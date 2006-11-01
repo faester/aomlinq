@@ -1,0 +1,75 @@
+﻿<?xml version="1.0"?>
+<project name="AOMDB" default="build">
+	<property name="dir.deploy" value="${project::get-base-directory()}/Deploy" />
+	<property name="dir.build" value="${project::get-base-directory()}/NantBuild" />
+	<property name="dir.tests" value="${project::get-base-directory()}/NantBuild" />
+	<property name="dir.testresults" value="${project::get-base-directory()}/testresults" />
+	
+	
+	<property name="dir.nunit" value="${project::get-base-directory()}/NUnit" />
+	<property name="nunit.library" value="${dir.nunit}/nunit.framework.dll" />
+	
+	<assemblyfileset id="sys.assemblies">
+    <include name="System.dll" />
+    <include name="System.Data.dll" />
+    <include name="System.Xml.dll" />
+	</assemblyfileset>
+	
+	<target name="setup" depends="">
+		<mkdir dir="${dir.build}" />
+		<mkdir dir="${dir.tests}" />
+	</target>
+
+	<target name="build" depends="setup">
+			<nant target="build">
+		    <buildfiles>
+		        <include name="AOM/default.build" />
+		        <include name="Persistence/default.build" />
+		        <include name="Business/default.build" />
+		        <include name="Translation/default.build" />
+		        <include name="Tests/default.build" />
+		    </buildfiles>
+			</nant>
+	</target>
+
+	<target name="rebuild" depends="clean build" />
+
+	<target name="deploy" depends="clean test">
+		<mkdir dir="${dir.deploy}" />
+		<copy todir="${dir.deploy}">
+			<file name="${dir.build}/*.dll" />
+		</copy>
+	</target>
+	
+	<target name="clean">
+		<nant target="clean">
+	    <buildfiles>
+	        <include name="AOM/default.build" />
+	        <include name="Persistence/default.build" />
+	        <include name="Business/default.build" />
+	        <include name="Translation/default.build" />
+	        <include name="Tests/default.build" />
+	    </buildfiles>
+		</nant>
+		<delete dir="${dir.deploy}" />
+		<delete dir="${dir.build}" />
+		<delete dir="${dir.tests}" />
+		<delete dir="${dir.testresults}" />
+	</target>
+
+	<target name="test" depends="build">
+		<!-- <property name="nant.onfailure" value="showfailurelog" /> -->
+			<nunit2 >
+				<formatter type="Plain" usefile="true" extension=".txt" outputdir="${dir.testresults}" />
+				<test>
+					<assemblies>
+						<include name="${dir.tests}\tests.dll" />
+					</assemblies>
+				</test>
+			</nunit2>
+	</target>
+	
+	<target name="showfailurelog" depends="" >
+	</target>
+	
+</project>

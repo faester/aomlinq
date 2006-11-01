@@ -22,6 +22,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{47F4F405-0712-4BD0-8A64-DB7CABCB9114}"
 	ProjectSection(SolutionItems) = preProject
 		default.build = default.build
+		NUnit\nunit.framework.dll = NUnit\nunit.framework.dll
 	EndProjectSection
 EndProject
 Global
