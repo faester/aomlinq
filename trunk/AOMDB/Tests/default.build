@@ -1,0 +1,40 @@
+﻿<?xml version="1.0"?>
+<project name="Tests" default="build">
+	<property name="tests.library" value="${dir.tests}/tests.dll" />
+
+
+	<target name="setup">
+		<mkdir dir="${dir.build}" />
+	</target>
+
+	<target name="build" depends="setup">
+		<csc target="library" output="${tests.library}">
+			<references>
+				<include name="${dir.build}/AOM.dll" />
+				<include name="${dir.build}/Persistence.dll" />
+				<include name="${dir.build}/Business.dll" />
+				<include name="${dir.build}/Translation.dll" />
+				<include name="${nunit.library}" />
+			</references>
+			<sources>
+				<include name="**/*.cs" />
+			</sources>
+		</csc>
+	</target>
+	
+	<target name="test" depends="build">
+	</target>
+	
+	<target name="deploy" depends="test">
+		<copy todir="${dir.build}" flatten="true">
+			<fileset>
+				<include name="${tests.library}"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="clean">
+		<delete file="${tests.library}" />
+	</target>
+	
+</project>

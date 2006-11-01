@@ -1,0 +1,29 @@
+﻿<?xml version="1.0"?>
+<project name="Business" default="build">
+	<property name="target.business" value="${dir.build}/Business.dll" />
+
+	<target name="setup">
+		<mkdir dir="${dir.build}" />
+	</target>
+
+	<target name="build" depends="setup">
+		<csc target="library" output="${target.business}">
+			<references>
+				<include name="${dir.build}/AOM.dll" />
+				<include name="${dir.build}/Persistence.dll" />
+			</references>
+			<sources>
+				<include name="**/*.cs" />
+			</sources>
+		</csc>
+	</target>
+	
+	<target name="test" depends="build">
+		<echo message="Test" />
+	</target>
+	
+	<target name="clean">
+		<delete file="${target.business}" />
+	</target>
+	
+</project>
