@@ -1,0 +1,36 @@
+﻿<?xml version="1.0"?>
+<project name="Translation" default="deploy">
+	<property name="library.translation" value="${dir.build}/Translation.dll" />
+	<target name="setup">
+		<mkdir dir="${dir.build}" />
+	</target>
+
+	<target name="build" depends="setup">
+		<csc target="library" output="${library.translation}">
+			<references>
+				<include name="${dir.build}/AOM.dll" />
+				<include name="${dir.build}/Persistence.dll" />
+				<include name="${dir.build}/Business.dll" />
+			</references>
+			<sources>
+				<include name="**/*.cs" />
+			</sources>
+		</csc>
+	</target>
+	
+	<target name="test" depends="build">
+	</target>
+	
+	<target name="deploy" depends="test">
+		<copy todir="${dir.build}" flatten="true">
+			<fileset>
+				<include name="${dir.build}/*.dll"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="clean">
+		<delete file="${library.translation}" />
+	</target>
+	
+</project>

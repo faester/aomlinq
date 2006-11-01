@@ -1,0 +1,34 @@
+﻿<?xml version="1.0"?>
+<project name="Persistence" default="build">
+	<property name="target.persistence" value="${dir.build}/Persistence.dll" />
+	<property name="target.testfile" value="${dir.tests}/tests.persistence.dll" />
+
+	<target name="build" depends="">
+		<csc target="library" output="${target.persistence}">
+			<references>
+				<include name="${dir.build}/AOM.dll" />
+			</references>
+			<sources>
+				<include name="**/*.cs" />
+				<exclude name="Tests.cs" />
+			</sources>
+		</csc>
+	</target>
+	
+	<target name="clean">
+		<delete file="${target.persistence}" />
+	</target>
+	
+	<target name="test">
+		<csc target="library"	output="${target.testfile}">
+			<references>
+				<include name="${dir.build}/AOM.dll" />
+				<include name="${target.persistence}" />
+				<include name="${nunit.library}" />
+			</references>
+			<sources>
+				<include name="Tests.cs" />
+			</sources>
+		</csc>
+	</target>
+</project>
