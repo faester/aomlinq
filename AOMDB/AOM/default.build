@@ -1,0 +1,44 @@
+﻿<?xml version="1.0"?>
+<project name="AOM" default="deploy">
+
+	<target name="setup">
+		<mkdir dir="${dir.build}" />
+	</target>
+
+	<target name="build" depends="setup">
+		<csc target="library" output="${dir.build}/AOM.dll">
+			<sources>
+				<include name="**/*.cs" />
+				<exclude name="**/Tests.cs" />
+			</sources>
+		</csc>
+	</target>
+	
+	<target name="buildtests">
+		<csc target="library" output="${dir.tests}/tests.aom.dll">
+			<references>
+				<include name="${nunit.library}" />
+				<include name="${dir.build}/Persistence.dll" />
+				<include name="${dir.build}/AOM.dll" />
+			</references>
+			<sources>
+				<include name="Tests.cs" />
+			</sources>
+		</csc>
+	</target>
+	
+	<target name="test" depends="build buildtests">
+	</target>
+	
+	<target name="deploy" depends="test">
+		<copy todir="${dir.build}" flatten="true">
+			<fileset>
+				<include name="${dir.build}/*.dll"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="clean">
+	</target>
+	
+</project>
