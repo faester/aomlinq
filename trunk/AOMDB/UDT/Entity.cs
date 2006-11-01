@@ -4,15 +4,14 @@ using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using Microsoft.SqlServer.Server;
 
-// example imports
 using System.Xml;
 using System.Data.Sql;
 using System.Globalization;
 
-
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace", Target = "Microsoft.Samples.SqlServer")]
 
 [Serializable]
-[Microsoft.SqlServer.Server.SqlUserDefinedType(Format.Native)]
+[Microsoft.SqlServer.Server.SqlUserDefinedType(Microsoft.SqlServer.Server.Format.UserDefined, IsByteOrdered = true, MaxByteSize = 8000)]
 public class Entity : INullable, IComparable, Microsoft.SqlServer.Server.IBinarySerialize
 {
     private long _entityPOID;
@@ -30,12 +29,13 @@ public class Entity : INullable, IComparable, Microsoft.SqlServer.Server.IBinary
         _entityTypePOID = entityTypePOID;
         _name = name;
         m_Null = false;
+        if(_name != null) _byteName = System.Text.Encoding.UTF8.GetBytes(this._name);
     }
 
-    public Entity(byte[] bytes)
-    {
-        _byteName = bytes;
-    }
+    //public Entity(byte[] bytes)
+    //{
+    //    _byteName = bytes;
+    //}
 
     public Entity()
     {
@@ -210,6 +210,8 @@ public class Entity : INullable, IComparable, Microsoft.SqlServer.Server.IBinary
             this._byteName = r.ReadBytes(length);
         }
         #endregion
+
+
 }
 
 
