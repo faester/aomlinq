@@ -144,7 +144,7 @@ namespace DBLayer
             //return this.Where<T> (expr.Compile()).ToQueryable();
         }
 
-        // Kan ikke operere med denne og ovenstående samtidig
+        // Polymorfien kan ikke operere med denne og ovenstående samtidig
         //public IEnumerable<T> Where(Func<T, bool> func)
         //{
         //    DumCollection<T> where = new DumCollection<T>();
