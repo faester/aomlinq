@@ -61,7 +61,7 @@ namespace AOMDB
             list.AddLast(b1);
 
             var selection = from o in table 
-                    where o.Name.ToUpper() == "retseT .rM"
+                    where o.ReverseName() == "retseT .rM"
                     select o;
 
             var selection2 = from o in list
