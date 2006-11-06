@@ -14,7 +14,7 @@ namespace Tests
     {
         public class NotTranslatable : IBusinessObject
         {
-            object o;
+            public object o;
             DBTag tag; 
             public DBTag DatabaseID 
             {

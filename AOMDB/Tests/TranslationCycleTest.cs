@@ -131,6 +131,8 @@ namespace Tests
             {
                 Assert.IsNotNull(copies[idx - 1].Next, "Null element found in translated chain");
                 copies[idx] = copies[idx - 1].Next;
+                Assert.AreEqual (copies[idx].Name, rbos[idx].Name, "Name fields' value changed.");
+                Assert.AreEqual (copies[idx].Serial, rbos[idx].Serial, "Serial fields' value changed.");
                 idx++;
             }
 

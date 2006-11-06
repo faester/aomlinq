@@ -18,11 +18,8 @@ namespace Tests
         Property p1;
         Property p2;
         Property p3;
-        Database db;
         long entityID;
         Entity e = null;
-        //Entity eWithValuesSet = null;
-        DBTag tag = null;
 
         //[TestFixtureSetUp]
         //public void FixtureSetup()
@@ -34,7 +31,6 @@ namespace Tests
         [SetUp]
         public void Setup()
         {
-            db = Database.Instance;
             if (!EntityType.EntityTypeExists(testEntityTypeName))
             {
                 et = EntityType.CreateType(testEntityTypeName, null);
@@ -59,7 +55,6 @@ namespace Tests
         [TearDown]
         public void TearDown()
         {
-            db = null;
             et = null;
             String = null;
             Integer = null;
@@ -77,21 +72,19 @@ namespace Tests
         [Test]
         public void DatabaseStore()
         {
-            Assert.IsFalse(db == null, "Database object was null. Error in test setup.");
             Assert.IsFalse(e == null, "Entity objet wass null. Error in test setup.");
-            db.Store(e);
+            ObjectCache.StoreEntity(e);
             entityID = e.Id;
         }
 
         [Test]
         public void DatabaseRetrieve()
         {
-            db.Store (e);
+            ObjectCache.StoreEntity (e);
             entityID = e.Id;
-            Assert.IsFalse(db == null, "Database == null. Error in test setup.");
             Assert.IsFalse(entityID == Entity.UNDEFINED_ID, "Error in test setup. entityID was undefined");
 
-            Entity ecopy = db.Retrieve(entityID);
+            Entity ecopy = ObjectCache.RetrieveEntity(entityID);
             Assert.IsTrue(ecopy.Equals(e));
         }
 
@@ -99,16 +92,16 @@ namespace Tests
         public void EntityPOIDAssignment()
         {
             Assert.IsTrue (e.Id == Entity.UNDEFINED_ID, "Unsaved Entity instances must have Id == Entity.UNDEFINED_ID");
-            db.Store(e);
+            ObjectCache.StoreEntity(e);
             Assert.IsTrue (e.Id != Entity.UNDEFINED_ID, "Entity instances must have their ID set when they are saved to DB");
         }
 
         [Test]
         public void EntityTypePreservation()
         {
-            db.Store (e);
+            ObjectCache.StoreEntity (e);
             entityID = e.Id;
-            Entity copy = db.Retrieve(entityID);
+            Entity copy = ObjectCache.RetrieveEntity(entityID);
             Assert.IsTrue(e.Type.Id == copy.Type.Id, "EntityType of retrived object did not match type of the saved object.");
             Assert.IsTrue(e.Type.Name == copy.Type.Name, "EntityType of saved and retrieved objects did not match.");
         }
@@ -118,8 +111,8 @@ namespace Tests
         {
             string val = "testName987981237";
             e.SetProperty("firstName", val) ;
-            db.Store (e);
-            Entity copy = db.Retrieve (e.Id);
+            ObjectCache.StoreEntity (e);
+            Entity copy = ObjectCache.RetrieveEntity(e.Id);
             Assert.IsTrue(e.GetPropertyValue("firstName") == val, "Property value changed during storage/retrieve operation.");
             Assert.IsTrue(copy.GetPropertyValue("firstName") == e.GetPropertyValue("firstName"), "Property value changed in retrieved Entity.");
         }

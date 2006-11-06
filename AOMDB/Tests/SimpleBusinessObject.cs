@@ -6,6 +6,8 @@ using Persistence;
 
 namespace Tests
 {
+    public enum SBOEnum { Per, Poul, Konrad }
+    
     /// <summary>
     /// Used for testing purposes. Should contain all
     /// data s_types that the conversion mechanism should 
@@ -13,7 +15,6 @@ namespace Tests
     /// </summary>
     internal class SimpleBusinessObject : IBusinessObject
     {
-        enum SBOEnum { Per, Poul, Konrad }
         DBTag m_tag;
 
         byte byteMember = 123;

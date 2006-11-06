@@ -14,10 +14,9 @@ namespace Business
         /// a new Entity will be created, and the DatabaseID 
         /// i accordance with this.
         /// <p>
-        /// Will also provide call-
-        /// back to the database, when an IBusinessObject is
-        /// garbage collected. Should NOT be modified by the 
-        /// user.
+        /// Will also provide call-back to the database, when 
+        /// an IBusinessObject is garbage collected. The DBTag 
+        /// object should NOT be modified by the user.
         /// </p>
         /// </summary>
         DBTag DatabaseID { get; set; }

@@ -30,6 +30,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DLinq, Version=1.0.2319.19044, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="System.Query, Version=1.0.2319.19041, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -62,7 +64,7 @@
       <Name>UDT</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+<Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -8,7 +8,7 @@ using AOM;
 
 namespace Persistence
 {
-    public sealed partial class Database
+    internal sealed partial class Database
     {
 
         /// <summary>
@@ -165,7 +165,11 @@ namespace Persistence
                 }
 
                 cmd.Parameters[1].Value = e.Type.Id;
-                e.Id = Execute();
+                long id = Execute();
+                if (id != e.Id )
+                {
+                    e.Id = id;
+                }
                 e.IsPersistent = true;
             }
         }
@@ -204,11 +208,10 @@ namespace Persistence
                 cmd.Parameters.Add(new SqlParameter("@propertyTypePOID", SqlDbType.Int));
             }
 
-            public void Store(ref PropertyType pt)
+            public void Store(PropertyType pt)
             {
                 if (pt.HasUndefinedId) { cmd.Parameters[1].Value = DBNull.Value; }
                 else { cmd.Parameters[1].Value = pt.Id; }
-                Console.WriteLine ("StorePropertyTypeExecuter storing: {0}", pt.Name );
                 cmd.Parameters[0].Value = pt.Name;
                 pt.Id = Execute();
                 pt.IsPersistent = true;

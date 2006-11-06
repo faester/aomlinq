@@ -48,7 +48,6 @@
     <Compile Include="Int32Converter.cs" />
     <Compile Include="LongConverter.cs" />
     <Compile Include="NotTranslatableException.cs" />
-    <Compile Include="ObjectCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RetTypeConverter.cs" />
     <Compile Include="SingleConverter.cs" />

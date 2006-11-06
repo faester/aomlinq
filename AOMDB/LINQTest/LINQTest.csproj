@@ -45,6 +45,10 @@
       <Project>{6931C4C6-EFFE-4BB1-B2F3-706301C1EAF2}</Project>
       <Name>DBLayer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Translation\Translation.csproj">
+      <Project>{222C94BB-18D6-4955-A43D-C9E2E2EFABA6}</Project>
+      <Name>Translation</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
 </Project>
