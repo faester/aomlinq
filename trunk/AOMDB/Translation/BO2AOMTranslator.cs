@@ -4,6 +4,7 @@ using System.Text;
 using AOM;
 using Business;
 using System.Reflection;
+using Persistence;
 
 namespace Translation
 {
@@ -33,7 +34,7 @@ namespace Translation
                 e.Id = ObjectCache.GetIDByObject(obj);
             }
             e = cnv.ToEntity(e, obj);
-            Persistence.Database.Instance.Store(e);
+            e.Id = ObjectCache.GetNewUnusedId();
             //e.Id should have been set in the AOMConverter
             if (e.Id == Entity.UNDEFINED_ID) { throw new Exception("Entity ID not set correctly! (ToEntity)"); }
             ObjectCache.Store (obj, e.Id);

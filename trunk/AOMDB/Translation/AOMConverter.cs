@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 using AOM;
+using Persistence;
+
 namespace Translation
 {
     /// <summary>

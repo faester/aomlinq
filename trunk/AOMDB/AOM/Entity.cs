@@ -55,7 +55,7 @@ namespace AOM
                 return true;
             }
             Entity other = (Entity)obj;
-            if (this.Id != Entity.UNDEFINED_ID && this.Id == other.Id)
+            if (this.Id != AOMBaseObject.UNDEFINED_ID && this.Id == other.Id)
             {
                 return true;
             }

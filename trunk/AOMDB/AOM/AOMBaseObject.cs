@@ -17,8 +17,9 @@ namespace AOM
         public const long UNDEFINED_ID = -1;
 
         string name;
-        long id = UNDEFINED_ID;
+        private long id = UNDEFINED_ID;
         bool isPersistent = false;
+        bool idHasBeenSet = false;
 
         /// <summary>
         /// Used to indicate that the object already
@@ -28,6 +29,11 @@ namespace AOM
         {
             get { return isPersistent; }
             set { isPersistent = value; }
+        }
+
+        public bool IdHasBeenSet
+        {
+            get { return idHasBeenSet; }
         }
 
 
@@ -40,7 +46,9 @@ namespace AOM
             get { return id; }
             set
             {
-                if (isPersistent) { throw new IDChangeAfterCommitException(); }
+                if (value == UNDEFINED_ID) throw new Exception("Attempt to set illegal ID value.");
+                if (IdHasBeenSet) throw new IDChangeAfterCommitException();
+                idHasBeenSet = true;
                 id = value;
             }
         }

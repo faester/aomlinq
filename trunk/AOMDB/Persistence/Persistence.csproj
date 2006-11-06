@@ -34,6 +34,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Query, Version=1.0.2319.19041, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -41,6 +42,7 @@
     <Compile Include="DatabaseHelpers.cs" />
     <Compile Include="DBTag.cs" />
     <Compile Include="EntityTypeLoader.cs" />
+    <Compile Include="ObjectCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

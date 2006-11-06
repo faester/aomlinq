@@ -21,7 +21,6 @@ namespace Translation
     /// </summary>
     class RefTypeConverter : IFieldConverter
     {
-        private static Persistence.Database db = null;
         //private static Dictionary<long, object> idObj = null;
         //private static Dictionary<object, long> objId = null;
 
@@ -31,7 +30,6 @@ namespace Translation
 
         static RefTypeConverter()
         {
-            db = Database.Instance;
             //idObj = new Dictionary<long, object>();
             //objId = new Dictionary<object, long>();
         }
@@ -48,11 +46,10 @@ namespace Translation
             if (ObjectCache.HasId(entityPOID))
             {
                 object res = ObjectCache.GetObjectByID(entityPOID);
-                Console.WriteLine("Returning cached object of type " + res.GetType ().FullName );
                 return res;
             }
 
-            Entity e = db.Retrieve(entityPOID);
+            Entity e = ObjectCache.RetrieveEntity(entityPOID);
 
             Type t = Type.GetType(e.Type.Name);
 
@@ -62,7 +59,7 @@ namespace Translation
             AOMConverter aomcnv = new AOMConverter(t, e.Type);
             aomcnv.FromEntity(e, o);
 
-            CacheObject(entityPOID, o);
+            ObjectCache.Store(o, entityPOID);
 
             return o;
         }
@@ -84,37 +81,26 @@ namespace Translation
         public string ToValueString(object o)
         {
             if (o == null) { return null; }            
-            
-            long entityPOID;
-            
             if (ObjectCache.HasObject(o))
             {
-                entityPOID = ObjectCache.GetIDByObject(o);
+                return ObjectCache.GetIDByObject(o).ToString();
+
             }
             else
             {
-                EntityType et = EntityTypeConverter.Construct(o);
-                AOMConverter cnv = new AOMConverter(o, et);
-                Entity e = et.New();
+                //EntityType et = EntityTypeConverter.Construct(o);
+                //AOMConverter cnv = new AOMConverter(o, et);
+                //Entity e = et.New();
                 //Set id. 
-                db.Store(e);
-                entityPOID = e.Id;
+                //e.Id = ObjectCache.GetNewUnusedId ();
+                //ObjectCache.StoreEntity(e);
+                long entityPOID = ObjectCache.GetNewUnusedId();
 
-                ObjectCache.Store(o, e.Id);
-                cnv.ToEntity(e, o);
-                db.Store(e);
+                ObjectCache.Store(o, entityPOID);
+                //cnv.ToEntity(e, o);
+                //ObjectCache.StoreEntity(e);
+                return entityPOID.ToString();
             }
-
-            return entityPOID.ToString();
-        }
-
-        private static void CacheObject (long entityPOID, object obj)
-        {
-            if (entityPOID == Entity.UNDEFINED_ID) 
-            {
-                throw new Exception("Trying to store object with illegal ID");
-            }
-            ObjectCache.Store(obj, entityPOID);
         }
     }
 }

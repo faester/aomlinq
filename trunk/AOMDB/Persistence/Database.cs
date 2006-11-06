@@ -1,3 +1,4 @@
+//#define CACHE_ENTITIES
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,11 +17,14 @@ namespace Persistence
     /// make a work-around to make it possible to retrieve Entities based on their 
     /// type from the cache.
     /// </summary>
-    public sealed partial class Database
+    internal sealed partial class Database
     {
+        private const string CNN_STRING = "server=.;database=tests;uid=aom;pwd=aomuser";
         static Database instance;
+#if CACHE_ENTITIES
         static Dictionary<long, Entity> loadedEntities = new Dictionary<long, Entity>();
-
+#endif
+        
         private Database() { /* empty */ }
 
         /// <summary>
@@ -28,14 +32,14 @@ namespace Persistence
         /// connection string is defined in AOMConfig, 
         /// which is rather ugly.
         /// </summary>
-        public static Database Instance
+        internal static Database Instance
         {
             get
             {
                 if (instance == null)
                 {
                     EntityTypeLoader.Load();
-                    instance = new Database(AOMConfig.CNN_STRING);
+                    instance = new Database(CNN_STRING);
                 }
                 return instance;
             }
@@ -122,8 +126,8 @@ namespace Persistence
         /// will be updated to match the values of the <pre>EntityType</pre>
         /// given.
         /// <para>
-        /// Will also store/update super s_types, if any exist. Likewise any 
-        /// property and property s_types will be stored. 
+        /// Will also store/update super entity types, if any exist. Likewise any 
+        /// property and property types will be stored. 
         /// </para>
         /// </summary>
         /// <param name="et"></param>
@@ -148,6 +152,15 @@ namespace Persistence
                     Console.WriteLine(ex.StackTrace);
                     throw ex;
                 }
+                catch (IDChangeAfterCommitException ice)
+                {
+                    trans.Rollback();
+                    //et.Id = oldID;
+                    et.IsPersistent = false;
+                    Console.WriteLine(ice.StackTrace );
+                    throw ice;
+                }
+
                 trans.Commit();
             }
         }
@@ -188,7 +201,15 @@ namespace Persistence
                     Console.WriteLine(ex.StackTrace);
                     throw ex;
                 }
-                trans.Commit();
+                catch (IDChangeAfterCommitException ice)
+                {
+                    trans.Rollback();
+                    //e.Id = oldID;
+                    e.IsPersistent = false;
+                    Console.WriteLine(ice.StackTrace );
+                    throw ice;
+                }                trans.Commit();
+#if CACHE_ENTITIES
                 /* Store entity in the cache.
                  * Test if the entity object has changed, 
                  * since this might indicate problems.
@@ -198,6 +219,7 @@ namespace Persistence
                     System.Diagnostics.Debug.Assert(Object.ReferenceEquals(e, loadedEntities[e.Id]));
                 }
                 loadedEntities[e.Id] = e;
+#endif
             }
         }
 
@@ -267,7 +289,7 @@ namespace Persistence
             if (e.EntityBase != null) { _Store(e.EntityBase, e); }
 
             /*
-             * Store value of all properties.
+             * StoreEntity value of all properties.
              */
             foreach (Property p in e.Type.Properties)
             {
@@ -277,7 +299,7 @@ namespace Persistence
 
 
         /// <summary>
-        /// Store a <pre>Property</pre>
+        /// StoreEntity a <pre>Property</pre>
         /// </summary>
         /// <param name="p">Property to store</param>
         /// <param name="et">EntityType that <paramref name="p"/> belongs to.</param>
@@ -290,14 +312,14 @@ namespace Persistence
         }
 
         /// <summary>
-        /// Store a property type.
+        /// StoreEntity a property type.
         /// </summary>
         /// <param name="pt"></param>
         private void _Store(PropertyType pt)
         {
             if (pt.IsPersistent) { return; }
 
-            storePropertyTypeExecuter.Store(ref pt);
+            storePropertyTypeExecuter.Store(pt);
         }
 
         /// <summary>
@@ -307,8 +329,18 @@ namespace Persistence
         /// <param name="tag"></param>
         public void Delete (DBTag tag)
         {
+            if (tag == null) throw new NullReferenceException ("dbtag");
+            Delete (tag.Id);
+        }
+
+        public void Delete (long id)
+        {
+#if CACHE_ENTITIES
             loadedEntities.Remove (tag.Id);
-            SqlCommand deleter = new SqlCommand ("DELETE FROM Entity WHERE EntityPOID = " + tag.Id, cnn);
+#endif
+            SqlCommand deleter = new SqlCommand ("DELETE FROM Entity WHERE EntityPOID = " + id, cnn);
+            deleter.ExecuteNonQuery();
+            deleter.CommandText = "DELETE FROM value WHERE EntityPOID = " + id;
             deleter.ExecuteNonQuery();
             deleter = null;
         }
@@ -333,15 +365,19 @@ namespace Persistence
 
         private Entity _Retrieve(long entityPOID)
         {
+#if CACHE_ENTITIES
             if (loadedEntities == null)
             {
                 throw new Exception ("Internal error in database!");
             }
+#endif
             //Check if cache contains the Entity already. 
+#if CACHE_ENTITIES
             if (loadedEntities.ContainsKey(entityPOID))
             {
                 return loadedEntities[entityPOID];
             }
+#endif
 
             Entity res = null;
             SqlCommand cmd = new SqlCommand(
@@ -432,7 +468,9 @@ namespace Persistence
             }
 
             if (!r.IsClosed) { r.Close(); }
+#if CACHE_ENTITIES
             loadedEntities[res.Id] = res;
+#endif
             return res;
         }
 
