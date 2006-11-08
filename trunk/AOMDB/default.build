@@ -5,14 +5,18 @@
 	<property name="dir.tests" value="${project::get-base-directory()}/NantBuild" />
 	<property name="dir.testresults" value="${project::get-base-directory()}/testresults" />
 	
-	
-	<property name="dir.nunit" value="${project::get-base-directory()}/NUnit" />
+	<property name="dir.nunit" value="${project::get-base-directory()}/ext-dll" />
 	<property name="nunit.library" value="${dir.nunit}/nunit.framework.dll" />
+	<property name="dir.linq" value="${dir.nunit}" />
 	
 	<assemblyfileset id="sys.assemblies">
     <include name="System.dll" />
     <include name="System.Data.dll" />
     <include name="System.Xml.dll" />
+    <include name="${dir.linq}/System.Data.Dlinq.dll" />
+    <include name="${dir.linq}/System.Data.Extension.dll" />
+    <include name="${dir.linq}/System.Query.dll" />
+    <include name="${dir.linq}/System.Xml.Xlinq.dll" />
 	</assemblyfileset>
 	
 	<target name="setup" depends="">
@@ -27,6 +31,7 @@
 		        <include name="Persistence/default.build" />
 		        <include name="Business/default.build" />
 		        <include name="Translation/default.build" />
+		        <include name="DBLayer/default.build" />
 		        <include name="Tests/default.build" />
 		    </buildfiles>
 			</nant>
@@ -60,7 +65,7 @@
 	<target name="test" depends="build">
 		<!-- <property name="nant.onfailure" value="showfailurelog" /> -->
 			<nunit2 >
-				<formatter type="Plain" usefile="true" extension=".txt" outputdir="${dir.testresults}" />
+				<formatter type="Plain" usefile="false" extension=".txt" outputdir="${dir.testresults}" />
 				<test>
 					<assemblies>
 						<include name="${dir.tests}\tests.dll" />
