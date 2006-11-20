@@ -13,39 +13,43 @@ namespace AOMDB
 {
     class BORecursive : AbsBusinessObj
     {
-        BORecursive next;
+        public BORecursive Next;
 
-        private string name;
+        public int Id;
 
-        public string Name
-        {
-            get { return name; }
-            set { name = value; }
-        }
+        public DateTime dt;
 
-        public string ReverseName()
-        {
-            int nl = name.Length;
-            StringBuilder s = new StringBuilder(nl); 
-            for (int i = nl - 1; i >= 0; i--)
-            {
-                s.Append (name[i]);
-            }
-            return s.ToString();
-        }
-
-        internal BORecursive Next
-        {
-            get { return next; }
-            set { next = value; }
-        }
+        public string Name;
     }
 
     class Program
     {
         static void Main(string[] args)
         {
-            Table<BORecursive> table = new Table<BORecursive>();
+            int[] is0 = new int[10];
+            int[] is1 = new int[10];
+
+            for (int i = 0; i < 10; i++)
+            {
+                is0[i] = i;
+                is1[i] = -i;
+            }
+
+            is1[5] = 5;
+
+
+            var ers = from j in is0
+                      from k in is1
+                      where j == k && j != 0
+                    select j;
+
+            foreach (var k in ers)
+            {
+                Console.WriteLine(k);
+            }
+
+
+            DBLayer.Table <BORecursive> table = new DBLayer.Table<BORecursive>();
             LinkedList<BORecursive> list = new LinkedList<BORecursive>();
 
             BORecursive b0 = new BORecursive();
@@ -53,22 +57,20 @@ namespace AOMDB
             BORecursive b1 = new BORecursive();
             b1.Name = "Someone Else";
 
-            Console.Out.WriteLine (b0.ReverseName());
-
             table.Add (b0);
             table.Add (b1);
             list.AddLast(b0);
             list.AddLast(b1);
 
             var selection = from o in table 
-                    where o.ReverseName() == "retseT .rM"
+                    where (o.Id > 0 && o.Name == "Mr. Tester") || (o.Id == 1) || o.dt < DateTime.Now
                     select o;
 
             var selection2 = from o in list
-                    where o.ReverseName() == "retseT .rM"
+                    where o.Name == "Mr. Tester"
                     select o;
 
-            foreach(BORecursive b in selection2)
+            foreach(BORecursive b in selection)
             {
                 Console.WriteLine ("RETE: " + b.Name );
             }
