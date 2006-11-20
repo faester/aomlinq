@@ -7,13 +7,14 @@ using Business;
 using Translation;
 using Persistence;
 using AOM;
+using System.Reflection;
 
 namespace DBLayer
 {
     public class Table<T> : /* IQueryable<T>, */ ICollection<T>
         where T : IBusinessObject, new()
     {
-        BO2AOMTranslator <T> converter = new BO2AOMTranslator<T>();
+        BO2AOMTranslator<T> converter = new BO2AOMTranslator<T>();
         int capacity = 1; //TODO: Remove
         int size = 0; //TODO: Remove
         T[] content; //TODO: Remove
@@ -22,8 +23,8 @@ namespace DBLayer
 
         public void Add(T e)
         {
-            Entity ent = converter.ToEntity (e);
-            ObjectCache.StoreEntity (ent);
+            Entity ent = converter.ToEntity(e);
+            ObjectCache.StoreEntity(ent);
         }
 
         public void Clear()
@@ -45,13 +46,14 @@ namespace DBLayer
         {
             if (e.DatabaseID != null)
             {
-                DBTag tag = e.DatabaseID ;
-                ObjectCache.Delete (tag);
+                DBTag tag = e.DatabaseID;
+                ObjectCache.Delete(tag);
                 e.DatabaseID = null;
                 return true;
-            } else if  (ObjectCache.HasObject(e))
+            }
+            else if (ObjectCache.HasObject(e))
             {
-                ObjectCache.RemoveObject (e);
+                ObjectCache.RemoveObject(e);
                 return true;
             }
             return false;
@@ -114,14 +116,66 @@ namespace DBLayer
 
         #region Query Expression Pattern members
 
-        public DumCollection<T> Where (Expression<Func<T, bool>> expr)
+        static void ParseExpression(Expression<Func<T, bool>> expr)
         {
-            Console.WriteLine("Where kaldt med Exression {0}: ", expr.ToString ());
+            Console.WriteLine(expr.GetType());
+            ParseExpression (expr.Body);
+
+        }
+
+        static void ParseBinaryExpression(BinaryExpression be)
+        {
+            string t = be.GetType().ToString();
+            Console.WriteLine(be.NodeType);
+            Console.WriteLine(be.Left);
+            Console.WriteLine(be.Right);
+
+            ParseExpression(be.Left);
+            ParseExpression(be.Right);
+        }
+
+        static void ParseMemberExpression(MemberExpression me)
+        {
+            Console.WriteLine("MemberExpression: {0}", me);
+            MemberInfo m = me.Member; //MemberInfo fra Reflection
+            Console.WriteLine(m.MemberType);
+            if (m.MemberType == MemberTypes.Field)
+            {
+                Console.WriteLine(m);
+            }
+            else 
+            {
+                throw new Exception ("Don't know how to handle " + m);
+            }
+        }
+
+        static void ParseExpression(Expression e)
+        {
+            string t = e.GetType().ToString();
+            Console.WriteLine(e);
+            if (e is BinaryExpression )
+            {
+                BinaryExpression be = (BinaryExpression)e;
+                ParseBinaryExpression(be);
+            }
+            else if (e is MemberExpression)
+            {
+                ParseMemberExpression((MemberExpression)e);
+            }
+            else
+            {
+                Console.WriteLine("We have a: '{0}' in '{1}' ", e.GetType().ToString(), e);
+            }
+        }
+
+        public DumCollection<T> Where(Expression<Func<T, bool>> expr)
+        {
+            ParseExpression(expr);
             Func<T, bool> predicate = expr.Compile();
             DumCollection<T> result = new DumCollection<T>();
             for (int idx = 0; idx < size; idx++)
             {
-                if (predicate (content[idx]))
+                if (predicate(content[idx]))
                 {
                     result.Add(content[idx]);
                 }
@@ -144,7 +198,7 @@ namespace DBLayer
         //    return where;
         //}
 
-        
+
         //public IEnumerable<S> Select<S>(Expression<Func<T, S>> selector) 
         //{
         //    Console.WriteLine ("Select called with expression: {0}", selector);
