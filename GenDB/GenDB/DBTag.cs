@@ -4,22 +4,28 @@ using System.Text;
 
 namespace GenDB
 {
-    internal class DBTag
+    public class DBTag
     {
         long entityPOID;
-        GenericDB connection;
+        IBOCache cache;
+        
+        internal static void AssignDBTagTo(IBusinessObject obj, long id, IBOCache cache)
+        {
+            DBTag dbtag = new DBTag(cache, id);
+            obj.DBTag = dbtag;
+        }
 
         private DBTag() { /* empty */ }
 
-        public DBTag (GenericDB connection, long entityPOID)
+        private DBTag (IBOCache cache, long entityPOID)
         {
             this.EntityPOID = entityPOID;
-            this.connection = connection;
+            this.cache = cache;
         }
 
         ~DBTag() 
         {
-            connection.Delete(this);
+            cache.Remove(this.EntityPOID);
         }
 
         public long EntityPOID
