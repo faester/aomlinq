@@ -39,10 +39,12 @@
   <ItemGroup>
     <Compile Include="DB.cs" />
     <Compile Include="DBTag.cs" />
-    <Compile Include="ObjectCache.cs" />
+    <Compile Include="IBOCache.cs" />
+    <Compile Include="IBusinessObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GenTable.cs" />
+    <Compile Include="Translator.cs" />
   </ItemGroup>
   <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
 </Project>
