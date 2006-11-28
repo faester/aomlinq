@@ -158,14 +158,14 @@ namespace GenDB
 
         private EntityRef<Entity> _Entity;
 
-        [Association(Storage = "_Property", ThisKey = "PropertyPOID")]
+        [Association(Storage = "_Property", ThisKey = "PropertyPOID", OtherKey = "PropertyPOID")]
         public Property Property
         {
             get { return this._Property.Entity; }
             set { this._Property.Entity = value; }
         }
 
-        [Association(Storage = "_Entity", ThisKey = "EntityPOID")]
+        [Association(Storage = "_Entity", ThisKey = "EntityPOID", OtherKey = "EntityPOID")]
         public Entity Entity
         {
             get { return this._Entity.Entity; }
@@ -175,14 +175,42 @@ namespace GenDB
 
     internal class GenericDB : DataContext
     {
+        #region singleton stuff
+        private static string connectString = "server=localhost;database=generic;uid=aom;pwd=aomuser";
+
+        public static string ConnectString
+        {
+            get { return GenericDB.connectString; }
+            set { 
+                if (instance == null)
+                {
+                    GenericDB.connectString = value; 
+                }
+                else 
+                {
+                    throw new Exception("Can not change connect string after initialization.");
+                }
+            }
+        }
+
+        private static GenericDB instance = null;
+
+        public static GenericDB Instance 
+        {
+            get {
+                if (instance == null) { instance = new GenericDB(); }
+                return instance;
+            }
+        }
+        #endregion
+
         public Table<Entity> Entities;
         public Table<EntityType> EntityTypes;
         public Table<Property> Properties;
         public Table<PropertyType> PropertyTypes;
         public Table<Inheritance> Inheritance;
         public Table<PropertyValue> PropertyValues;
-        public static readonly string CONNECTSTRING = "server=localhost;database=generic;uid=aom;pwd=aomuser";
-        public GenericDB() : base(CONNECTSTRING) { }
+        private GenericDB() : base(connectString) { }
 
         public void Delete (DBTag dbtag)
         {

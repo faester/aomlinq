@@ -11,14 +11,14 @@ namespace GenDB
     {
         static void Main(string[] args)
         {
-            GenericDB genDB = new GenericDB();
+            GenericDB genDB = GenericDB.Instance;
             genDB.Log = Console.Out;
-            if (genDB.DatabaseExists())
-            {
-                Console.WriteLine("Deleting old database.");
-                genDB.DeleteDatabase();
-            }
-            genDB.CreateDatabase();
+            //if (genDB.DatabaseExists())
+            //{
+            //    Console.WriteLine("Deleting old database.");
+            //    genDB.DeleteDatabase();
+            //}
+            //genDB.CreateDatabase();
 
             EntityType et0 = new EntityType() {  Name = "et0" };
             EntityType et1 = new EntityType() {  Name = "et1" };
@@ -38,8 +38,9 @@ namespace GenDB
             Property p0 = new Property{Name = "Name", PropertyType = ptString, EntityType = et1};
             Property p1 = new Property{Name = "BirthYear", PropertyType = ptInt, EntityType = et0};
 
-            PropertyValue pv0  = new PropertyValue { Property = p0, TheValue = "Morten", Entity = e1 };
+            //PropertyValue pv0  = new PropertyValue { Property = p0, TheValue = "Morten", Entity = e1 };
 
+            PropertyValue pv0 = new PropertyValue { TheValue = "Morten", Property = p0, Entity = e1 };
 
             Inheritance i = new Inheritance();
             i.SuperEntityType = et0;
@@ -52,7 +53,7 @@ namespace GenDB
             genDB.PropertyTypes.Add (ptString);
             genDB.PropertyTypes.Add (ptInt);
             genDB.SubmitChanges();
-
+            
             var z = from e in genDB.Entities 
                     where e.EntityPOID == 0
                     select e;

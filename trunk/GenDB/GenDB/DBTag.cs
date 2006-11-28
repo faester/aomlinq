@@ -4,6 +4,18 @@ using System.Text;
 
 namespace GenDB
 {
+    /// <summary>
+    /// DBTag objekter bruges til at gemme 
+    /// databaseid'et for et objekt. DBTag
+    /// elementer skal kun have een reference,
+    /// der skal befinde sig som et felt i 
+    /// det IBusinessObject, den gemmer id for.
+    /// Derved vil DBTag objektet blive garbage-
+    /// collected sammen med IBusinessObject objektet.
+    /// Destructoren i DBTag sikrer så, at objectcachens
+    /// interne reference til IBusinessObject-objektet
+    /// fjernes, så hukommelsen kan blive genbrugt.
+    /// </summary>
     public class DBTag
     {
         long entityPOID;
@@ -23,6 +35,9 @@ namespace GenDB
             this.cache = cache;
         }
 
+        /// <summary>
+        /// Destructoren 
+        /// </summary>
         ~DBTag() 
         {
             cache.Remove(this.EntityPOID);
