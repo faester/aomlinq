@@ -217,28 +217,53 @@ namespace GenDB
 
         public EntityType GetEntityType(string name)
         {
-            EntityType et = null;
-            var q = from ets in EntityTypes
-                     where ets.Name == name
+            EntityType et = null; // Return object
+            var q = from ets in EntityTypes // Filter from table
+                     where ets.Name == name // Where name matches
                      select ets;
 
-            int count = q.Count();
+            int count = 0; // Could also check using = q.Count(); (Will create 2 lookups)
 
-            if (count == 0)
+            foreach (EntityType etEnum in q) // Should just make one pass.
             {
-                et = new EntityType { Name = name };
-                EntityTypes.Add(et);
+                count++;
+                if (count > 1)
+                {
+                    throw new Exception("Inconsistent database. Dublicates of EntityType named '" + name + "'");
+                }
+                et = etEnum; // Store in result value to make it possible to test if iteration continues after first element
             }
-            else if (count == 1)
+
+            if (count == 0) // Test if no result was found
             {
-                et = q.First();
-            }
-            else
-            {
-                throw new Exception("Inconsistent database. Dublicates of EntityType named '" + name + "'");
+                et = new EntityType { Name = name }; // Create new entityType
+                EntityTypes.Add(et); // And add to the database
             }
 
             return et;
+        }
+
+        public PropertyValue SetPropertyValue(Entity e, Property p, string value)
+        {
+            var pvs = from pv in PropertyValues
+                      where pv.Entity == e && pv.Property == p
+                      select pv;
+
+            foreach (PropertyValue val in pvs) // Since PK is (EntityPOID, PropertyPOID) this will (should) contain max 1 element
+            {
+                val.TheValue = value;
+                return val; // Return if found
+            }
+
+            // No match found
+
+            // Create new property
+            PropertyValue res = new PropertyValue { Entity = e, Property = p, TheValue = value };
+
+            // Add it to table (TODO: Is this desired semantics?)
+            PropertyValues.Add(res);
+
+            return res;
         }
     }
 }
