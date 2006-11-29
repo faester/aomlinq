@@ -125,7 +125,7 @@ namespace Translation
             }
             if (e.Id != Entity.UNDEFINED_ID)
             {
-                ObjectCache.Store(outObj, e.Id);
+                BOCache.Store(outObj, e.Id);
             }
             return outObj;
         }

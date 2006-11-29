@@ -73,18 +73,18 @@ namespace Tests
         public void DatabaseStore()
         {
             Assert.IsFalse(e == null, "Entity objet wass null. Error in test setup.");
-            ObjectCache.StoreEntity(e);
+            BOCache.StoreEntity(e);
             entityID = e.Id;
         }
 
         [Test]
         public void DatabaseRetrieve()
         {
-            ObjectCache.StoreEntity (e);
+            BOCache.StoreEntity (e);
             entityID = e.Id;
             Assert.IsFalse(entityID == Entity.UNDEFINED_ID, "Error in test setup. entityID was undefined");
 
-            Entity ecopy = ObjectCache.RetrieveEntity(entityID);
+            Entity ecopy = BOCache.RetrieveEntity(entityID);
             Assert.IsTrue(ecopy.Equals(e));
         }
 
@@ -92,16 +92,16 @@ namespace Tests
         public void EntityPOIDAssignment()
         {
             Assert.IsTrue (e.Id == Entity.UNDEFINED_ID, "Unsaved Entity instances must have Id == Entity.UNDEFINED_ID");
-            ObjectCache.StoreEntity(e);
+            BOCache.StoreEntity(e);
             Assert.IsTrue (e.Id != Entity.UNDEFINED_ID, "Entity instances must have their ID set when they are saved to DB");
         }
 
         [Test]
         public void EntityTypePreservation()
         {
-            ObjectCache.StoreEntity (e);
+            BOCache.StoreEntity (e);
             entityID = e.Id;
-            Entity copy = ObjectCache.RetrieveEntity(entityID);
+            Entity copy = BOCache.RetrieveEntity(entityID);
             Assert.IsTrue(e.Type.Id == copy.Type.Id, "EntityType of retrived object did not match type of the saved object.");
             Assert.IsTrue(e.Type.Name == copy.Type.Name, "EntityType of saved and retrieved objects did not match.");
         }
@@ -111,8 +111,8 @@ namespace Tests
         {
             string val = "testName987981237";
             e.SetProperty("firstName", val) ;
-            ObjectCache.StoreEntity (e);
-            Entity copy = ObjectCache.RetrieveEntity(e.Id);
+            BOCache.StoreEntity (e);
+            Entity copy = BOCache.RetrieveEntity(e.Id);
             Assert.IsTrue(e.GetPropertyValue("firstName") == val, "Property value changed during storage/retrieve operation.");
             Assert.IsTrue(copy.GetPropertyValue("firstName") == e.GetPropertyValue("firstName"), "Property value changed in retrieved Entity.");
         }

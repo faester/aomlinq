@@ -43,13 +43,13 @@ namespace Translation
                 return null;
             }
             long entityPOID = long.Parse(propertyValue);
-            if (ObjectCache.HasId(entityPOID))
+            if (BOCache.HasId(entityPOID))
             {
-                object res = ObjectCache.GetObjectByID(entityPOID);
+                object res = BOCache.GetObjectByID(entityPOID);
                 return res;
             }
 
-            Entity e = ObjectCache.RetrieveEntity(entityPOID);
+            Entity e = BOCache.RetrieveEntity(entityPOID);
 
             Type t = Type.GetType(e.Type.Name);
 
@@ -59,7 +59,7 @@ namespace Translation
             AOMConverter aomcnv = new AOMConverter(t, e.Type);
             aomcnv.FromEntity(e, o);
 
-            ObjectCache.Store(o, entityPOID);
+            BOCache.Store(o, entityPOID);
 
             return o;
         }
@@ -81,9 +81,9 @@ namespace Translation
         public string ToValueString(object o)
         {
             if (o == null) { return null; }            
-            if (ObjectCache.HasObject(o))
+            if (BOCache.HasObject(o))
             {
-                return ObjectCache.GetIDByObject(o).ToString();
+                return BOCache.GetIDByObject(o).ToString();
 
             }
             else
@@ -92,15 +92,25 @@ namespace Translation
                 //AOMConverter cnv = new AOMConverter(o, et);
                 //Entity e = et.New();
                 //Set id. 
-                //e.Id = ObjectCache.GetNewUnusedId ();
-                //ObjectCache.StoreEntity(e);
-                long entityPOID = ObjectCache.GetNewUnusedId();
+                //e.Id = BOCache.GetNewUnusedId ();
+                //BOCache.StoreEntity(e);
+                long entityPOID = BOCache.GetNewUnusedId();
 
-                ObjectCache.Store(o, entityPOID);
+                BOCache.Store(o, entityPOID);
                 //cnv.ToEntity(e, o);
-                //ObjectCache.StoreEntity(e);
+                //BOCache.StoreEntity(e);
                 return entityPOID.ToString();
             }
+        }
+
+        /// <summary>
+        /// TODO: Principielt burde dette kunne løses ved 
+        /// at teste om EntityPOID er identiske, men indtil 
+        /// videre antages "false".
+        /// </summary>
+        public bool CanHandleEquals
+        {
+            get { return true; }
         }
     }
 }

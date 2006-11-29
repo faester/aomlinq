@@ -11,20 +11,19 @@ using System.Reflection;
 
 namespace DBLayer
 {
-    public class Table<T> : /* IQueryable<T>, */ ICollection<T>
+    public class Table<T> : /* IQueryable<T>,  */ ICollection<T>
         where T : IBusinessObject, new()
     {
         BO2AOMTranslator<T> converter = new BO2AOMTranslator<T>();
-        int capacity = 1; //TODO: Remove
-        int size = 0; //TODO: Remove
-        T[] content; //TODO: Remove
+        Func<T, bool> linqWhereCondition = null;
+        ICondition genDBcondition = null;
 
         #region ICollection members
 
         public void Add(T e)
         {
             Entity ent = converter.ToEntity(e);
-            ObjectCache.StoreEntity(ent);
+            BOCache.StoreEntity(ent);
         }
 
         public void Clear()
@@ -47,13 +46,13 @@ namespace DBLayer
             if (e.DatabaseID != null)
             {
                 DBTag tag = e.DatabaseID;
-                ObjectCache.Delete(tag);
+                BOCache.Delete(tag);
                 e.DatabaseID = null;
                 return true;
             }
-            else if (ObjectCache.HasObject(e))
+            else if (BOCache.HasObject(e))
             {
-                ObjectCache.RemoveObject(e);
+                BOCache.RemoveObject(e);
                 return true;
             }
             return false;
@@ -80,47 +79,18 @@ namespace DBLayer
         }
         #endregion
 
-        #region Table members
-        public Table()
-        {
-        }
+        public Table() { /* empty */ }
 
-        private void Resize(int newCapacity)
-        {
-            throw new Exception("Not implemented");
-        }
-
-        public IQueryable CreateQuery(Expression e)
-        {
-            throw new Exception("Not implemented");
-        }
-
-        public object Execute(Expression e)
-        {
-            return e;
-        }
-
-        public Expression Expression
-        {
-            get
-            {
-                throw new Exception("Not implemented");
-            }
-        }
-
-        public Type ElementType
-        {
-            get { return typeof(T); }
-        }
-        #endregion
-
-        #region Query Expression Pattern members
+        #region Query Expression 
 
         static void ParseExpression(Expression<Func<T, bool>> expr)
         {
+            Type t = typeof(T);
             Console.WriteLine(expr.GetType());
             ParseExpression (expr.Body);
 
+            object o = expr.Compile();
+            Console.WriteLine(o);
         }
 
         static void ParseBinaryExpression(BinaryExpression be)
@@ -162,60 +132,35 @@ namespace DBLayer
             {
                 ParseMemberExpression((MemberExpression)e);
             }
+            else if (e is MethodCallExpression )
+            {
+                MethodCallExpression mce = (MethodCallExpression)e;
+                foreach (Expression ex in mce.Parameters)
+                {
+                    Type theT = ex.GetType();
+                    ExpressionType exprType = ex.NodeType;
+                    if (exprType == System.Expressions.ExpressionType.MemberAccess)
+                    {
+                        Console.WriteLine ("Yahooo!");
+                    }
+                    Console.WriteLine(exprType.ToString());
+                }
+                MethodInfo methodInfo = mce.Method ;
+                                
+                Console.WriteLine(methodInfo);
+            }
             else
             {
                 Console.WriteLine("We have a: '{0}' in '{1}' ", e.GetType().ToString(), e);
             }
         }
 
-        public DumCollection<T> Where(Expression<Func<T, bool>> expr)
+        public ICollection<T> Where(Expression<Func<T, bool>> expr)
         {
             ParseExpression(expr);
-            Func<T, bool> predicate = expr.Compile();
-            DumCollection<T> result = new DumCollection<T>();
-            for (int idx = 0; idx < size; idx++)
-            {
-                if (predicate(content[idx]))
-                {
-                    result.Add(content[idx]);
-                }
-            }
-            return result;
+            return this;
             //return this.Where<T> (expr.Compile()).ToQueryable();
         }
-
-        // Polymorfien kan ikke operere med denne og ovenstående samtidig
-        //public IEnumerable<T> Where(Func<T, bool> func)
-        //{
-        //    DumCollection<T> where = new DumCollection<T>();
-        //    foreach (T t in content)
-        //    {
-        //        if (func(t))
-        //        {
-        //            where.Add(t);
-        //        }
-        //    }
-        //    return where;
-        //}
-
-
-        //public IEnumerable<S> Select<S>(Expression<Func<T, S>> selector) 
-        //{
-        //    Console.WriteLine ("Select called with expression: {0}", selector);
-        //    Func<T, S> sel = selector.Compile();
-        //    Table<S> result = new DumCollection<S>();
-        //    for (int i = 0; i < size; i++)
-        //    {
-        //        result.Add  (sel( content[i]));
-        //    }
-        //    return result;
-        //}
-
-        //public IEnumerable<S> SelectMany<S>(Func<T, IEnumerable<S>> sel)
-        //{
-        //    Console.WriteLine("SelectMany got selector : {0}", sel);
-        //    return new Table<T>();
-        //}
         #endregion
     }
 }
