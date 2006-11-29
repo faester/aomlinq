@@ -39,8 +39,10 @@
   <ItemGroup>
     <Compile Include="DB.cs" />
     <Compile Include="DBTag.cs" />
+    <Compile Include="FieldConverters.cs" />
     <Compile Include="IBOCache.cs" />
     <Compile Include="IBusinessObject.cs" />
+    <Compile Include="IDBStorer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GenTable.cs" />
