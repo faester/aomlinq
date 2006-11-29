@@ -8,7 +8,7 @@ namespace GenDB
     {
         static IBOCache instance = new IBOCache();
 
-        public IBOCache Instance 
+        public static IBOCache Instance 
         {
             get { return instance; }
         }

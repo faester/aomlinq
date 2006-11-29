@@ -211,20 +211,5 @@ namespace GenDB
         public Table<Inheritance> Inheritance;
         public Table<PropertyValue> PropertyValues;
         private GenericDB() : base(connectString) { }
-
-        public void Delete (DBTag dbtag)
-        {
-            var z = from e in Entities
-                    where e.EntityPOID == dbtag.EntityPOID
-                    select e;
-            Entities.RemoveAll (z);
-
-            var q = from pv in PropertyValues 
-                    where pv.EntityPOID == dbtag.EntityPOID
-                    select pv;
-            PropertyValues.RemoveAll(q);
-            
-            SubmitChanges();
-        }
     }
 }
