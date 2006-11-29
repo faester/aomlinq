@@ -41,6 +41,17 @@ namespace GenDB
             return (IBusinessObject)wr.Target;
         }
 
+        public IBusinessObject Get(long id)
+        {
+            WeakReference wr;
+            if (!cachedObjects.TryGetValue(id, out wr))
+            {
+                return null;
+            }
+            if (!wr.IsAlive) {throw new Exception("Internal error in cache: Object has been reclaimed by garbagecollector, but was requested from cache."); }
+            return (IBusinessObject)wr.Target;
+        }
+
         /// <summary>
         /// Removes the object identified 
         /// by the id from the cache.

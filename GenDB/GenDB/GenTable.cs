@@ -6,6 +6,6 @@ namespace GenDB
 {
     internal class GenTable 
     {
-
+        
     }
 }
