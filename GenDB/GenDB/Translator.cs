@@ -28,10 +28,12 @@ namespace GenDB
         }
     }
 
-    internal class Translator : IFieldConverter 
+    internal class Translator : IFieldConverter
     {
+        #region static part
         static IBOCache cache = IBOCache.Instance;
         static Dictionary<Type, Translator> translators = new Dictionary<Type, Translator>();
+        static Type DBTAG_TYPE = typeof(DBTag);
 
         public static Translator GetTranslator(Type t)
         {
@@ -45,7 +47,7 @@ namespace GenDB
             return res;
         }
 
-        private static void CheckTypeLegality(Type t)
+        private static void CheckRefTypeLegality(Type t)
         {
             if (t.IsGenericType || t.IsGenericTypeDefinition)
             {
@@ -59,6 +61,11 @@ namespace GenDB
             }
         }
 
+        private static bool IsValueTranslatable (Type t)
+        {
+            return t.IsValueType || t.Equals(typeof(string));
+        }
+        #endregion
 
         LinkedList<Converter> declaredConverters = new LinkedList<Converter>(); // Contains converters for declared fields
         LinkedList<Converter> allConverters = new LinkedList <Converter>(); // All converters needed to convert between objectType and generic representation
@@ -90,8 +97,9 @@ namespace GenDB
         private void InitProperties()
         {
             fields = objectType.GetFields(BindingFlags.NonPublic
-                                         |BindingFlags.Public
-                                         |BindingFlags.DeclaredOnly
+                                         | BindingFlags.Instance 
+                                         | BindingFlags.Public
+                                         | BindingFlags.DeclaredOnly
                                          );
 
             if (objectType.GetFields( BindingFlags.Static ).Length != 0)
@@ -101,17 +109,19 @@ namespace GenDB
                      
             foreach (FieldInfo fi in fields)
             {
-                if (fi.FieldType.IsValueType || fi.FieldType.Equals(typeof(string)))
+                if (Translator.IsValueTranslatable(fi.FieldType))
                 {
                     declaredConverters.AddLast (new Converter(FieldConverters.GetConverter(fi.FieldType), fi));
                 }
-                else 
+                else if (fi.FieldType == DBTAG_TYPE)
                 {
-                    CheckTypeLegality(fi.FieldType); // Check if we can translate. (Throws exception on error)
+                    /* ignore */
+                }
+                else
+                {
+                    Translator.CheckRefTypeLegality(fi.FieldType); // Check if we can translate. (Throws exception on error)
                 }
             }
-            // Der skal testes for om feltet er en referencetype her.
-            // Felttyper (primitiver) hentes fra FieldConverters
         }
 
         private void Init()
@@ -136,7 +146,7 @@ namespace GenDB
 
             long id = long.Parse (s);
 
-            IBusinessObject res = IBOCache.Instance.Get (id);
+            IBusinessObject res = IBOCache.Instance.Get(id);
 
             throw new Exception("Not implemented.");
         }

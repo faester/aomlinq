@@ -10,9 +10,29 @@ namespace GenDB
 {
     class Program
     {
-        class A { public string StringParm = DateTime.Now.ToString(); }
-        class B : A {}
-        class C : B {}
+        class AbsBO : IBusinessObject
+        {
+            private DBTag dBTag;
+            public DBTag DBTag 
+            {
+                get { return dBTag;}
+                set { dBTag = value; }
+            }
+        }
+
+        class A : AbsBO
+        { 
+            public string StringParm = DateTime.Now.ToString(); 
+        }
+        
+        class B : A 
+        {
+            int year;
+        }
+        class C : B 
+        {
+            string name;
+        }
 
         static void Main(string[] args)
         {
