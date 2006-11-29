@@ -60,8 +60,8 @@ namespace GenDB
             genDB.Entities.Add (e1);
             genDB.Entities.Add (e2);
             genDB.PropertyValues.Add(pv0);
-            genDB.PropertyTypes.Add (ptString);
-            genDB.PropertyTypes.Add (ptInt);
+            //genDB.PropertyTypes.Add (ptString);
+            //genDB.PropertyTypes.Add (ptInt);
             genDB.SubmitChanges();
             
             var z = from e in genDB.Entities 
