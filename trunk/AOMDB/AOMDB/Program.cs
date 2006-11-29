@@ -14,6 +14,7 @@ namespace AOMDB
     public class Person : AbsBusinessObj
     {
         public string name;
+        public int birthYear;
     }
 
     public class Student : Person
@@ -43,7 +44,7 @@ namespace AOMDB
             //list.AddLast(s);
 
             var selection = from o in table 
-                    where (o.name == "Mr. Tester")
+                    where (o.name == "Mr. Tester" && o.birthYear == 1978)
                     select o;
 
             var selection2 = from o in list
