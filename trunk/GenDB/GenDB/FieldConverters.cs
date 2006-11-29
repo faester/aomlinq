@@ -23,12 +23,25 @@ namespace GenDB
         }
     }
 
+    internal class Int32Converter : IFieldConverter
+    {
+        public string ToPropertyValueString(object o)
+        {
+            return o.ToString();
+        }
+        public object ToObjectRepresentation(string s)
+        {
+            return Int32.Parse (s);
+        }
+    }
+
     static class FieldConverters
     {
         static Dictionary<Type, IFieldConverter> convs = new Dictionary<Type, IFieldConverter>();
         static FieldConverters()
         {
             convs[typeof(string)] = new StringConverter();
+            convs[typeof(Int32)] = new StringConverter();
         }
 
         public static IFieldConverter GetConverter(Type t)
