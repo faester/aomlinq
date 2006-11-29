@@ -41,20 +41,7 @@ namespace GenDB
 
         private void InitEntityType()
         {
-            var q = from ets in GenericDB.Instance.EntityTypes
-                     where ets.Name == objectType.FullName
-                     select ets;
-
-            if (q.Count() == 0)
-            {
-                et = new EntityType { Name = objectType.FullName };
-                GenericDB.Instance.EntityTypes.Add(et);
-            }
-            else 
-            { 
-                et = q.First();
-            }
-
+            et = GenericDB.Instance.GetEntityType (objectType.FullName);
             if (objectType.BaseType != null)
             {
                 superTranslator = GetTranslator(objectType.BaseType);
@@ -63,7 +50,9 @@ namespace GenDB
 
         private void InitProperties()
         {
-
+            // Der skal testes for om feltet er en referencetype her.
+            // Felttyper (primitiver) hentes fra FieldConverters
+            
         }
 
         private void Init()

@@ -6,26 +6,26 @@ using System.Query;
 
 namespace GenDB
 {
-    [Table(Name="Inheritance")]
+    [Table(Name = "Inheritance")]
     internal class Inheritance
     {
-        [Column(Name="SuperEntityTypePOID", Id = true)]
+        [Column(Name = "SuperEntityTypePOID", Id = true)]
         public long SuperEntityTypePOID;
-        
-        [Column(Name="SubEntityTypePOID", Id = true)]
+
+        [Column(Name = "SubEntityTypePOID", Id = true)]
         public long SubEntityTypePOID;
 
         private EntityRef<EntityType> _SubEntityType;
         private EntityRef<EntityType> _SuperEntityType;
 
-        [Association(Storage="_SubEntityType", ThisKey="SubEntityTypePOID", OtherKey="EntityTypePOID")]
+        [Association(Storage = "_SubEntityType", ThisKey = "SubEntityTypePOID", OtherKey = "EntityTypePOID")]
         public EntityType SubEntityType
         {
             get { return this._SubEntityType.Entity; }
             set { this._SubEntityType.Entity = value; }
         }
 
-        [Association(Storage="_SuperEntityType", ThisKey="SuperEntityTypePOID", OtherKey="EntityTypePOID")]
+        [Association(Storage = "_SuperEntityType", ThisKey = "SuperEntityTypePOID", OtherKey = "EntityTypePOID")]
         public EntityType SuperEntityType
         {
             get { return this._SuperEntityType.Entity; }
@@ -49,8 +49,9 @@ namespace GenDB
         public EntityType EntityType
         {
             get { return this._entityType.Entity; }
-            set { 
-                this._entityType.Entity = value; 
+            set
+            {
+                this._entityType.Entity = value;
             }
         }
 
@@ -115,7 +116,7 @@ namespace GenDB
         }
 
 
-        [Association(Storage="_propertyType", ThisKey="PropertyTypePOID", OtherKey="PropertyTypePOID")]
+        [Association(Storage = "_propertyType", ThisKey = "PropertyTypePOID", OtherKey = "PropertyTypePOID")]
         public PropertyType PropertyType
         {
             get { return this._propertyType.Entity; }
@@ -134,11 +135,11 @@ namespace GenDB
 
         EntitySet<Property> _properties = new EntitySet<Property>();
 
-        [Association(Storage="_properties", ThisKey="PropertyTypePOID")]
+        [Association(Storage = "_properties", ThisKey = "PropertyTypePOID")]
         public EntitySet<Property> Properties
         {
             get { return this._properties; }
-            set { this._properties.Assign (value); }
+            set { this._properties.Assign(value); }
         }
     }
 
@@ -181,12 +182,13 @@ namespace GenDB
         public static string ConnectString
         {
             get { return GenericDB.connectString; }
-            set { 
+            set
+            {
                 if (instance == null)
                 {
-                    GenericDB.connectString = value; 
+                    GenericDB.connectString = value;
                 }
-                else 
+                else
                 {
                     throw new Exception("Can not change connect string after initialization.");
                 }
@@ -195,9 +197,10 @@ namespace GenDB
 
         private static GenericDB instance = null;
 
-        public static GenericDB Instance 
+        public static GenericDB Instance
         {
-            get {
+            get
+            {
                 if (instance == null) { instance = new GenericDB(); }
                 return instance;
             }
@@ -211,5 +214,31 @@ namespace GenDB
         public Table<Inheritance> Inheritance;
         public Table<PropertyValue> PropertyValues;
         private GenericDB() : base(connectString) { }
+
+        public EntityType GetEntityType(string name)
+        {
+            EntityType et = null;
+            var q = from ets in EntityTypes
+                     where ets.Name == name
+                     select ets;
+
+            int count = q.Count();
+
+            if (count == 0)
+            {
+                et = new EntityType { Name = name };
+                EntityTypes.Add(et);
+            }
+            else if (count == 1)
+            {
+                et = q.First();
+            }
+            else
+            {
+                throw new Exception("Inconsistent database. Dublicates of EntityType named '" + name + "'");
+            }
+
+            return et;
+        }
     }
 }

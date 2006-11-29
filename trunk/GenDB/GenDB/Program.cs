@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define RECREATE_DB
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Query;
@@ -9,7 +10,7 @@ namespace GenDB
 {
     class Program
     {
-        class A {}
+        class A { public string StringParm = DateTime.Now.ToString(); }
         class B : A {}
         class C : B {}
 
@@ -17,12 +18,17 @@ namespace GenDB
         {
             GenericDB genDB = GenericDB.Instance;
             genDB.Log = Console.Out;
-            //if (genDB.DatabaseExists())
-            //{
-            //    Console.WriteLine("Deleting old database.");
-            //    genDB.DeleteDatabase();
-            //}
-            //genDB.CreateDatabase();
+#if RECREATE_DB
+            if (genDB.DatabaseExists())
+            {
+                Console.WriteLine("Deleting old database.");
+                genDB.DeleteDatabase();
+            }
+#endif
+            if (!genDB.DatabaseExists())
+            {
+                genDB.CreateDatabase();
+            }
 
             EntityType et0 = new EntityType() {  Name = "et0" };
             EntityType et1 = new EntityType() {  Name = "et1" };
