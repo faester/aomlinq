@@ -9,6 +9,10 @@ namespace GenDB
 {
     class Program
     {
+        class A {}
+        class B : A {}
+        class C : B {}
+
         static void Main(string[] args)
         {
             GenericDB genDB = GenericDB.Instance;
@@ -66,6 +70,10 @@ namespace GenDB
             {
                 Console.WriteLine (enumer);
             }
+
+            Translator t = Translator.GetTranslator (typeof(C));
+
+            genDB.SubmitChanges();
 
             Console.WriteLine("Press Return to end..");
             Console.ReadLine();

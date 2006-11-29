@@ -9,7 +9,7 @@ namespace GenDB
     internal class Translator
     {
         static IBOCache cache = IBOCache.Instance;
-        static Dictionary<Type, Translator> translators;
+        static Dictionary<Type, Translator> translators = new Dictionary<Type, Translator>();
 
         public static Translator GetTranslator(Type t)
         {
@@ -41,15 +41,20 @@ namespace GenDB
 
         private void InitEntityType()
         {
-            et = (from ets in GenericDB.Instance.EntityTypes
+            var q = from ets in GenericDB.Instance.EntityTypes
                      where ets.Name == objectType.FullName
-                     select ets).First<EntityType>();
+                     select ets;
 
-            if (et == null)
+            if (q.Count() == 0)
             {
                 et = new EntityType { Name = objectType.FullName };
                 GenericDB.Instance.EntityTypes.Add(et);
             }
+            else 
+            { 
+                et = q.First();
+            }
+
             if (objectType.BaseType != null)
             {
                 superTranslator = GetTranslator(objectType.BaseType);
