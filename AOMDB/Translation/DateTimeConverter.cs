@@ -15,6 +15,10 @@ namespace Translation
             long ticks = long.Parse(propertyValue);
             return new DateTime(ticks);
         }
-    }
 
+        public  bool CanHandleEquals
+        {
+            get { return true; }
+        }
+    }
 }

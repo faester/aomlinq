@@ -17,14 +17,14 @@ namespace Persistence
     /// parenting IBusinessObject, no GC will happen for the DBTag. 
     /// The structure is kept in the hope that we will manage to get 
     /// the garbage collector to neglect the object storage inside 
-    /// the ObjectCache. (Perhabs using unsafe methods and some way to
-    /// access the reference count of the objects stored in the cache. 
-    /// This is a PENDING TASK!)
+    /// the BOCache. (TODO: Possible work-around using unsafe methods 
+    /// and some way to access the reference count of the objects stored 
+    /// in the cache.)
     /// </summary>
-    public static class ObjectCache
+    public static class BOCache
     {
         /// <summary>
-        /// Assign to private field in ObjectCache. 
+        /// Assign to private field in BOCache. 
         /// Will invoke the cleanup methods when 
         /// garbage collected. This happens only 
         /// on program shut down, since the field 
@@ -35,7 +35,7 @@ namespace Persistence
 
             ~CleanUpObjectCache()
             {
-                ObjectCache.CleanupUnusedIds();
+                BOCache.CleanupUnusedIds();
             }
         }
 
@@ -43,7 +43,7 @@ namespace Persistence
         static Database dbinstance = Database.Instance;
         private const int ENTITY_IDS_TO_ALLOCATE = 100;
 
-        //private static ObjectCache instance;
+        //private static BOCache instance;
         private const string DUMMY_ENTITY_TYPE_NAME = "...dummytype"; //Used to get ids from DB. ()
         private static EntityType dummyType = null;
 
@@ -51,11 +51,11 @@ namespace Persistence
         private static Dictionary<object, long> obj2id;
         private static LinkedList<long> unusedIds = new LinkedList<long>(); //List of IDS not in use by the DB. 
 
-        static ObjectCache()
+        static BOCache()
         {
             id2obj = new Dictionary<long, object>();
             obj2id = new Dictionary<object, long>();
-            CreateDummeEntityType();
+            CreateDummyEntityType();
             dummyType = EntityType.GetType(DUMMY_ENTITY_TYPE_NAME);
         }
 
@@ -79,7 +79,7 @@ namespace Persistence
             return id2obj[id];
         }
 
-        public static long GetIDByObject(object obj)
+        public static long GetIDByObject(Object obj)
         {
             return obj2id[obj];
         }
@@ -125,7 +125,7 @@ namespace Persistence
         }
 
         #region private stuff
-        private static void CreateDummeEntityType()
+        private static void CreateDummyEntityType()
         {
             if (!EntityType.EntityTypeExists(DUMMY_ENTITY_TYPE_NAME))
             {

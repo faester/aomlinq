@@ -29,15 +29,15 @@ namespace Translation
         {
             if (obj == null) { return null; }
             Entity e = et.New();
-            if (ObjectCache.HasObject (obj)) 
+            if (BOCache.HasObject (obj)) 
             {
-                e.Id = ObjectCache.GetIDByObject(obj);
+                e.Id = BOCache.GetIDByObject(obj);
             }
             e = cnv.ToEntity(e, obj);
-            e.Id = ObjectCache.GetNewUnusedId();
+            e.Id = BOCache.GetNewUnusedId();
             //e.Id should have been set in the AOMConverter
             if (e.Id == Entity.UNDEFINED_ID) { throw new Exception("Entity ID not set correctly! (ToEntity)"); }
-            ObjectCache.Store (obj, e.Id);
+            BOCache.Store (obj, e.Id);
             return e;
         }
 
@@ -45,9 +45,9 @@ namespace Translation
         {
             if (e == null) { return default(T); }
             T obj = default(T);
-            if (e.Id != Entity.UNDEFINED_ID && ObjectCache.HasId(e.Id))
+            if (e.Id != Entity.UNDEFINED_ID && BOCache.HasId(e.Id))
             {
-                obj = (T)ObjectCache.GetObjectByID(e.Id);
+                obj = (T)BOCache.GetObjectByID(e.Id);
                 if (obj == null) { obj = new T(); }
             }
             else
@@ -57,7 +57,7 @@ namespace Translation
             obj = (T)cnv.FromEntity(e, obj);
             //e.Id should have been set in the AOMConverter
             if (e.Id == Entity.UNDEFINED_ID) { throw new Exception("Entity ID not set correctly! (FromEntity)"); }
-            ObjectCache.Store (obj, e.Id);
+            BOCache.Store (obj, e.Id);
             return obj;
         }
     }

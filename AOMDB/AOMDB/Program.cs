@@ -11,77 +11,49 @@ using System.Expressions ;
 
 namespace AOMDB
 {
-    class BORecursive : AbsBusinessObj
+    public class Person : AbsBusinessObj
     {
-        public BORecursive Next;
+        public string name;
+    }
 
-        public int Id;
+    public class Student : Person
+    {
+        public double avg;
+        public string major;
+    }
 
-        public DateTime dt;
-
-        public string Name;
+    public class Teacher : Person
+    {
+        public int yearHired;
     }
 
     class Program
     {
         static void Main(string[] args)
         {
-            int[] is0 = new int[10];
-            int[] is1 = new int[10];
+            DBLayer.Table <Person> table = new DBLayer.Table<Person>();
+            LinkedList<Person> list = new LinkedList<Person>();
 
-            for (int i = 0; i < 10; i++)
-            {
-                is0[i] = i;
-                is1[i] = -i;
-            }
+            Person p = new Person { name = "Mr. Tester" };
+            Student s = new Student { name = "Student", avg = 8.0, major = "interesting" };
 
-            is1[5] = 5;
-
-
-            var ers = from j in is0
-                      from k in is1
-                      where j == k && j != 0
-                    select j;
-
-            foreach (var k in ers)
-            {
-                Console.WriteLine(k);
-            }
-
-
-            DBLayer.Table <BORecursive> table = new DBLayer.Table<BORecursive>();
-            LinkedList<BORecursive> list = new LinkedList<BORecursive>();
-
-            BORecursive b0 = new BORecursive();
-            b0.Name = "Mr. Tester";
-            BORecursive b1 = new BORecursive();
-            b1.Name = "Someone Else";
-
-            table.Add (b0);
-            table.Add (b1);
-            list.AddLast(b0);
-            list.AddLast(b1);
+            //table.Add (p);
+            //table.Add (s);
+            //list.AddLast(p);
+            //list.AddLast(s);
 
             var selection = from o in table 
-                    where (o.Id > 0 && o.Name == "Mr. Tester") || (o.Id == 1) || o.dt < DateTime.Now
+                    where (o.name == "Mr. Tester")
                     select o;
 
             var selection2 = from o in list
-                    where o.Name == "Mr. Tester"
+                    where o.name == "Mr. Tester" 
                     select o;
 
-            foreach(BORecursive b in selection)
+            foreach(Person rp in selection)
             {
-                Console.WriteLine ("RETE: " + b.Name );
+                Console.WriteLine ("RETE: " + rp.name );
             }
-
-            BORecursive first = new BORecursive();
-            BORecursive second = new BORecursive();
-            first.Next = second;
-            second.Next = first;
-            BO2AOMTranslator<BORecursive> trans = new BO2AOMTranslator<BORecursive>();
-            AOM.Entity e = trans.ToEntity (first);
-            Console.ReadLine();
         }
     }
 }

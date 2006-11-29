@@ -13,5 +13,10 @@ namespace Translation
         public string ToValueString(object o){
             return o.ToString();
         }
+
+        public bool CanHandleEquals
+        {
+            get { return true; }
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.Text;
 namespace Persistence
 {
     /// <summary>
-    /// <remarks>See note for <see cref="ObjectCache"/></remarks>
+    /// <remarks>See note for <see cref="BOCache"/></remarks>
     /// Establishes ID and relation to a database.
     /// Has only internal constructors, since this
     /// object is ment ot be modified only by the 

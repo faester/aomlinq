@@ -8,5 +8,6 @@ namespace Translation
     interface IFieldConverter {
         object ToPropertyValue(string propertyValue);
         string ToValueString(object fieldValue);
+        bool CanHandleEquals {get;}
     }
 }
