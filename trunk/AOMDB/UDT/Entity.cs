@@ -107,30 +107,47 @@ public class Entity : INullable, IComparable, Microsoft.SqlServer.Server.IBinary
         return new Entity(); // tmp
     }
 
-    // taken from eaxmple code
     public int CompareTo(object obj)
+    {
+        if (obj == null)
+            return 1; //by definition
+        
+        Entity s = obj as Entity;
+        if (s == null)
+            throw new ArgumentException("the argument to compare is not a Utf8String");
+
+        if (this.IsNull)
         {
-            if (obj == null)
-                return 1; //by definition
-
-            Entity s = obj as Entity;
-
-            if (s == null)
-                throw new ArgumentException("the argument to compare is not a Utf8String");
-
-            if (this.IsNull)
-            {
-                if (s.IsNull)
-                    return 0;
-
-                return -1;
-            }
-
             if (s.IsNull)
-                return 1;
-
-            return this.ToString().CompareTo(s.ToString());
+                return 0;    
+            return -1;
         }
+
+        if (s.IsNull)
+            return 1;
+
+        return this.ToString().CompareTo(s.ToString());
+    }
+
+    public static bool operator ==(Entity entity, Entity other)
+    {
+        return entity.Equals(other);
+    }
+
+    public static bool operator !=(Entity entity, Entity other)
+    {
+        return !(entity == other);
+    }
+
+    public static bool operator <(Entity entity, Entity other)
+    {
+        return (entity.CompareTo(other) < 0);
+    }
+
+    public static bool operator >(Entity entity, Entity other)
+    {
+        return (entity.CompareTo(other) > 0);
+    }
 
     public SqlBinary Utf8Bytes
         {
