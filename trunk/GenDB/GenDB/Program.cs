@@ -31,7 +31,7 @@ namespace GenDB
         }
         class C : B 
         {
-            public string name;
+            public string name = "bnavn";
         }
 
         static void Main(string[] args)
@@ -98,7 +98,9 @@ namespace GenDB
             //}
 
             Translator t = Translator.GetTranslator (typeof(C));
+            C c = new C();
 
+            Console.WriteLine(t.ToPropertyValueString (c));
             genDB.SubmitChanges();
 
             Console.WriteLine("Press Return to end..");

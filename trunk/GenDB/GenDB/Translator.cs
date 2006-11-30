@@ -22,6 +22,7 @@ namespace GenDB
         {
             this.conv = conv;
             this.fi = fi;
+            this.p = p;
         }
 
         public string ToPropertyValueString(object o)
@@ -181,7 +182,13 @@ namespace GenDB
             // should only handle IBusinassObject 
             // instances, so the cast below should be safe.
             IBusinessObject ibo = (IBusinessObject)o;
-            throw new Exception("Not implemented.");
+            if (ibo.DBTag == null)
+            {
+                // Add business object to database
+                // (Assigns DBTag)
+                InsertNewDBEntity(ibo);
+            }
+            return ibo.DBTag.EntityPOID.ToString();
         }
 
         public object ToObjectRepresentation(string s)
@@ -197,16 +204,64 @@ namespace GenDB
                 res = GetFromDatabase (id);
                 DBTag.AssignDBTagTo (res, id, IBOCache.Instance);
             }
-
             return res;
         }
 
-        private void AddToDatabase(IBusinessObject o)
+        private void UpdateDBWith(IBusinessObject o)
+        {
+            if (o.DBTag != null) // test if o is already in DB
+            {
+                UpdateDBEntity(o);
+            }
+            else
+            {
+                InsertNewDBEntity (o);
+            }
+        }
+
+        private void UpdateDBEntity(IBusinessObject o)
+        {
+            //Select Entity with matching id
+            Entity e = (from es in GenericDB.Instance.Entities
+                           where es.EntityPOID == o.DBTag.EntityPOID
+                           select es).First();
+
+            //Copy all property values to dictionary with PropertyPOID as key
+            IDictionary<long, PropertyValue> pvs = new Dictionary<long, PropertyValue>();
+            pvs = e.PropertyValues.ToDictionary((PropertyValue pv) => pv.PropertyPOID);
+
+            // Step through Converters properties and assign value to corresponding PropertyValue
+            foreach (Converter c in allConverters)
+            {
+                pvs[c.Property.PropertyPOID].TheValue = c.ToPropertyValueString(o);
+            }
+
+            GenericDB.Instance.SubmitChanges();
+        }
+
+        /// <summary>
+        /// Constructs and Entity in accordance with o
+        /// and adds it to the database.
+        /// </summary>
+        /// <param name="o"></param>
+        private void InsertNewDBEntity(IBusinessObject o)
         {
             Entity e = new Entity();
-            throw new Exception ("Not implemented.");
+            e.EntityType = et;
 
-            
+            foreach (Converter c in allConverters)
+            {
+                PropertyValue pv = new PropertyValue();
+                pv.Property = c.Property;
+                if (c.Property == null) { throw new NullReferenceException("c.Property"); }
+                pv.Entity = e;
+                e.PropertyValues.Add (pv);
+                pv.TheValue = c.ToPropertyValueString(o);
+                GenericDB.Instance.PropertyValues.Add(pv);
+            }
+            GenericDB.Instance.Entities.Add (e);
+            GenericDB.Instance.SubmitChanges();
+            DBTag.AssignDBTagTo(o, e.EntityPOID, IBOCache.Instance);
         }
 
         private IBusinessObject GetFromDatabase(long id)
