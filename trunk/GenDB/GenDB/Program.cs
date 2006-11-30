@@ -43,7 +43,7 @@ namespace GenDB
         static void Main(string[] args)
         {
             GenericDB genDB = GenericDB.Instance;
-            genDB.Log = Console.Out;
+            //genDB.Log = Console.Out;
 #if RECREATE_DB
             if (genDB.DatabaseExists())
             {
@@ -56,7 +56,7 @@ namespace GenDB
                 genDB.CreateDatabase();
             }
 
-            Translator t = Translator.GetTranslator (typeof(C));
+            Translator t = Translator.GetCreateTranslator (typeof(C));
             int elements = 0;
             C[] cs = new C[elements];
 
@@ -76,7 +76,7 @@ namespace GenDB
 
             D d = new D { ibo = new C()};
             d.ibo = d;
-            Translator dt = Translator.GetTranslator(d.GetType ());
+            Translator dt = Translator.GetCreateTranslator(d.GetType ());
 
             string idStr = dt.ToPropertyValueString (d);
             object obj = t.ToObjectRepresentation(idStr);

@@ -12,21 +12,92 @@ namespace GenDB
         #region static part
         static Type[] EMPTY_TYPE_ARRAY = new Type[0];
         static IBOCache cache = IBOCache.Instance;
-        static Dictionary<Type, Translator> translators = new Dictionary<Type, Translator>();
+        static Dictionary<Type, Translator> type2translator = new Dictionary<Type, Translator>();
+        static Dictionary<long, Translator> et2translator = new Dictionary<long, Translator>();
         static Type DBTAG_TYPE = typeof(DBTag);
 
-        public static Translator GetTranslator(Type t)
+        /// <summary>
+        /// Used to create new translator instances as
+        /// well as retrieving already constructed translators
+        /// based on a Type.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        internal static Translator GetCreateTranslator(Type t)
         {
             Translator res;
-            if (translators.TryGetValue(t, out res))
+            if (type2translator.TryGetValue(t, out res))
             {
                 return res;
             }
             res = new Translator(t);
-            translators[t] = res;
+            type2translator[t] = res;
+            long entityTypePOID = res.et.EntityTypePOID;
+            et2translator [entityTypePOID] = res;
             return res;
         }
 
+
+        /// <summary>
+        /// Used to retrive Translators based on an
+        /// EntityTypePOID. If a corresponding translator does
+        /// not exist, one is constructed based on the
+        /// EntityType.Name. 
+        /// </summary>
+        /// <param name="entityTypePOID"></param>
+        /// <returns></returns>
+        internal static Translator GetTranslator(long entityTypePOID)
+        {
+            Translator res;
+            if (et2translator.TryGetValue(entityTypePOID, out res))
+            {
+                return res;
+            }
+
+            EntityType et = (from ets in GenericDB.Instance.EntityTypes
+                             where ets.EntityTypePOID == entityTypePOID
+                             select ets).First();
+            Type t = Type.GetType(et.Name);
+            res = GetCreateTranslator (t);
+            return res;
+        }
+
+        /// <summary>
+        /// Return s an object identified by the
+        /// given id from the database.
+        /// PRE: Behaviour is unspecified if no objects
+        /// where EntityPOID == id exists in the 
+        /// database. 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        internal static IBusinessObject GetFromDatabase(long id)
+        {
+            // Can be a subtype of objectType, so we need to 
+            // retrieve a translator for each method invokation.
+            Entity e = (from es in GenericDB.Instance.Entities
+                       where es.EntityPOID == id
+                       select es).First();
+
+            Translator st = Translator.GetTranslator (e.EntityType.EntityTypePOID);
+            object o = st.NewObjectInstance();
+
+            foreach (Converter c in st.allConverters)
+            {
+                PropertyValue pv = e.PropertyValues.Where ( (PropertyValue tpv) => tpv.Entity == e ).First();
+                c.FieldInfo.SetValue (o, c.ToObjectRepresentation(pv.TheValue));
+            }
+
+            return (IBusinessObject)o;
+        }
+
+        /// <summary>
+        /// Checks if a given type can be translated 
+        /// using the Translator class. If the type 
+        /// is accepted, nothing happens, but an error
+        /// is thrown in case the Type is not translatable.
+        /// </summary>
+        /// <param name="t"></param>
         private static void CheckRefTypeLegality(Type t)
         {
             if (t.IsGenericType || t.IsGenericTypeDefinition)
@@ -47,7 +118,7 @@ namespace GenDB
                 throw new NotTranslatableException("Reference types must implement IBusinessObject (" + t.FullName + ")" );
             }
         }
-
+        
         private static bool IsValueTranslatable (Type t)
         {
             return t.IsValueType || t.Equals(typeof(string));
@@ -77,7 +148,7 @@ namespace GenDB
             et = GenericDB.Instance.GetCreateEntityType (objectType.FullName);
             if (objectType.BaseType != null)
             {
-                superTranslator = GetTranslator(objectType.BaseType);
+                superTranslator = GetCreateTranslator(objectType.BaseType);
             }
         }
 
@@ -124,7 +195,7 @@ namespace GenDB
                     else
                     {
                         Translator.CheckRefTypeLegality(fi.FieldType); // Check if we can translate. (Throws exception on error)
-                        Translator t = Translator.GetTranslator(fi.FieldType);
+                        Translator t = Translator.GetCreateTranslator(fi.FieldType);
                         declaredConverters.AddLast(new Converter(t, fi, property));
                     }
                 }
@@ -242,37 +313,19 @@ namespace GenDB
             DBTag.AssignDBTagTo(o, e.EntityPOID, IBOCache.Instance);
         }
 
-
         /// <summary>
-        /// Return s an object identified by the
-        /// given id from the database.
-        /// PRE: Behaviour is unspecified if no objects
-        /// where EntityPOID == id exists in the 
-        /// database. 
+        /// Creates an instance of the type this
+        /// Translator represents.
         /// </summary>
-        /// <param name="id"></param>
         /// <returns></returns>
-        private IBusinessObject GetFromDatabase(long id)
+        private object NewObjectInstance()
         {
-            // Can be a subtype of objectType, so we need to 
-            // retrieve a translator for each method invokation.
-            Entity e = (from es in GenericDB.Instance.Entities
-                       where es.EntityPOID == id
-                       select es).First();
-
-            Type t = Type.GetType(e.EntityType.Name);
+            Type t = Type.GetType(et.Name);
             ConstructorInfo ci = t.GetConstructor(EMPTY_TYPE_ARRAY);
             object o = ci.Invoke(null);
-            Translator st = Translator.GetTranslator (t);
-
-            foreach (Converter c in st.allConverters)
-            {
-                PropertyValue pv = e.PropertyValues.Where ( (PropertyValue tpv) => tpv.Entity == e ).First();
-                c.FieldInfo.SetValue (o, c.ToObjectRepresentation(pv.TheValue));
-            }
-
-            return (IBusinessObject)o;
+            return o;
         }
+
     }
 
     public class NotTranslatableException : Exception
