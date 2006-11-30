@@ -43,13 +43,15 @@ namespace GenDB
         static FieldConverters()
         {
             convs[typeof(string)] = new StringConverter();
-            convs[typeof(Int32)] = new StringConverter();
+            convs[typeof(Int32)] = new Int32Converter();
         }
 
         public static IFieldConverter GetConverter(Type t)
         {
+            IFieldConverter res = null;
             try {
-                return convs[t];
+                res =  convs[t];
+                return res;
             }
             catch (KeyNotFoundException)
             {

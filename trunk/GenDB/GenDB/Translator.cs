@@ -12,6 +12,12 @@ namespace GenDB
         FieldInfo fi;
         Property p;
 
+        internal FieldInfo FieldInfo
+        {
+            get { return fi; }
+            set { fi = value; }
+        }
+
         internal Property Property
         {
             get { return p; }
@@ -40,6 +46,7 @@ namespace GenDB
     internal class Translator : IFieldConverter
     {
         #region static part
+        static Type[] EMPTY_TYPE_ARRAY = new Type[0];
         static IBOCache cache = IBOCache.Instance;
         static Dictionary<Type, Translator> translators = new Dictionary<Type, Translator>();
         static Type DBTAG_TYPE = typeof(DBTag);
@@ -113,7 +120,7 @@ namespace GenDB
 
             if (objectType.GetFields( BindingFlags.Static ).Length != 0)
             {
-                throw new Exception ("Can not handle static fields.");
+                throw new Exception ("Can not handle objecst with static fields.");
             }
                      
             foreach (FieldInfo fi in fields)
@@ -264,13 +271,36 @@ namespace GenDB
             DBTag.AssignDBTagTo(o, e.EntityPOID, IBOCache.Instance);
         }
 
+
+        /// <summary>
+        /// Return s an object identified by the
+        /// given id from the database.
+        /// PRE: Behaviour is unspecified if no objects
+        /// where EntityPOID == id exists in the 
+        /// database. 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         private IBusinessObject GetFromDatabase(long id)
         {
             // Can be a subtype of objectType, so we need to 
             // retrieve a translator for each method invokation.
-            
+            Entity e = (from es in GenericDB.Instance.Entities
+                       where es.EntityPOID == id
+                       select es).First();
 
-            throw new Exception ("Not implemented.");
+            Type t = Type.GetType(e.EntityType.Name);
+            ConstructorInfo ci = t.GetConstructor(EMPTY_TYPE_ARRAY);
+            object o = ci.Invoke(null);
+            Translator st = Translator.GetTranslator (t);
+
+            foreach (Converter c in st.allConverters)
+            {
+                PropertyValue pv = e.PropertyValues.Where ( (PropertyValue tpv) => tpv.Entity == e ).First();
+                c.FieldInfo.SetValue (o, c.ToObjectRepresentation(pv.TheValue));
+            }
+
+            return (IBusinessObject)o;
         }
     }
 
