@@ -6,6 +6,10 @@ using System.IO;
 
 namespace GenDB
 {
+    /// <summary>
+    /// Simple helper class to create
+    /// text representations of objects.
+    /// </summary>
     public static class ObjectDumper
     {
         static int MAX_INDENT_LEVEL = 5;
@@ -26,11 +30,24 @@ namespace GenDB
             return res;
         }
 
+        /// <summary>
+        /// Print object information to 
+        /// Console.Out
+        /// </summary>
+        /// <param name="o">Object to print</param>
         public static void PrintOut(object o)
         {
             PrintOut(o, Console.Out);
         }
 
+        /// <summary>
+        /// Print object information to 
+        /// any TextWriter. TextWriter 
+        /// must not be null and must be
+        /// open when this method is called.
+        /// </summary>
+        /// <param name="o">Object to print</param>
+        /// <param name="output">Where to send output</param>
         public static void PrintOut(object o, TextWriter output)
         {
             PrintObject(o, output, 0);
