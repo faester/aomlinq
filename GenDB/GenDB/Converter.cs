@@ -40,5 +40,10 @@ namespace GenDB
         {
             return conv.ToObjectRepresentation(s);
         }
+
+        public void SetObjectsFieldValue(object o, string s)
+        {
+            fi.SetValue(o, ToObjectRepresentation(s));
+        }
     }
 }
