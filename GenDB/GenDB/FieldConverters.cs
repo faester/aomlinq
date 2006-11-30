@@ -15,10 +15,12 @@ namespace GenDB
     {
         public string ToPropertyValueString(object o)
         {
+            if (o == null) return null;
             return o.ToString();
         }
         public object ToObjectRepresentation(string s)
         {
+            if (s == null) return null;
             return s;
         }
     }

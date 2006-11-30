@@ -78,7 +78,7 @@ namespace GenDB
             {
                 et = new EntityType { Name = name }; // Create new entityType
                 EntityTypes.Add(et); // And add to the database
-                SubmitChanges();
+                SubmitChanges(); // Need to submit if subsequent queries are to find the added element
             }
 
             return et;
@@ -113,7 +113,7 @@ namespace GenDB
                 res = new PropertyType();
                 res.Name = name;
                 PropertyTypes.Add (res);
-                SubmitChanges();
+                SubmitChanges(); // Need to submit if subsequent queries are to find the added element
             }
 
             return res;
