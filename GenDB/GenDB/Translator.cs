@@ -69,8 +69,15 @@ namespace GenDB
             {
                 throw new NotTranslatableException("Can not translate generic types.");
             }
-            Type ibusinessobjectInterface =
-                t.GetInterface(typeof(IBusinessObject).FullName);
+
+            if (t.IsArray)
+            {
+                throw new NotTranslatableException("Can not translate arrays.");
+            }
+
+            if (t == typeof(IBusinessObject)) { return; }
+
+            Type ibusinessobjectInterface = t.GetInterface(typeof(IBusinessObject).FullName);
             if (ibusinessobjectInterface == null)
             {
                 throw new NotTranslatableException("Reference types must implement IBusinessObject (" + t.FullName + ")" );
