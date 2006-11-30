@@ -31,5 +31,4 @@ namespace GenDB
             set { this._SuperEntityType.Entity = value; }
         }
     }
-
 }
