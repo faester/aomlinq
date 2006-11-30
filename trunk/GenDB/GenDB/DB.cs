@@ -48,14 +48,21 @@ namespace GenDB
         public Table<PropertyValue> PropertyValues;
         private GenericDB() : base(connectString) { }
 
-        public EntityType GetEntityType(string name)
+        /// <summary>
+        /// Returns EntityType named 'name'. If no 
+        /// such EntityType exists in the database
+        /// it will be created and added to the db.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public EntityType GetCreateEntityType(string name)
         {
             EntityType et = null; // Return object
             var q = from ets in EntityTypes // Filter from table
                      where ets.Name == name // Where name matches
                      select ets;
 
-            int count = 0; // Could also check using = q.Count(); (Will create 2 lookups)
+            int count = 0; // Could also check using = q.Count(); (Would create 2 lookups)
 
             foreach (EntityType etEnum in q) // Should just make one pass.
             {
@@ -71,30 +78,43 @@ namespace GenDB
             {
                 et = new EntityType { Name = name }; // Create new entityType
                 EntityTypes.Add(et); // And add to the database
+                SubmitChanges();
             }
 
             return et;
         }
 
-        public PropertyValue SetPropertyValue(Entity e, Property p, string value)
-        {
-            var pvs = from pv in PropertyValues
-                      where pv.Entity == e && pv.Property == p
-                      select pv;
 
-            foreach (PropertyValue val in pvs) // Since PK is (EntityPOID, PropertyPOID) this will (should) contain max 1 element
+        /// <summary>
+        /// Returns PropertyType named 'name'. If no 
+        /// such PropertyType exists in the database
+        /// it will be created and added to the db.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public PropertyType GetCreatePropertyType(string name)
+        {
+            var pts = from pt in PropertyTypes 
+                      where pt.Name == name
+                      select pt;
+            
+            int count = 0;
+            PropertyType res = null;
+
+            foreach (PropertyType pt in pts)
             {
-                val.TheValue = value;
-                return val; // Return if found
+                count++;
+                if (count > 1) { throw new Exception ("Dublicate PropertyTypes with name '" + name + "' exists. "); }
+                res = pt;
             }
 
-            // No match found
-
-            // Create new property
-            PropertyValue res = new PropertyValue { Entity = e, Property = p, TheValue = value };
-
-            // Add it to table (TODO: Is this desired semantics?)
-            PropertyValues.Add(res);
+            if (count == 0)
+            {
+                res = new PropertyType();
+                res.Name = name;
+                PropertyTypes.Add (res);
+                SubmitChanges();
+            }
 
             return res;
         }

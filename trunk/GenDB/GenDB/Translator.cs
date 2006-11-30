@@ -10,7 +10,15 @@ namespace GenDB
     {
         IFieldConverter conv;
         FieldInfo fi;
-        public Converter (IFieldConverter conv, FieldInfo fi)
+        Property p;
+
+        internal Property Property
+        {
+            get { return p; }
+            set { p = value; }
+        }
+
+        public Converter (IFieldConverter conv, FieldInfo fi, Property p)
         {
             this.conv = conv;
             this.fi = fi;
@@ -87,7 +95,7 @@ namespace GenDB
 
         private void InitEntityType()
         {
-            et = GenericDB.Instance.GetEntityType (objectType.FullName);
+            et = GenericDB.Instance.GetCreateEntityType (objectType.FullName);
             if (objectType.BaseType != null)
             {
                 superTranslator = GetTranslator(objectType.BaseType);
@@ -109,19 +117,37 @@ namespace GenDB
                      
             foreach (FieldInfo fi in fields)
             {
-                if (Translator.IsValueTranslatable(fi.FieldType))
+                if (fi.FieldType != DBTAG_TYPE) // DBTags should never be stored in database.
                 {
-                    declaredConverters.AddLast (new Converter(FieldConverters.GetConverter(fi.FieldType), fi));
-                }
-                else if (fi.FieldType == DBTAG_TYPE)
-                {
-                    /* ignore */
-                }
-                else
-                {
-                    Translator.CheckRefTypeLegality(fi.FieldType); // Check if we can translate. (Throws exception on error)
-                    Translator t = Translator.GetTranslator (fi.FieldType);
-                    declaredConverters.AddLast (new Converter(t, fi));
+                    var pc = from p in GenericDB.Instance.Properties
+                             where p.Name == fi.Name && p.EntityType == et
+                             select p;
+
+                    Property property;
+
+                    if (pc.Count() == 0)
+                    { // Property did not exist, so create it and add it to DB.
+                        property = new Property();
+                        property.EntityType = et;
+                        property.Name = fi.Name;
+                        PropertyType pt = GenericDB.Instance.GetCreatePropertyType(fi.FieldType.FullName);
+                        property.PropertyType = pt;
+                        et.Properties.Add(property);
+                    }
+                    else
+                    {
+                        property = pc.First();
+                    }
+                    if (Translator.IsValueTranslatable(fi.FieldType))
+                    {
+                        declaredConverters.AddLast(new Converter(FieldConverters.GetConverter(fi.FieldType), fi, property));
+                    }
+                    else
+                    {
+                        Translator.CheckRefTypeLegality(fi.FieldType); // Check if we can translate. (Throws exception on error)
+                        Translator t = Translator.GetTranslator(fi.FieldType);
+                        declaredConverters.AddLast(new Converter(t, fi, property));
+                    }
                 }
             }
 
