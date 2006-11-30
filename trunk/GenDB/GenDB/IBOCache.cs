@@ -28,6 +28,11 @@ namespace GenDB
             cachedObjects[obj.DBTag.EntityPOID] = wr;
         }
 
+        public int Count
+        {
+            get { return cachedObjects.Count; }
+        }
+
         /// <summary>
         /// Returns the IBusinessObject identified
         /// by the given DBTag id.
