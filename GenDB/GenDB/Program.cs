@@ -37,7 +37,7 @@ namespace GenDB
         static void Main(string[] args)
         {
             GenericDB genDB = GenericDB.Instance;
-            genDB.Log = Console.Out;
+            //genDB.Log = Console.Out;
 #if RECREATE_DB
             if (genDB.DatabaseExists())
             {
@@ -98,11 +98,28 @@ namespace GenDB
             //}
 
             Translator t = Translator.GetTranslator (typeof(C));
-            C c = new C();
+            int elements = 500;
+            C[] cs = new C[elements];
 
-            Console.WriteLine(t.ToPropertyValueString (c));
+            for (int i = 0; i < elements; i++)
+            {
+                cs[i] = new C();
+                t.ToPropertyValueString(cs[i]);
+            }
             genDB.SubmitChanges();
 
+            Console.WriteLine("Cached objects: {0}", IBOCache.Instance.Count);
+
+            for (int i = 0; i < elements; i++)
+            {
+                cs[i] = null;
+            }
+
+            object o = t.ToObjectRepresentation("100");
+
+            GC.Collect();
+            Console.WriteLine("Cached objects: {0}", IBOCache.Instance.Count);
+            
             Console.WriteLine("Press Return to end..");
             Console.ReadLine();
         }

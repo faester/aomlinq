@@ -266,6 +266,10 @@ namespace GenDB
 
         private IBusinessObject GetFromDatabase(long id)
         {
+            // Can be a subtype of objectType, so we need to 
+            // retrieve a translator for each method invokation.
+            
+
             throw new Exception ("Not implemented.");
         }
     }

@@ -18,16 +18,15 @@ namespace GenDB
     /// </summary>
     public class DBTag
     {
+#if DEBUG
         static int instantiated = 0;
         static int reclaimed = 0;
 
-        /// <summary>
-        /// TODO: Remove, testing purposes only.
-        /// </summary>
         static void DumpInstantiationStatus()
         {
-            Console.WriteLine("**DBtag object status: Instantiated == {0}, Reclaimed == {1}", instantiated, reclaimed);
+            Console.WriteLine("DBTag element status: Instantiated == {0}, garbage collected == {1}", instantiated, reclaimed);
         }
+#endif 
 
         long entityPOID;
         IBOCache cache;
@@ -40,17 +39,20 @@ namespace GenDB
         /// <param name="cache"></param>
         internal static void AssignDBTagTo(IBusinessObject obj, long id, IBOCache cache)
         {
-            instantiated++;
             DBTag dbtag = new DBTag(cache, id);
             obj.DBTag = dbtag;
+            cache.Add(obj);
+#if DEBUG
+            instantiated++;
             DumpInstantiationStatus();
+#endif
         }
 
         private DBTag() { /* empty */ }
 
         private DBTag (IBOCache cache, long entityPOID)
         {
-            this.EntityPOID = entityPOID;
+            this.entityPOID = entityPOID;
             this.cache = cache;
         }
 
@@ -60,15 +62,15 @@ namespace GenDB
         ~DBTag() 
         {
             cache.Remove(this.EntityPOID);
+#if DEBUG
             reclaimed++;
             DumpInstantiationStatus();
+#endif        
         }
 
         public long EntityPOID
         {
             get { return entityPOID; }
-            set { entityPOID = value; }
         }
-
     }
 }
