@@ -33,11 +33,17 @@ namespace GenDB
         {
             public string name = "bnavn";
         }
+        class D : B
+        {
+            public IBusinessObject ibo; 
+        }
+
+
 
         static void Main(string[] args)
         {
             GenericDB genDB = GenericDB.Instance;
-            //genDB.Log = Console.Out;
+            genDB.Log = Console.Out;
 #if RECREATE_DB
             if (genDB.DatabaseExists())
             {
@@ -51,7 +57,7 @@ namespace GenDB
             }
 
             Translator t = Translator.GetTranslator (typeof(C));
-            int elements = 5;
+            int elements = 0;
             C[] cs = new C[elements];
 
             for (int i = 0; i < elements; i++)
@@ -68,11 +74,16 @@ namespace GenDB
                 cs[i] = null;
             }
 
-            object obj = t.ToObjectRepresentation("1");
+            D d = new D { ibo = new C()};
+            d.ibo = d;
+            Translator dt = Translator.GetTranslator(d.GetType ());
+
+            string idStr = dt.ToPropertyValueString (d);
+            object obj = t.ToObjectRepresentation(idStr);
 
             ObjectDumper.PrintOut(obj);
 
-            ObjectDumper.PrintOut("Hello World");
+            //ObjectDumper.PrintOut("Hello World");
 
             GC.Collect();
             Console.WriteLine("Cached objects: {0}", IBOCache.Instance.Count);
