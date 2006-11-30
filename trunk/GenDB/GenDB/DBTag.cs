@@ -21,6 +21,12 @@ namespace GenDB
         long entityPOID;
         IBOCache cache;
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="id"></param>
+        /// <param name="cache"></param>
         internal static void AssignDBTagTo(IBusinessObject obj, long id, IBOCache cache)
         {
             DBTag dbtag = new DBTag(cache, id);

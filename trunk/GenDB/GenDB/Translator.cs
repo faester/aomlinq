@@ -68,7 +68,7 @@ namespace GenDB
         #endregion
 
         LinkedList<Converter> declaredConverters = new LinkedList<Converter>(); // Contains converters for declared fields
-        LinkedList<Converter> allConverters = new LinkedList <Converter>(); // All converters needed to convert between objectType and generic representation
+        IEnumerable<Converter> allConverters = new LinkedList <Converter>(); // All converters needed to convert between objectType and generic representation
 
         FieldInfo[] fields;        
         Type objectType;
@@ -120,8 +120,24 @@ namespace GenDB
                 else
                 {
                     Translator.CheckRefTypeLegality(fi.FieldType); // Check if we can translate. (Throws exception on error)
+                    Translator t = Translator.GetTranslator (fi.FieldType);
+                    declaredConverters.AddLast (new Converter(t, fi));
                 }
             }
+
+            if (superTranslator != null)
+            {
+                allConverters = declaredConverters.Union(superTranslator.GetConverters());
+            }
+            else 
+            {
+                allConverters = declaredConverters;
+            }
+        }
+
+        private IEnumerable<Converter> GetConverters()
+        {
+            return allConverters;
         }
 
         private void Init()
@@ -134,7 +150,9 @@ namespace GenDB
         {
             if (o == null) return null;
             // Translators should never accept anything but 
-            // primitive types, string and IBusinassObject 
+            // primitive types, string (Handled by the 
+            // IFieldConverter classes) whereas this Trans-
+            // should only handle IBusinassObject 
             // instances, so the cast below should be safe.
             IBusinessObject ibo = (IBusinessObject)o;
             throw new Exception("Not implemented.");
@@ -148,7 +166,26 @@ namespace GenDB
 
             IBusinessObject res = IBOCache.Instance.Get(id);
 
-            throw new Exception("Not implemented.");
+            if (res == null)
+            {
+                res = GetFromDatabase (id);
+                DBTag.AssignDBTagTo (res, id, IBOCache.Instance);
+            }
+
+            return res;
+        }
+
+        private void AddToDatabase(IBusinessObject o)
+        {
+            Entity e = new Entity();
+            throw new Exception ("Not implemented.");
+
+            
+        }
+
+        private IBusinessObject GetFromDatabase(long id)
+        {
+            throw new Exception ("Not implemented.");
         }
     }
 
