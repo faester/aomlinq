@@ -77,7 +77,7 @@ namespace GenDB
         }
 
         /// <summary>
-        /// Return s an object identified by the
+        /// Return entityPOIDStr an object identified by the
         /// given id from the database.
         /// PRE: Behaviour is unspecified if no objects
         /// where EntityPOID == id exists in the 
@@ -245,8 +245,6 @@ namespace GenDB
                     }
                     else
                     {
-                        //Translator t = Translator.GetCreateTranslator(fi.FieldType);
-                        //declaredConverters.AddLast(new Converter(t, fi, property));
                         declaredConverters.AddLast(new Converter(RefTypeTranslator.Instance, fi, property));
                     }
                 }
@@ -263,7 +261,8 @@ namespace GenDB
             {
                 allConverters = declaredConverters.ToList();
             }
-            //convPropertyPOIDLookup = allConverters.ToDictionary((Converter c) => c.Property.PropertyPOID);
+            GenericDB.Instance.SubmitChanges();
+            convPropertyPOIDLookup = allConverters.ToDictionary((Converter c) => c.Property.PropertyPOID);
         }
 
 
@@ -280,7 +279,7 @@ namespace GenDB
             InitConverterCollections();
         }
 
-        public string ToPropertyValueString(object o)
+        public string GetEntityPOID(object o)
         {
             if (o == null) return null;
             // Translators should never accept anything but 
@@ -298,11 +297,11 @@ namespace GenDB
             return ibo.DBTag.EntityPOID.ToString();
         }
 
-        public object ToObjectRepresentation(string s)
+        public object GetObjectFromEntityPOID(string entityPOIDStr)
         {
-            if (s == null) return null;
+            if (entityPOIDStr == null) return null;
 
-            long id = long.Parse (s);
+            long id = long.Parse (entityPOIDStr);
 
             IBusinessObject res = IBOCache.Instance.Get(id);
 
@@ -333,7 +332,7 @@ namespace GenDB
                 e.EntityType = et;
             }
 
-            //Copy all property values to dictionary with PropertyPOID as key
+            //Copy all property values to dictionary with propertyPOID as key
             IDictionary<long, PropertyValue> pvs = new Dictionary<long, PropertyValue>();
             pvs = e.PropertyValues.ToDictionary((PropertyValue pv) => pv.PropertyPOID);
 
@@ -382,6 +381,11 @@ namespace GenDB
                 GenericDB.Instance.PropertyValues.Add(pv);
             }
             GenericDB.Instance.SubmitChanges(); // Commit property values.
+        }
+
+        public GetPropertyValueConverter(long propertyPOID)
+        {
+            return this.convPropertyPOIDLookup[propertyPOID];
         }
 
         /// <summary>

@@ -63,7 +63,7 @@ namespace GenDB
             for (int i = 0; i < elements; i++)
             {
                 cs[i] = new C();
-                t.ToPropertyValueString(cs[i]);
+                t.GetEntityPOID(cs[i]);
             }
             genDB.SubmitChanges();
 
@@ -79,8 +79,8 @@ namespace GenDB
             Translator dt = Translator.GetCreateTranslator(d.GetType ());
 
             Translator.UpdateDBWith(d);
-            //string idStr = dt.ToPropertyValueString (d);
-            //object obj = t.ToObjectRepresentation(idStr);
+            //string idStr = dt.GetEntityPOID (d);
+            //object obj = t.GetObjectFromEntityPOID(idStr);
 
             //ObjectDumper.PrintOut(obj);
 
