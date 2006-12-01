@@ -27,6 +27,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Assertions|AnyCPU' ">
+    <OutputPath>bin\Assertions\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -47,6 +50,7 @@
     <Compile Include="IBusinessObject.cs" />
     <Compile Include="IDBStorer.cs" />
     <Compile Include="Inheritance.cs" />
+    <Compile Include="NotTranslatableException.cs" />
     <Compile Include="ObjectDumper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -54,6 +58,7 @@
     <Compile Include="Property.cs" />
     <Compile Include="PropertyType.cs" />
     <Compile Include="PropertyValue.cs" />
+    <Compile Include="RefTypeTranslator.cs" />
     <Compile Include="Translator.cs" />
   </ItemGroup>
   <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
