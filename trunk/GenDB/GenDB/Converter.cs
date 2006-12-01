@@ -69,7 +69,7 @@ namespace GenDB
         /// the internal database to regular object 
         /// repræsentation. 
         /// </summary>
-        /// <param name="s"></param>
+        /// <param name="entityPOIDStr"></param>
         /// <returns></returns>
         public object ToObjectRepresentation(string s)
         {
@@ -80,10 +80,10 @@ namespace GenDB
         /// Sets the value of field represented by 
         /// this converter in object o, based on value 
         /// PRE: o must be an instance of type ConversionType
-        /// string s.
+        /// string entityPOIDStr.
         /// </summary>
         /// <param name="o"></param>
-        /// <param name="s"></param>
+        /// <param name="entityPOIDStr"></param>
         public void SetObjectsFieldValue(object o, string s)
         {
             fi.SetValue(o, ToObjectRepresentation(s));
