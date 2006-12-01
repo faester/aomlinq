@@ -6,29 +6,7 @@ using System.Query;
 
 namespace GenDB
 {
-    internal sealed class RefTypeTranslator : IFieldConverter
-    {
-        private static RefTypeTranslator instance = new RefTypeTranslator();
-
-        public static RefTypeTranslator Instance 
-        {
-            get { return instance; }
-        }
-
-        public string ToPropertyValueString(object o)
-        {
-            Translator t = Translator.GetCreateTranslator(o.GetType());
-            return t.ToPropertyValueString(o);
-        }
-
-        public object ToObjectRepresentation(string s)
-        {
-            long id = long.Parse(s);
-            return Translator.GetFromDatabase(id);
-        }
-    }
-
-    internal class Translator : IFieldConverter
+    internal class Translator 
     {
         #region static part
         static Type[] EMPTY_TYPE_ARRAY = new Type[0];
@@ -267,9 +245,9 @@ namespace GenDB
                     }
                     else
                     {
-                        Translator t = Translator.GetCreateTranslator(fi.FieldType);
-                        declaredConverters.AddLast(new Converter(t, fi, property));
-                        //declaredConverters.AddLast(new Converter(RefTypeTranslator.Instance, fi, property));
+                        //Translator t = Translator.GetCreateTranslator(fi.FieldType);
+                        //declaredConverters.AddLast(new Converter(t, fi, property));
+                        declaredConverters.AddLast(new Converter(RefTypeTranslator.Instance, fi, property));
                     }
                 }
             }
@@ -336,7 +314,11 @@ namespace GenDB
             return res;
         }
 
-
+        /// <summary>
+        /// Updates PropertyValues of an already
+        /// persisted business object.
+        /// </summary>
+        /// <param name="o"></param>
         private void UpdateDBEntity(IBusinessObject o)
         {
             //Select Entity with matching id
@@ -385,6 +367,10 @@ namespace GenDB
             Entity e = new Entity();
             e.EntityType = et;
 
+            GenericDB.Instance.Entities.Add (e);
+            GenericDB.Instance.SubmitChanges(); // Need commit to set id correctly.
+            DBTag.AssignDBTagTo(o, e.EntityPOID, IBOCache.Instance);
+
             foreach (Converter c in allConverters)
             {
                 PropertyValue pv = new PropertyValue();
@@ -395,9 +381,7 @@ namespace GenDB
                 pv.TheValue = c.ToPropertyValueString(o);
                 GenericDB.Instance.PropertyValues.Add(pv);
             }
-            GenericDB.Instance.Entities.Add (e);
-            GenericDB.Instance.SubmitChanges();
-            DBTag.AssignDBTagTo(o, e.EntityPOID, IBOCache.Instance);
+            GenericDB.Instance.SubmitChanges(); // Commit property values.
         }
 
         /// <summary>
@@ -411,26 +395,6 @@ namespace GenDB
             ConstructorInfo ci = t.GetConstructor(EMPTY_TYPE_ARRAY);
             object o = ci.Invoke(null);
             return o;
-        }
-    }
-
-    public class NotTranslatableException : Exception
-    {
-        FieldInfo fi;
-        public NotTranslatableException(string msg, FieldInfo fi)
-            : base(msg) 
-        { 
-            this.fi = fi;
-        }
-
-        public FieldInfo FieldInfo
-        {
-            get { return fi; }
-        }
-
-        public override string ToString()
-        {
-            return Message + " (Conflicting Field: " + fi.ToString() + ")";
         }
     }
 }
