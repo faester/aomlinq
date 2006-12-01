@@ -6,6 +6,27 @@ using System.Query;
 
 namespace GenDB
 {
+    internal sealed class RefTypeTranslator : IFieldConverter
+    {
+        private static RefTypeTranslator instance = new RefTypeTranslator();
+
+        public static RefTypeTranslator Instance 
+        {
+            get { return instance; }
+        }
+
+        public string ToPropertyValueString(object o)
+        {
+            Translator t = Translator.GetCreateTranslator(o.GetType());
+            return t.ToPropertyValueString(o);
+        }
+
+        public object ToObjectRepresentation(string s)
+        {
+            long id = long.Parse(s);
+            return Translator.GetFromDatabase(id);
+        }
+    }
 
     internal class Translator : IFieldConverter
     {
@@ -248,6 +269,7 @@ namespace GenDB
                     {
                         Translator t = Translator.GetCreateTranslator(fi.FieldType);
                         declaredConverters.AddLast(new Converter(t, fi, property));
+                        //declaredConverters.AddLast(new Converter(RefTypeTranslator.Instance, fi, property));
                     }
                 }
             }
