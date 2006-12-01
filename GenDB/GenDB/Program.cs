@@ -56,7 +56,7 @@ namespace GenDB
                 genDB.CreateDatabase();
             }
 
-            Translator t = Translator.GetCreateTranslator (typeof(C));
+            Translator t = Translator.GetCreateTranslator(typeof(C));
             int elements = 0;
             C[] cs = new C[elements];
 
@@ -78,10 +78,11 @@ namespace GenDB
             d.ibo = d;
             Translator dt = Translator.GetCreateTranslator(d.GetType ());
 
-            string idStr = dt.ToPropertyValueString (d);
-            object obj = t.ToObjectRepresentation(idStr);
+            Translator.UpdateDBWith(d);
+            //string idStr = dt.ToPropertyValueString (d);
+            //object obj = t.ToObjectRepresentation(idStr);
 
-            ObjectDumper.PrintOut(obj);
+            //ObjectDumper.PrintOut(obj);
 
             //ObjectDumper.PrintOut("Hello World");
 
