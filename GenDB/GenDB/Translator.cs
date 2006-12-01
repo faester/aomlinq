@@ -383,7 +383,7 @@ namespace GenDB
             GenericDB.Instance.SubmitChanges(); // Commit property values.
         }
 
-        public GetPropertyValueConverter(long propertyPOID)
+        public Converter GetPropertyValueConverter(long propertyPOID)
         {
             return this.convPropertyPOIDLookup[propertyPOID];
         }
