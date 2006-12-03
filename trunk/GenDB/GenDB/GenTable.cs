@@ -12,63 +12,6 @@ namespace GenDB
             Translator.UpdateDBWith(ibo);
         }
 
-        //public IEnumerable<IBusinessObject> GetAll()
-        //{
-            
-        //    var pvs = from entity in GenericDB.Instance.Entities
-        //              join propertyvalue in GenericDB.Instance.PropertyValues
-        //              on entity.EntityPOID equals propertyvalue.EntityPOID
-        //              select new {
-        //                  EntityPOID = entity.EntityPOID, 
-        //                  TheValue = propertyvalue.TheValue, 
-        //                  PropertyPOID = propertyvalue.PropertyPOID,
-        //                  EntityTypePOID = entity.EntityTypePOID
-        //                  };
-
-        //    Translator currentTranslator = Translator.GetCreateTranslator(typeof(object));
-        //    long currentEntityType = currentTranslator.EntityTypePOID;
-        //    IBusinessObject currentObject = null;
-        //    long currentObjectID = currentTranslator.EntityTypePOID;
-        //    bool first = true;
-
-        //    foreach (var pv in pvs)
-        //    {
-        //        long entityTypePOID, entityPOID, propertyPOID;
-        //        string theValue;
-
-
-        //        entityPOID = pv.EntityPOID;
-        //        propertyPOID = pv.PropertyPOID;
-        //        theValue = pv.TheValue;
-        //        entityTypePOID = pv.EntityTypePOID;
-            
-        //        if (currentEntityType != entityTypePOID)
-        //        { // Need to switch translator since type has changed
-        //            currentTranslator = Translator.GetTranslator(entityTypePOID);
-        //            currentEntityType = entityTypePOID;
-        //        }
-            
-        //        if (currentObjectID != entityPOID || first)
-        //        {
-        //            if (!first)
-        //            {
-        //                yield return currentObject;
-        //                currentObject = currentTranslator.NewObjectInstance();
-        //            }
-        //            else 
-        //            {
-        //                first = false;
-        //            }
-        //        }
-
-        //        currentTranslator
-        //            .GetPropertyValueConverter (propertyPOID)
-        //            .SetObjectsFieldValue(currentObject, theValue);
-        //    }
-
-        //    reader.Close();
-        //}
-
         public IEnumerable<IBusinessObject> GetAll()
         {
 
@@ -77,6 +20,7 @@ namespace GenDB
             {
                 cnn.Open();
             }
+
             SqlCommand cmd = new SqlCommand(
                 "SELECT e.EntityTypePOID, pv.EntityPOID, pv.PropertyPOID, pv.TheValue " 
                 + " FROM PropertyValue pv INNER JOIN Entity e "
@@ -115,6 +59,7 @@ namespace GenDB
                     {
                         first = false;
                     }
+                    currentObjectID = entityPOID;
                     currentObject = currentTranslator.NewObjectInstance();
                 }
 
