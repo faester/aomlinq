@@ -7,6 +7,12 @@ namespace GenDB
     internal sealed class IBOCache
     {
         static IBOCache instance = new IBOCache();
+        static long retrieved = 0;
+
+        public static long Retrieved
+        {
+            get { return IBOCache.retrieved; }
+        }
 
         public static IBOCache Instance 
         {
@@ -43,6 +49,7 @@ namespace GenDB
             if (id == null) { throw new NullReferenceException("id"); }
             WeakReference wr = cachedObjects[id.EntityPOID];
             if (!wr.IsAlive) { throw new Exception("Internal error in cache: Object has been reclaimed by garbagecollector, but was requested from cache."); }
+            retrieved++;
             return (IBusinessObject)wr.Target;
         }
 
@@ -53,6 +60,7 @@ namespace GenDB
             {
                 return null;
             }
+            retrieved++;
             if (!wr.IsAlive) {throw new Exception("Internal error in cache: Object has been reclaimed by garbagecollector, but was requested from cache."); }
             return (IBusinessObject)wr.Target;
         }

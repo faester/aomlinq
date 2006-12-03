@@ -14,6 +14,9 @@ namespace GenDB
         static Dictionary<Type, Translator> type2translator = new Dictionary<Type, Translator>();
         static Dictionary<long, Translator> et2translator = new Dictionary<long, Translator>();
         static Type DBTAG_TYPE = typeof(DBTag);
+        static GenericDB genDB = GenericDB.Instance;
+
+        static int tcount;
 
         /// <summary>
         /// Used to create new translator instances as
@@ -29,6 +32,8 @@ namespace GenDB
             {
                 return res;
             }
+            tcount++;
+            Console.WriteLine("Translators: {0}", tcount);
             res = new Translator(t);
             type2translator[t] = res;
             long entityTypePOID = res.et.EntityTypePOID;
@@ -53,7 +58,7 @@ namespace GenDB
                 return res;
             }
 
-            EntityType et = (from ets in GenericDB.Instance.EntityTypes
+            EntityType et = (from ets in genDB.EntityTypes
                              where ets.EntityTypePOID == entityTypePOID
                              select ets).First();
             Type t = Type.GetType(et.Name);
@@ -89,17 +94,21 @@ namespace GenDB
         {
             // Can be a subtype of objectType, so we need to 
             // retrieve a translator for each method invokation.
-            Entity e = (from es in GenericDB.Instance.Entities
+            Entity e = (from es in genDB.Entities
                        where es.EntityPOID == id
                        select es).First();
 
             Translator st = Translator.GetTranslator (e.EntityType.EntityTypePOID);
             object o = st.NewObjectInstance();
 
+            IDictionary<long, PropertyValue> pvals = 
+                (from pv in genDB.PropertyValues
+                where pv.EntityPOID == id
+                select pv).ToDictionary( (PropertyValue tpv) => tpv.PropertyPOID);
+
             foreach (Converter c in st.allConverters)
             {
-                PropertyValue pv = e.PropertyValues.Where ( (PropertyValue tpv) => tpv.Entity == e ).First();
-                c.FieldInfo.SetValue (o, c.ToObjectRepresentation(pv.TheValue));
+                c.FieldInfo.SetValue (o, c.ToObjectRepresentation(pvals[c.Property.PropertyPOID].TheValue));
             }
 
             return (IBusinessObject)o;
@@ -183,7 +192,7 @@ namespace GenDB
 
         private void InitEntityType()
         {
-            et = GenericDB.Instance.GetCreateEntityType (objectType.FullName);
+            et = genDB.GetCreateEntityType (objectType.FullName);
             if (objectType.BaseType != null)
             {
                 superTranslator = GetCreateTranslator(objectType.BaseType);
@@ -193,7 +202,7 @@ namespace GenDB
         private Property GetCreateCorrespondingProperty(FieldInfo fi)
         {
             // Get Property with same name and EntityType from DB
-            var pc = from p in GenericDB.Instance.Properties
+            var pc = from p in genDB.Properties
                              where p.Name == fi.Name && p.EntityType == et
                              select p;
 
@@ -217,7 +226,7 @@ namespace GenDB
                 property = new Property();
                 property.EntityType = et;
                 property.Name = fi.Name;
-                PropertyType pt = GenericDB.Instance.GetCreatePropertyType(fi.FieldType.FullName);
+                PropertyType pt = genDB.GetCreatePropertyType(fi.FieldType.FullName);
                 property.PropertyType = pt;
                 et.Properties.Add(property);
             }
@@ -261,7 +270,7 @@ namespace GenDB
             {
                 allConverters = declaredConverters.ToList();
             }
-            GenericDB.Instance.SubmitChanges();
+            genDB.SubmitChanges();
             convPropertyPOIDLookup = allConverters.ToDictionary((Converter c) => c.Property.PropertyPOID);
         }
 
@@ -326,7 +335,7 @@ namespace GenDB
         private void UpdateDBEntity(IBusinessObject o)
         {
             //Select Entity with matching id
-            Entity e = (from es in GenericDB.Instance.Entities
+            Entity e = (from es in genDB.Entities
                            where es.EntityPOID == o.DBTag.EntityPOID
                            select es).First();
 
@@ -339,7 +348,11 @@ namespace GenDB
 
             //Copy all property values to dictionary with propertyPOID as key
             IDictionary<long, PropertyValue> pvs = new Dictionary<long, PropertyValue>();
-            pvs = e.PropertyValues.ToDictionary((PropertyValue pv) => pv.PropertyPOID);
+            pvs = GenericDB
+                .Instance
+                .PropertyValues
+                .Where( (PropertyValue pv) => pv.EntityPOID == e.EntityPOID) 
+                .ToDictionary((PropertyValue pv) => pv.PropertyPOID);
 
             // Step through Converters properties and assign value to corresponding PropertyValue
             foreach (Converter c in allConverters)
@@ -358,7 +371,7 @@ namespace GenDB
                     pv.TheValue = theValue;
                 }
             }
-            GenericDB.Instance.SubmitChanges();
+            genDB.SubmitChanges();
         }
 
         /// <summary>
@@ -371,8 +384,8 @@ namespace GenDB
             Entity e = new Entity();
             e.EntityType = et;
 
-            GenericDB.Instance.Entities.Add (e);
-            GenericDB.Instance.SubmitChanges(); // Need commit to set id correctly.
+            genDB.Entities.Add (e);
+            genDB.SubmitChanges(); // Need commit to set id correctly.
             DBTag.AssignDBTagTo(o, e.EntityPOID, IBOCache.Instance);
 
             foreach (Converter c in allConverters)
@@ -381,16 +394,22 @@ namespace GenDB
                 pv.Property = c.Property;
                 if (c.Property == null) { throw new NullReferenceException("c.Property"); }
                 pv.Entity = e;
-                e.PropertyValues.Add (pv);
+
+                genDB.PropertyValues.Add (pv);
                 pv.TheValue = c.ToPropertyValueString(o);
-                GenericDB.Instance.PropertyValues.Add(pv);
+                genDB.PropertyValues.Add(pv);
             }
-            GenericDB.Instance.SubmitChanges(); // Commit property values.
+            genDB.SubmitChanges(); // Commit property values.
         }
 
         internal Converter GetPropertyValueConverter(long propertyPOID)
         {
             return this.convPropertyPOIDLookup[propertyPOID];
+        }
+
+        internal IEnumerable<Converter> AllConverters
+        {
+            get { return allConverters; }
         }
 
         /// <summary>
