@@ -38,7 +38,12 @@ namespace GenDB
             public IBusinessObject ibo; 
         }
 
+        class Person : AbsBO
+        { 
+            public string name = null; 
+        }
 
+        class Student : Person { public DateTime enlisted; }
 
         static void Main(string[] args)
         {
@@ -56,39 +61,37 @@ namespace GenDB
                 genDB.CreateDatabase();
             }
 
-            Translator t = Translator.GetCreateTranslator(typeof(C));
-            int elements = 0;
-            C[] cs = new C[elements];
-
-            for (int i = 0; i < elements; i++)
-            {
-                cs[i] = new C();
-                t.GetEntityPOID(cs[i]);
-            }
-            genDB.SubmitChanges();
-
-            Console.WriteLine("Cached objects: {0}", IBOCache.Instance.Count);
-
-            for (int i = 0; i < elements; i++)
-            {
-                cs[i] = null;
-            }
-
-            D d = new D { ibo = new C()};
-            d.ibo = d;
-            Translator dt = Translator.GetCreateTranslator(d.GetType ());
-
-            Translator.UpdateDBWith(d);
+            int elements = 100;
+            //Translator dt = Translator.GetCreateTranslator(d.GetType ());
+            //Translator.UpdateDBWith(d);
             //string idStr = dt.GetEntityPOID (d);
             //object obj = t.GetObjectFromEntityPOID(idStr);
 
             //ObjectDumper.PrintOut(obj);
 
-            //ObjectDumper.PrintOut("Hello World");
+            GenTable gt = new GenTable();
+
+            for (int i = 0; i < elements; i++)
+            {
+                Person p = new Person();
+                p.name = "person no " + i.ToString();
+                
+                Student s = new Student();
+                s.name = "student no " + i.ToString();
+                s.enlisted = DateTime.Now;
+
+                gt.Add (s);
+                gt.Add (p);
+            }
+
+            Console.WriteLine("Cached objects: {0}", IBOCache.Instance.Count);
+
+            foreach(IBusinessObject ibo in gt.GetAll())
+            {
+                ObjectDumper.PrintOut(ibo);
+            }
 
             GC.Collect();
-            Console.WriteLine("Cached objects: {0}", IBOCache.Instance.Count);
-            
             Console.WriteLine("Press Return to end..");
             Console.ReadLine();
         }

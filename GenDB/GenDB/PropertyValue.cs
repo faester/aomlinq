@@ -8,7 +8,7 @@ namespace GenDB
     [Table(Name = "PropertyValue")]
     internal class PropertyValue
     {
-        [Column(Name = "TheValue", Id = false)]
+        [Column(Name = "TheValue", Id = false, DBType="VARCHAR(8000) NULL")]
         public string TheValue;
 
         [Column(Name = "PropertyPOID", Id = true)]

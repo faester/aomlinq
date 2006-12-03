@@ -25,6 +25,23 @@ namespace GenDB
         }
     }
 
+    internal class DateTimeConverter : IFieldConverter
+    {
+        public string ToPropertyValueString(object o)
+        {
+            if (o == null) return null;
+            long tick = ((DateTime)o).Ticks;
+            return tick.ToString();
+        }
+        public object ToObjectRepresentation(string s)
+        {
+            if (s == null) return null;
+            long ticks = long.Parse(s);
+            DateTime res = new DateTime(ticks);
+            return res;
+        }
+    }
+
     internal class Int32Converter : IFieldConverter
     {
         public string ToPropertyValueString(object o)
@@ -44,6 +61,7 @@ namespace GenDB
         {
             convs[typeof(string)] = new StringConverter();
             convs[typeof(Int32)] = new Int32Converter();
+            convs[typeof(DateTime)] = new DateTimeConverter();
         }
 
         public static IFieldConverter GetConverter(Type t)

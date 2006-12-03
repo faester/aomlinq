@@ -153,13 +153,13 @@ namespace GenDB
             {
                 if (fi.IsStatic) { ThrowException("Can not translate static fields", fi); };
                 if (fi.FieldType.IsArray) { ThrowException("Can not translate arrays.", fi); }
-                if (!fi.FieldType.IsPrimitive) { CheckRefTypeLegality(fi); }
+                if (!IsValueTranslatable(fi.FieldType)) { CheckRefTypeLegality(fi); }
             }
         }
 
         private static bool IsValueTranslatable (Type t)
         {
-            return t.IsValueType || t.Equals(typeof(string));
+            return t.IsValueType || t.Equals(typeof(string)) || t.Equals(typeof(DateTime));
         }
         #endregion
 
@@ -279,6 +279,11 @@ namespace GenDB
             InitConverterCollections();
         }
 
+        public long EntityTypePOID
+        {
+            get { return et.EntityTypePOID; }
+        }
+
         public string GetEntityPOID(object o)
         {
             if (o == null) return null;
@@ -383,7 +388,7 @@ namespace GenDB
             GenericDB.Instance.SubmitChanges(); // Commit property values.
         }
 
-        public Converter GetPropertyValueConverter(long propertyPOID)
+        internal Converter GetPropertyValueConverter(long propertyPOID)
         {
             return this.convPropertyPOIDLookup[propertyPOID];
         }
@@ -393,11 +398,11 @@ namespace GenDB
         /// Translator represents.
         /// </summary>
         /// <returns></returns>
-        private object NewObjectInstance()
+        internal IBusinessObject NewObjectInstance()
         {
             Type t = Type.GetType(et.Name);
             ConstructorInfo ci = t.GetConstructor(EMPTY_TYPE_ARRAY);
-            object o = ci.Invoke(null);
+            IBusinessObject o = (IBusinessObject)ci.Invoke(null);
             return o;
         }
     }
