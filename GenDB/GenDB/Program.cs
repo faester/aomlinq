@@ -1,4 +1,4 @@
-﻿#define RECREATE_DB
+﻿//#define RECREATE_DB
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -61,7 +61,7 @@ namespace GenDB
                 genDB.CreateDatabase();
             }
 
-            int elements = 100;
+            int elements = 200;
             //Translator dt = Translator.GetCreateTranslator(d.GetType ());
             //Translator.UpdateDBWith(d);
             //string idStr = dt.GetEntityPOID (d);
@@ -70,6 +70,8 @@ namespace GenDB
             //ObjectDumper.PrintOut(obj);
 
             GenTable gt = new GenTable();
+
+            DateTime then = DateTime.Now;
 
             for (int i = 0; i < elements; i++)
             {
@@ -84,11 +86,15 @@ namespace GenDB
                 gt.Add (p);
             }
 
+            TimeSpan dur = DateTime.Now - then;
+
+            Console.WriteLine("Inserts took: {0}", dur);
+
             Console.WriteLine("Cached objects: {0}", IBOCache.Instance.Count);
 
             foreach(IBusinessObject ibo in gt.GetAll())
             {
-                ObjectDumper.PrintOut(ibo);
+                //ObjectDumper.PrintOut(ibo);
             }
 
             GC.Collect();
