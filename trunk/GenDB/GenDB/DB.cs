@@ -48,6 +48,13 @@ namespace GenDB
         public Table<PropertyValue> PropertyValues;
         private GenericDB() : base(connectString) { }
 
+        //public void CreateDatabase()
+        //{
+        //    Console.WriteLine("ÆÆ");
+        //    base.CreateDatabase();
+        //    base.ExecuteCommand();
+        //}
+
         /// <summary>
         /// Returns EntityType named 'name'. If no 
         /// such EntityType exists in the database
