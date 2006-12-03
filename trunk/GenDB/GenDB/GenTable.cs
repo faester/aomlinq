@@ -7,6 +7,8 @@ namespace GenDB
 {
     internal class GenTable 
     {
+        SqlConnection cnn = (SqlConnection)GenericDB.Instance.Connection;
+
         public void Add(IBusinessObject ibo)
         {
             Translator.UpdateDBWith(ibo);
@@ -14,8 +16,6 @@ namespace GenDB
 
         public IEnumerable<IBusinessObject> GetAll()
         {
-
-            SqlConnection cnn = (SqlConnection)GenericDB.Instance.Connection;
             if (cnn.State == System.Data.ConnectionState.Closed)
             {
                 cnn.Open();
@@ -61,6 +61,7 @@ namespace GenDB
                     }
                     currentObjectID = entityPOID;
                     currentObject = currentTranslator.NewObjectInstance();
+                    DBTag.AssignDBTagTo(currentObject, entityPOID, IBOCache.Instance);
                 }
 
                 currentTranslator

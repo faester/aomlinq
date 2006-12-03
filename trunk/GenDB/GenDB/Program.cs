@@ -47,6 +47,8 @@ namespace GenDB
 
         static void Main(string[] args)
         {
+            int elements = 100;
+
             GenericDB genDB = GenericDB.Instance;
             //genDB.Log = Console.Out;
 #if RECREATE_DB
@@ -58,10 +60,11 @@ namespace GenDB
 #endif
             if (!genDB.DatabaseExists())
             {
+                Console.WriteLine("Building database.");
                 genDB.CreateDatabase();
+                Console.WriteLine("Database built");
             }
 
-            int elements = 200;
             //Translator dt = Translator.GetCreateTranslator(d.GetType ());
             //Translator.UpdateDBWith(d);
             //string idStr = dt.GetEntityPOID (d);
@@ -72,6 +75,7 @@ namespace GenDB
             GenTable gt = new GenTable();
 
             DateTime then = DateTime.Now;
+                        TimeSpan dur = DateTime.Now - then;
 
             for (int i = 0; i < elements; i++)
             {
@@ -83,20 +87,32 @@ namespace GenDB
                 s.enlisted = DateTime.Now;
 
                 gt.Add (s);
-                gt.Add (p);
+                //gt.Add (p);
+                if (i % 50 == 0) {
+                    dur = DateTime.Now - then;
+                    Console.WriteLine("{0} objects inserted in {1}. {2} objs/s ", i, dur, i / dur.TotalSeconds);
+                    GenericDB.Instance.SubmitChanges();
+                }
             }
 
-            TimeSpan dur = DateTime.Now - then;
+            dur = DateTime.Now - then;
 
-            Console.WriteLine("Inserts took: {0}", dur);
+            Console.WriteLine("{0} objects inserted in {1}. {2} objs/s ", elements, dur, elements / dur.TotalSeconds);
 
             Console.WriteLine("Cached objects: {0}", IBOCache.Instance.Count);
 
+            then = DateTime.Now;
+            int retrieveCount = 0;
+
             foreach(IBusinessObject ibo in gt.GetAll())
             {
+                retrieveCount++;
                 //ObjectDumper.PrintOut(ibo);
             }
 
+            dur = DateTime.Now - then;
+            Console.WriteLine("{0} objects retrieved in {1}. {2} obj/sec", retrieveCount, dur, retrieveCount / dur.TotalSeconds);
+            Console.WriteLine("Objects retrieved from cache: {0}", IBOCache.Retrieved);
             GC.Collect();
             Console.WriteLine("Press Return to end..");
             Console.ReadLine();
