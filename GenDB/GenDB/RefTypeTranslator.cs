@@ -15,6 +15,10 @@ namespace GenDB
 
         public string ToPropertyValueString(object o)
         {
+            if (o == null)
+            {
+                return null;
+            }
             IBusinessObject ibo = (IBusinessObject)o;
             if (ibo.DBTag != null)
             {
@@ -26,6 +30,10 @@ namespace GenDB
 
         public object ToObjectRepresentation(string s)
         {
+            if (s == null)
+            {
+                return null;
+            }
             long id = long.Parse(s);
             return Translator.GetFromDatabase(id);
         }

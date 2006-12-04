@@ -1,10 +1,11 @@
-﻿//#define RECREATE_DB
+﻿#define RECREATE_DB
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Query;
 using System.Xml.XLinq;
 using System.Data.DLinq;
+using System.Data.SqlClient;
 
 namespace GenDB
 {
@@ -41,6 +42,7 @@ namespace GenDB
         class Person : AbsBO
         { 
             public string name = null; 
+            public Person spouse = null;
         }
 
         class Student : Person { public DateTime enlisted; }
@@ -77,6 +79,8 @@ namespace GenDB
             DateTime then = DateTime.Now;
                         TimeSpan dur = DateTime.Now - then;
 
+            Student lastStudent = null;
+
             for (int i = 0; i < elements; i++)
             {
                 Person p = new Person();
@@ -85,6 +89,9 @@ namespace GenDB
                 Student s = new Student();
                 s.name = "student no " + i.ToString();
                 s.enlisted = DateTime.Now;
+                s.spouse = lastStudent;
+
+                lastStudent = s;
 
                 gt.Add (s);
                 //gt.Add (p);
@@ -110,10 +117,14 @@ namespace GenDB
                 //ObjectDumper.PrintOut(ibo);
             }
 
+
             dur = DateTime.Now - then;
             Console.WriteLine("{0} objects retrieved in {1}. {2} obj/sec", retrieveCount, dur, retrieveCount / dur.TotalSeconds);
-            Console.WriteLine("Objects retrieved from cache: {0}", IBOCache.Retrieved);
+            Console.WriteLine("Objects retrieved from cache: {0}", IBOCache.Instance.Retrieved);
+            Console.WriteLine(IBOCache.Instance);
+            Console.WriteLine("Forcing garbage collection.");
             GC.Collect();
+            Console.WriteLine(IBOCache.Instance);
             Console.WriteLine("Press Return to end..");
             Console.ReadLine();
         }
