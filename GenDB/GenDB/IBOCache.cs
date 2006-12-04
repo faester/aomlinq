@@ -1,11 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
 
 namespace GenDB
 {
     internal sealed class IBOCache
     {
+        private class CacheEntry : WeakReference
+        {
+            long objectID;
+
+            public CacheEntry(object target) : base(target) { }
+
+            public long ObjectID
+            {
+                get { return objectID; }
+            }
+        }
+
         static IBOCache instance = new IBOCache();
         static long retrieved = 0;
 
