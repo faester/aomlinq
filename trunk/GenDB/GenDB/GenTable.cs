@@ -7,7 +7,14 @@ namespace GenDB
 {
     internal class GenTable 
     {
-        SqlConnection cnn = (SqlConnection)GenericDB.Instance.Connection;
+        SqlConnection cnn ;
+
+        public GenTable()
+        {
+            string db = GenericDB.Instance.Connection.Database;
+            cnn = new SqlConnection(GenericDB.Instance.Connection.ConnectionString + ";database=" + db);
+            cnn.Open();
+        }
 
         public void Add(IBusinessObject ibo)
         {
@@ -20,7 +27,7 @@ namespace GenDB
             {
                 cnn.Open();
             }
-
+            
             SqlCommand cmd = new SqlCommand(
                 "SELECT e.EntityTypePOID, pv.EntityPOID, pv.PropertyPOID, pv.TheValue " 
                 + " FROM PropertyValue pv INNER JOIN Entity e "
@@ -38,10 +45,10 @@ namespace GenDB
                 long entityTypePOID, entityPOID, propertyPOID;
                 string theValue;
 
-                entityTypePOID = long.Parse(reader[0].ToString());
                 entityPOID = long.Parse(reader[1].ToString());
+                entityTypePOID = long.Parse(reader[0].ToString());
                 propertyPOID = long.Parse(reader[2].ToString());
-                theValue = reader[3].ToString();
+                theValue = reader[3] == DBNull.Value ? null : reader[3].ToString();
             
                 if (currentEntityType != entityTypePOID)
                 { // Need to switch translator since type has changed

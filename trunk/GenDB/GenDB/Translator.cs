@@ -92,6 +92,13 @@ namespace GenDB
         /// <returns></returns>
         internal static IBusinessObject GetFromDatabase(long id)
         {
+            IBusinessObject ibo = IBOCache.Instance.Get(id);
+
+            if (ibo != null)
+            {
+                return ibo;
+            }
+
             // Can be a subtype of objectType, so we need to 
             // retrieve a translator for each method invokation.
             Entity e = (from es in genDB.Entities
@@ -99,19 +106,20 @@ namespace GenDB
                        select es).First();
 
             Translator st = Translator.GetTranslator (e.EntityType.EntityTypePOID);
-            object o = st.NewObjectInstance();
+            ibo = st.NewObjectInstance();
 
             IDictionary<long, PropertyValue> pvals = 
                 (from pv in genDB.PropertyValues
                 where pv.EntityPOID == id
                 select pv).ToDictionary( (PropertyValue tpv) => tpv.PropertyPOID);
 
+
             foreach (Converter c in st.allConverters)
             {
-                c.FieldInfo.SetValue (o, c.ToObjectRepresentation(pvals[c.Property.PropertyPOID].TheValue));
+                c.FieldInfo.SetValue (ibo, c.ToObjectRepresentation(pvals[c.Property.PropertyPOID].TheValue));
             }
 
-            return (IBusinessObject)o;
+            return ibo;
         }
 
         /// <summary>

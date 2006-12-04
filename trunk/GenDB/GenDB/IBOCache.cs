@@ -9,7 +9,7 @@ namespace GenDB
         static IBOCache instance = new IBOCache();
         static long retrieved = 0;
 
-        public static long Retrieved
+        public long Retrieved
         {
             get { return IBOCache.retrieved; }
         }
@@ -63,6 +63,11 @@ namespace GenDB
             retrieved++;
             if (!wr.IsAlive) {throw new Exception("Internal error in cache: Object has been reclaimed by garbagecollector, but was requested from cache."); }
             return (IBusinessObject)wr.Target;
+        }
+
+        public override string ToString()
+        {
+            return "IBOCache. Cache size = " + instance.Count + ", cache retrieves = " + instance.Retrieved;
         }
 
         /// <summary>
