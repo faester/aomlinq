@@ -43,7 +43,7 @@
     <Compile Include="Converter.cs" />
     <Compile Include="DB.cs" />
     <Compile Include="DBTag.cs" />
-    <Compile Include="Entity.cs" />
+    <Compile Include="EntityDL.cs" />
     <Compile Include="EntityTypeDL.cs" />
     <Compile Include="FieldConverters.cs" />
     <Compile Include="IBOCache.cs" />
@@ -61,6 +61,10 @@
     <Compile Include="PropertyValue.cs" />
     <Compile Include="RefTypeTranslator.cs" />
     <Compile Include="Translator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Component Include="lib\nunit.core.dll" />
+    <Component Include="lib\nunit.framework.dll" />
   </ItemGroup>
   <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
 </Project>

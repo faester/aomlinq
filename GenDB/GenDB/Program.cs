@@ -65,14 +65,7 @@ namespace GenDB
                 Console.WriteLine("Database built");
             }
 
-            //Translator dt = Translator.GetCreateTranslator(d.GetType ());
-            //Translator.UpdateDBWith(d);
-            //string idStr = dt.GetEntityPOID (d);
-            //object obj = t.GetObjectFromEntityPOID(idStr);
-
-            //ObjectDumper.PrintOut(obj);
-
-            GenTable gt = new GenTable();
+            GenTable genericTable = new GenTable();
 
             DateTime then = DateTime.Now;
             TimeSpan dur = DateTime.Now - then;
@@ -84,9 +77,6 @@ namespace GenDB
 
             for (int i = 0; i < elements; i++)
             {
-                Person p = new Person();
-                p.name = "person no " + i.ToString();
-
                 Student s = new Student();
                 s.name = "student no " + i.ToString();
                 s.enlisted = DateTime.Now;
@@ -94,8 +84,7 @@ namespace GenDB
 
                 lastStudent = s;
 
-                gt.Add(s);
-                //gt.Add (p);
+                genericTable.Add(s);
                 if (i % submitInterval == 0)
                 {
                     dur = DateTime.Now - then;
@@ -114,7 +103,7 @@ namespace GenDB
             int retrieveCount = 0;
 
             LinkedList<IBusinessObject> ll = new LinkedList<IBusinessObject>();
-            foreach (IBusinessObject ibo in gt.GetAll())
+            foreach (IBusinessObject ibo in genericTable.GetAll())
             {
                 retrieveCount++;
                 ll.AddLast (ibo);
@@ -135,6 +124,11 @@ namespace GenDB
             dur = DateTime.Now - then;
             Console.WriteLine("Cache flush duration: " + dur);
             GC.Collect();
+
+            foreach (IBusinessObject ibo in genericTable.GetAll())
+            {
+                ObjectUtilities.PrintOut(ibo);
+            }
 
             Console.ReadLine();
         }
