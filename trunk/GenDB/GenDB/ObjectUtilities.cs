@@ -173,14 +173,23 @@ namespace GenDB
 
                 if (fieldType.IsPrimitive)
                 {
-                    if (va != vb) { return false; }
+                    if (!va.Equals(vb)) { return false; }
                 }
                 else
                 {
                     if (fieldType == TYPEOF_DATETIME) { 
-                        return va.Equals(vb); 
+                        if (!va.Equals (vb))
+                        {
+                            return false;
+                        }
                     }
-                    else 
+                    else if (fieldType == TYPEOF_STRING) {
+                        if (!va.Equals(vb))
+                        {
+                            return false;
+                        }
+                    }
+                    else
                     {
                         if (!Object.ReferenceEquals (va, vb)) 
                         {
