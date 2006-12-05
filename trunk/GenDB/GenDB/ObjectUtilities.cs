@@ -12,6 +12,10 @@ namespace GenDB
     /// </summary>
     public static class ObjectUtilities
     {
+        static Type[] EMPTY_TYPE_ARRAY = new Type[0];
+        static Type TYPEOF_STRING = typeof(string);
+        static Type TYPEOF_DATETIME = typeof(DateTime);
+
         static int MAX_INDENT_LEVEL = 5;
         static string Indent(int level)
         {
@@ -110,7 +114,82 @@ namespace GenDB
                     output.WriteLine ();
                     PrintObject (value, output, indentLevel + 1);
                 }
+            } // foreach
+        } // method
+
+        public static object MakeClone(object o)
+        {
+            if (o == null)
+            {
+                return null;
             }
+            Type t = o.GetType();
+            FieldInfo[] fields = t.GetFields (
+                BindingFlags.Instance
+            | BindingFlags.Public
+            | BindingFlags.NonPublic
+            );
+
+            ConstructorInfo cinf = t.GetConstructor(EMPTY_TYPE_ARRAY);
+            object clone = cinf.Invoke(null);
+
+            foreach (FieldInfo f in fields)
+            {
+                object fv = f.GetValue (o);
+                f.SetValue(clone, fv);
+            }
+            return clone;
+        }
+
+        public static bool TestFieldEquality(object a, object b)
+        {
+            if (a == null && b == null)
+            {
+                return true;
+            }
+            if (b == null)
+            {
+                return false;
+            }
+
+            Type t = a.GetType();
+            if (b.GetType () != t)
+            {
+                return false;
+            }
+
+            FieldInfo[] fields = t.GetFields (
+                        BindingFlags.Instance
+                        | BindingFlags.Public
+                        | BindingFlags.NonPublic
+            );
+
+            foreach(FieldInfo f in fields)
+            {
+                Type fieldType = f.FieldType;
+
+                object va = f.GetValue (a);
+                object vb = f.GetValue (b);
+
+                if (fieldType.IsPrimitive)
+                {
+                    if (va != vb) { return false; }
+                }
+                else
+                {
+                    if (fieldType == TYPEOF_DATETIME) { 
+                        return va.Equals(vb); 
+                    }
+                    else 
+                    {
+                        if (!Object.ReferenceEquals (va, vb)) 
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
     }
 }

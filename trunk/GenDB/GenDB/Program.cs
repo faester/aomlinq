@@ -14,9 +14,9 @@ namespace GenDB
         class AbsBO : IBusinessObject
         {
             private DBTag dBTag;
-            public DBTag DBTag 
+            public DBTag DBTag
             {
-                get { return dBTag;}
+                get { return dBTag; }
                 set { dBTag = value; }
             }
         }
@@ -25,23 +25,23 @@ namespace GenDB
         {
             public string dateString = DateTime.Now.ToString();
         }
-        
-        class B : A 
+
+        class B : A
         {
             public int year;
         }
-        class C : B 
+        class C : B
         {
             public string name = "bnavn";
         }
         class D : B
         {
-            public IBusinessObject ibo; 
+            public IBusinessObject ibo;
         }
 
         class Person : AbsBO
-        { 
-            public string name = null; 
+        {
+            public string name = null;
             public Person spouse = null;
         }
 
@@ -49,8 +49,6 @@ namespace GenDB
 
         static void Main(string[] args)
         {
-            int elements = 100;
-
             GenericDB genDB = GenericDB.Instance;
             //genDB.Log = Console.Out;
 #if RECREATE_DB
@@ -77,15 +75,17 @@ namespace GenDB
             GenTable gt = new GenTable();
 
             DateTime then = DateTime.Now;
-                        TimeSpan dur = DateTime.Now - then;
+            TimeSpan dur = DateTime.Now - then;
 
             Student lastStudent = null;
+
+            int elements = 500;
 
             for (int i = 0; i < elements; i++)
             {
                 Person p = new Person();
                 p.name = "person no " + i.ToString();
-                
+
                 Student s = new Student();
                 s.name = "student no " + i.ToString();
                 s.enlisted = DateTime.Now;
@@ -93,12 +93,13 @@ namespace GenDB
 
                 lastStudent = s;
 
-                gt.Add (s);
+                gt.Add(s);
                 //gt.Add (p);
-                if (i % 50 == 0) {
+                if (i % 50 == 0)
+                {
                     dur = DateTime.Now - then;
                     Console.WriteLine("{0} objects inserted in {1}. {2} objs/s ", i, dur, i / dur.TotalSeconds);
-                    GenericDB.Instance.SubmitChanges();
+                    //GenericDB.Instance.SubmitChanges();
                 }
             }
 
@@ -111,18 +112,26 @@ namespace GenDB
             then = DateTime.Now;
             int retrieveCount = 0;
 
-            foreach(IBusinessObject ibo in gt.GetAll())
+            LinkedList<IBusinessObject> ll = new LinkedList<IBusinessObject>();
+            foreach (IBusinessObject ibo in gt.GetAll())
             {
                 retrieveCount++;
+                ll.AddLast (ibo);
                 //ObjectDumper.PrintOut(ibo);
             }
 
+            lastStudent.name = "Changed to enforce rewrite from cache.";
 
             dur = DateTime.Now - then;
             Console.WriteLine("{0} objects retrieved in {1}. {2} obj/sec", retrieveCount, dur, retrieveCount / dur.TotalSeconds);
             Console.WriteLine("Objects retrieved from cache: {0}", IBOCache.Instance.Retrieved);
             Console.WriteLine(IBOCache.Instance);
             Console.WriteLine("Forcing garbage collection.");
+            Console.WriteLine("Flushing cache.");
+            then = DateTime.Now;
+            IBOCache.Instance.FlushToDB();
+            dur = DateTime.Now - then;
+            Console.WriteLine("Cache flush duration: " + dur);
             GC.Collect();
             Console.WriteLine(IBOCache.Instance);
             Console.WriteLine("Press Return to end..");

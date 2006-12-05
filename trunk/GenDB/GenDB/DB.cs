@@ -41,7 +41,7 @@ namespace GenDB
         #endregion
 
         public Table<Entity> Entities;
-        public Table<EntityType> EntityTypes;
+        public Table<EntityTypeDL> EntityTypes;
         public Table<Property> Properties;
         public Table<PropertyType> PropertyTypes;
         public Table<Inheritance> Inheritance;
@@ -62,16 +62,16 @@ namespace GenDB
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public EntityType GetCreateEntityType(string name)
+        public EntityTypeDL GetCreateEntityType(string name)
         {
-            EntityType et = null; // Return object
+            EntityTypeDL et = null; // Return object
             var q = from ets in EntityTypes // Filter from table
                      where ets.Name == name // Where name matches
                      select ets;
 
             int count = 0; // Could also check using = q.Count(); (Would create 2 lookups)
 
-            foreach (EntityType etEnum in q) // Should just make one pass.
+            foreach (EntityTypeDL etEnum in q) // Should just make one pass.
             {
                 count++;
                 if (count > 1)
@@ -83,7 +83,7 @@ namespace GenDB
 
             if (count == 0) // Test if no result was found
             {
-                et = new EntityType { Name = name }; // Create new entityType
+                et = new EntityTypeDL { Name = name }; // Create new entityType
                 EntityTypes.Add(et); // And add to the database
                 SubmitChanges(); // Need to submit if subsequent queries are to find the added element
             }

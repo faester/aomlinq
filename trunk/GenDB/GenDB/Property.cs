@@ -22,7 +22,7 @@ namespace GenDB
 
         EntitySet<PropertyValue> _values = new EntitySet<PropertyValue>();
         EntityRef<PropertyType> _propertyType = new EntityRef<PropertyType>();
-        EntityRef<EntityType> _entityType = new EntityRef<EntityType>();
+        EntityRef<EntityTypeDL> _entityType = new EntityRef<EntityTypeDL>();
 
         [Association(Storage = "_values", OtherKey = "PropertyPOID")]
         public EntitySet<PropertyValue> Values
@@ -32,7 +32,7 @@ namespace GenDB
         }
 
         [Association(Storage = "_entityType", OtherKey = "EntityTypePOID", ThisKey = "EntityTypePOID")]
-        public EntityType EntityType
+        public EntityTypeDL EntityType
         {
             get { return this._entityType.Entity; }
             set { this._entityType.Entity = value; }

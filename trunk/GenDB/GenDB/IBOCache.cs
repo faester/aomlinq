@@ -7,18 +7,6 @@ namespace GenDB
 {
     internal sealed class IBOCache
     {
-        private class CacheEntry : WeakReference
-        {
-            long objectID;
-
-            public CacheEntry(object target) : base(target) { }
-
-            public long ObjectID
-            {
-                get { return objectID; }
-            }
-        }
-
         static IBOCache instance = new IBOCache();
         static long retrieved = 0;
 
@@ -43,7 +31,7 @@ namespace GenDB
         public void Add(IBusinessObject obj)
         {
             if (obj.DBTag == null) { throw new NullReferenceException ("DBTag of obj not set"); }
-            WeakReference wr = new WeakReference (obj);
+            WeakReference wr = new WeakReference(obj);
             cachedObjects[obj.DBTag.EntityPOID] = wr;
         }
 
@@ -81,6 +69,20 @@ namespace GenDB
         public override string ToString()
         {
             return "IBOCache. Cache size = " + instance.Count + ", cache retrieves = " + instance.Retrieved;
+        }
+
+        public void FlushToDB()
+        {
+            //foreach (CacheEntry wr in cachedObjects.Values)
+            //{
+            //    if (wr.IsDirty)
+            //    {
+            //        IBusinessObject ibo = (IBusinessObject)wr.Target;
+            //        Console.WriteLine("Writing object {0} to cache" , ibo.DBTag.EntityPOID);
+            //        Translator.UpdateDBWith((IBusinessObject) wr.Target);
+            //        wr.ClearDirtyBit();
+            //    }
+            //}
         }
 
         /// <summary>
