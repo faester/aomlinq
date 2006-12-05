@@ -14,7 +14,7 @@ namespace GenDB
         [Column(Name = "EntityTypePOID", Id = true, AutoGen = true)]
         public long EntityTypePOID;
 
-        private EntitySet<Entity> _entities = new EntitySet<Entity>();
+        private EntitySet<EntityDL> _entities = new EntitySet<EntityDL>();
         private EntitySet<Property> _properties = new EntitySet<Property>();
 
         [Association(Storage = "_properties", OtherKey = "EntityTypePOID", ThisKey = "EntityTypePOID")]
@@ -25,7 +25,7 @@ namespace GenDB
         }
 
         [Association(Storage = "_entities", OtherKey = "EntityTypePOID", ThisKey = "EntityTypePOID")]
-        public EntitySet<Entity> Entities
+        public EntitySet<EntityDL> Entities
         {
             get { return this._entities; }
             set { this._entities.Assign(value); }

@@ -40,7 +40,7 @@ namespace GenDB
         }
         #endregion
 
-        public Table<Entity> Entities;
+        public Table<EntityDL> Entities;
         public Table<EntityTypeDL> EntityTypes;
         public Table<Property> Properties;
         public Table<PropertyType> PropertyTypes;
