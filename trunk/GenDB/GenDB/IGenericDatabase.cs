@@ -33,19 +33,40 @@ namespace GenDB
         /// </summary>
         /// <param name="property"></param>
         void AddProperty (IProperty property);
+
+        /// <summary>
+        /// Used to determine if insertion should 
+        /// happen using an update or insert command.
+        /// </summary>
+        bool ExistsInDatabase { get; set; } 
     }
 
     interface IEntity
     {
         IEntityType EntityType { get; set; }
+        
         long EntityPOID { get; set; }
+        
         string PropertyValue(IProperty property);
+
+        /// <summary>
+        /// Used to determine if insertion should 
+        /// happen using an update or insert command.
+        /// </summary>
+        bool ExistsInDatabase { get; set; } 
     }
 
     interface IPropertyType
     {
         string Name { get; set; }
+        
         long PropertyTypePOID { get; set; }
+        
+        /// <summary>
+        /// Used to determine if insertion should 
+        /// happen using an update or insert command.
+        /// </summary>
+        bool ExistsInDatabase { get; set; } 
     }
 
     interface IProperty
@@ -53,6 +74,11 @@ namespace GenDB
         IPropertyType PropertyType { get; set; }
         long PropertyPOID { get; set; }
         string PropertyName { get; set; } 
+        /// <summary>
+        /// Used to determine if insertion should 
+        /// happen using an update or insert command.
+        /// </summary>
+        bool ExistsInDatabase { get; set; } 
     }
 
     interface IPropertyValue 
@@ -60,6 +86,12 @@ namespace GenDB
         IProperty Property { get; set; }
         IEntity Entity { get; set; }
         string Value { get; set; }
+
+        /// <summary>
+        /// Used to determine if insertion should 
+        /// happen using an update or insert command.
+        /// </summary>
+        bool ExistsInDatabase { get; set; } 
     }
 
     interface IGenericDatabase
@@ -68,7 +100,6 @@ namespace GenDB
         /// Creates the database. Throws Exception if db already exists.
         /// </summary>
         void CreateDatabase();
-
 
         /// <summary>
         /// Deletes database.

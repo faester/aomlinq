@@ -19,7 +19,7 @@ namespace GenDB
         static int tcount;
 
         /// <summary>
-        /// Used to create new translator instances as
+        /// Used to create new translator instantiated as
         /// well as retrieving already constructed translators
         /// based on a Type.
         /// </summary>
@@ -65,8 +65,6 @@ namespace GenDB
             res = GetCreateTranslator (t);
             return res;
         }
-
-
 
         internal static void UpdateDBWith(IBusinessObject o)
         {
@@ -217,7 +215,7 @@ namespace GenDB
             Property property;
             int count = 0;
 
-            // Step through found Property instances. (Must make 0 or 1 pass)
+            // Step through found Property instantiated. (Must make 0 or 1 pass)
             foreach (Property p in pc)
             {
                 count++; // Check result size. 
@@ -278,7 +276,7 @@ namespace GenDB
             {
                 allConverters = declaredConverters.ToList();
             }
-            genDB.SubmitChanges();
+            //genDB.SubmitChanges();
             convPropertyPOIDLookup = allConverters.ToDictionary((Converter c) => c.Property.PropertyPOID);
         }
 
@@ -308,7 +306,7 @@ namespace GenDB
             // primitive types, string (Handled by the 
             // IFieldConverter classes) whereas this Trans-
             // should only handle IBusinassObject 
-            // instances, so the cast below should be safe.
+            // instantiated, so the cast below should be safe.
             IBusinessObject ibo = (IBusinessObject)o;
             if (ibo.DBTag == null)
             {
@@ -380,7 +378,7 @@ namespace GenDB
                     pv.TheValue = theValue;
                 }
             }
-            genDB.SubmitChanges();
+            //genDB.SubmitChanges();
         }
 
         /// <summary>
@@ -394,7 +392,7 @@ namespace GenDB
             e.EntityType = et;
 
             genDB.Entities.Add (e);
-            genDB.SubmitChanges(); // Need commit to set id correctly.
+            //genDB.SubmitChanges(); // Need commit to set id correctly.
             DBTag.AssignDBTagTo(o, e.EntityPOID, IBOCache.Instance);
 
             foreach (Converter c in allConverters)
@@ -408,7 +406,7 @@ namespace GenDB
                 pv.TheValue = c.ToPropertyValueString(o);
                 genDB.PropertyValues.Add(pv);
             }
-            genDB.SubmitChanges(); // Commit property values.
+            //genDB.SubmitChanges(); // Commit property values.
         }
 
         internal Converter GetPropertyValueConverter(long propertyPOID)

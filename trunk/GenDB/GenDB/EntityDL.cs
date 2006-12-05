@@ -6,9 +6,14 @@ using System.Data.DLinq;
 namespace GenDB
 {
     [Table(Name = "Entity")]
-    internal class EntityDL
+    internal class EntityDL 
     {
-        [Column(Name = "EntityPOID", Id = true, AutoGen = true)]
+        public EntityDL()
+        {
+            EntityPOID = GenericDB.Instance.NextEntityPOID;
+        }
+
+        [Column(Name = "EntityPOID", Id = true, AutoGen = false)]
         public long EntityPOID;
 
         [Column(Name = "EntityTypePOID", Id = false)]
