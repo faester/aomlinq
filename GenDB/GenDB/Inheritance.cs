@@ -14,18 +14,18 @@ namespace GenDB
         [Column(Name = "SubEntityTypePOID", Id = true)]
         public long SubEntityTypePOID;
 
-        private EntityRef<EntityType> _SubEntityType;
-        private EntityRef<EntityType> _SuperEntityType;
+        private EntityRef<EntityTypeDL> _SubEntityType;
+        private EntityRef<EntityTypeDL> _SuperEntityType;
 
         [Association(Storage = "_SubEntityType", ThisKey = "SubEntityTypePOID", OtherKey = "EntityTypePOID")]
-        public EntityType SubEntityType
+        public EntityTypeDL SubEntityType
         {
             get { return this._SubEntityType.Entity; }
             set { this._SubEntityType.Entity = value; }
         }
 
         [Association(Storage = "_SuperEntityType", ThisKey = "SuperEntityTypePOID", OtherKey = "EntityTypePOID")]
-        public EntityType SuperEntityType
+        public EntityTypeDL SuperEntityType
         {
             get { return this._SuperEntityType.Entity; }
             set { this._SuperEntityType.Entity = value; }

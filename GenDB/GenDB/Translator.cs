@@ -58,7 +58,7 @@ namespace GenDB
                 return res;
             }
 
-            EntityType et = (from ets in genDB.EntityTypes
+            EntityTypeDL et = (from ets in genDB.EntityTypes
                              where ets.EntityTypePOID == entityTypePOID
                              select ets).First();
             Type t = Type.GetType(et.Name);
@@ -186,7 +186,7 @@ namespace GenDB
 
         Type objectType;
         LinkedList<Property> Properties;
-        EntityType et;
+        EntityTypeDL et;
 
         private Translator superTranslator = null;
 
@@ -338,9 +338,10 @@ namespace GenDB
         /// <summary>
         /// Updates PropertyValues of an already
         /// persisted business object.
+        /// PRE: o must exist in the database.
         /// </summary>
         /// <param name="o"></param>
-        private void UpdateDBEntity(IBusinessObject o)
+        internal void UpdateDBEntity(IBusinessObject o)
         {
             //Select Entity with matching id
             Entity e = (from es in genDB.Entities

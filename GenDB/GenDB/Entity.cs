@@ -14,11 +14,11 @@ namespace GenDB
         [Column(Name = "EntityTypePOID", Id = false)]
         public long EntityTypePOID;
 
-        private EntityRef<EntityType> _entityType = new EntityRef<EntityType>();
+        private EntityRef<EntityTypeDL> _entityType = new EntityRef<EntityTypeDL>();
         private EntitySet<PropertyValue> _propertyValues = new EntitySet<PropertyValue>();
 
         [Association(Storage = "_entityType", OtherKey = "EntityTypePOID", ThisKey = "EntityTypePOID")]
-        public EntityType EntityType
+        public EntityTypeDL EntityType
         {
             get { return this._entityType.Entity; }
             set
