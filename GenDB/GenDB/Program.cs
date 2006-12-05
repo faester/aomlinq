@@ -112,6 +112,8 @@ namespace GenDB
 
             lastStudent.name = "Changed to enforce rewrite from cache.";
 
+            Console.WriteLine(ObjectUtilities.TestFieldEquality(lastStudent, lastStudent));
+
             dur = DateTime.Now - then;
             Console.WriteLine("{0} objects retrieved in {1}. {2} obj/sec", retrieveCount, dur, retrieveCount / dur.TotalSeconds);
             Console.WriteLine("Objects retrieved from cache: {0}", IBOCache.Instance.Retrieved);
@@ -124,12 +126,6 @@ namespace GenDB
             dur = DateTime.Now - then;
             Console.WriteLine("Cache flush duration: " + dur);
             GC.Collect();
-
-            foreach (IBusinessObject ibo in genericTable.GetAll())
-            {
-                ObjectUtilities.PrintOut(ibo);
-            }
-
             Console.ReadLine();
         }
     }
