@@ -101,7 +101,7 @@ namespace GenDB
 
             // Can be a subtype of objectType, so we need to 
             // retrieve a translator for each method invokation.
-            Entity e = (from es in genDB.Entities
+            EntityDL e = (from es in genDB.Entities
                        where es.EntityPOID == id
                        select es).First();
 
@@ -344,7 +344,7 @@ namespace GenDB
         internal void UpdateDBEntity(IBusinessObject o)
         {
             //Select Entity with matching id
-            Entity e = (from es in genDB.Entities
+            EntityDL e = (from es in genDB.Entities
                            where es.EntityPOID == o.DBTag.EntityPOID
                            select es).First();
 
@@ -390,7 +390,7 @@ namespace GenDB
         /// <param name="o"></param>
         private void InsertNewDBEntity(IBusinessObject o)
         {
-            Entity e = new Entity();
+            EntityDL e = new EntityDL();
             e.EntityType = et;
 
             genDB.Entities.Add (e);

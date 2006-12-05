@@ -19,7 +19,7 @@ namespace GenDB
 
         private EntityRef<Property> _Property;
 
-        private EntityRef<Entity> _Entity;
+        private EntityRef<EntityDL> _Entity;
 
         [Association(Storage = "_Property", ThisKey = "PropertyPOID", OtherKey = "PropertyPOID")]
         public Property Property
@@ -29,7 +29,7 @@ namespace GenDB
         }
 
         [Association(Storage = "_Entity", ThisKey = "EntityPOID", OtherKey = "EntityPOID")]
-        public Entity Entity
+        public EntityDL Entity
         {
             get { return this._Entity.Entity; }
             set { this._Entity.Entity = value; }
