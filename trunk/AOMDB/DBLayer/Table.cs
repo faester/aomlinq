@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Text;
 using System.Query;
 using System.Expressions;
@@ -11,19 +12,39 @@ using System.Reflection;
 
 namespace DBLayer
 {
-    public class Table<T> : /* IQueryable<T>,  */ ICollection<T>
+    // IQueryable<T>,
+
+    public class Table<T> : ICollection<T>
         where T : IBusinessObject, new()
     {
         BO2AOMTranslator<T> converter = new BO2AOMTranslator<T>();
         Func<T, bool> linqWhereCondition = null;
         ICondition genDBcondition = null;
 
+        T[] content = new T[1];
+        int capacity=1;
+        int size=0;
+
+       
+        private void Resize(int newCapacity)
+        {
+            if (newCapacity == 0) { newCapacity = 1; }
+            Array.Resize<T>(ref content, newCapacity);
+            capacity = newCapacity;
+        }
+
         #region ICollection members
 
         public void Add(T e)
         {
             Entity ent = converter.ToEntity(e);
-            BOCache.StoreEntity(ent);
+
+            if (size == capacity)
+            {
+                Resize(capacity * 2);
+            }
+            content[size++] = e;
+
         }
 
         public void Clear()
@@ -60,7 +81,7 @@ namespace DBLayer
 
         public int Count
         {
-            get { throw new Exception("Not implemented"); }
+            get { return content.Count(); }
         }
 
         public bool IsReadOnly
@@ -69,14 +90,21 @@ namespace DBLayer
         }
 
         public System.Collections.Generic.IEnumerator<T> GetEnumerator()
-        {
-            throw new Exception("Not implemented");
+        {    
+            for (int idx = 0; idx < size; idx++)
+            {
+                yield return content[idx];
+            }
+
+            //throw new Exception("Not implemented");
         }
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            Console.WriteLine("SECOND");
+            return GetEnumerator();			  
         }
+
         #endregion
 
         public Table() { /* empty */ }
@@ -161,6 +189,7 @@ namespace DBLayer
             return this;
             //return this.Where<T> (expr.Compile()).ToQueryable();
         }
+
         #endregion
     }
 }
