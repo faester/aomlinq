@@ -79,7 +79,8 @@ namespace GenDB
 
             Student lastStudent = null;
 
-            int elements = 500;
+            int elements = 1000;
+            int submitInterval = 100;
 
             for (int i = 0; i < elements; i++)
             {
@@ -95,11 +96,11 @@ namespace GenDB
 
                 gt.Add(s);
                 //gt.Add (p);
-                if (i % 50 == 0)
+                if (i % submitInterval == 0)
                 {
                     dur = DateTime.Now - then;
                     Console.WriteLine("{0} objects inserted in {1}. {2} objs/s ", i, dur, i / dur.TotalSeconds);
-                    //GenericDB.Instance.SubmitChanges();
+                    GenericDB.Instance.SubmitChanges();
                 }
             }
 
@@ -127,14 +128,14 @@ namespace GenDB
             Console.WriteLine("Objects retrieved from cache: {0}", IBOCache.Instance.Retrieved);
             Console.WriteLine(IBOCache.Instance);
             Console.WriteLine("Forcing garbage collection.");
-            Console.WriteLine("Flushing cache.");
+            Console.WriteLine("Flushing cache and submitting DB.");
             then = DateTime.Now;
             IBOCache.Instance.FlushToDB();
+            GenericDB.Instance.SubmitChanges();
             dur = DateTime.Now - then;
             Console.WriteLine("Cache flush duration: " + dur);
             GC.Collect();
-            Console.WriteLine(IBOCache.Instance);
-            Console.WriteLine("Press Return to end..");
+
             Console.ReadLine();
         }
     }

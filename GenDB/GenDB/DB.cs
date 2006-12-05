@@ -40,20 +40,56 @@ namespace GenDB
         }
         #endregion
 
+        long nextEntityPOID = 0;
+
+        public long NextEntityPOID
+        {
+            get { return nextEntityPOID++; }
+        }
+
+        long nextEntityTypePOID = 0;
+
+        public long NextEntityTypePOID
+        {
+            get { return nextEntityTypePOID++; }
+        }
+
+        long nextPropertyTypePOID = 0;
+
+        public long NextPropertyTypePOID
+        {
+            get { return nextPropertyTypePOID++; }
+        }
+        long nextPropertyPOID = 0;
+
+        public long NextPropertyPOID
+        {
+            get { return nextPropertyPOID++; }
+        }
+
         public Table<EntityDL> Entities;
         public Table<EntityTypeDL> EntityTypes;
         public Table<Property> Properties;
         public Table<PropertyType> PropertyTypes;
         public Table<Inheritance> Inheritance;
         public Table<PropertyValue> PropertyValues;
-        private GenericDB() : base(connectString) { }
+        private GenericDB() : base(connectString) 
+        { 
+            InitIDs();
+        }
 
-        //public void CreateDatabase()
-        //{
-        //    Console.WriteLine("ÆÆ");
-        //    base.CreateDatabase();
-        //    base.ExecuteCommand();
-        //}
+        private void InitIDs()
+        {
+            var entityIDs = from ids in Entities select ids.EntityPOID;
+            var entityTypeIDS = from ids in EntityTypes select ids.EntityTypePOID;
+            var propertyPoids = from ids in Properties select ids.PropertyPOID;
+            var propertyTypePoids = from ids in PropertyTypes select ids.PropertyTypePOID;
+
+            nextEntityPOID = entityIDs.Max() + 1;
+            nextEntityTypePOID = entityTypeIDS.Max() + 1;
+            nextPropertyPOID = propertyPoids.Max() + 1;
+            nextPropertyPOID = propertyTypePoids.Max() + 1;
+        }
 
         /// <summary>
         /// Returns EntityType named 'name'. If no 
@@ -85,7 +121,7 @@ namespace GenDB
             {
                 et = new EntityTypeDL { Name = name }; // Create new entityType
                 EntityTypes.Add(et); // And add to the database
-                SubmitChanges(); // Need to submit if subsequent queries are to find the added element
+                //                SubmitChanges(); // Need to submit if subsequent queries are to find the added element
             }
 
             return et;
@@ -120,7 +156,7 @@ namespace GenDB
                 res = new PropertyType();
                 res.Name = name;
                 PropertyTypes.Add (res);
-                SubmitChanges(); // Need to submit if subsequent queries are to find the added element
+                //SubmitChanges(); // Need to submit if subsequent queries are to find the added element
             }
 
             return res;

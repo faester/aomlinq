@@ -8,7 +8,12 @@ namespace GenDB
     [Table(Name = "Property")]
     internal class Property
     {
-        [Column(Name = "PropertyPOID", Id = true, AutoGen = true)]
+        public Property()
+        {
+            PropertyPOID = GenericDB.Instance.NextPropertyPOID;
+        }
+
+        [Column(Name = "PropertyPOID", Id = true, AutoGen = false)]
         public long PropertyPOID;
 
         [Column(Name = "Name", Id = false)]
