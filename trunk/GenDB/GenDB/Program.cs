@@ -11,14 +11,20 @@ namespace GenDB
 {
     class Program
     {
+        static int nextID = 0;
 
         public class Person : AbstractBusinessObject
         {
+            public IBusinessObject obj = null;
             public string name = null;
             public Person spouse = null;
         }
 
-        public class Student : Person { public DateTime enlisted; }
+        public class Student : Person { 
+            public int rnd = 0;    
+            public int id = nextID++;
+            public DateTime enlisted; 
+        }
 
         static void Main(string[] args)
         {
@@ -45,7 +51,7 @@ namespace GenDB
 
             Student lastStudent = null;
 
-            int elements = 5000;
+            int elements = 2500;
             int submitInterval = 2500;
 
             for (int i = 0; i < elements; i++)
@@ -77,16 +83,34 @@ namespace GenDB
 
             IBOCache.Instance.FlushToDB();
 
-            foreach (IBusinessObject ibo in genericTable.GetAll())
+            if (false)
             {
-                if (retrieveCount % 2 == 0) {
-                    Student s = (Student)ibo;
-                    s.name = "Navn nr " + retrieveCount;
+                EntityTypeDL et = genDB.EntityTypes.Where((EntityTypeDL e) => e.Name.EndsWith("Student")).First();
+                IEnumerable<IBusinessObject> ibosss = genericTable.GetAll(et);
+                foreach (IBusinessObject ibo in ibosss)
+                {
+                    if (retrieveCount % 2 == 0)
+                    {
+                        Student s = (Student)ibo;
+                        s.name = "Navn nr " + retrieveCount;
+                    }
+                    retrieveCount++;
+                    //ObjectDumper.PrintOut(ibo);
                 }
-                retrieveCount++;
-                //ObjectDumper.PrintOut(ibo);
             }
-
+            else
+            {
+                foreach (IBusinessObject ibo in genericTable.GetAll())
+                {
+                    if (retrieveCount % 2 == 0)
+                    {
+                        Student s = (Student)ibo;
+                        s.name = "Navn nr " + retrieveCount;
+                    }
+                    retrieveCount++;
+                    //ObjectDumper.PrintOut(ibo);
+                }
+            }
             dur = DateTime.Now - then;
             Console.WriteLine("{0} objects retrieved in {1}. {2} obj/sec", retrieveCount, dur, retrieveCount / dur.TotalSeconds);
             Console.WriteLine("Objects retrieved from cache: {0}", IBOCache.Instance.Retrieved);
@@ -98,7 +122,6 @@ namespace GenDB
             GenericDB.Instance.SubmitChanges();
             dur = DateTime.Now - then;
             Console.WriteLine("Cache flush duration: " + dur);
-            GC.Collect();
             Console.ReadLine();
         }
     }

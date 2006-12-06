@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Data.SqlClient;
+using System.Data;
 
 namespace GenDB
 {
     internal class GenTable
     {
         SqlConnection cnn;
-
+        const string ePOID = "ePOID"; // Alias for entityPOID in select queries
+        const string sTHEVALUE = "TheValue"; // Name of value attribute in PropertyValue table
+        const string sPV = "pv"; // Prefix for property value table name alias
         public GenTable()
         {
             string db = GenericDB.Instance.Connection.Database;
@@ -45,7 +48,7 @@ namespace GenDB
                 , cnn);
             SqlDataReader reader = cmd.ExecuteReader();
 
-            Translator currentTranslator = Translator.GetCreateTranslator(typeof(object));
+            Translator currentTranslator = Translator.GetTranslator(typeof(object));
             long currentEntityType = currentTranslator.EntityTypePOID;
             IBusinessObject currentObject = null;
             long currentObjectID = currentTranslator.EntityTypePOID;
@@ -103,6 +106,122 @@ namespace GenDB
             } else {
                 yield return currentObject;
             }
+        }
+
+        /// <summary>
+        /// Returns all instances of specific type.
+        /// entityTypePOID must exist.
+        /// Only considers in-database objects. (For now, submit before invoking)
+        /// </summary>
+        /// <param name="entityTypePOID"></param>
+        /// <returns></returns>
+        public IEnumerable<IBusinessObject> GetAll(EntityTypeDL et) 
+        {
+            Translator t = Translator.GetTranslator(et.EntityTypePOID);
+            string sqlSel = SQLSelectStrAllOfType(t);
+            if (cnn.State != ConnectionState.Open) { cnn.Open(); }
+
+            Console.WriteLine(sqlSel);
+
+            IEnumerable<Converter> converters = t.AllConverters;
+
+            SqlCommand cmd = new SqlCommand(sqlSel, cnn);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            IBusinessObject result = null;
+
+            while(reader.Read ())
+            {
+                long entityPOID = long.Parse (reader[ePOID].ToString());
+                result = IBOCache.Instance.Get (entityPOID);
+                if (result != null)
+                {
+                    yield return result;
+                }
+                else 
+                {
+                    result = t.NewObjectInstance();
+                    foreach (Converter c in converters)
+                    {
+                        string value = reader["p" + c.Property.PropertyPOID].ToString();
+                        c.SetObjectsFieldValue(result, value);
+                    }
+                    yield return result;
+                }
+            }
+
+            if (!reader.IsClosed) { reader.Close(); }
+        }
+
+        
+        internal string SQLSelectStrAllOfType(Translator t)
+        {
+            var converters = from conv in t.AllConverters 
+                             select conv;
+
+            StringBuilder selectStr = new StringBuilder("SELECT ");
+            StringBuilder fromStr = new StringBuilder("\n FROM ");
+            StringBuilder whereStr = new StringBuilder ("\n WHERE (");
+            bool first = true;
+            Converter previousConverter = null;
+
+            foreach (Converter currentConverter in converters )
+            {
+                if (!first) { 
+                    fromStr.Append("\n\t INNER JOIN "); 
+                    selectStr.Append(", ");
+                    whereStr.Append (" AND ");
+                }
+                else
+                {
+                    selectStr.Append("\n\t ")
+                             .Append(sPV)
+                             .Append(currentConverter.Property.PropertyPOID)
+                             .Append(".EntityPOID ")
+                             .Append(ePOID)
+                             .Append (", ");
+                }
+
+                selectStr.Append("\n\t ")
+                         .Append(sPV)
+                         .Append(currentConverter.Property.PropertyPOID)
+                         .Append (".")
+                         .Append (sTHEVALUE)
+                         .Append (" p")
+                         .Append (currentConverter.Property.PropertyPOID);
+
+                fromStr .Append ("PropertyValue ")
+                        .Append(sPV)
+                        .Append(currentConverter.Property.PropertyPOID);
+
+                whereStr .Append ("\n\t ")
+                         .Append (sPV)
+                         .Append (currentConverter.Property.PropertyPOID)
+                         .Append (".PropertyPOID = ")
+                         .Append (currentConverter.Property.PropertyPOID);
+
+                if (!first) {
+                    fromStr.Append("\n\t\t ON ")
+                            .Append(sPV)
+                            .Append(previousConverter.Property.PropertyPOID)
+                            .Append(".EntityPOID = ")
+                            .Append(sPV)
+                            .Append (currentConverter.Property.PropertyPOID)
+                            .Append (".EntityPOID ");
+                }
+                else
+                {
+                    first = false;
+                }
+                previousConverter = currentConverter;
+            }
+            whereStr.Append ("\n)");
+
+            selectStr.Append (fromStr);
+            selectStr.Append (whereStr);
+
+            return selectStr.ToString();
         }
     }
 }

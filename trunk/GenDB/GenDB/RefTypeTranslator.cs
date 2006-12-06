@@ -24,7 +24,7 @@ namespace GenDB
             {
                 return ibo.DBTag.EntityPOID.ToString();
             }
-            Translator t = Translator.GetCreateTranslator(o.GetType());
+            Translator t = Translator.GetTranslator(o.GetType());
             return t.GetEntityPOID(o);
         }
 
