@@ -391,9 +391,9 @@ namespace GenDB
         {
             EntityDL e = new EntityDL();
             e.EntityType = et;
-
+            
             genDB.Entities.Add (e);
-            //genDB.SubmitChanges(); // Need commit to set id correctly.
+
             DBTag.AssignDBTagTo(o, e.EntityPOID, IBOCache.Instance);
 
             foreach (Converter c in allConverters)
@@ -407,7 +407,6 @@ namespace GenDB
                 pv.TheValue = c.ToPropertyValueString(o);
                 genDB.PropertyValues.Add(pv);
             }
-            //genDB.SubmitChanges(); // Commit property values.
         }
 
         internal Converter GetPropertyValueConverter(long propertyPOID)

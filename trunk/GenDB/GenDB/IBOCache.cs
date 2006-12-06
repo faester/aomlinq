@@ -11,12 +11,12 @@ namespace GenDB
         long entityPOID;
         IBusinessObject clone;
 
-        private CacheElement () { /* empty */ }
-        
-        public CacheElement (IBusinessObject target)
+        private CacheElement() { /* empty */ }
+
+        public CacheElement(IBusinessObject target)
         {
-            wr = new WeakReference (target);
-            clone = (IBusinessObject)ObjectUtilities.MakeClone (target);
+            wr = new WeakReference(target);
+            clone = (IBusinessObject)ObjectUtilities.MakeClone(target);
             entityPOID = target.DBTag.EntityPOID;
         }
 
@@ -25,11 +25,12 @@ namespace GenDB
             get { return wr.IsAlive; }
         }
 
-        public bool IsDirty { 
-            get { return !ObjectUtilities.TestFieldEquality(wr.Target, clone); } 
+        public bool IsDirty
+        {
+            get { return !ObjectUtilities.TestFieldEquality(wr.Target, clone); }
         }
 
-        public IBusinessObject Target 
+        public IBusinessObject Target
         {
             get { return (IBusinessObject)wr.Target; }
         }
@@ -50,13 +51,24 @@ namespace GenDB
             get { return IBOCache.retrieved; }
         }
 
-        public static IBOCache Instance 
+        public static IBOCache Instance
         {
             get { return instance; }
         }
 
-        private IBOCache() { /* empty */ } 
-        Dictionary<long, CacheElement> cachedObjects = new Dictionary<long, CacheElement>();
+        private IBOCache() { /* empty */ }
+
+        /// <summary>
+        /// Stores objects with weak references to allow garbage collection of 
+        /// the cached objects.
+        /// </summary>
+        Dictionary<long, CacheElement> committedObjects = new Dictionary<long, CacheElement>();
+
+        ///// <summary>
+        ///// Stores regular object references. The object must not be gc'ed before 
+        ///// it has been written to persistent storage.
+        ///// </summary>
+        Dictionary<long, IBusinessObject> uncommittedObject = new Dictionary<long, IBusinessObject>();
 
         /// <summary>
         /// Adds the given obj to the cache. The DBTag element
@@ -65,40 +77,60 @@ namespace GenDB
         /// <param name="obj"></param>
         public void Add(IBusinessObject obj)
         {
-            if (obj.DBTag == null) { throw new NullReferenceException ("DBTag of obj not set"); }
-            CacheElement wr = new CacheElement(obj);
-            cachedObjects[obj.DBTag.EntityPOID] = wr;
+            if (obj.DBTag == null) { throw new NullReferenceException("DBTag of obj not set"); }
+            uncommittedObject[obj.DBTag.EntityPOID] = obj;
         }
 
+        private void AddToCommitted(IBusinessObject obj)
+        {
+            CacheElement wr = new CacheElement(obj);
+            committedObjects[obj.DBTag.EntityPOID] = wr;
+        }
+        
         public int Count
         {
-            get { return cachedObjects.Count; }
+            get { return committedObjects.Count; }
         }
 
         /// <summary>
         /// Returns the IBusinessObject identified
-        /// by the given DBTag id.
+        /// by the given DBTag id. Returns null if 
+        /// object is not found. If DBTag is null, a
+        /// NullReferenceException is thrown.
         /// </summary>
         /// <param name="id"></param>
         public IBusinessObject Get(DBTag id)
         {
             if (id == null) { throw new NullReferenceException("id"); }
-            CacheElement wr = cachedObjects[id.EntityPOID];
-            if (!wr.IsAlive) { throw new Exception("Internal error in cache: Object has been reclaimed by garbagecollector, but was requested from cache."); }
-            retrieved++;
-            return (IBusinessObject)wr.Target;
+            return Get(id.EntityPOID);
         }
 
+        /// <summary>
+        /// Returns the business object identified 
+        /// by the given id. Will return null if id
+        /// is not found.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public IBusinessObject Get(long id)
         {
             CacheElement wr;
-            if (!cachedObjects.TryGetValue(id, out wr))
+            IBusinessObject result;
+            if (!committedObjects.TryGetValue(id, out wr))
             {
-                return null;
+                if (!uncommittedObject.TryGetValue(id, out result))
+                {
+                    return null;
+                }
+
+            }
+            else
+            {
+                if (!wr.IsAlive) { throw new Exception("Internal error in cache: Object has been reclaimed by garbagecollector, but was requested from cache."); }
+                result = wr.Target;
             }
             retrieved++;
-            if (!wr.IsAlive) {throw new Exception("Internal error in cache: Object has been reclaimed by garbagecollector, but was requested from cache."); }
-            return (IBusinessObject)wr.Target;
+            return result;
         }
 
         public override string ToString()
@@ -109,28 +141,65 @@ namespace GenDB
         public void FlushToDB()
         {
             GenericDB.Instance.SubmitChanges();
-            foreach (CacheElement ce in cachedObjects.Values)
+
+            CommitUncommitted();
+            CommitChangedCommited();
+            MoveCommittedToUncommitted();
+
+            GenericDB.Instance.SubmitChanges();
+        }
+
+        private void CommitUncommitted()
+        {
+            foreach (IBusinessObject ibo in uncommittedObject.Values)
+            {
+                Translator.UpdateDBWith(ibo);
+            }
+        }
+
+        private void MoveCommittedToUncommitted()
+        {
+            foreach (IBusinessObject ibo in uncommittedObject.Values)
+            {
+                AddToCommitted(ibo);
+            }
+            uncommittedObject.Clear();
+        }
+
+        private void CommitChangedCommited()
+        {
+            foreach (CacheElement ce in committedObjects.Values)
             {
                 if (ce.IsDirty)
                 {
-                    IBusinessObject ibo = ce.Target;
-                    Translator.UpdateDBWith(ibo);
-                    ce.ClearDirtyBit();
+                    if (ce.IsAlive)
+                    {
+                        IBusinessObject ibo = ce.Target;
+                        Translator.UpdateDBWith(ibo);
+                        ce.ClearDirtyBit();
+                    }
+                    else
+                    {
+                        //TODO:
+                        throw new Exception("Object reclaimed before if was flushed to the DB.");
+                    }
                 }
             }
-            GenericDB.Instance.SubmitChanges();
         }
 
         /// <summary>
         /// Removes the object identified 
-        /// by the id from the cache.
+        /// by the id from the cache. If object is 
+        /// dirty its new state will be added to the database.
         /// (Ment to be invoked only by 
         /// the DBTag destructor)
         /// </summary>
         /// <param name="id"></param>
         internal void Remove(long id)
         {
-            cachedObjects.Remove (id);
+            //TODO: Need to make some kind of commit possible here.
+            committedObjects.Remove(id);
+            uncommittedObject.Remove(id);
         }
     }
 }

@@ -45,8 +45,8 @@ namespace GenDB
 
             Student lastStudent = null;
 
-            int elements = 1000;
-            int submitInterval = 100;
+            int elements = 5000;
+            int submitInterval = 2500;
 
             for (int i = 0; i < elements; i++)
             {
