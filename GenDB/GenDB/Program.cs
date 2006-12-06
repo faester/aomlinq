@@ -11,17 +11,8 @@ namespace GenDB
 {
     class Program
     {
-        class AbsBO : IBusinessObject
-        {
-            private DBTag dBTag;
-            public DBTag DBTag
-            {
-                get { return dBTag; }
-                set { dBTag = value; }
-            }
-        }
 
-        class A : AbsBO
+        public class A : AbstractBusinessObject
         {
             public string dateString = DateTime.Now.ToString();
         }
@@ -39,13 +30,13 @@ namespace GenDB
             public IBusinessObject ibo;
         }
 
-        class Person : AbsBO
+        public class Person : AbstractBusinessObject
         {
             public string name = null;
             public Person spouse = null;
         }
 
-        class Student : Person { public DateTime enlisted; }
+        public class Student : Person { public DateTime enlisted; }
 
         static void Main(string[] args)
         {
@@ -72,7 +63,7 @@ namespace GenDB
 
             Student lastStudent = null;
 
-            int elements = 1000;
+            int elements = 10000;
             int submitInterval = 100;
 
             for (int i = 0; i < elements; i++)
@@ -102,17 +93,17 @@ namespace GenDB
             then = DateTime.Now;
             int retrieveCount = 0;
 
-            LinkedList<IBusinessObject> ll = new LinkedList<IBusinessObject>();
+            IBOCache.Instance.FlushToDB();
+
             foreach (IBusinessObject ibo in genericTable.GetAll())
             {
+                if (retrieveCount % 2 == 0) {
+                    Student s = (Student)ibo;
+                    s.name = "Navn nr " + retrieveCount;
+                }
                 retrieveCount++;
-                ll.AddLast (ibo);
                 //ObjectDumper.PrintOut(ibo);
             }
-
-            lastStudent.name = "Changed to enforce rewrite from cache.";
-
-            Console.WriteLine(ObjectUtilities.TestFieldEquality(lastStudent, lastStudent));
 
             dur = DateTime.Now - then;
             Console.WriteLine("{0} objects retrieved in {1}. {2} obj/sec", retrieveCount, dur, retrieveCount / dur.TotalSeconds);

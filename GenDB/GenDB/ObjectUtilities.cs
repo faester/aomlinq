@@ -15,6 +15,7 @@ namespace GenDB
         static Type[] EMPTY_TYPE_ARRAY = new Type[0];
         static Type TYPEOF_STRING = typeof(string);
         static Type TYPEOF_DATETIME = typeof(DateTime);
+        static Type TYPEOF_DBTAG = typeof(DBTag);
 
         static int MAX_INDENT_LEVEL = 5;
         static string Indent(int level)
@@ -117,6 +118,14 @@ namespace GenDB
             } // foreach
         } // method
 
+        /// <summary>
+        /// Clones object so all field values are identical.
+        /// DBTags are silently ignored.
+        /// This clone method is used by the IBOCache as 
+        /// part of the change tracking mechanism.
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
         public static object MakeClone(object o)
         {
             if (o == null)
@@ -135,8 +144,11 @@ namespace GenDB
 
             foreach (FieldInfo f in fields)
             {
-                object fv = f.GetValue (o);
-                f.SetValue(clone, fv);
+                if (f.FieldType != TYPEOF_DBTAG)
+                {
+                    object fv = f.GetValue(o);
+                    f.SetValue(clone, fv);
+                }
             }
             return clone;
         }
@@ -147,7 +159,7 @@ namespace GenDB
             {
                 return true;
             }
-            if (b == null)
+            if (a == null || b == null)
             {
                 return false;
             }

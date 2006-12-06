@@ -16,18 +16,8 @@ namespace GenDB
     /// interne reference til IBusinessObject-objektet
     /// fjernes, så hukommelsen kan blive genbrugt.
     /// </summary>
-    public class DBTag
+    public sealed class DBTag
     {
-#if DEBUG
-        static int instantiated = 0;
-        static int reclaimed = 0;
-
-        static void DumpInstantiationStatus()
-        {
-            Console.WriteLine("DBTag element status: Instantiated == {0}, garbage collected == {1}", instantiated, reclaimed);
-        }
-#endif 
-
         long entityPOID;
         IBOCache cache;
         
@@ -42,10 +32,6 @@ namespace GenDB
             DBTag dbtag = new DBTag(cache, id);
             obj.DBTag = dbtag;
             cache.Add(obj);
-#if DEBUG
-            instantiated++;
-            DumpInstantiationStatus();
-#endif
         }
 
         private DBTag() { /* empty */ }
@@ -62,10 +48,6 @@ namespace GenDB
         ~DBTag() 
         {
             cache.Remove(this.EntityPOID);
-#if DEBUG
-            reclaimed++;
-            DumpInstantiationStatus();
-#endif        
         }
 
         public long EntityPOID
