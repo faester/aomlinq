@@ -73,6 +73,7 @@ namespace GenDB
         public Table<PropertyType> PropertyTypes;
         public Table<Inheritance> Inheritance;
         public Table<PropertyValue> PropertyValues;
+
         private GenericDB() : base(connectString) 
         { 
             InitIDs();
