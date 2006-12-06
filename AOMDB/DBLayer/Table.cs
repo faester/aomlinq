@@ -17,7 +17,6 @@ namespace DBLayer
     public class Table<T> : ICollection<T>
         where T : IBusinessObject, new()
     {
-
         BO2AOMTranslator<T> converter = new BO2AOMTranslator<T>();
         Func<T, bool> linqWhereCondition = null;
         ICondition genDBcondition = null;
@@ -58,13 +57,9 @@ namespace DBLayer
             throw new Exception("Not implemented");
         }
 
-        public void CopyTo(T[] arr, int index)
+        public void CopyTo(T[] arr, int i)
         {
-            foreach(T i in arr)
-            {
-                arr.SetValue(i,index);
-                index = index+1;
-            }
+            throw new Exception("Not implemented");
         }
 
         public bool Remove(T e)
@@ -188,32 +183,16 @@ namespace DBLayer
             }
         }
 
-        public ICollection<T> Where(Expression<Func<T, bool>> expr)
+        public Table<T> Where(Expression<Func<T, bool>> expr)
         {
             ParseExpression(expr);
-            Console.WriteLine("*Where*");
             return this;
             //return this.Where<T> (expr.Compile()).ToQueryable();
         }
 
-        public ICollection<T> Select(Expression<Func<T, bool>> expr)
+        public ICollection<T> Select<U>(Expression<Func<T, U>> projection)
         {
-            throw new Exception("not implemented");
-            //ParseExpression(expr);
-            //Console.WriteLine("*SELECT*");
-            //return this;
-        }
-
-        public ICollection<T> OrderByDescending(Expression<Func<T,bool>> expr)
-        {
-            Console.WriteLine("OrderByDescending");
-            throw new Exception("not implemented");
-        }
-
-        public ICollection<T> OrderBy(Expression<Func<T,bool>> expr)
-        {
-            Console.WriteLine("OrderBy");
-            throw new Exception("*OrderBy*");
+            throw new Exception("Select ikke implementeret.");
         }
 
         #endregion
