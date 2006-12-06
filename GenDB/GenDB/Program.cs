@@ -12,24 +12,6 @@ namespace GenDB
     class Program
     {
 
-        public class A : AbstractBusinessObject
-        {
-            public string dateString = DateTime.Now.ToString();
-        }
-
-        class B : A
-        {
-            public int year;
-        }
-        class C : B
-        {
-            public string name = "bnavn";
-        }
-        class D : B
-        {
-            public IBusinessObject ibo;
-        }
-
         public class Person : AbstractBusinessObject
         {
             public string name = null;
@@ -63,7 +45,7 @@ namespace GenDB
 
             Student lastStudent = null;
 
-            int elements = 10000;
+            int elements = 1000;
             int submitInterval = 100;
 
             for (int i = 0; i < elements; i++)

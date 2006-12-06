@@ -4,6 +4,11 @@ using System.Text;
 
 namespace GenDB
 {
+    /// <summary>
+    /// The simplest possible implementation
+    /// of IBusinessObject. Can be used as a 
+    /// base class for any object hierarchy.
+    /// </summary>
     public class AbstractBusinessObject : IBusinessObject
     {
         private DBTag dBTag;

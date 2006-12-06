@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractBusinessObject.cs" />
     <Compile Include="Converter.cs" />
     <Compile Include="DB.cs" />
     <Compile Include="DBTag.cs" />
