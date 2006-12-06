@@ -25,7 +25,7 @@ namespace GenDB
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        internal static Translator GetCreateTranslator(Type t)
+        internal static Translator GetTranslator(Type t)
         {
             Translator res;
             if (type2translator.TryGetValue(t, out res))
@@ -62,13 +62,13 @@ namespace GenDB
                              where ets.EntityTypePOID == entityTypePOID
                              select ets).First();
             Type t = Type.GetType(et.Name);
-            res = GetCreateTranslator (t);
+            res = GetTranslator (t);
             return res;
         }
 
         internal static void UpdateDBWith(IBusinessObject o)
         {
-            Translator t = Translator.GetCreateTranslator(o.GetType());
+            Translator t = Translator.GetTranslator(o.GetType());
             if (o.DBTag != null) // test if o is already in DB
             {
                 t.UpdateDBEntity(o);
@@ -202,7 +202,14 @@ namespace GenDB
             et = genDB.GetCreateEntityType (objectType.FullName);
             if (objectType.BaseType != null)
             {
-                superTranslator = GetCreateTranslator(objectType.BaseType);
+                superTranslator = GetTranslator(objectType.BaseType);
+                /* TODO: Der skal testes for om en eksisterende Inheritance-tupel med
+                 * SubEntityTypePOID = et.EntityTypePOID eksisterer. Da der kun er tale 
+                 * om enkelt-arv skal en sådan slettes.
+                 */
+                genDB.Inheritance.Add (
+                    new Inheritance {SuperEntityTypePOID = superTranslator.EntityTypePOID, SubEntityTypePOID = et.EntityTypePOID}
+                    );
             }
         }
 
