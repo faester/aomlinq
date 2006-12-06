@@ -130,11 +130,11 @@ namespace GenDB
         private static void CheckRefTypeLegality(FieldInfo fi)
         {
             Type t = fi.FieldType;
+            
             if (t.IsGenericType || t.IsGenericTypeDefinition)
             {
                 ThrowException("Can not translate generic types.", fi);
             }
-
             if (t == typeof(IBusinessObject)) { return; }
             if (t == DBTAG_TYPE) { return; }
             if (t == typeof(string)) { return; }
@@ -183,6 +183,7 @@ namespace GenDB
         IDictionary<long, Converter> convPropertyPOIDLookup;
 
         Type objectType;
+
         LinkedList<Property> Properties;
         EntityTypeDL et;
 

@@ -80,15 +80,18 @@ namespace GenDB
 
         private void InitIDs()
         {
-            var entityIDs = from ids in Entities select ids.EntityPOID;
-            var entityTypeIDS = from ids in EntityTypes select ids.EntityTypePOID;
-            var propertyPoids = from ids in Properties select ids.PropertyPOID;
-            var propertyTypePoids = from ids in PropertyTypes select ids.PropertyTypePOID;
+            if (DatabaseExists())
+            {
+                var entityIDs = from ids in Entities select ids.EntityPOID;
+                var entityTypeIDS = from ids in EntityTypes select ids.EntityTypePOID;
+                var propertyPoids = from ids in Properties select ids.PropertyPOID;
+                var propertyTypePoids = from ids in PropertyTypes select ids.PropertyTypePOID;
 
-            nextEntityPOID = entityIDs.Max() + 1;
-            nextEntityTypePOID = entityTypeIDS.Max() + 1;
-            nextPropertyPOID = propertyPoids.Max() + 1;
-            nextPropertyPOID = propertyTypePoids.Max() + 1;
+                nextEntityPOID = entityIDs.Max() + 1;
+                nextEntityTypePOID = entityTypeIDS.Max() + 1;
+                nextPropertyPOID = propertyPoids.Max() + 1;
+                nextPropertyPOID = propertyTypePoids.Max() + 1;
+            }
         }
 
         /// <summary>
@@ -127,7 +130,6 @@ namespace GenDB
             return et;
         }
 
-
         /// <summary>
         /// Returns PropertyType named 'name'. If no 
         /// such PropertyType exists in the database
@@ -158,7 +160,6 @@ namespace GenDB
                 PropertyTypes.Add (res);
                 //SubmitChanges(); // Need to submit if subsequent queries are to find the added element
             }
-
             return res;
         }
     }
