@@ -17,6 +17,7 @@ namespace DBLayer
     public class Table<T> : ICollection<T>
         where T : IBusinessObject, new()
     {
+
         BO2AOMTranslator<T> converter = new BO2AOMTranslator<T>();
         Func<T, bool> linqWhereCondition = null;
         ICondition genDBcondition = null;
@@ -57,9 +58,13 @@ namespace DBLayer
             throw new Exception("Not implemented");
         }
 
-        public void CopyTo(T[] arr, int i)
+        public void CopyTo(T[] arr, int index)
         {
-            throw new Exception("Not implemented");
+            foreach(T i in arr)
+            {
+                arr.SetValue(i,index);
+                index = index+1;
+            }
         }
 
         public bool Remove(T e)
@@ -186,8 +191,29 @@ namespace DBLayer
         public ICollection<T> Where(Expression<Func<T, bool>> expr)
         {
             ParseExpression(expr);
+            Console.WriteLine("*Where*");
             return this;
             //return this.Where<T> (expr.Compile()).ToQueryable();
+        }
+
+        public ICollection<T> Select(Expression<Func<T, bool>> expr)
+        {
+            throw new Exception("not implemented");
+            //ParseExpression(expr);
+            //Console.WriteLine("*SELECT*");
+            //return this;
+        }
+
+        public ICollection<T> OrderByDescending(Expression<Func<T,bool>> expr)
+        {
+            Console.WriteLine("OrderByDescending");
+            throw new Exception("not implemented");
+        }
+
+        public ICollection<T> OrderBy(Expression<Func<T,bool>> expr)
+        {
+            Console.WriteLine("OrderBy");
+            throw new Exception("*OrderBy*");
         }
 
         #endregion
