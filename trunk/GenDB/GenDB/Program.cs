@@ -15,9 +15,9 @@ namespace GenDB
 
         public class Person : AbstractBusinessObject
         {
-            public IBusinessObject obj = null;
+            //public IBusinessObject obj = null;
             public string name = null;
-            public Person spouse = null;
+            //public Person spouse = null;
         }
 
         public class Student : Person { 
@@ -26,7 +26,22 @@ namespace GenDB
             public DateTime enlisted; 
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
+        {
+            IGenericDatabase gdb = new MsSql2005DB();
+            if (!gdb.DatabaseExists ()) 
+            {
+                gdb.CreateDatabase();
+            }
+            else
+            {
+                gdb.DeleteDatabase();
+                gdb.CreateDatabase();
+            }
+
+        }
+
+        static void OldMain()
         {
             GenericDB genDB = GenericDB.Instance;
             //genDB.Log = Console.Out;
@@ -51,7 +66,7 @@ namespace GenDB
 
             Student lastStudent = null;
 
-            int elements = 2500;
+            int elements = 1000;
             int submitInterval = 2500;
 
             for (int i = 0; i < elements; i++)
@@ -59,7 +74,7 @@ namespace GenDB
                 Student s = new Student();
                 s.name = "student no " + i.ToString();
                 s.enlisted = DateTime.Now;
-                s.spouse = lastStudent;
+                //s.spouse = lastStudent;
 
                 lastStudent = s;
 

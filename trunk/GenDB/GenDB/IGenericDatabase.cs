@@ -1,143 +1,173 @@
-//using System;
-//using System.Collections.Generic;
-//using System.Text;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-//namespace GenDB
-//{
-//    interface IEntityType 
-//    {
-//        /// <summary>
-//        /// Returns super entity type if present. Otherwise
-//        /// null is returned.
-//        /// </summary>
-//        IEntityType SuperEntityType { get; set; } 
+namespace GenDB
+{
+    public enum MappingType { BOOL, DATETIME, DOUBLE, LONG, STRING, REFERENCE }; 
 
-//        /// <summary>
-//        /// Database id of this IEntityType
-//        /// </summary>
-//        long EntityTypePOID { get; set; }
+    interface IEntityType 
+    {
+        /// <summary>
+        /// Returns super entity type if present. Otherwise
+        /// null is returned.
+        /// </summary>
+        IEntityType SuperEntityType { get; set; } 
 
-//        /// <summary>
-//        /// Name of this EntityType
-//        /// </summary>
-//        string Name { get; }
+        /// <summary>
+        /// Database id of this IEntityType
+        /// </summary>
+        long EntityTypePOID { get; set; }
 
-//        /// <summary>
-//        /// Returns all properties associated 
-//        /// with this IEntityType
-//        /// </summary>
-//        IEnumerable<IProperty> Properties { get; }
+        /// <summary>
+        /// Name of this EntityType
+        /// </summary>
+        string Name { get; }
 
-//        /// <summary>
-//        /// Adds a property to the entity type.
-//        /// </summary>
-//        /// <param name="property"></param>
-//        void AddProperty (IProperty property);
+        /// <summary>
+        /// Returns all properties associated 
+        /// with this IEntityType
+        /// </summary>
+        IEnumerable<IProperty> Properties { get; }
 
-//        /// <summary>
-//        /// Used to determine if insertion should 
-//        /// happen using an update or insert command.
-//        /// </summary>
-//        bool ExistsInDatabase { get; set; } 
-//    }
+        /// <summary>
+        /// Adds a property to the entity type.
+        /// </summary>
+        /// <param name="property"></param>
+        void AddProperty (IProperty property);
 
-//    interface IEntity
-//    {
-//        IEntityType EntityType { get; set; }
+        /// <summary>
+        /// Used to determine if insertion should 
+        /// happen using an update or insert command.
+        /// </summary>
+        bool ExistsInDatabase { get; set; } 
+    }
+
+    interface IEntity
+    {
+        IEntityType EntityType { get; set; }
         
-//        long EntityPOID { get; set; }
+        long EntityPOID { get; set; }
         
-//        string PropertyValue(IProperty property);
+        IPropertyValue GetPropertyValue(IProperty property);
 
-//        /// <summary>
-//        /// Used to determine if insertion should 
-//        /// happen using an update or insert command.
-//        /// </summary>
-//        bool ExistsInDatabase { get; set; } 
-//    }
+        void StorePropertyValue(IPropertyValue propertyValue);
 
-//    interface IPropertyType
-//    {
-//        string Name { get; set; }
+        /// <summary>
+        /// Used to determine if insertion should 
+        /// happen using an update or insert command.
+        /// </summary>
+        bool ExistsInDatabase { get; set; } 
+    }
+
+    interface IPropertyType
+    {
+        string Name { get; set; }
         
-//        long PropertyTypePOID { get; set; }
+        long PropertyTypePOID { get; set; }
         
-//        /// <summary>
-//        /// Used to determine if insertion should 
-//        /// happen using an update or insert command.
-//        /// </summary>
-//        bool ExistsInDatabase { get; set; } 
-//    }
+        /// <summary>
+        /// Constants should be provided by the 
+        /// implementation of IGenericDatabase
+        /// </summary>
+        MappingType MappedType { get; set; }
 
-//    interface IProperty
-//    {
-//        IPropertyType PropertyType { get; set; }
-//        long PropertyPOID { get; set; }
-//        string PropertyName { get; set; } 
-//        /// <summary>
-//        /// Used to determine if insertion should 
-//        /// happen using an update or insert command.
-//        /// </summary>
-//        bool ExistsInDatabase { get; set; } 
-//    }
+        /// <summary>
+        /// Used to determine if insertion should 
+        /// happen using an update or insert command.
+        /// </summary>
+        bool ExistsInDatabase { get; set; } 
+    }
 
-//    interface IPropertyValue 
-//    {
-//        IProperty Property { get; set; }
-//        IEntity Entity { get; set; }
-//        string Value { get; set; }
+    interface IProperty
+    {
+        IPropertyType PropertyType { get; set; }
+        long PropertyPOID { get; set; }
+        string PropertyName { get; set; } 
+        /// <summary>
+        /// Used to determine if insertion should 
+        /// happen using an update or insert command.
+        /// </summary>
+        bool ExistsInDatabase { get; set; } 
+    }
 
-//        /// <summary>
-//        /// Used to determine if insertion should 
-//        /// happen using an update or insert command.
-//        /// </summary>
-//        bool ExistsInDatabase { get; set; } 
-//    }
+    interface IPropertyValue 
+    {
+        IProperty Property { get; set; }
 
-//    interface IGenericDatabase
-//    {
-//        /// <summary>
-//        /// Creates the database. Throws Exception if db already exists.
-//        /// </summary>
-//        void CreateDatabase();
-
-//        /// <summary>
-//        /// Deletes database.
-//        /// </summary>
-//        void DeleteDatabase();
-
-//        /// <summary>
-//        /// Returns IEntityType with given EntityTypePOID if present.
-//        /// The associated properties should be set.
-//        /// Null otherwise.
-//        /// </summary>
-//        /// <param name="entityTypePOID"></param>
-//        IEntityType GetEntityType(long entityTypePOID);
-//        IEntityType GetEntityType(string name);
-
-//        /// <summary>
-//        /// Returns a new IEntityType instance with 
-//        /// correct EntityPOID, name set and no associated
-//        /// properties.
-//        /// </summary>
-//        /// <returns></returns>
-//        IEntityType NewEntityType(string name);
-
-//        /// <summary>
-//        /// Returns IEntity with given EntityPOID if present.
-//        /// Null otherwise.
-//        /// </summary>
-//        /// <param name="entityTypePOID"></param>
-//        IEntity GetEntity(long entityPOID);
-//        IEntity NewEntity();
-
-//        IPropertyType GetPropertyType(long propertyTypePOID);
-//        IPropertyType GetPropertyType(string name);
-
-//        IProperty GetProperty(long propertyPOID);
-//        IProperty GetProperty(IEntityType entityType, IPropertyType propertyType);
+        IEntity Entity { get; set; }
         
-//        void Save(IEntityType entityType);
-//        void Save(IEntity entity);
-//    }
-//}
+        string StringValue { get; set; }
+        
+        int IntValue { get; set; }
+        
+        long LongValue { get; set; }
+        
+        DateTime DateTimeValue { get; set; }
+
+        char CharValue { get; set; }
+
+        bool BoolValue { get; set; }
+
+        /// <summary>
+        /// Used to determine if insertion should 
+        /// happen using an update or insert command.
+        /// </summary>
+        bool ExistsInDatabase { get; set; } 
+    }
+
+    interface IGenericDatabase
+    {
+        /// <summary>
+        /// Creates the database. Throws Exception if db already exists.
+        /// </summary>
+        void CreateDatabase();
+
+        /// <summary>
+        /// Deletes database.
+        /// </summary>
+        void DeleteDatabase();
+
+        /// <summary>
+        /// Tests if database exists.
+        /// </summary>
+        /// <returns></returns>
+        bool DatabaseExists();
+
+        /// <summary>
+        /// Returns IEntityType with given EntityTypePOID if present.
+        /// The associated properties should be set.
+        /// Null otherwise.
+        /// </summary>
+        /// <param name="entityTypePOID"></param>
+        IEntityType RetrieveEntityType(long entityTypePOID);
+        IEntityType RetrieveEntityType(string name);
+
+        /// <summary>
+        /// Returns a new IEntityType instance with 
+        /// correct EntityPOID, name set and no associated
+        /// properties.
+        /// 
+        /// The type is not persisted until it is added to the database.
+        /// </summary>
+        /// <returns></returns>
+        IEntityType NewEntityType(string name);
+
+        /// <summary>
+        /// Returns IEntity with given EntityPOID if present.
+        /// Null otherwise.
+        /// </summary>
+        /// <param name="entityTypePOID"></param>
+        IEntity GetEntity(long entityPOID);
+        IEntity NewEntity();
+
+        IPropertyType GetPropertyType(long propertyTypePOID);
+        IPropertyType GetPropertyType(string name);
+
+        IProperty GetProperty(long propertyPOID);
+        IProperty GetProperty(IEntityType entityType, IPropertyType propertyType);
+        
+        void Save(IEntityType entityType);
+        void Save(IEntity entity);
+    }
+}
