@@ -207,9 +207,25 @@ namespace GenDB
                  * SubEntityTypePOID = et.EntityTypePOID eksisterer. Da der kun er tale 
                  * om enkelt-arv skal en sådan slettes.
                  */
-                genDB.Inheritance.Add (
-                    new Inheritance {SuperEntityTypePOID = superTranslator.EntityTypePOID, SubEntityTypePOID = et.EntityTypePOID}
-                    );
+                var oldinheritance = from inheritance in genDB.Inheritance
+                                where inheritance.SubEntityTypePOID == et.EntityTypePOID
+                                select inheritance;
+
+                Inheritance inh; 
+
+                if (oldinheritance.Count () > 0)
+                {
+                    inh = oldinheritance.First();
+                }
+                else
+                {
+                    inh = new Inheritance();
+                }
+
+                inh.SubEntityTypePOID = et.EntityTypePOID;
+                inh.SuperEntityTypePOID = superTranslator.EntityTypePOID;
+
+                genDB.Inheritance.Add(inh);
             }
         }
 

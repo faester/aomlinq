@@ -6,6 +6,15 @@ using System.Data;
 
 namespace GenDB
 {
+    /*
+     * Kan persisteres:
+     *  - Objekterne skal implementere IBusinessObject og null() (Dette skal sikres af generisk deklarering på public Table<T> )
+     *      - Kun felter med public getter og setter persisteres
+     *          - Primitive felter persisteres.
+     *          - Felter af referencetype persisteres kun, hvis de implementerer IBusinessObject
+     *      - Ønskes et felt, der opfylder ovenstående, ikke persisteret kan det annoteres med [Volatile]
+     *      - Statiske felter persisteres ikke
+     */
     internal class GenTable
     {
         SqlConnection cnn;

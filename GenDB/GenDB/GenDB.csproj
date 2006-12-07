@@ -61,6 +61,7 @@
     <Compile Include="IBusinessObject.cs" />
     <Compile Include="IGenericDatabase.cs" />
     <Compile Include="Inheritance.cs" />
+    <Compile Include="MsSql2005DB.cs" />
     <Compile Include="NotTranslatableException.cs" />
     <Compile Include="ObjectUtilities.cs" />
     <Compile Include="Program.cs" />
