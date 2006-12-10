@@ -57,7 +57,14 @@ namespace GenDB
             IEntity e = dtrans.Translate (s);
             Console.WriteLine (e);
             
-            ObjectUtilities.PrintOut(e);
+            Student copy = (Student)dtrans.Translate (e);
+            Console.WriteLine("Here goes the original Student: ");
+            ObjectUtilities.PrintOut(s);
+            Console.WriteLine("Here goes the copy: ");
+            ObjectUtilities.PrintOut(copy);
+            Console.WriteLine("Reflection based equality test says: ");
+            Console.WriteLine(ObjectUtilities.TestFieldEquality (s, copy));
+
             Console.ReadLine();
         }
 

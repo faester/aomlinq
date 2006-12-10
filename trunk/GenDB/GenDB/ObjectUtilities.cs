@@ -100,11 +100,18 @@ namespace GenDB
 
                 if (fi.FieldType.IsValueType  )
                 {
-                    output.WriteLine (" = " + value);
+                    output.WriteLine (" = " + value); 
                 }
                 else if (fi.FieldType == typeof(string))
                 {
-                    output.WriteLine(" = \"" + value + "\"");
+                    if (value == null)
+                    {
+                        output.WriteLine(" = null");
+                    }
+                    else
+                    {
+                        output.WriteLine(" = \"" + value + "\"");
+                    }
                 }
                 else if (fi.FieldType.IsArray )
                 {
