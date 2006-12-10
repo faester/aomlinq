@@ -178,7 +178,7 @@ namespace GenDB
 
         public void SetValues (IBusinessObject ibo, IEntity e)
         {
-            // Append fields defined at this point in the object hierarchy
+            // Append fields defined at this entity type in the object hierarchy
             if (iet.DeclaredProperties != null)
             {
                 foreach (IProperty property in iet.DeclaredProperties)
@@ -195,6 +195,8 @@ namespace GenDB
                     fcv.SetEntityPropertyValue(ibo, e);
                 }
             }
+
+            // Test if we have a super type (translator), and apply if it is the case
             if (superTranslator != null)
             {
                 superTranslator.SetValues(ibo, e);
