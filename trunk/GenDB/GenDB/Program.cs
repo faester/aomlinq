@@ -17,7 +17,7 @@ namespace GenDB
         {
             //public IBusinessObject obj = null;
             public string name = null;
-            //public Person spouse = null;
+            public Person spouse = null;
         }
 
         public class Student : Person { 
@@ -45,10 +45,13 @@ namespace GenDB
                 gdb.CreateDatabase();
             }
 
+            Person spouse = new Person();
+            spouse.name = "In your dreams...";
             Student s = new Student();
             s.name = "Morten";
             s.id = 839;
             s.Enlisted = new DateTime (2006, 12, 31);
+            s.spouse = spouse;
             Type t = typeof(Student);
 
             TypeSystem.Instance.RegisterType(t);

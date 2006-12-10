@@ -192,10 +192,6 @@ namespace GenDB
             {
                 throw new NotTranslatableException("Can not translate ararys.", field);
             }
-            else if (t.IsByRef)
-            {
-                return MappingType.REFERENCE;
-            }
             else if (t == typeof(string))
             {
                 return MappingType.STRING;
@@ -203,6 +199,10 @@ namespace GenDB
             else if (t == typeof(DateTime))
             {
                 return MappingType.DATETIME;
+            }
+            else if (t.IsByRef || t.IsClass)
+            {
+                return MappingType.REFERENCE;
             }
             else
             {

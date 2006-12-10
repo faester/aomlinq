@@ -89,7 +89,7 @@ namespace GenDB
         {
             if (iet.SuperEntityType != null)
             {
-                superTranslator = TypeSystem.Instance.GetTranslator (iet.SuperEntityType.EntityTypePOID);
+                superTranslator = TypeSystem.Instance.GetTranslator(iet.SuperEntityType.EntityTypePOID);
             }
         }
 
@@ -99,9 +99,9 @@ namespace GenDB
         private void SetFieldInfo()
         {
             fields = t.GetFields(
-                BindingFlags.Public 
+                BindingFlags.Public
                 | BindingFlags.DeclaredOnly
-                | BindingFlags.NonPublic 
+                | BindingFlags.NonPublic
                 | BindingFlags.Instance
                 );
         }
@@ -151,7 +151,7 @@ namespace GenDB
         /// </summary>
         /// <param name="e"></param>
         /// <param name="ibo"></param>
-        private void SetValues(IEntity e,IBusinessObject ibo)
+        private void SetValues(IEntity e, IBusinessObject ibo)
         {
             foreach (FieldConverter c in fieldConverters)
             {
@@ -176,7 +176,7 @@ namespace GenDB
             return res;
         }
 
-        public void SetValues (IBusinessObject ibo, IEntity e)
+        public void SetValues(IBusinessObject ibo, IEntity e)
         {
             // Append fields defined at this entity type in the object hierarchy
             if (iet.DeclaredProperties != null)
@@ -211,9 +211,11 @@ namespace GenDB
         SetHandler sh;
         GetHandler gh;
         Type clrType;
+        FieldInfo fi;
 
         public FieldConverter(Type t, FieldInfo fi, IProperty property)
         {
+            this.fi = fi;
             clrType = t;
             sh = DynamicMethodCompiler.CreateSetHandler(t, fi);
             gh = DynamicMethodCompiler.CreateGetHandler(t, fi);
@@ -240,12 +242,13 @@ namespace GenDB
         /// <returns></returns>
         private PropertyValueGetter CreateGetter(FieldInfo fi, IProperty prop)
         {
-            if (fi.FieldType.IsByRef && !(fi.FieldType == typeof(string) || fi.FieldType == typeof(DateTime)))
+            if ((fi.FieldType.IsByRef || fi.FieldType.IsClass) 
+                && !(fi.FieldType == typeof(string) || fi.FieldType == typeof(DateTime))
+                )
             { // Handles references other than string and DateTime
                 return delegate(IEntity ie)
                 {
-
-                    IBOReference entityRef = (IBOReference)(gh(ie.GetPropertyValue(prop).RefValue));
+                    IBOReference entityRef = (IBOReference)(ie.GetPropertyValue(prop).RefValue);
                     if (!entityRef.IsNullReference)
                     {
                         IBusinessObject res = IBOCache.Instance.Get(entityRef.EntityPOID);
@@ -266,33 +269,36 @@ namespace GenDB
             }
             if (fi.FieldType == typeof(long))
             {
-                return delegate(IEntity ie) { return gh(ie.GetPropertyValue(prop).LongValue); };
+                return delegate(IEntity ie)
+                {
+                    return ie.GetPropertyValue(prop).LongValue;
+                };
             }
             else if (fi.FieldType == typeof(int))
             {
-                return delegate(IEntity ie) { return gh(ie.GetPropertyValue(prop).IntValue); };
+                return delegate(IEntity ie) { return (int)ie.GetPropertyValue(prop).LongValue; };
             }
             else if (fi.FieldType == typeof(string))
             {
                 return delegate(IEntity ie)
                 {
-                    return gh(ie.GetPropertyValue(prop).StringValue);
+                    return ie.GetPropertyValue(prop).StringValue;
                 };
             }
             else if (fi.FieldType == typeof(DateTime))
             {
                 return delegate(IEntity ie)
                 {
-                    return gh(ie.GetPropertyValue(prop).DateTimeValue);
+                    return ie.GetPropertyValue(prop).DateTimeValue;
                 };
             }
             else if (fi.FieldType == typeof(bool))
             {
-                return delegate(IEntity ie) { return gh(ie.GetPropertyValue(prop).BoolValue); };
+                return delegate(IEntity ie) { return ie.GetPropertyValue(prop).BoolValue; };
             }
             else if (fi.FieldType == typeof(char))
             {
-                return delegate(IEntity ie) { return gh(ie.GetPropertyValue(prop).CharValue); };
+                return delegate(IEntity ie) { return ie.GetPropertyValue(prop).CharValue; };
             }
             else
             {
@@ -336,7 +342,7 @@ namespace GenDB
                             // Is it safe not to perform any real translation here??
                             IEntity refered = Configuration.GenDB.NewEntity();
                             DBTag.AssignDBTagTo(ibo, refered.EntityPOID, IBOCache.Instance);
-                            IBOReference reference = e.GetPropertyValue(p).RefValue;
+                            IBOReference reference = new IBOReference (ibo.DBTag.EntityPOID);
                             e.GetPropertyValue(p).RefValue = reference;
                         }
                         else
