@@ -16,8 +16,6 @@ namespace GenDB
         static Type DBTAG_TYPE = typeof(DBTag);
         static GenericDB genDB = GenericDB.Instance;
 
-        static int tcount;
-
         /// <summary>
         /// Used to create new translator instantiated as
         /// well as retrieving already constructed translators
@@ -32,8 +30,6 @@ namespace GenDB
             {
                 return res;
             }
-            tcount++;
-            Console.WriteLine("Translators: {0}", tcount);
             res = new Translator(t);
             type2translator[t] = res;
             long entityTypePOID = res.et.EntityTypePOID;
@@ -43,7 +39,7 @@ namespace GenDB
 
 
         /// <summary>
-        /// Used to retrive Translators based on an
+        /// Used to retrieve Translators based on an
         /// EntityTypePOID. If a corresponding translator does
         /// not exist, one is constructed based on the
         /// EntityType.Name. 

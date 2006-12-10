@@ -6,6 +6,49 @@ namespace GenDB
 {
     public enum MappingType { BOOL, DATETIME, DOUBLE, LONG, STRING, REFERENCE }; 
 
+    /// <summary>
+    /// Representation of DB reference to another
+    /// object. We need some way to represent DBNull, 
+    /// since this indicates that the reference is empty.
+    /// 
+    /// 
+    /// </summary>
+    struct IBOReference 
+    {
+        long entityPOID;
+
+        public long EntityPOID
+        {
+            get { return entityPOID; }
+            set { entityPOID = value; }
+        }
+        bool isNullReference;
+
+        public bool IsNullReference
+        {
+            get { return isNullReference; }
+            set { isNullReference = value; }
+        }
+        
+        public IBOReference (bool isNullReference)
+        {
+            this.isNullReference = isNullReference;
+            this.entityPOID = default(long);
+        }
+
+        public IBOReference (long entityPOID)
+        {
+            isNullReference = false;
+            this.entityPOID = entityPOID;
+        }
+
+        public IBOReference (bool isNullReference, long entityPOID)
+        {
+            this.isNullReference = isNullReference;
+            this.entityPOID = entityPOID;
+        }
+    }
+
     interface IEntityType 
     {
         /// <summary>
@@ -22,13 +65,21 @@ namespace GenDB
         /// <summary>
         /// Name of this EntityType
         /// </summary>
-        string Name { get; }
+        string Name { get; set; }
 
         /// <summary>
-        /// Returns all properties associated 
-        /// with this IEntityType
+        /// Returns all properties declared  
+        /// for this IEntityType
         /// </summary>
-        IEnumerable<IProperty> Properties { get; }
+        IEnumerable<IProperty> DeclaredProperties { get; }
+
+        /// <summary>
+        /// Returns all properties valid for 
+        /// this entity type. That is, all 
+        /// properties declared for this entity 
+        /// type and all super types.
+        /// </summary>
+        IEnumerable <IProperty> GetAllProperties { get; }
 
         /// <summary>
         /// Adds a property to the entity type.
@@ -81,7 +132,9 @@ namespace GenDB
 
     interface IProperty
     {
+        MappingType MappingType { get; set; }
         IPropertyType PropertyType { get; set; }
+        IEntityType EntityType { get; set; }
         long PropertyPOID { get; set; }
         string PropertyName { get; set; } 
         /// <summary>
@@ -102,12 +155,16 @@ namespace GenDB
         int IntValue { get; set; }
         
         long LongValue { get; set; }
-        
+
+        double DoubleValue { get; set; }
+
         DateTime DateTimeValue { get; set; }
 
         char CharValue { get; set; }
 
         bool BoolValue { get; set; }
+
+        IBOReference RefValue { get; set; }
 
         /// <summary>
         /// Used to determine if insertion should 
@@ -135,13 +192,10 @@ namespace GenDB
         bool DatabaseExists();
 
         /// <summary>
-        /// Returns IEntityType with given EntityTypePOID if present.
-        /// The associated properties should be set.
-        /// Null otherwise.
+        /// Returns all persistent property types. 
         /// </summary>
-        /// <param name="entityTypePOID"></param>
-        IEntityType RetrieveEntityType(long entityTypePOID);
-        IEntityType RetrieveEntityType(string name);
+        /// <returns></returns>
+        IEnumerable<IPropertyType> GetAllPropertyTypes();
 
         /// <summary>
         /// Returns a new IEntityType instance with 
@@ -149,17 +203,29 @@ namespace GenDB
         /// properties.
         /// 
         /// The type is not persisted until it is added to the database.
+        /// 
+        /// (Should be called by the TypeSystem singleton only)
         /// </summary>
         /// <returns></returns>
         IEntityType NewEntityType(string name);
 
-        /// <summary>
-        /// Returns IEntity with given EntityPOID if present.
-        /// Null otherwise.
-        /// </summary>
-        /// <param name="entityTypePOID"></param>
-        IEntity GetEntity(long entityPOID);
         IEntity NewEntity();
+
+        IProperty NewProperty();
+
+        IPropertyType NewPropertyType();
+
+        IPropertyValue NewPropertyValue();
+
+        /// <summary>
+        /// Returns all IEntityTypes stored in the database.
+        /// Is used by the TypeSystem singleton to retrieve
+        /// all types upon instantiation.
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<IEntityType> GetAllEntityTypes();
+
+        IEntity GetEntity(long entityPOID);
 
         IPropertyType GetPropertyType(long propertyTypePOID);
         IPropertyType GetPropertyType(string name);
@@ -167,7 +233,28 @@ namespace GenDB
         IProperty GetProperty(long propertyPOID);
         IProperty GetProperty(IEntityType entityType, IPropertyType propertyType);
         
+        /// <summary>
+        /// Saves the entityType as well as any unsaved 
+        /// super types, properties and property types.
+        /// </summary>
+        /// <param name="entityType"></param>
         void Save(IEntityType entityType);
+
+        /// <summary>
+        /// Assumes that all neccessary IProperty, IEntityType and IPropertyType 
+        /// instances has been saved before this method is called.
+        /// </summary>
+        /// <param name="entity"></param>
         void Save(IEntity entity);
+
+        void CommitChanges();
+
+        /// <summary>
+        /// Commits changes in the type system.
+        /// (Properties, EntityTypes and PropertyTypes)
+        /// </summary>
+        void CommitTypeChanges();
+        void RollbackTypeTransaction();
+        void RollbackTransaction();
     }
 }

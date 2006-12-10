@@ -23,12 +23,18 @@ namespace GenDB
         public class Student : Person { 
             public int rnd = 0;    
             public int id = nextID++;
-            public DateTime enlisted; 
+            private DateTime enlisted;
+
+            public DateTime Enlisted
+            {
+                get { return enlisted; }
+                set { enlisted = value; }
+            } 
         }
 
         public static void Main(string[] args)
         {
-            IGenericDatabase gdb = new MsSql2005DB();
+            IGenericDatabase gdb = MsSql2005DB.Instance;
             if (!gdb.DatabaseExists ()) 
             {
                 gdb.CreateDatabase();
@@ -39,6 +45,17 @@ namespace GenDB
                 gdb.CreateDatabase();
             }
 
+            Student s = new Student();
+            s.name = "Morten";
+            s.id = 839;
+            s.Enlisted = new DateTime (2006, 12, 31);
+            Type t = typeof(Student);
+
+            TypeSystem.Instance.RegisterType(t);
+
+            DelegateTranslator dtrans = TypeSystem.Instance.GetTranslator (t);
+            IEntity e = dtrans.Translate (s);
+            ObjectUtilities.PrintOut(e);
         }
 
         static void OldMain()
@@ -73,7 +90,7 @@ namespace GenDB
             {
                 Student s = new Student();
                 s.name = "student no " + i.ToString();
-                s.enlisted = DateTime.Now;
+                s.Enlisted = DateTime.Now;
                 //s.spouse = lastStudent;
 
                 lastStudent = s;
