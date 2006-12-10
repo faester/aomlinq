@@ -589,6 +589,22 @@ namespace GenDB
             get { return property; }
             set { property = value; }
         }
+
+        public override string ToString()
+        {
+            string value = null;
+            switch (property.MappingType)
+            {
+                case MappingType.BOOL: value = BoolValue.ToString(); break;
+                case MappingType.DATETIME: value = DateTimeValue.ToString(); break;
+                case MappingType.DOUBLE: value = DoubleValue.ToString(); break;
+                case MappingType.LONG: value = LongValue.ToString(); break;
+                case MappingType.REFERENCE: value = this.RefValue.ToString(); break;
+                case MappingType.STRING : value = this.StringValue; break;
+            }
+            return property.MappingType.ToString() + " = " + value;
+
+        }
     }
 
     internal class MSEntityType : IEntityType
@@ -701,6 +717,17 @@ namespace GenDB
         {
             this.propertyValues[propertyValue.Property.PropertyPOID] = propertyValue;
         }
+
+        public override string ToString()
+        {
+            string res = "MSEntity { " + this.EntityType.ToString();
+            foreach (IPropertyValue pv in propertyValues.Values)
+            {
+                res += "\n" + pv.ToString();
+            }
+            res += "\n}";
+            return res;
+        }
     }
 
     internal class MSProperty : IProperty
@@ -748,6 +775,11 @@ namespace GenDB
         {
             get { return propertyType; }
             set { propertyType = value; }
+        }
+
+        public override string ToString()
+        {
+            return "MSProperty {" + this.mappingType + " name = " + propertyName + " " + PropertyType + " }";
         }
     }
 

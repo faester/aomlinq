@@ -132,6 +132,7 @@ namespace GenDB
 
     interface IProperty
     {
+        //TODO: Bør flyttes til PropertyType....
         MappingType MappingType { get; set; }
         IPropertyType PropertyType { get; set; }
         IEntityType EntityType { get; set; }

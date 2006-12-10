@@ -55,7 +55,10 @@ namespace GenDB
 
             DelegateTranslator dtrans = TypeSystem.Instance.GetTranslator (t);
             IEntity e = dtrans.Translate (s);
+            Console.WriteLine (e);
+            
             ObjectUtilities.PrintOut(e);
+            Console.ReadLine();
         }
 
         static void OldMain()

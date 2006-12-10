@@ -58,6 +58,7 @@ namespace GenDB
     /// </summary>
     class DelegateTranslator
     {
+        DelegateTranslator superTranslator = null;
         IEntityType iet;
         Type t;
         FieldInfo[] fields;
@@ -78,6 +79,18 @@ namespace GenDB
             SetFieldInfo();
             InitFieldTranslators();
             InitInstantiator();
+            InitSuperTranslator();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void InitSuperTranslator()
+        {
+            if (iet.SuperEntityType != null)
+            {
+                superTranslator = TypeSystem.Instance.GetTranslator (iet.SuperEntityType.EntityTypePOID);
+            }
         }
 
         /// <summary>
@@ -85,8 +98,12 @@ namespace GenDB
         /// </summary>
         private void SetFieldInfo()
         {
-            fields = t.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Public
-                | BindingFlags.NonPublic | BindingFlags.Instance);
+            fields = t.GetFields(
+                BindingFlags.Public 
+                | BindingFlags.DeclaredOnly
+                | BindingFlags.NonPublic 
+                | BindingFlags.Instance
+                );
         }
 
         /// <summary>
@@ -123,11 +140,27 @@ namespace GenDB
         public IBusinessObject Translate(IEntity e)
         {
             IBusinessObject res = (IBusinessObject)instantiator();
+            SetValues(e, res);
+            return res;
+        }
+
+        /// <summary>
+        /// Copies values from PropertyValues stored in 
+        /// e to the fields in ibo. (Thus changing state 
+        /// of ibo)
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="ibo"></param>
+        private void SetValues(IEntity e,IBusinessObject ibo)
+        {
             foreach (FieldConverter c in fieldConverters)
             {
-                c.SetObjectFieldValue(res, e);
+                c.SetObjectFieldValue(ibo, e);
             }
-            return res;
+            if (superTranslator != null)
+            {
+                superTranslator.SetValues(e, ibo);
+            }
         }
 
         public IEntity Translate(IBusinessObject ibo)
@@ -139,20 +172,33 @@ namespace GenDB
                 res.EntityPOID = ibo.DBTag.EntityPOID;
             }
             res.EntityType = iet;
-            
-            foreach (IProperty property in iet.GetAllProperties)
-            {
-                IPropertyValue propertyValue = Configuration.GenDB.NewPropertyValue();
-                propertyValue.Entity = res;
-                propertyValue.Property = property;
-                res.StorePropertyValue (propertyValue);
-            }
-
-            foreach (FieldConverter fcv in fieldConverters)
-            {
-                fcv.SetEntityPropertyValue (ibo, res);
-            }
+            SetValues(ibo, res);
             return res;
+        }
+
+        public void SetValues (IBusinessObject ibo, IEntity e)
+        {
+            // Append fields defined at this point in the object hierarchy
+            if (iet.DeclaredProperties != null)
+            {
+                foreach (IProperty property in iet.DeclaredProperties)
+                {
+                    Console.WriteLine("PN: " + property.PropertyName);
+                    IPropertyValue propertyValue = Configuration.GenDB.NewPropertyValue();
+                    propertyValue.Entity = e;
+                    propertyValue.Property = property;
+                    e.StorePropertyValue(propertyValue);
+                }
+
+                foreach (FieldConverter fcv in fieldConverters)
+                {
+                    fcv.SetEntityPropertyValue(ibo, e);
+                }
+            }
+            if (superTranslator != null)
+            {
+                superTranslator.SetValues(ibo, e);
+            }
         }
     }
 
@@ -209,7 +255,7 @@ namespace GenDB
                         }
                         return res;
                     }
-                    else 
+                    else
                     {
                         return null;
                     }
@@ -226,14 +272,16 @@ namespace GenDB
             }
             else if (fi.FieldType == typeof(string))
             {
-                return delegate(IEntity ie) { 
-                    return gh(ie.GetPropertyValue(prop).StringValue); 
+                return delegate(IEntity ie)
+                {
+                    return gh(ie.GetPropertyValue(prop).StringValue);
                 };
             }
             else if (fi.FieldType == typeof(DateTime))
             {
-                return delegate(IEntity ie) { 
-                    return gh(ie.GetPropertyValue(prop).DateTimeValue); 
+                return delegate(IEntity ie)
+                {
+                    return gh(ie.GetPropertyValue(prop).DateTimeValue);
                 };
             }
             else if (fi.FieldType == typeof(bool))
@@ -252,68 +300,57 @@ namespace GenDB
 
         PropertyValueSetter CreateSetter(IProperty p)
         {
-            if (p.MappingType == MappingType.BOOL)
+            switch (p.MappingType)
             {
-                return delegate(IEntity e, object value) { e.GetPropertyValue(p).BoolValue = (bool)value; };
-            }
-            else if (p.MappingType == MappingType.DATETIME)
-            {
-                return delegate(IEntity e, object value) { 
-                    e.GetPropertyValue(p).DateTimeValue = (DateTime)value; 
-                };
-            }
-            else if (p.MappingType == MappingType.DOUBLE)
-            {
-                return delegate(IEntity e, object value) { e.GetPropertyValue(p).DoubleValue = (double)value; };
-            }
-            else if (p.MappingType == MappingType.LONG)
-            {
-                return delegate(IEntity e, object value) {
-                    Type t  = value.GetType ();
-                    long v = (int)value;
-                    IPropertyValue pv = e.GetPropertyValue(p);
-                    pv.LongValue = v;
-                };
-            }
-            else if (p.MappingType == MappingType.REFERENCE)
-            {
-                return delegate(IEntity e, object value) {
-                    if (value == null)
+                case MappingType.BOOL:
+                    return delegate(IEntity e, object value) { e.GetPropertyValue(p).BoolValue = (bool)value; };
+                case MappingType.DATETIME:
+                    return delegate(IEntity e, object value)
                     {
-                        IBOReference reference = new IBOReference (true);
-                        e.GetPropertyValue(p).RefValue = reference;
-                        return;
-                    }
-                    IBusinessObject ibo = (IBusinessObject) value;
-                    if (ibo.DBTag == null)
+                        e.GetPropertyValue(p).DateTimeValue = (DateTime)value;
+                    };
+                case MappingType.DOUBLE: return delegate(IEntity e, object value) { e.GetPropertyValue(p).DoubleValue = (double)value; };
+                case MappingType.LONG:
+                    return delegate(IEntity e, object value)
                     {
-                        // TODO: Do a lot of checking.... :(
-                        // Is it safe not to perform any real translation here??
-                        IEntity refered = Configuration.GenDB.NewEntity();
-                        DBTag.AssignDBTagTo(ibo, refered.EntityPOID, IBOCache.Instance);
-                        IBOReference reference = e.GetPropertyValue(p).RefValue;
-                        e.GetPropertyValue(p).RefValue = reference;
-                    }
-                    else
+                        Type t = value.GetType();
+                        long v = (int)value;
+                        IPropertyValue pv = e.GetPropertyValue(p);
+                        pv.LongValue = v;
+                    };
+                case MappingType.REFERENCE:
+                    return delegate(IEntity e, object value)
                     {
-                        IBOReference reference = new IBOReference(false, ibo.DBTag.EntityPOID);
-                        e.GetPropertyValue(p).RefValue = reference;
-                    }
-                };
-            }
-            else if (p.MappingType == MappingType.STRING)
-            {
-                return delegate(IEntity e, object value) 
-                { 
-                    e.GetPropertyValue(p).StringValue = value.ToString(); 
-                };
-            }
-            else
-            {
-                throw new Exception("Unknown MappingType in DelegateTranslator, CreateSetter: " + p.MappingType);
+                        if (value == null)
+                        {
+                            IBOReference reference = new IBOReference(true);
+                            e.GetPropertyValue(p).RefValue = reference;
+                            return;
+                        }
+                        IBusinessObject ibo = (IBusinessObject)value;
+                        if (ibo.DBTag == null)
+                        {
+                            // TODO: Do a lot of checking.... :(
+                            // Is it safe not to perform any real translation here??
+                            IEntity refered = Configuration.GenDB.NewEntity();
+                            DBTag.AssignDBTagTo(ibo, refered.EntityPOID, IBOCache.Instance);
+                            IBOReference reference = e.GetPropertyValue(p).RefValue;
+                            e.GetPropertyValue(p).RefValue = reference;
+                        }
+                        else
+                        {
+                            IBOReference reference = new IBOReference(false, ibo.DBTag.EntityPOID);
+                            e.GetPropertyValue(p).RefValue = reference;
+                        }
+                    };
+                case MappingType.STRING:
+                    return delegate(IEntity e, object value)
+                    {
+                        e.GetPropertyValue(p).StringValue = value.ToString();
+                    };
+                default:
+                    throw new Exception("Unknown MappingType in DelegateTranslator, CreateSetter: " + p.MappingType);
             }
         }
     }
-
-
 }
