@@ -51,9 +51,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractBusinessObject.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="Converter.cs" />
     <Compile Include="DB.cs" />
     <Compile Include="DBTag.cs" />
+    <Compile Include="DelegateTranslator.cs" />
+    <Compile Include="DynamicMethodCompiler.cs" />
     <Compile Include="EntityDL.cs" />
     <Compile Include="EntityTypeDL.cs" />
     <Compile Include="FieldConverters.cs" />
@@ -73,6 +76,7 @@
     <Compile Include="RefTypeTranslator.cs" />
     <Compile Include="Tests.cs" />
     <Compile Include="Translator.cs" />
+    <Compile Include="TypeSystem.cs" />
   </ItemGroup>
   <ItemGroup>
     <Component Include="lib\nunit.core.dll" />

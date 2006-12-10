@@ -8,7 +8,7 @@ namespace GenDB
 {
     /*
      * Kan persisteres:
-     *  - Objekterne skal implementere IBusinessObject og null() (Dette skal sikres af generisk deklarering på public Table<T> )
+     *  - Objekterne skal implementere IBusinessObject og new() (Dette skal sikres af generisk deklarering på public Table<T> )
      *      - Kun felter med public getter og setter persisteres
      *          - Primitive felter persisteres.
      *          - Felter af referencetype persisteres kun, hvis de implementerer IBusinessObject
