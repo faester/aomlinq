@@ -95,6 +95,7 @@ namespace GenDB
         /// </summary>
         public void CreateDatabase()
         {
+            Console.WriteLine("Creating database.");
             using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName))
             {
                 cnn.Open();
@@ -112,6 +113,7 @@ namespace GenDB
         /// <returns></returns>
         public bool DatabaseExists()
         {
+            Console.WriteLine("Deleting database.");
             SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName);
             cnn.Open();
             SqlCommand cmd = new SqlCommand("USE " + Configuration.DatabaseName, cnn);
@@ -302,7 +304,17 @@ namespace GenDB
             {
                 cnn.Open();
 
-                SqlCommand cmd = new SqlCommand ("SELECT e.EntityTypePOID, propertyPOID, LongValue, DateTimeValue, BoolValue, DateTimeValue, CharValue FROM EntityPOID e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID");
+                SqlCommand cmd = new SqlCommand (
+                    "SELECT " +
+                    "    e.EntityTypePOID, " + // 0
+                    "    propertyPOID, " + // 1
+                    "    LongValue, " + // 2
+                    "    DateTimeValue, " + // 3
+                    "    BoolValue, " + // 4
+                    "    StringTimeValue, " + // 5
+                    "    CharValue, " + // 6
+                    "    DoubleValue " + // 7
+                     " FROM EntityPOID e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID");
                 SqlDataReader reader = cmd.ExecuteReader();
 
                 IEntity result = new MSEntity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
@@ -319,12 +331,36 @@ namespace GenDB
                         result.EntityPOID = entityPOID;
                         result.EntityType = TypeSystem.Instance.GetEntityType(entityTypePOID);
                     }
-                    //result.EntityType.Get
+                    if (reader[1] != DBNull.Value) // Does any properties exist?
+                    {
+                        IProperty p = result.EntityType.GetProperty(propertyPOID);
+                        IPropertyValue pv = new MSPropertyValue();
+                        pv.Property = p;
+                        switch (p.MappingType)
+                        {
+                            case MappingType.BOOL: pv.BoolValue = (bool)reader[4]; break;
+                            case MappingType.DATETIME: pv.DateTimeValue = (DateTime)reader[3]; break;
+                            case MappingType.DOUBLE: pv.DoubleValue = (double)reader[7]; break;
+                            case MappingType.LONG: pv.LongValue = (long)reader[2]; break;
+                            case MappingType.REFERENCE: if (reader[2] == DBNull.Value) 
+                                                        { 
+                                                            pv.RefValue = new IBOReference(false); break;
+                                                        } else {
+                                                          pv.RefValue = new IBOReference((long)reader[2]);
+                                                          break;
+                                                        }
+                            case MappingType.STRING: pv.StringValue = (string)reader[5]; break;
+                            case MappingType.CHAR: pv.CharValue = (char)reader[6]; break;
+                            default: throw new Exception("Could not translate the property value.");
+                        }
+                        result.StorePropertyValue(pv);
+                        pv.Entity = result;
+                    }
                 }
 
                 if (!reader.IsClosed) { reader.Close(); }
                 if (!found) { throw new Exception("Request for unknown entityPOID: " + entityPOID);}
-                throw new Exception("Implementation incomplete.");
+                return result;
             }
         }
 
@@ -412,6 +448,31 @@ namespace GenDB
         }
 
         #region Private methods.
+        private void InitNextIDs()
+        {
+            if (DatabaseExists())
+            {
+                using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithDBName))
+                {
+                    cnn.Open();
+                    SqlCommand cmd = new SqlCommand ();
+                    cmd.Connection = cnn;
+
+                    cmd.CommandText = "SELECT CASE WHEN Max(EntityTypePOID) = 0 THEN 0 ELSE Max(EntityTypePOID) + 1 END FROM EntityType";
+                    nextETID = (long)cmd.ExecuteScalar();
+
+                    cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) = 0 THEN 0 ELSE Max(EntityPOID) + 1 END FROM Entity";
+                    nextEID = (long)cmd.ExecuteScalar();
+
+                    cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) = 0 THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";
+                    nextPID = (long)cmd.ExecuteScalar();
+
+                    cmd.CommandText = "SELECT CASE WHEN Max(PropertyTypePOID) = 0 THEN 0 ELSE Max(PropertyTypePOID) + 1 END FROM PropertyType";
+                    nextPTID = (long)cmd.ExecuteScalar();
+                }
+            }
+        }
+
         private void ClearDirtyLists()
         {
             dirtyEntities.Clear();
