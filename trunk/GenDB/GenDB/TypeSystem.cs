@@ -83,6 +83,19 @@ namespace GenDB
             }
         }
 
+        /// <summary>
+        /// Returns IEntityType with given entityTypePOID.
+        /// Since all IEntityTypes are loaded upon instantiation,
+        /// this method does not perform any checks to test if
+        /// the ID is legal or not.
+        /// </summary>
+        /// <param name="entityTypePOID"></param>
+        /// <returns></returns>
+        public IEntityType GetEntityType(long entityTypePOID)
+        {
+            return etid2IEt[entityTypePOID].Target;
+        }
+
         public DelegateTranslator GetTranslator (Type t)
         {
             return type2IEt[t].Translator;

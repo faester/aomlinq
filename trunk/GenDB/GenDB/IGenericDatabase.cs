@@ -82,6 +82,17 @@ namespace GenDB
         IEnumerable <IProperty> GetAllProperties { get; }
 
         /// <summary>
+        /// Returns the property with the given propertyPOID if such a 
+        /// property is associated with this IEntityType or one of its 
+        /// super types. It is the responsibility of the caller to 
+        /// ensure that a property with given ID actually exists. The 
+        /// behaviour is unspecified if this precondition is violated.
+        /// </summary>
+        /// <param name="propertyPOID"></param>
+        /// <returns></returns>
+        IProperty GetProperty(long propertyPOID);
+
+        /// <summary>
         /// Adds a property to the entity type.
         /// </summary>
         /// <param name="property"></param>
@@ -152,8 +163,6 @@ namespace GenDB
         IEntity Entity { get; set; }
         
         string StringValue { get; set; }
-        
-        int IntValue { get; set; }
         
         long LongValue { get; set; }
 

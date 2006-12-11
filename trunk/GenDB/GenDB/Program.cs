@@ -51,7 +51,7 @@ namespace GenDB
             s.name = "Morten";
             s.id = 839;
             s.Enlisted = new DateTime (2006, 12, 31);
-            s.spouse = spouse;
+            s.spouse = s;
             Type t = typeof(Student);
 
             TypeSystem.Instance.RegisterType(t);
