@@ -103,6 +103,7 @@ namespace GenDB
             }
             CreateTables();
             CreateIndexes();
+            CreateSProcs();
         }
 
         /// <summary>
@@ -297,7 +298,34 @@ namespace GenDB
 
         public IEntity GetEntity(long entityPOID)
         {
-            throw new Exception("Not implemented");
+            using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithoutDBName))
+            {
+                cnn.Open();
+
+                SqlCommand cmd = new SqlCommand ("SELECT e.EntityTypePOID, propertyPOID, LongValue, DateTimeValue, BoolValue, DateTimeValue, CharValue FROM EntityPOID e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID");
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                IEntity result = new MSEntity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
+                bool found = false;
+                long propertyPOID = 0;
+                long entityTypePOID = 0;
+
+                while (reader.Read ())
+                {
+                    if (!found) {
+                        found = true;
+                        //entityPOID = (long)reader[0]; // Got that from 
+                        entityTypePOID = (long)reader[1];
+                        result.EntityPOID = entityPOID;
+                        result.EntityType = TypeSystem.Instance.GetEntityType(entityTypePOID);
+                    }
+                    //result.EntityType.Get
+                }
+
+                if (!reader.IsClosed) { reader.Close(); }
+                if (!found) { throw new Exception("Request for unknown entityPOID: " + entityPOID);}
+                throw new Exception("Implementation incomplete.");
+            }
         }
 
         public IPropertyType GetPropertyType(long propertyTypePOID)
@@ -329,8 +357,6 @@ namespace GenDB
         {
             InternalSaveEntityType(entityType);
         }
-
-        
 
         public void Save(IEntity entity)
         {
@@ -472,19 +498,69 @@ namespace GenDB
 
             tCC.AddLast("CREATE TABLE " + TB_ENTITYTYPE_NAME + " (EntityTypePOID int primary key, SuperEntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) , Name VARCHAR(max)); ");
             tCC.AddLast("CREATE TABLE " + TB_PROPERTYTYPE_NAME + " (PropertyTypePOID int primary key, Name VARCHAR(max), MappingType smallint); ");
-            tCC.AddLast("CREATE TABLE " + TB_ENTITY_NAME + " (EntityPOID int primary key, EntityType int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID)); ");
+            tCC.AddLast("CREATE TABLE " + TB_ENTITY_NAME + " (EntityPOID int primary key, EntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID)); ");
             tCC.AddLast("CREATE TABLE " + TB_PROPERTY_NAME + " (PropertyPOID int primary key, PropertyTypePOID int references " + TB_PROPERTYTYPE_NAME + "(PropertyTypePOID), EntityTypePOID int references entityType (entityTypePOID) on delete cascade on update cascade, PropertyName VARCHAR(max)); ");
             tCC.AddLast("CREATE TABLE "
                 + TB_PROPERTYVALUE_NAME + " ( "
                 + " PropertyPOID int not null references " + TB_PROPERTY_NAME + " (PropertyPOID) ON DELETE CASCADE, "
                 + " EntityPOID int not null references " + TB_ENTITY_NAME + " (EntityPOID) ON DELETE CASCADE, "
-                + " LongValue BIGINT, "
+                + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
                 + " BoolValue BIT, "
                 + " StringValue VARCHAR(MAX), "
-                + " DateTimeValue DATETIME)"
+                + " DateTimeValue DATETIME, "
+                + " CharValue CHAR(1))"
                 );
 
             ExecuteNonQueries(tCC);
+        }
+
+        private void CreateSProcs()
+        {
+                string sp_UP_INS_ENTITY =   "CREATE PROCEDURE sp_UP_INS_ENTITY "
+	                                      + "  @EntityPOID AS INT, "
+	                                      + "  @EntityTypePOID AS INT "
+                                          + "AS "
+                                          + "	IF EXISTS (SELECT * FROM Entity WHERE EntityPOID = @EntityPOID) "
+	                                      + "BEGIN "
+		                                  + "   UPDATE Entity SET "
+			                              + "      EntityTypePOID = @EntityTypePOID "
+		                                  + "WHERE "
+			                              + "      EntityPOID = @EntityPOID "
+	                                      + " END ELSE BEGIN "
+		                                  + "INSERT INTO Entity (EntityPOID, EntityTypePOID) "
+                                	      + " VALUES (@EntityPOID, @EntityTypePOID)"
+                                          + "	END ";
+
+                string sp_SET_PROPERTYVALUE = "CREATE PROCEDURE sp_SET_PROPERTYVALUE" +
+                                            "	@EntityPOID AS INT, " +
+                                            "	@PropertyPOID AS INT," +
+                                            "	@LongValue AS INT," +
+                                            "	@CharValue AS CHAR(1)," +
+                                            "	@StringValue AS VARCHAR(max)," +
+                                            "	@DateTimeValue AS DateTime," +
+                                            "	@BoolValue AS BIT" +
+                                            " AS " +
+                                            "	IF EXISTS (SELECT * FROM PropertyValue WHERE EntityPOID = @EntityPOID AND PropertyPOID = @PropertyPoid) " +
+                                            "	BEGIN " +
+                                            "		UPDATE PropertyValue SET " +
+                                            "			LongValue = @LongValue," +
+                                            "			CharValue = @CharValue," +
+                                            "			StringValue = @StringValue ," +
+                                            "			DateTimeValue = @DateTimeValue ," +
+                                            "			BoolValue = @BoolValue " +
+                                            "		WHERE " +
+                                            "			EntityPOID = @EntityPOID AND PropertyPOID = @PropertyPOID" +
+                                            "	END " +
+                                            "	ELSE" +
+                                            "	BEGIN" +
+                                            "		INSERT INTO " +
+                                            "		PropertyValue (EntityPOID, PropertyPOID, LongValue, CharValue , StringValue , DateTimeValue , BoolValue )" +
+                                            "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @CharValue,	@StringValue, @DateTimeValue, @BoolValue)" +
+                                            "	END";
+
+	
+
+                ExecuteNonQueries(new string[] { sp_UP_INS_ENTITY, sp_SET_PROPERTYVALUE });
         }
 
         /// <summary>
@@ -498,12 +574,16 @@ namespace GenDB
 
             SqlCommand cmd = new SqlCommand();
             cmd.Connection = cnn;
+
+            cmd.CommandText = "BEGIN TRANSACTION";
+            cmd.ExecuteNonQuery();
             foreach (string cmdStr in cmdStrings)
             {
                 cmd.CommandText = cmdStr;
                 cmd.ExecuteNonQuery();
             }
-
+            cmd.CommandText = " COMMIT ";
+            cmd.ExecuteNonQuery();
             cnn.Close();
         }
         #endregion
@@ -514,7 +594,6 @@ namespace GenDB
         private IProperty property;
         private IEntity entity;
         private string stringValue = null;
-        private int intValue = default(int);
         private DateTime dateTimeValue = default(DateTime);
         bool existsInDatabase = false;
         private long longValue = default(long);
@@ -566,12 +645,6 @@ namespace GenDB
             set { dateTimeValue = value; }
         }
 
-        public int IntValue
-        {
-            get { return intValue; }
-            set { intValue = value; }
-        }
-
         public string StringValue
         {
             get { return stringValue; }
@@ -616,11 +689,14 @@ namespace GenDB
 
         IEntityType superEntityType;
 
-        LinkedList<IProperty> properties;
+        Dictionary<long, IProperty> properties;
 
         public IEnumerable<IProperty> DeclaredProperties
         {
-            get { return properties; }
+            get {
+                if (properties == null) { return null; }
+                else { return properties.Values; }
+            }
         }
 
         public IEnumerable<IProperty> GetAllProperties
@@ -648,14 +724,32 @@ namespace GenDB
         }
 
         /// <summary>
+        /// TODO: Might be better to store all properties in each 
+        /// MSEntityType to avoid nested look up and thus increase 
+        /// performance. 
+        /// </summary>
+        /// <param name="propertyPOID"></param>
+        /// <returns></returns>
+        public IProperty GetProperty(long propertyPOID)
+        {
+            IProperty result;
+            if (!properties.TryGetValue (propertyPOID, out result))
+            {
+                if (superEntityType == null) { throw new Exception("No such property in IEntityType '" + name + "': " + propertyPOID); }
+                result = superEntityType.GetProperty(propertyPOID);
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Adds property to this entity type. 
         /// Insertion of duplicates are not checked.
         /// </summary>
         /// <param name="property"></param>
         public void AddProperty(IProperty property)
         {
-            if (properties == null) { properties = new LinkedList<IProperty>(); }
-            properties.AddLast(property);
+            if (properties == null) { properties = new Dictionary<long, IProperty>(); }
+            properties.Add(property.PropertyPOID, property);
         }
 
         public bool ExistsInDatabase
