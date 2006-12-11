@@ -51,20 +51,11 @@ namespace GenDB
             s.name = "Morten";
             s.id = 839;
             s.Enlisted = new DateTime (2006, 12, 31);
-            s.spouse = s;
+            s.spouse = spouse;
             Type t = typeof(Student);
 
-            try {
             TypeSystem.Instance.RegisterType(t);
 
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-                Console.WriteLine(ex.StackTrace);
-                Console.ReadLine();
-                return;
-            }
             DelegateTranslator dtrans = TypeSystem.Instance.GetTranslator (t);
             IEntity e = dtrans.Translate (s);
             Console.WriteLine (e);
@@ -77,6 +68,11 @@ namespace GenDB
             Console.WriteLine("Reflection based equality test says: ");
             Console.WriteLine(ObjectUtilities.TestFieldEquality (s, copy));
 
+            DateTime then = DateTime.Now;
+            Configuration.GenDB.Save (e);
+            Configuration.GenDB.CommitChanges();
+
+            Console.WriteLine("Commit duration: {0}" , DateTime.Now - then);
             Console.ReadLine();
         }
 

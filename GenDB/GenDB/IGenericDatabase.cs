@@ -115,6 +115,8 @@ namespace GenDB
 
         void StorePropertyValue(IPropertyValue propertyValue);
 
+        IEnumerable<IPropertyValue> AllPropertyValues { get; }
+
         /// <summary>
         /// Used to determine if insertion should 
         /// happen using an update or insert command.

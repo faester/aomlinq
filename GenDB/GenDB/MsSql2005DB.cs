@@ -82,6 +82,8 @@ namespace GenDB
         StringBuilder sbETInserts = new StringBuilder(); // "Batching" queries as 
         StringBuilder sbPTInserts = new StringBuilder(); // appended strings.
         StringBuilder sbPInserts = new StringBuilder();  // Stored in different stringbuilders to ensure ordered inserts. (One migth actually suffice.)
+        StringBuilder sbEInserts = new StringBuilder();
+        StringBuilder sbPVInserts = new StringBuilder();
 
         LinkedList<IEntityType> dirtyEntityTypes = new LinkedList<IEntityType>();
         LinkedList<IEntity> dirtyEntities = new LinkedList<IEntity>();
@@ -317,11 +319,10 @@ namespace GenDB
                     "    e.EntityTypePOID, " + // 0
                     "    propertyPOID, " + // 1
                     "    LongValue, " + // 2
-                    "    DateTimeValue, " + // 3
-                    "    BoolValue, " + // 4
-                    "    StringTimeValue, " + // 5
-                    "    CharValue, " + // 6
-                    "    DoubleValue " + // 7
+                    "    BoolValue, " + // 3
+                    "    StringTimeValue, " + // 4
+                    "    CharValue, " + // 5
+                    "    DoubleValue " + // 6
                      " FROM EntityPOID e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID");
                 SqlDataReader reader = cmd.ExecuteReader();
 
@@ -346,9 +347,9 @@ namespace GenDB
                         pv.Property = p;
                         switch (p.MappingType)
                         {
-                            case MappingType.BOOL: pv.BoolValue = (bool)reader[4]; break;
-                            case MappingType.DATETIME: pv.DateTimeValue = (DateTime)reader[3]; break;
-                            case MappingType.DOUBLE: pv.DoubleValue = (double)reader[7]; break;
+                            case MappingType.BOOL: pv.BoolValue = (bool)reader[3]; break;
+                            case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
+                            case MappingType.DOUBLE: pv.DoubleValue = (double)reader[6]; break;
                             case MappingType.LONG: pv.LongValue = (long)reader[2]; break;
                             case MappingType.REFERENCE: if (reader[2] == DBNull.Value) 
                                                         { 
@@ -357,8 +358,8 @@ namespace GenDB
                                                           pv.RefValue = new IBOReference((long)reader[2]);
                                                           break;
                                                         }
-                            case MappingType.STRING: pv.StringValue = (string)reader[5]; break;
-                            case MappingType.CHAR: pv.CharValue = (char)reader[6]; break;
+                            case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
+                            case MappingType.CHAR: pv.CharValue = (char)reader[5]; break;
                             default: throw new Exception("Could not translate the property value.");
                         }
                         result.StorePropertyValue(pv);
@@ -404,13 +405,55 @@ namespace GenDB
 
         public void Save(IEntity entity)
         {
-            throw new Exception("Not implemented");
+            DoSave (entity);
+            foreach (IPropertyValue pv in entity.AllPropertyValues)
+            {
+                SavePropertyValue(pv);
+            }
+        }
+
+        private void SavePropertyValue(IPropertyValue pv)
+        {
+            long longValue; // DateTimes are stored as ticks to avoid problems with limited date span in SQL-server
+            if (pv.Property.MappingType == MappingType.DATETIME)
+            {
+                longValue = pv.DateTimeValue.Ticks;
+            }
+            else
+            {
+                longValue = pv.LongValue;
+            }
+            string stringValue = pv.StringValue != null ? pv.StringValue.Replace("'", "\\'") : null;
+            int boolValue = pv.BoolValue ? 1 : 0;
+
+            sbPVInserts.Append (" EXEC sp_SET_PROPERTYVALUE ")
+                       .Append (pv.Entity.EntityPOID)
+                       .Append (',')
+                       .Append (pv.Property.PropertyPOID)
+                       .Append (',')
+                       .Append (longValue)
+                       .Append (",'")
+                       .Append (pv.CharValue.ToString())
+                       .Append ("','") //Todo: Need som check for illegal characters.
+                       .Append (stringValue)
+                       .Append ("',")
+                       .Append (boolValue)
+                       .Append (";");
+        }
+        
+        private void DoSave(IEntity entity)
+        {
+            sbEInserts.Append(" EXEC sp_UP_INS_Entity ")
+                      .Append(entity.EntityPOID)
+                      .Append (',')
+                      .Append (entity.EntityType.EntityTypePOID)
+                      .Append (';');
         }
 
         public void CommitChanges()
         {
             CommitTypeChanges();
-            throw new Exception("Not implemented");
+            CommitValueChanges();
         }
 
         public void CommitTypeChanges()
@@ -439,6 +482,32 @@ namespace GenDB
             ClearDirtyLists();
             ClearInsertStringBuilders();
         }
+
+        private void CommitValueChanges()
+        {
+            SqlCommand cmd = new SqlCommand();
+            using(SqlConnection cnn =  new SqlConnection(Configuration.ConnectStringWithDBName))
+            {
+                cnn.Open ();
+                cmd.Connection = cnn;
+                if (sbEInserts.Length != 0)
+                {
+                    cmd.CommandText = sbEInserts.ToString();
+                    cmd.ExecuteNonQuery();
+                }
+                if (sbPVInserts.Length != 0)
+                {
+                    string cmdstr = sbPVInserts.ToString();
+                    cmd.CommandText = sbPVInserts.ToString();
+                    cmd.ExecuteNonQuery();
+                    long l = long.MaxValue;
+                }
+            }
+            ClearValueInsertStringBuilders();
+
+        }
+
+
 
         public void RollbackTransaction()
         {
@@ -495,6 +564,13 @@ namespace GenDB
             sbPTInserts = new StringBuilder();
             sbPInserts = new StringBuilder();
         }
+
+        private void ClearValueInsertStringBuilders()
+        {
+            sbEInserts = new StringBuilder();
+            sbPVInserts = new StringBuilder();
+        }
+
         private void InternalSaveEntityType(IEntityType et)
         {
             if (et == null || et.ExistsInDatabase) { return; }
@@ -577,7 +653,7 @@ namespace GenDB
                 + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
                 + " BoolValue BIT, "
                 + " StringValue VARCHAR(MAX), "
-                + " DateTimeValue DATETIME, "
+//                + " DateTimeValue DATETIME, "
                 + " CharValue CHAR(1))"
                 );
 
@@ -604,10 +680,9 @@ namespace GenDB
                 string sp_SET_PROPERTYVALUE = "CREATE PROCEDURE sp_SET_PROPERTYVALUE" +
                                             "	@EntityPOID AS INT, " +
                                             "	@PropertyPOID AS INT," +
-                                            "	@LongValue AS INT," +
+                                            "	@LongValue AS BIGINT," +
                                             "	@CharValue AS CHAR(1)," +
                                             "	@StringValue AS VARCHAR(max)," +
-                                            "	@DateTimeValue AS DateTime," +
                                             "	@BoolValue AS BIT" +
                                             " AS " +
                                             "	IF EXISTS (SELECT * FROM PropertyValue WHERE EntityPOID = @EntityPOID AND PropertyPOID = @PropertyPoid) " +
@@ -616,7 +691,6 @@ namespace GenDB
                                             "			LongValue = @LongValue," +
                                             "			CharValue = @CharValue," +
                                             "			StringValue = @StringValue ," +
-                                            "			DateTimeValue = @DateTimeValue ," +
                                             "			BoolValue = @BoolValue " +
                                             "		WHERE " +
                                             "			EntityPOID = @EntityPOID AND PropertyPOID = @PropertyPOID" +
@@ -624,8 +698,8 @@ namespace GenDB
                                             "	ELSE" +
                                             "	BEGIN" +
                                             "		INSERT INTO " +
-                                            "		PropertyValue (EntityPOID, PropertyPOID, LongValue, CharValue , StringValue , DateTimeValue , BoolValue )" +
-                                            "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @CharValue,	@StringValue, @DateTimeValue, @BoolValue)" +
+                                            "		PropertyValue (EntityPOID, PropertyPOID, LongValue, CharValue , StringValue , BoolValue )" +
+                                            "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @CharValue,	@StringValue, @BoolValue)" +
                                             "	END";
 
 	
@@ -871,6 +945,11 @@ namespace GenDB
         {
             get { return entityType; }
             set { entityType = value; }
+        }
+
+        public IEnumerable<IPropertyValue> AllPropertyValues
+        {
+            get { return propertyValues.Values; }
         }
 
         public IPropertyValue GetPropertyValue(IProperty property)
