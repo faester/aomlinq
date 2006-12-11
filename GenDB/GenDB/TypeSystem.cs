@@ -57,8 +57,17 @@ namespace GenDB
         /// <param name="et"></param>
         private void RegisterType(IEntityType et)
         {
+            if (etid2IEt .ContainsKey(et.EntityTypePOID))
+            {
+                return;
+            }
+            if (et.SuperEntityType != null && !etid2IEt.ContainsKey(et.SuperEntityType.EntityTypePOID))
+            {
+                RegisterType(et.SuperEntityType);
+            }
             Type t = Type.GetType(et.Name);
-            IETCacheElement ce = new IETCacheElement(et, t);
+            if (t == null) { throw new Exception("Could not find a CLR type with name: " + et.Name); }
+            IETCacheElement ce = new IETCacheElement(et, t, this);
             // Use add to ensure exception, if something is attempted to be inputted twice.
             etid2IEt.Add (et.EntityTypePOID, ce);
             name2IEt.Add(et.Name, ce);
@@ -72,7 +81,6 @@ namespace GenDB
             Configuration.GenDB.Save (et);
             Configuration.GenDB.CommitTypeChanges();
         }
-
         internal void RegisterType(Type t)
         {
             if (!type2IEt.ContainsKey(t))
@@ -151,8 +159,8 @@ namespace GenDB
                 {
                     IProperty property = Configuration.GenDB.NewProperty();
                     property.PropertyName = field.Name;
+                    property.PropertyType = GetPropertyType(field.FieldType.FullName);
                     property.MappingType = FindMappingType(field);
-                    property.PropertyType = TypeSystem.Instance.GetPropertyType(field.FieldType.FullName);
                     property.EntityType = et;
                     et.AddProperty(property);
                 }
@@ -275,11 +283,11 @@ namespace GenDB
                 directSubTypes.Add(iet);
             }
             
-            public IETCacheElement (IEntityType iet, Type t)
+            public IETCacheElement (IEntityType iet, Type t, TypeSystem owner)
             {
                 this.clrType = t;
                 entityType = iet;
-                translator = new DelegateTranslator (t, entityType);
+                translator = new DelegateTranslator (t, entityType, owner);
             }
         }
         #endregion
