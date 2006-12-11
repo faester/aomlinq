@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GenDB
 {
-    public enum MappingType { BOOL, DATETIME, DOUBLE, LONG, STRING, REFERENCE }; 
+    public enum MappingType { BOOL, DATETIME, DOUBLE, LONG, STRING, REFERENCE, CHAR }; 
 
     /// <summary>
     /// Representation of DB reference to another

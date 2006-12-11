@@ -278,6 +278,10 @@ namespace GenDB
             {
                 return delegate(IEntity ie) { return (int)ie.GetPropertyValue(prop).LongValue; };
             }
+            else if (fi.FieldType == typeof(char))
+            {
+                return delegate(IEntity ie) { return (int)ie.GetPropertyValue(prop).CharValue; };
+            }
             else if (fi.FieldType == typeof(string))
             {
                 return delegate(IEntity ie)
@@ -354,8 +358,9 @@ namespace GenDB
                 case MappingType.STRING:
                     return delegate(IEntity e, object value)
                     {
-                        e.GetPropertyValue(p).StringValue = value.ToString();
+                        e.GetPropertyValue(p).StringValue = (string)value;
                     };
+                case MappingType.CHAR: return delegate(IEntity e, object value) { e.GetPropertyValue(p).CharValue = (char)value; };
                 default:
                     throw new Exception("Unknown MappingType in DelegateTranslator, CreateSetter: " + p.MappingType);
             }
