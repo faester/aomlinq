@@ -64,10 +64,12 @@ namespace GenDB
         FieldInfo[] fields;
         LinkedList<FieldConverter> fieldConverters = new LinkedList<FieldConverter>();
         InstantiateObjectHandler instantiator;
+        TypeSystem owner;
         private DelegateTranslator() { /* empty */ }
 
-        public DelegateTranslator(Type t, IEntityType iet)
+        public DelegateTranslator(Type t, IEntityType iet, TypeSystem owner)
         {
+            this.owner = owner;
             this.iet = iet;
             this.t = t;
             Init();
@@ -89,7 +91,7 @@ namespace GenDB
         {
             if (iet.SuperEntityType != null)
             {
-                superTranslator = TypeSystem.Instance.GetTranslator(iet.SuperEntityType.EntityTypePOID);
+                superTranslator = owner.GetTranslator(iet.SuperEntityType.EntityTypePOID);
             }
         }
 
@@ -127,7 +129,7 @@ namespace GenDB
                 if (fi.FieldType != typeof(DBTag))
                 {
                     IProperty prop = properties[fi.Name];
-                    fieldConverters.AddLast(new FieldConverter(t, fi, prop));
+                    fieldConverters.AddLast(new FieldConverter(t, fi, prop, owner));
                 }
             }
         }
@@ -212,9 +214,11 @@ namespace GenDB
         GetHandler gh;
         Type clrType;
         FieldInfo fi;
+        TypeSystem owner;
 
-        public FieldConverter(Type t, FieldInfo fi, IProperty property)
+        public FieldConverter(Type t, FieldInfo fi, IProperty property, TypeSystem owner)
         {
+            this.owner = owner;
             this.fi = fi;
             clrType = t;
             sh = DynamicMethodCompiler.CreateSetHandler(t, fi);
@@ -255,7 +259,7 @@ namespace GenDB
                         if (res == null)
                         {
                             IEntity e = Configuration.GenDB.GetEntity(entityRef.EntityPOID);
-                            DelegateTranslator trans = TypeSystem.Instance.GetTranslator(clrType);
+                            DelegateTranslator trans = owner.GetTranslator(clrType);
                             DBTag.AssignDBTagTo(res, e.EntityPOID, IBOCache.Instance);
                         }
                         return res;

@@ -201,10 +201,12 @@ namespace GenDB
                 while (reader.Read ())
                 {
                     IPropertyType tmp = new MSPropertyType();
-                    long ptid = (long)(reader[1]);
+                    long ptid = long.Parse(reader[1].ToString());
                     string name = (string)reader[0];
-                    MappingType mpt = (MappingType)reader[2];
-                    tmp.PropertyTypePOID = ptid;
+                    short mapping = (short)reader[2];
+                    MappingType mpt = (MappingType)Enum.ToObject(typeof  (MappingType), mapping);
+                    tmp.MappedType = mpt;
+                    tmp.PropertyTypePOID =ptid;
                     tmp.Name = name;
                     tmp.ExistsInDatabase = true;
                     res.AddLast (tmp);
@@ -242,6 +244,7 @@ namespace GenDB
                     tmp.PropertyName = name;
                     tmp.EntityType = entityTypes[etid];
                     tmp.PropertyType = propertyTypes[tid];
+                    tmp.MappingType = tmp.PropertyType.MappedType;
                     tmp.ExistsInDatabase = true;
                     res.Add (pid, tmp);
                 }
@@ -262,8 +265,10 @@ namespace GenDB
                 SqlCommand cmd = new SqlCommand ("SELECT EntityTypePOID, Name FROM " + TB_ENTITYTYPE_NAME, cnn);
                 SqlDataReader reader = cmd.ExecuteReader();
                 while(reader.Read()){
+                    string t1 = reader[0].ToString ();
+                    string t2 = reader[1].ToString ();
                     long id = long.Parse(reader[0].ToString());
-                    string name = reader[1].ToString();
+                    string name = (string)reader[1];
                     IEntityType et = new MSEntityType();
                     et.Name = name;
                     et.EntityTypePOID = id;
@@ -276,8 +281,11 @@ namespace GenDB
                 while (reader.Read())
                 {
                     long id = long.Parse(reader[0].ToString());
-                    long superId = long.Parse(reader[1].ToString());
-                    res[id].SuperEntityType = res[superId];
+                    if (reader[1] != DBNull .Value )
+                    {
+                        long superId = long.Parse(reader[1].ToString());
+                        res[id].SuperEntityType = res[superId];
+                    }
                 }
             }
 
@@ -539,7 +547,8 @@ namespace GenDB
             sbPTInserts.Append(",'");
             sbPTInserts.Append(pt.Name);
             sbPTInserts.Append ("',");
-            sbPTInserts.Append ((short)pt.MappedType);
+            short mt = (short)pt.MappedType;
+            sbPTInserts.Append (mt);
             sbPTInserts.Append (")");
             dirtyPropertyTypes .AddLast(pt);
             pt.ExistsInDatabase = true;
@@ -762,19 +771,20 @@ namespace GenDB
 
         public IEnumerable<IProperty> GetAllProperties
         {
-            get {
+            get
+            {
                 if (DeclaredProperties != null)
                 {
                     foreach (IProperty p in DeclaredProperties)
                     {
                         yield return p;
                     }
-                    if (superEntityType != null)
+                }
+                if (superEntityType != null)
+                {
+                    foreach (IProperty p in superEntityType.GetAllProperties)
                     {
-                        foreach (IProperty p in superEntityType.GetAllProperties)
-                        {
-                            yield return p;
-                        }
+                        yield return p;
                     }
                 }
                 else
@@ -889,7 +899,6 @@ namespace GenDB
     {
         IPropertyType propertyType;
         IEntityType entityType;
-        MappingType mappingType;
 
         long propertyPOID;
         string propertyName;
@@ -897,8 +906,8 @@ namespace GenDB
 
         public MappingType MappingType
         {
-            get { return mappingType; }
-            set { mappingType = value; }
+            get { return PropertyType.MappedType; }
+            set { PropertyType.MappedType = value; }
         } 
 
 
@@ -934,7 +943,7 @@ namespace GenDB
 
         public override string ToString()
         {
-            return "MSProperty {" + this.mappingType + " name = " + propertyName + " " + PropertyType + " }";
+            return "MSProperty {name = " + propertyName + " " + PropertyType + " }";
         }
     }
 

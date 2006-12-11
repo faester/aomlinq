@@ -41,8 +41,8 @@ namespace GenDB
             }
             else
             {
-                gdb.DeleteDatabase();
-                gdb.CreateDatabase();
+                //gdb.DeleteDatabase();
+                //gdb.CreateDatabase();
             }
 
             Person spouse = new Person();
@@ -54,8 +54,17 @@ namespace GenDB
             s.spouse = s;
             Type t = typeof(Student);
 
+            try {
             TypeSystem.Instance.RegisterType(t);
 
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                Console.WriteLine(ex.StackTrace);
+                Console.ReadLine();
+                return;
+            }
             DelegateTranslator dtrans = TypeSystem.Instance.GetTranslator (t);
             IEntity e = dtrans.Translate (s);
             Console.WriteLine (e);
