@@ -1,3 +1,5 @@
+// internal class fra System.Query.dll, sakset via reflector
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
