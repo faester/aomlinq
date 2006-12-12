@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GenDB
 {
-    class Volatile : Attribute
+    public class Volatile : Attribute
     {
     }
 }

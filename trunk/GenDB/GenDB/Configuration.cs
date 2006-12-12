@@ -6,6 +6,14 @@ namespace GenDB
 {
     public static class Configuration
     {
+        private static int dbBatchSize = 100;
+
+        public static int DbBatchSize
+        {
+            get { return Configuration.dbBatchSize; }
+            set { Configuration.dbBatchSize = value; }
+        } 
+
         static IGenericDatabase genDB = null;
 
         static internal IGenericDatabase GenDB
