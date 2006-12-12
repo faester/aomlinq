@@ -174,7 +174,7 @@ namespace GenDB
             }
             else
             { // No DBTag. Add it to cache/db, and assign tag
-                DBTag.AssignDBTagTo(ibo, res.EntityPOID, IBOCache.Instance);
+                DBTag.AssignDBTagTo(ibo, res.EntityPOID);
             }
             res.EntityType = iet;
             SetValues(ibo, res);
@@ -255,12 +255,12 @@ namespace GenDB
                     IBOReference entityRef = (IBOReference)(ie.GetPropertyValue(prop).RefValue);
                     if (!entityRef.IsNullReference)
                     {
-                        IBusinessObject res = IBOCache.Instance.Get(entityRef.EntityPOID);
+                        IBusinessObject res = IBOCache.Get(entityRef.EntityPOID);
                         if (res == null)
                         {
                             IEntity e = Configuration.GenDB.GetEntity(entityRef.EntityPOID);
                             DelegateTranslator trans = TypeSystem.GetTranslator(clrType);
-                            DBTag.AssignDBTagTo(res, e.EntityPOID, IBOCache.Instance);
+                            DBTag.AssignDBTagTo(res, e.EntityPOID);
                         }
                         return res;
                     }
@@ -347,7 +347,7 @@ namespace GenDB
                             // TODO: Do a lot of checking.... :(
                             // Is it safe not to perform any real translation here??
                             IEntity refered = Configuration.GenDB.NewEntity();
-                            DBTag.AssignDBTagTo(ibo, refered.EntityPOID, IBOCache.Instance);
+                            DBTag.AssignDBTagTo(ibo, refered.EntityPOID);
                             IBOReference reference = new IBOReference (ibo.DBTag.EntityPOID);
                             e.GetPropertyValue(p).RefValue = reference;
                         }

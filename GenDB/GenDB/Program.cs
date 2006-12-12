@@ -69,7 +69,7 @@ namespace GenDB
             Console.WriteLine(ObjectUtilities.TestFieldEquality (s, copy));
 
             DateTime then = DateTime.Now;
-            IBOCache.Instance.FlushToDB();
+            IBOCache.FlushToDB();
 
             Console.WriteLine("Commit duration: {0}" , DateTime.Now - then);
             Console.ReadLine();
