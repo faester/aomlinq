@@ -34,7 +34,7 @@ namespace GenDB
             get { return rebuildDatabase; }
         }
 
-        static string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI";
+        static string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI;connection timeout=240";
 
         public static string ConnectStringWithDBName
         {
@@ -42,7 +42,7 @@ namespace GenDB
             set { Configuration.connectStringWithDBName = value; }
         }
 
-        static string connectStringWithoutDBName = "server=(local);Integrated Security=SSPI";
+        static string connectStringWithoutDBName = "server=(local);Integrated Security=SSPI;connection timeout=240";
 
         public static string ConnectStringWithoutDBName
         {

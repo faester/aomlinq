@@ -24,8 +24,11 @@ namespace Tests
 
         static void Main(string[] args)
         {
+            long objcount = 1000;
+
+            DateTime then = DateTime.Now;
             GenTable gt = new GenTable();
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < objcount; i++)
             {
                 Person p = new Person();
                 p.Name = "Navn " + i.ToString();
@@ -33,11 +36,17 @@ namespace Tests
             }
 
             gt.CommitChanges();
+            TimeSpan dur = DateTime.Now - then;
+            Console.WriteLine ("Insertion of {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
 
+            objcount = 0;
             foreach (IBusinessObject ibo in gt.GetAll())
             {
-                ObjectUtilities.PrintOut(ibo);
+                objcount++;
+                //ObjectUtilities.PrintOut(ibo);
             }
+            Console.WriteLine ("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
+            Console.ReadLine();
         }
     }
 }

@@ -405,36 +405,50 @@ namespace GenDB
                     "    CharValue, " + // 5
                     "    DoubleValue, " + // 6
                     "    e.EntityPOID " + // 7
-                    " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID");
+                    " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
+                    " ORDER BY e.EntityTypePOID, e.EntityPOID"
+                    );
                 cmd.Connection = cnn;
                 SqlDataReader reader = cmd.ExecuteReader();
 
                 IEntity result = null; 
+                IEntityType currentType = null;
                 long propertyPOID = 0;
                 long entityTypePOID = 0;
                 long oldEntityTypePOID = entityTypePOID + 1; // Must be different
                 long entityPOID = 0;
                 long oldEntityPOID = entityPOID + 1; // Must be different
+                bool firstPass = true;
 
                 while (reader.Read ())
                 {
                     entityTypePOID = long.Parse(reader[0].ToString());
                     entityPOID = long.Parse(reader[7].ToString());
-                    if (entityPOID != oldEntityPOID)
+                    if (entityTypePOID != oldEntityTypePOID || firstPass) {
+                        currentType = TypeSystem.GetEntityType(entityTypePOID);
+                        oldEntityPOID = entityTypePOID;
+                    }
+                    if (entityPOID != oldEntityPOID || firstPass)
                     {
                         if (result != null) { yield return result; }
                         result = new MSEntity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
-                    }
-                    if (entityTypePOID != oldEntityTypePOID) {
-                        result.EntityPOID = entityPOID;
-                        result.EntityType = TypeSystem.GetEntityType(entityTypePOID);
+                        result.EntityType = currentType;
+
+                        foreach (IProperty prop in result.EntityType.GetAllProperties)
+                        {
+                            IPropertyValue pv = new MSPropertyValue();
+                            pv.Property = prop;
+                            pv.Entity = result; // TODO: Check if this is needed. Consider removing from interface of PropertyValue
+                            result.StorePropertyValue(pv);
+                        }
+
+                        oldEntityPOID = entityPOID;
                     }
                     if (reader[1] != DBNull.Value) // Does any properties exist?
                     {
                         propertyPOID = long.Parse(reader[1].ToString());
                         IProperty p = result.EntityType.GetProperty(propertyPOID);
-                        IPropertyValue pv = new MSPropertyValue();
-                        pv.Property = p;
+                        IPropertyValue pv = result.GetPropertyValue(p); 
                         switch (p.MappingType)
                         {
                             case MappingType.BOOL: pv.BoolValue = bool.Parse(reader[3].ToString()); break;
@@ -452,8 +466,7 @@ namespace GenDB
                             case MappingType.CHAR: pv.CharValue = (char)reader[5]; break;
                             default: throw new Exception("Could not translate the property value.");
                         }
-                        result.StorePropertyValue(pv);
-                        pv.Entity = result; // TODO: Check if this is needed. Consider removing from interface of PropertyValue
+                        firstPass = false;
                     }
                 }
 
@@ -617,7 +630,7 @@ namespace GenDB
         {
             if (DatabaseExists())
             {
-                using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithoutDBName))
+                using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithDBName))
                 {
                     cnn.Open();
                     SqlCommand cmd = new SqlCommand ();
@@ -628,28 +641,40 @@ namespace GenDB
                         cmd.CommandText = "SELECT CASE WHEN Max(EntityTypePOID) is null THEN 0 ELSE Max(EntityTypePOID) + 1 END FROM EntityType";
                         nextETID = long.Parse(cmd.ExecuteScalar().ToString());
                     }
-                    catch (Exception) { }
+                    catch (Exception)
+                    { 
+                        Console.WriteLine("Error retrieving max EntityTypePOID.");
+                    }
 
                     try
                     {
                         cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) is null THEN 0 ELSE Max(EntityPOID) + 1 END FROM Entity";
                         nextEID = long.Parse(cmd.ExecuteScalar().ToString());
                     }
-                    catch (Exception) { }
+                    catch (Exception)
+                    { 
+                        Console.WriteLine("Error retrieving max EntityPOID.");
+                    }
 
                     try
                     {
                         cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) is null THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";
                         nextPID = long.Parse(cmd.ExecuteScalar().ToString());
                     }
-                    catch (Exception) { }
+                    catch (Exception)
+                    { 
+                        Console.WriteLine("Error retrieving max PropertyPOID.");
+                    }
 
                     try
                     {
                         cmd.CommandText = "SELECT CASE WHEN Max(PropertyTypePOID) is null THEN 0 ELSE Max(PropertyTypePOID) + 1 END FROM PropertyType";
                         nextPTID = long.Parse(cmd.ExecuteScalar().ToString());
                     }
-                    catch(Exception) {}
+                    catch (Exception)
+                    { 
+                        Console.WriteLine("Error retrieving max PropertyTypePOID.");
+                    }
 
                     cnn.Close();
                 }
