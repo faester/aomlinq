@@ -9,7 +9,7 @@ namespace GenDB
     /// of IBusinessObject. Can be used as a 
     /// base class for any object hierarchy.
     /// </summary>
-    public class AbstractBusinessObject : IBusinessObject
+    public abstract class AbstractBusinessObject : IBusinessObject
     {
         private DBTag dBTag;
         public DBTag DBTag

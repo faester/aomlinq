@@ -89,10 +89,10 @@ namespace GenDB
         StringBuilder sbEInserts = new StringBuilder();  // actually suffice.)
         StringBuilder sbPVInserts = new StringBuilder();
 
-        LinkedList<IEntityType> dirtyEntityTypes = new LinkedList<IEntityType>();
-        LinkedList<IEntity> dirtyEntities = new LinkedList<IEntity>();
-        LinkedList<IPropertyType> dirtyPropertyTypes = new LinkedList <IPropertyType>();
-        LinkedList<IProperty> dirtyProperties = new LinkedList<IProperty>();
+        //LinkedList<IEntityType> dirtyEntityTypes = new LinkedList<IEntityType>();
+        //LinkedList<IEntity> dirtyEntities = new LinkedList<IEntity>();
+        //LinkedList<IPropertyType> dirtyPropertyTypes = new LinkedList <IPropertyType>();
+        //LinkedList<IProperty> dirtyProperties = new LinkedList<IProperty>();
         #endregion
 
         #region DB logic
@@ -327,7 +327,9 @@ namespace GenDB
                     "    StringTimeValue, " + // 4
                     "    CharValue, " + // 5
                     "    DoubleValue " + // 6
-                     " FROM EntityPOID e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID");
+                    " FROM EntityPOID e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" + 
+                    " WHERE e.EntityPOID = " + entityPOID.ToString()
+                    );
                 SqlDataReader reader = cmd.ExecuteReader();
 
                 IEntity result = new MSEntity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
@@ -375,6 +377,83 @@ namespace GenDB
                 if (!found) { throw new Exception("Request for unknown entityPOID: " + entityPOID);}
                 return result;
             }
+        }
+
+        public IEnumerable<IEntity> GetAllEntities()
+        {
+            using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithoutDBName))
+            {
+                cnn.Open();
+
+                SqlCommand cmd = new SqlCommand (
+                    "SELECT " +
+                    "    e.EntityTypePOID, " + // 0
+                    "    propertyPOID, " + // 1
+                    "    LongValue, " + // 2
+                    "    BoolValue, " + // 3
+                    "    StringTimeValue, " + // 4
+                    "    CharValue, " + // 5
+                    "    DoubleValue " + // 6
+                    "    e.EntityPOID, " + // 7
+                    " FROM EntityPOID e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID");
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                IEntity result = null; 
+                long propertyPOID = 0;
+                long entityTypePOID = 0;
+                long oldEntityTypePOID = entityTypePOID + 1; // Must be different
+                long entityPOID = 0;
+                long oldEntityPOID = entityPOID + 1; // Must be different
+
+                while (reader.Read ())
+                {
+                    entityTypePOID = (long)reader[1];
+                    entityPOID = (long)reader[7];
+                    if (entityTypePOID != oldEntityTypePOID) {
+                        result.EntityPOID = entityPOID;
+                        result.EntityType = TypeSystem.GetEntityType(entityTypePOID);
+                    }
+                    if (entityPOID != oldEntityPOID)
+                    {
+                        if (result != null) { yield return result; }
+                        result = new MSEntity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
+                    }
+                    if (reader[1] != DBNull.Value) // Does any properties exist?
+                    {
+                        IProperty p = result.EntityType.GetProperty(propertyPOID);
+                        IPropertyValue pv = new MSPropertyValue();
+                        pv.Property = p;
+                        switch (p.MappingType)
+                        {
+                            case MappingType.BOOL: pv.BoolValue = (bool)reader[3]; break;
+                            case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
+                            case MappingType.DOUBLE: pv.DoubleValue = (double)reader[6]; break;
+                            case MappingType.LONG: pv.LongValue = (long)reader[2]; break;
+                            case MappingType.REFERENCE: if (reader[2] == DBNull.Value) 
+                                                        { 
+                                                            pv.RefValue = new IBOReference(false); break;
+                                                        } else {
+                                                          pv.RefValue = new IBOReference((long)reader[2]);
+                                                          break;
+                                                        }
+                            case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
+                            case MappingType.CHAR: pv.CharValue = (char)reader[5]; break;
+                            default: throw new Exception("Could not translate the property value.");
+                        }
+                        result.StorePropertyValue(pv);
+                        pv.Entity = result; // TODO: Check if this is needed. Consider removing from interface of PropertyValue
+                    }
+                }
+
+                if (!reader.IsClosed) { reader.Close(); }
+                if (result != null) { yield return result; }
+            }
+        }
+
+        public IEnumerable<IEntity> GetAllEntitiesOfType(IEntityType type)
+        {
+            // TODO
+            throw new Exception("Not implemented.");
         }
 
         public IPropertyType GetPropertyType(long propertyTypePOID)
@@ -483,7 +562,6 @@ namespace GenDB
                     cmd.ExecuteNonQuery();
                 }
             }
-            ClearDirtyLists();
             ClearInsertStringBuilders();
         }
 
@@ -519,11 +597,6 @@ namespace GenDB
 
         public void RollbackTypeTransaction()
         {
-            foreach (IEntityType et in dirtyEntityTypes) { et.ExistsInDatabase = false; }
-            foreach (IEntity e in dirtyEntities) { e.ExistsInDatabase = false; }
-            foreach (IProperty p in dirtyProperties) { p.ExistsInDatabase = false; }
-            foreach (IPropertyType pt in dirtyPropertyTypes) { pt.ExistsInDatabase = false; }
-            ClearDirtyLists();
             ClearInsertStringBuilders();
         }
 
@@ -551,14 +624,6 @@ namespace GenDB
                     nextPTID = (long)cmd.ExecuteScalar();
                 }
             }
-        }
-
-        private void ClearDirtyLists()
-        {
-            dirtyEntities.Clear();
-            dirtyEntityTypes.Clear();
-            dirtyProperties.Clear();
-            dirtyPropertyTypes.Clear();
         }
 
         private void ClearInsertStringBuilders()
@@ -596,7 +661,6 @@ namespace GenDB
                     InternalSaveProperty(p);
                 }
             }
-            dirtyEntityTypes.AddLast (et);
             et.ExistsInDatabase = true;
         }
 
@@ -629,7 +693,6 @@ namespace GenDB
             short mt = (short)pt.MappedType;
             sbPTInserts.Append (mt);
             sbPTInserts.Append (")");
-            dirtyPropertyTypes .AddLast(pt);
             pt.ExistsInDatabase = true;
         }
         /// <summary>
