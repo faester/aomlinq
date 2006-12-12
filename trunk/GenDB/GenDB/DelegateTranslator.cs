@@ -173,6 +173,10 @@ namespace GenDB
             {
                 res.EntityPOID = ibo.DBTag.EntityPOID;
             }
+            else
+            { // No DBTag. Add it to cache/db, and assign tag
+                DBTag.AssignDBTagTo(ibo, res.EntityPOID, IBOCache.Instance);
+            }
             res.EntityType = iet;
             SetValues(ibo, res);
             return res;
