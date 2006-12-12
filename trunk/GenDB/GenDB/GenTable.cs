@@ -52,8 +52,17 @@ namespace GenDB
                 {
                     translator = TypeSystem.GetTranslator (e.EntityType.EntityTypePOID);
                 }
-                IBusinessObject ibo = translator.Translate(e);
-                yield return ibo;
+                IBusinessObject ibo = IBOCache.Get (e.EntityPOID);
+                if (ibo != null)
+                {
+                    yield return ibo;
+                }
+                else
+                {
+                    ibo = translator.Translate(e);
+                    DBTag.AssignDBTagTo(ibo, e.EntityPOID);
+                    yield return ibo;
+                }
             }
         }
 

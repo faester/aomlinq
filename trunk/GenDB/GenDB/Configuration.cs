@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GenDB
 {
-    static class Configuration
+    public static class Configuration
     {
         static IGenericDatabase genDB = null;
 
@@ -16,8 +16,7 @@ namespace GenDB
                     genDB = MsSql2005DB.Instance;
                     if (Configuration.RebuildDatabase)
                     {
-                        if (genDB.DatabaseExists())
-                        {
+                        if (genDB.DatabaseExists()){
                             genDB.DeleteDatabase();
                         }
                         genDB.CreateDatabase();
@@ -32,6 +31,10 @@ namespace GenDB
         public static bool RebuildDatabase
         {
             get { return rebuildDatabase; }
+            set { 
+                if (genDB != null) { throw new Exception("Request for DB rebuild must be set before the DB is accessed for the first time."); }
+                rebuildDatabase = value;
+            }
         }
 
         static string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI;connection timeout=240";

@@ -24,34 +24,65 @@ namespace GenDB
      */
     class MsSql2005DB : IGenericDatabase
     {
-        #region static
-        static long nextETID = 0;
-
-        public static long NextETID
+        long nextETID = 0;
+        bool nextIDsInitialized = false;
+        public long NextETID
         {
-            get { return MsSql2005DB.nextETID++; }
+            get { 
+                if (!nextIDsInitialized)
+                {
+                    InitNextIDs();
+                    nextIDsInitialized = true;
+                }
+                return nextETID++; 
+            }
         }
-        static long nextEID = 0;
+        long nextEID = 0;
 
-        public static long NextEID
+        public long NextEID
         {
-            get { return MsSql2005DB.nextEID++; }
+            get
+            {
+                if (!nextIDsInitialized)
+                {
+                    InitNextIDs();
+                    nextIDsInitialized = true;
+                }
+                return nextEID++;
+            }
         }
 
-        static long nextPTID = 0;
+        long nextPTID = 0;
 
-        public static long NextPTID
+        public long NextPTID
         {
-            get { return MsSql2005DB.nextPTID++; }
-        }
-        static long nextPID = 0;
+            get
+            {
+                if (!nextIDsInitialized)
+                {
+                    InitNextIDs();
+                    nextIDsInitialized = true;
+                }
 
-        public static long NextPID
+                return nextPTID++;
+            }
+        }
+        long nextPID = 0;
+
+        public long NextPID
         {
-            get { return MsSql2005DB.nextPID++; }
+            get
+            {
+                if (!nextIDsInitialized)
+                {
+                    InitNextIDs();
+                    nextIDsInitialized = true;
+                }
+
+                return nextPID++;
+            }
         }
 
-        #endregion
 
         #region CONSTS
         /* ADO.NET opretholder en connection pool. 
@@ -82,7 +113,7 @@ namespace GenDB
 
         private MsSql2005DB()
         {
-            InitNextIDs();
+            //InitNextIDs();
         }
 
         #region fields
@@ -178,14 +209,14 @@ namespace GenDB
         public IEntityType NewEntityType(string name)
         {
             IEntityType res = new MSEntityType();
-            res.EntityTypePOID = MsSql2005DB.nextETID++;
+            res.EntityTypePOID = NextETID;
             return res;
         }
 
         public IEntity NewEntity()
         {
             IEntity res = new MSEntity();
-            res.EntityPOID = MsSql2005DB.nextEID++;
+            res.EntityPOID = NextEID;
             return res;
         }
 

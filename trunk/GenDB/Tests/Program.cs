@@ -24,7 +24,8 @@ namespace Tests
 
         static void Main(string[] args)
         {
-            long objcount = 1000;
+            Configuration.RebuildDatabase = true;
+            long objcount = 4000;
 
             DateTime then = DateTime.Now;
             GenTable gt = new GenTable();
@@ -38,13 +39,14 @@ namespace Tests
             gt.CommitChanges();
             TimeSpan dur = DateTime.Now - then;
             Console.WriteLine ("Insertion of {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
-
+            then = DateTime.Now;
             objcount = 0;
             foreach (IBusinessObject ibo in gt.GetAll())
             {
                 objcount++;
                 //ObjectUtilities.PrintOut(ibo);
             }
+            dur = DateTime.Now - then;
             Console.WriteLine ("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
             Console.ReadLine();
         }
