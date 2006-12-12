@@ -67,7 +67,8 @@ namespace GenDB
                 RegisterType(et.SuperEntityType);
             }
 
-            Type t = Type.GetType(et.Name, true);
+            Assembly assembly = Assembly.Load(et.AssemblyDescription);
+            Type t = assembly.GetType(et.Name, true);
             if (t == null) { throw new Exception("Could not find a CLR type with name: " + et.Name); }
             IETCacheElement ce = new IETCacheElement(et, t);
             // Use add to ensure exception, if something is attempted to be inputted twice.
@@ -158,6 +159,7 @@ namespace GenDB
             IEntityType et = Configuration.GenDB.NewEntityType(t.FullName);
 
             et.Name = t.FullName;
+            et.AssemblyDescription = t.Assembly.FullName;
 
             FieldInfo[] fields = t.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance |
                                         BindingFlags.Public | BindingFlags.NonPublic );

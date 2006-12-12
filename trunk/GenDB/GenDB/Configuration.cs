@@ -11,9 +11,27 @@ namespace GenDB
         static internal IGenericDatabase GenDB
         {
             get {
-                if (genDB == null) { genDB = MsSql2005DB.Instance; }
+                if (genDB == null)
+                {
+                    genDB = MsSql2005DB.Instance;
+                    if (Configuration.RebuildDatabase)
+                    {
+                        if (genDB.DatabaseExists())
+                        {
+                            genDB.DeleteDatabase();
+                        }
+                        genDB.CreateDatabase();
+                    }
+                }
                 return genDB; 
             }
+        }
+
+        private static bool rebuildDatabase = false;
+
+        public static bool RebuildDatabase
+        {
+            get { return rebuildDatabase; }
         }
 
         static string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI";

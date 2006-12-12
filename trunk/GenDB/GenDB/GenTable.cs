@@ -25,9 +25,6 @@ namespace GenDB
         {
             if (!TypeSystem.IsTypeKnown(ibo.GetType()))
             {
-               Assembly assembly = ibo.GetType().Assembly;
-               Assembly.Load(assembly.FullName );
-                
                TypeSystem.RegisterType(ibo.GetType());
             }
             DelegateTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
@@ -47,7 +44,17 @@ namespace GenDB
         /// <returns></returns>
         public IEnumerable<IBusinessObject> GetAll()
         {
-            throw new Exception("Not implemented");
+            IEntityType lastType = null;
+            DelegateTranslator translator = null;
+            foreach (IEntity e in Configuration.GenDB.GetAllEntities())
+            {
+                if (lastType != e.EntityType)
+                {
+                    translator = TypeSystem.GetTranslator (e.EntityType.EntityTypePOID);
+                }
+                IBusinessObject ibo = translator.Translate(e);
+                yield return ibo;
+            }
         }
 
         ///// <summary>

@@ -63,6 +63,14 @@ namespace GenDB
         long EntityTypePOID { get; set; }
 
         /// <summary>
+        /// When using types outside the namespace/assembly, it
+        /// may be neccessary to load the assembly at run-time. 
+        /// This string gives a unique description of the assembly
+        /// specifying the type.
+        /// </summary>
+        string AssemblyDescription { get; set; }
+
+        /// <summary>
         /// Name of this EntityType
         /// </summary>
         string Name { get; set; }

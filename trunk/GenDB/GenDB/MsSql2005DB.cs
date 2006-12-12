@@ -124,29 +124,25 @@ namespace GenDB
         public bool DatabaseExists()
         {
             Console.WriteLine("Checking if database exists.");
-            SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName);
-            try{
-            cnn.Open();
-            }
-            catch(Exception ex)
+            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName))
             {
-                Console.WriteLine(ex);
-                Console.ReadLine();
+                cnn.Open();
+
+                SqlCommand cmd = new SqlCommand("USE " + Configuration.DatabaseName, cnn);
+                try
+                {
+                    cmd.ExecuteNonQuery();
+                }
+                catch (SqlException)
+                {
+                    return false;
+                }
+                finally
+                {
+                    cnn.Close();
+                }
+                return true;
             }
-            SqlCommand cmd = new SqlCommand("USE " + Configuration.DatabaseName, cnn);
-            try
-            {
-                cmd.ExecuteNonQuery();
-            }
-            catch (SqlException)
-            {
-                return false;
-            }
-            finally
-            {
-                cnn.Close();
-            }
-            return true;
         }
 
         /// <summary>
@@ -154,13 +150,15 @@ namespace GenDB
         /// </summary>
         public void DeleteDatabase()
         {
-            SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName);
-            cnn.Open();
+            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName))
+            {
+                cnn.Open();
 
-            SqlCommand cmd = new SqlCommand("DROP DATABASE " + Configuration.DatabaseName, cnn);
-            cmd.ExecuteNonQuery();
+                SqlCommand cmd = new SqlCommand("DROP DATABASE " + Configuration.DatabaseName, cnn);
+                cmd.ExecuteNonQuery();
 
-            cnn.Close();
+                cnn.Close();
+            }
         }
         #endregion
         
@@ -279,7 +277,7 @@ namespace GenDB
             using(SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithDBName))
             {
                 cnn.Open();
-                SqlCommand cmd = new SqlCommand ("SELECT EntityTypePOID, Name FROM " + TB_ENTITYTYPE_NAME, cnn);
+                SqlCommand cmd = new SqlCommand ("SELECT EntityTypePOID, Name, AssemblyDescription FROM " + TB_ENTITYTYPE_NAME, cnn);
                 SqlDataReader reader = cmd.ExecuteReader();
                 while(reader.Read()){
                     string t1 = reader[0].ToString ();
@@ -288,6 +286,7 @@ namespace GenDB
                     string name = (string)reader[1];
                     IEntityType et = new MSEntityType();
                     et.Name = name;
+                    et.AssemblyDescription = (string)reader[2];
                     et.EntityTypePOID = id;
                     et.ExistsInDatabase = true;
                     res.Add (id, et);
@@ -392,7 +391,7 @@ namespace GenDB
 
         public IEnumerable<IEntity> GetAllEntities()
         {
-            using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithoutDBName))
+            using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithDBName))
             {
                 cnn.Open();
 
@@ -402,11 +401,12 @@ namespace GenDB
                     "    propertyPOID, " + // 1
                     "    LongValue, " + // 2
                     "    BoolValue, " + // 3
-                    "    StringTimeValue, " + // 4
+                    "    StringValue, " + // 4
                     "    CharValue, " + // 5
-                    "    DoubleValue " + // 6
-                    "    e.EntityPOID, " + // 7
-                    " FROM EntityPOID e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID");
+                    "    DoubleValue, " + // 6
+                    "    e.EntityPOID " + // 7
+                    " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID");
+                cmd.Connection = cnn;
                 SqlDataReader reader = cmd.ExecuteReader();
 
                 IEntity result = null; 
@@ -418,33 +418,34 @@ namespace GenDB
 
                 while (reader.Read ())
                 {
-                    entityTypePOID = (long)reader[1];
-                    entityPOID = (long)reader[7];
-                    if (entityTypePOID != oldEntityTypePOID) {
-                        result.EntityPOID = entityPOID;
-                        result.EntityType = TypeSystem.GetEntityType(entityTypePOID);
-                    }
+                    entityTypePOID = long.Parse(reader[0].ToString());
+                    entityPOID = long.Parse(reader[7].ToString());
                     if (entityPOID != oldEntityPOID)
                     {
                         if (result != null) { yield return result; }
                         result = new MSEntity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
                     }
+                    if (entityTypePOID != oldEntityTypePOID) {
+                        result.EntityPOID = entityPOID;
+                        result.EntityType = TypeSystem.GetEntityType(entityTypePOID);
+                    }
                     if (reader[1] != DBNull.Value) // Does any properties exist?
                     {
+                        propertyPOID = long.Parse(reader[1].ToString());
                         IProperty p = result.EntityType.GetProperty(propertyPOID);
                         IPropertyValue pv = new MSPropertyValue();
                         pv.Property = p;
                         switch (p.MappingType)
                         {
-                            case MappingType.BOOL: pv.BoolValue = (bool)reader[3]; break;
+                            case MappingType.BOOL: pv.BoolValue = bool.Parse(reader[3].ToString()); break;
                             case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
-                            case MappingType.DOUBLE: pv.DoubleValue = (double)reader[6]; break;
-                            case MappingType.LONG: pv.LongValue = (long)reader[2]; break;
+                            case MappingType.DOUBLE: pv.DoubleValue = double.Parse(reader[6].ToString()); break;
+                            case MappingType.LONG: pv.LongValue = long.Parse(reader[2].ToString()); break;
                             case MappingType.REFERENCE: if (reader[2] == DBNull.Value) 
                                                         { 
                                                             pv.RefValue = new IBOReference(false); break;
                                                         } else {
-                                                          pv.RefValue = new IBOReference((long)reader[2]);
+                                                          pv.RefValue = new IBOReference(long.Parse(reader[2].ToString()));
                                                           break;
                                                         }
                             case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
@@ -616,23 +617,41 @@ namespace GenDB
         {
             if (DatabaseExists())
             {
-                using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithDBName))
+                using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithoutDBName))
                 {
                     cnn.Open();
                     SqlCommand cmd = new SqlCommand ();
                     cmd.Connection = cnn;
 
-                    cmd.CommandText = "SELECT CASE WHEN Max(EntityTypePOID) = null THEN 0 ELSE Max(EntityTypePOID) + 1 END FROM EntityType";
-                    nextETID = long.Parse (cmd.ExecuteScalar().ToString());
+                    try
+                    {
+                        cmd.CommandText = "SELECT CASE WHEN Max(EntityTypePOID) is null THEN 0 ELSE Max(EntityTypePOID) + 1 END FROM EntityType";
+                        nextETID = long.Parse(cmd.ExecuteScalar().ToString());
+                    }
+                    catch (Exception) { }
 
-                    cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) = null THEN 0 ELSE Max(EntityPOID) + 1 END FROM Entity";
-                    nextEID = long.Parse(cmd.ExecuteScalar().ToString());
+                    try
+                    {
+                        cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) is null THEN 0 ELSE Max(EntityPOID) + 1 END FROM Entity";
+                        nextEID = long.Parse(cmd.ExecuteScalar().ToString());
+                    }
+                    catch (Exception) { }
 
-                    cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) = null THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";
-                    nextPID = long.Parse(cmd.ExecuteScalar().ToString());
+                    try
+                    {
+                        cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) is null THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";
+                        nextPID = long.Parse(cmd.ExecuteScalar().ToString());
+                    }
+                    catch (Exception) { }
 
-                    cmd.CommandText = "SELECT CASE WHEN Max(PropertyTypePOID) = null THEN 0 ELSE Max(PropertyTypePOID) + 1 END FROM PropertyType";
-                    nextPTID = long.Parse(cmd.ExecuteScalar().ToString());
+                    try
+                    {
+                        cmd.CommandText = "SELECT CASE WHEN Max(PropertyTypePOID) is null THEN 0 ELSE Max(PropertyTypePOID) + 1 END FROM PropertyType";
+                        nextPTID = long.Parse(cmd.ExecuteScalar().ToString());
+                    }
+                    catch(Exception) {}
+
+                    cnn.Close();
                 }
             }
         }
@@ -657,13 +676,16 @@ namespace GenDB
 
             sbETInserts.Append (" INSERT INTO ");
             sbETInserts.Append (TB_ENTITYTYPE_NAME);
-            sbETInserts.Append (" (EntityTypePOID, Name, SuperEntityTypePOID) VALUES (");
+            sbETInserts.Append (" (EntityTypePOID, Name, SuperEntityTypePOID, assemblyDescription) VALUES (");
             sbETInserts.Append (et.EntityTypePOID);
             sbETInserts.Append (", '");
             sbETInserts.Append (et.Name);
             sbETInserts.Append ("',");
             if (et.SuperEntityType == null) { sbETInserts.Append("null"); }
             else { sbETInserts.Append(et.SuperEntityType.EntityTypePOID); }
+            sbETInserts.Append (",'");
+            sbETInserts.Append(et.AssemblyDescription);
+            sbETInserts.Append('\'');
             sbETInserts.Append (") ");
             if (et.DeclaredProperties != null)
             {
@@ -719,7 +741,7 @@ namespace GenDB
         {
             LinkedList<string> tCC = new LinkedList<string>(); //Table create commands
 
-            tCC.AddLast("CREATE TABLE " + TB_ENTITYTYPE_NAME + " (EntityTypePOID int primary key, SuperEntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) , Name VARCHAR(max)); ");
+            tCC.AddLast("CREATE TABLE " + TB_ENTITYTYPE_NAME + " (EntityTypePOID int primary key, SuperEntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) , Name VARCHAR(max), assemblyDescription VARCHAR(MAX)); ");
             tCC.AddLast("CREATE TABLE " + TB_PROPERTYTYPE_NAME + " (PropertyTypePOID int primary key, Name VARCHAR(max), MappingType smallint); ");
             tCC.AddLast("CREATE TABLE " + TB_ENTITY_NAME + " (EntityPOID int primary key, EntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID)); ");
             tCC.AddLast("CREATE TABLE " + TB_PROPERTY_NAME + " (PropertyPOID int primary key, PropertyTypePOID int references " + TB_PROPERTYTYPE_NAME + "(PropertyTypePOID), EntityTypePOID int references entityType (entityTypePOID) on delete cascade on update cascade, PropertyName VARCHAR(max)); ");
@@ -730,7 +752,7 @@ namespace GenDB
                 + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
                 + " BoolValue BIT, "
                 + " StringValue VARCHAR(MAX), "
-//                + " DateTimeValue DATETIME, "
+                + " DoubleValue FLOAT, "
                 + " CharValue CHAR(1))"
                 );
 
@@ -904,6 +926,7 @@ namespace GenDB
     internal class MSEntityType : IEntityType
     {
         string name;
+        string assemblyDescription;
 
         bool persistent;
         long entityTypePOID;
@@ -911,6 +934,12 @@ namespace GenDB
         IEntityType superEntityType;
 
         Dictionary<long, IProperty> properties;
+
+        public string AssemblyDescription
+        {
+            get { return assemblyDescription; }
+            set { assemblyDescription = value; }
+        }
 
         public IEnumerable<IProperty> DeclaredProperties
         {
