@@ -58,7 +58,7 @@ namespace GenDB
         IEntityType SuperEntityType { get; set; } 
 
         /// <summary>
-        /// Database id of this IEntityType
+        /// Database id for this IEntityType
         /// </summary>
         long EntityTypePOID { get; set; }
 

@@ -4,6 +4,7 @@ using System.Text;
 using System.Data.SqlClient;
 using System.Data;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace GenDB
 {
@@ -17,18 +18,28 @@ namespace GenDB
      */
     public class GenTable
     {
+        Stopwatch timeSpent = new Stopwatch();
+
+        public Stopwatch TimeSpent
+        {
+            get { return timeSpent; }
+            set { timeSpent = value; }
+        }
+
         public GenTable()
         {
         }
 
         public void Add(IBusinessObject ibo)
         {
+            timeSpent.Start();
             if (!TypeSystem.IsTypeKnown(ibo.GetType()))
             {
                TypeSystem.RegisterType(ibo.GetType());
             }
             DelegateTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
             IEntity e = trans.Translate(ibo);
+            timeSpent.Stop();
         }
 
         public void CommitChanges()
@@ -52,17 +63,19 @@ namespace GenDB
                 {
                     translator = TypeSystem.GetTranslator (e.EntityType.EntityTypePOID);
                 }
-                IBusinessObject ibo = IBOCache.Get (e.EntityPOID);
-                if (ibo != null)
-                {
-                    yield return ibo;
-                }
-                else
-                {
-                    ibo = translator.Translate(e);
-                    DBTag.AssignDBTagTo(ibo, e.EntityPOID);
-                    yield return ibo;
-                }
+                IBusinessObject ibo = translator.Translate (e);
+                yield return ibo;
+                //IBusinessObject ibo = IBOCache.Get (e.EntityPOID);
+                //if (ibo != null)
+                //{
+                //    yield return ibo;
+                //}
+                //else
+                //{
+                //    ibo = translator.Translate(e);
+                //    DBTag.AssignDBTagTo(ibo, e.EntityPOID);
+                //    yield return ibo;
+                //}
             }
         }
 

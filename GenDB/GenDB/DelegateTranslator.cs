@@ -327,8 +327,7 @@ namespace GenDB
                 case MappingType.LONG:
                     return delegate(IEntity e, object value)
                     {
-                        Type t = value.GetType();
-                        long v = (long)value;
+                        long v = Convert.ToInt64(value);
                         IPropertyValue pv = e.GetPropertyValue(p);
                         pv.LongValue = v;
                     };

@@ -14,6 +14,11 @@ namespace Tests
         {
             string name;
 
+            int age;
+            
+            [Volatile]
+            DateTime instantiated = DateTime.Now ;
+
             public string Name
             {
                 get { return name; }
@@ -25,7 +30,8 @@ namespace Tests
         static void Main(string[] args)
         {
             Configuration.RebuildDatabase = true;
-            long objcount = 4000;
+            Configuration.DbBatchSize = 2000;
+            long objcount = 5000;
 
             DateTime then = DateTime.Now;
             GenTable gt = new GenTable();
@@ -48,6 +54,7 @@ namespace Tests
             }
             dur = DateTime.Now - then;
             Console.WriteLine ("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
+            Console.WriteLine("Generic table internal timer: {0}", gt.TimeSpent.Elapsed);
             Console.ReadLine();
         }
     }

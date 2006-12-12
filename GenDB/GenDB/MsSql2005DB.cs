@@ -117,11 +117,17 @@ namespace GenDB
         }
 
         #region fields
-        StringBuilder sbETInserts = new StringBuilder(); // "Batching" queries as appended strings.
-        StringBuilder sbPTInserts = new StringBuilder(); // Stored in different stringbuilders to 
-        StringBuilder sbPInserts = new StringBuilder();  // ensure ordered inserts. (One migth 
-        StringBuilder sbEInserts = new StringBuilder();  // actually suffice.)
-        StringBuilder sbPVInserts = new StringBuilder();
+        StringBuilder sbEntityTypeInserts = new StringBuilder(); // "Batching" queries as appended strings.
+        StringBuilder sbPropertyTypeInserts = new StringBuilder(); // Stored in different stringbuilders to 
+        StringBuilder sbPropertyInserts = new StringBuilder();  // ensure ordered inserts. (One migth 
+        StringBuilder sbEntityInserts = new StringBuilder();  // actually suffice.)
+        StringBuilder sbPropertyValueInserts = new StringBuilder();
+
+        LinkedList<string> llEntityInserts = new LinkedList<string>();
+        LinkedList<string> llPropertyValueInserts = new LinkedList<string>();
+
+        int entityInsertCount = 0;
+        int propertyValueInsertCount = 0;
 
         //LinkedList<IEntityType> dirtyEntityTypes = new LinkedList<IEntityType>();
         //LinkedList<IEntity> dirtyEntities = new LinkedList<IEntity>();
@@ -457,13 +463,15 @@ namespace GenDB
                     entityPOID = long.Parse(reader[7].ToString());
                     if (entityTypePOID != oldEntityTypePOID || firstPass) {
                         currentType = TypeSystem.GetEntityType(entityTypePOID);
-                        oldEntityPOID = entityTypePOID;
-                    }
+                        oldEntityTypePOID = entityTypePOID;
+                    } // if
                     if (entityPOID != oldEntityPOID || firstPass)
                     {
                         if (result != null) { yield return result; }
                         result = new MSEntity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
                         result.EntityType = currentType;
+                        
+                        oldEntityPOID = entityPOID;
 
                         foreach (IProperty prop in result.EntityType.GetAllProperties)
                         {
@@ -471,10 +479,8 @@ namespace GenDB
                             pv.Property = prop;
                             pv.Entity = result; // TODO: Check if this is needed. Consider removing from interface of PropertyValue
                             result.StorePropertyValue(pv);
-                        }
-
-                        oldEntityPOID = entityPOID;
-                    }
+                        } // foreach
+                    } // if
                     if (reader[1] != DBNull.Value) // Does any properties exist?
                     {
                         propertyPOID = long.Parse(reader[1].ToString());
@@ -496,10 +502,10 @@ namespace GenDB
                             case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
                             case MappingType.CHAR: pv.CharValue = (char)reader[5]; break;
                             default: throw new Exception("Could not translate the property value.");
-                        }
-                        firstPass = false;
-                    }
-                }
+                        } // switch
+                    } // if
+                    firstPass = false;
+                } // while
 
                 if (!reader.IsClosed) { reader.Close(); }
                 if (result != null) { yield return result; }
@@ -553,6 +559,11 @@ namespace GenDB
 
         private void SavePropertyValue(IPropertyValue pv)
         {
+            if (propertyValueInsertCount > Configuration.DbBatchSize)
+            {
+                PropertyValueStringBuilderToLL();
+            }
+            propertyValueInsertCount++;
             long longValue; // DateTimes are stored as ticks to avoid problems with limited date span in SQL-server
             if (pv.Property.MappingType == MappingType.DATETIME)
             {
@@ -565,7 +576,7 @@ namespace GenDB
             string stringValue = pv.StringValue != null ? pv.StringValue.Replace("'", "\\'") : null;
             int boolValue = pv.BoolValue ? 1 : 0;
 
-            sbPVInserts.Append (" EXEC sp_SET_PROPERTYVALUE ")
+            sbPropertyValueInserts.Append (" EXEC sp_SET_PROPERTYVALUE ")
                        .Append (pv.Entity.EntityPOID)
                        .Append (',')
                        .Append (pv.Property.PropertyPOID)
@@ -579,10 +590,35 @@ namespace GenDB
                        .Append (boolValue)
                        .Append (";");
         }
-        
+
+        /// <summary>
+        /// Used to avoid to many inserts in one batch. (Too many will cause connection timeout.)
+        /// </summary>
+        private void EntityInsertStringBuilderToLL()
+        {
+            llEntityInserts.AddLast(sbEntityInserts.ToString());
+            sbEntityInserts = new StringBuilder();
+            entityInsertCount = 0;
+        }
+
+        /// <summary>
+        /// Used to avoid to many inserts in one batch. (Too many will cause connection timeout.)
+        /// </summary>
+        private void PropertyValueStringBuilderToLL()
+        {
+            llPropertyValueInserts.AddLast(sbPropertyValueInserts.ToString());
+            sbPropertyValueInserts = new StringBuilder();
+            propertyValueInsertCount = 0;
+        }
+
         private void DoSave(IEntity entity)
         {
-            sbEInserts.Append(" EXEC sp_UP_INS_Entity ")
+            if (entityInsertCount > Configuration.DbBatchSize)
+            { 
+                EntityInsertStringBuilderToLL();         
+            }
+            entityInsertCount++;
+            sbEntityInserts.Append(" EXEC sp_UP_INS_Entity ")
                       .Append(entity.EntityPOID)
                       .Append (',')
                       .Append (entity.EntityType.EntityTypePOID)
@@ -602,19 +638,19 @@ namespace GenDB
             {
                 cnn.Open ();
                 cmd.Connection = cnn;
-                if (sbETInserts.Length != 0)
+                if (sbEntityTypeInserts.Length != 0)
                 {
-                    cmd.CommandText = sbETInserts.ToString();
+                    cmd.CommandText = sbEntityTypeInserts.ToString();
                     cmd.ExecuteNonQuery();
                 }
-                if (sbPTInserts.Length != 0)
+                if (sbPropertyTypeInserts.Length != 0)
                 {
-                    cmd.CommandText = sbPTInserts.ToString();
+                    cmd.CommandText = sbPropertyTypeInserts.ToString();
                     cmd.ExecuteNonQuery();
                 }
-                if (sbPInserts.Length != 0)
+                if (sbPropertyInserts.Length != 0)
                 {
-                    cmd.CommandText = sbPInserts.ToString();
+                    cmd.CommandText = sbPropertyInserts.ToString();
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -623,23 +659,31 @@ namespace GenDB
 
         private void CommitValueChanges()
         {
+            PropertyValueStringBuilderToLL();
+            EntityInsertStringBuilderToLL();
+
             SqlCommand cmd = new SqlCommand();
-            using(SqlConnection cnn =  new SqlConnection(Configuration.ConnectStringWithDBName))
+
+            using (SqlConnection cnn =  new SqlConnection(Configuration.ConnectStringWithDBName))
             {
-                cnn.Open ();
+                cnn.Open();
                 cmd.Connection = cnn;
-                if (sbEInserts.Length != 0)
+                cmd.Transaction = cnn.BeginTransaction();
+
+                foreach (string insertCommand in llEntityInserts)
                 {
-                    cmd.CommandText = sbEInserts.ToString();
+                    cmd.CommandText = insertCommand;
                     cmd.ExecuteNonQuery();
                 }
-                if (sbPVInserts.Length != 0)
+                foreach (string insertCommand in llPropertyValueInserts)
                 {
-                    string cmdstr = sbPVInserts.ToString();
-                    cmd.CommandText = sbPVInserts.ToString();
+                    cmd.CommandText = insertCommand;
                     cmd.ExecuteNonQuery();
                 }
+
+                cmd.Transaction.Commit();
             }
+
             ClearValueInsertStringBuilders();
 
         }
@@ -714,15 +758,17 @@ namespace GenDB
 
         private void ClearInsertStringBuilders()
         {
-            sbETInserts = new StringBuilder();
-            sbPTInserts = new StringBuilder();
-            sbPInserts = new StringBuilder();
+            sbEntityTypeInserts = new StringBuilder();
+            sbPropertyTypeInserts = new StringBuilder();
+            sbPropertyInserts = new StringBuilder();
         }
 
         private void ClearValueInsertStringBuilders()
         {
-            sbEInserts = new StringBuilder();
-            sbPVInserts = new StringBuilder();
+            sbEntityInserts = new StringBuilder();
+            sbPropertyValueInserts = new StringBuilder();
+            llEntityInserts.Clear();
+            llPropertyValueInserts.Clear();
         }
 
         private void InternalSaveEntityType(IEntityType et)
@@ -730,19 +776,19 @@ namespace GenDB
             if (et == null || et.ExistsInDatabase) { return; }
             InternalSaveEntityType (et.SuperEntityType); 
 
-            sbETInserts.Append (" INSERT INTO ");
-            sbETInserts.Append (TB_ENTITYTYPE_NAME);
-            sbETInserts.Append (" (EntityTypePOID, Name, SuperEntityTypePOID, assemblyDescription) VALUES (");
-            sbETInserts.Append (et.EntityTypePOID);
-            sbETInserts.Append (", '");
-            sbETInserts.Append (et.Name);
-            sbETInserts.Append ("',");
-            if (et.SuperEntityType == null) { sbETInserts.Append("null"); }
-            else { sbETInserts.Append(et.SuperEntityType.EntityTypePOID); }
-            sbETInserts.Append (",'");
-            sbETInserts.Append(et.AssemblyDescription);
-            sbETInserts.Append('\'');
-            sbETInserts.Append (") ");
+            sbEntityTypeInserts.Append (" INSERT INTO ");
+            sbEntityTypeInserts.Append (TB_ENTITYTYPE_NAME);
+            sbEntityTypeInserts.Append (" (EntityTypePOID, Name, SuperEntityTypePOID, assemblyDescription) VALUES (");
+            sbEntityTypeInserts.Append (et.EntityTypePOID);
+            sbEntityTypeInserts.Append (", '");
+            sbEntityTypeInserts.Append (et.Name);
+            sbEntityTypeInserts.Append ("',");
+            if (et.SuperEntityType == null) { sbEntityTypeInserts.Append("null"); }
+            else { sbEntityTypeInserts.Append(et.SuperEntityType.EntityTypePOID); }
+            sbEntityTypeInserts.Append (",'");
+            sbEntityTypeInserts.Append(et.AssemblyDescription);
+            sbEntityTypeInserts.Append('\'');
+            sbEntityTypeInserts.Append (") ");
             if (et.DeclaredProperties != null)
             {
                 foreach (IProperty p in et.DeclaredProperties)
@@ -756,32 +802,32 @@ namespace GenDB
         private void InternalSaveProperty(IProperty p)
         {
             InternalSavePropertyType(p.PropertyType);
-            sbPInserts.Append("INSERT INTO ");
-            sbPInserts.Append(TB_PROPERTY_NAME);
-            sbPInserts.Append(" (PropertyPOID, PropertyTypePOID, EntityTypePOID, PropertyName) VALUES (");
-            sbPInserts.Append(p.PropertyPOID);
-            sbPInserts.Append(',');
-            sbPInserts.Append(p.PropertyType.PropertyTypePOID);
-            sbPInserts.Append(',');
-            sbPInserts.Append(p.EntityType.EntityTypePOID);
-            sbPInserts.Append(",'");
-            sbPInserts.Append(p.PropertyName);
-            sbPInserts.Append("') ");
+            sbPropertyInserts.Append("INSERT INTO ");
+            sbPropertyInserts.Append(TB_PROPERTY_NAME);
+            sbPropertyInserts.Append(" (PropertyPOID, PropertyTypePOID, EntityTypePOID, PropertyName) VALUES (");
+            sbPropertyInserts.Append(p.PropertyPOID);
+            sbPropertyInserts.Append(',');
+            sbPropertyInserts.Append(p.PropertyType.PropertyTypePOID);
+            sbPropertyInserts.Append(',');
+            sbPropertyInserts.Append(p.EntityType.EntityTypePOID);
+            sbPropertyInserts.Append(",'");
+            sbPropertyInserts.Append(p.PropertyName);
+            sbPropertyInserts.Append("') ");
         }
 
         private void InternalSavePropertyType(IPropertyType pt)
         {
             if (pt.ExistsInDatabase) { return; }
-            sbPTInserts.Append (" INSERT INTO ");
-            sbPTInserts.Append (TB_PROPERTYTYPE_NAME);
-            sbPTInserts.Append (" (PropertyTypePOID, Name, MappingType) VALUES (");
-            sbPTInserts.Append (pt.PropertyTypePOID);
-            sbPTInserts.Append(",'");
-            sbPTInserts.Append(pt.Name);
-            sbPTInserts.Append ("',");
+            sbPropertyTypeInserts.Append (" INSERT INTO ");
+            sbPropertyTypeInserts.Append (TB_PROPERTYTYPE_NAME);
+            sbPropertyTypeInserts.Append (" (PropertyTypePOID, Name, MappingType) VALUES (");
+            sbPropertyTypeInserts.Append (pt.PropertyTypePOID);
+            sbPropertyTypeInserts.Append(",'");
+            sbPropertyTypeInserts.Append(pt.Name);
+            sbPropertyTypeInserts.Append ("',");
             short mt = (short)pt.MappedType;
-            sbPTInserts.Append (mt);
-            sbPTInserts.Append (")");
+            sbPropertyTypeInserts.Append (mt);
+            sbPropertyTypeInserts.Append (")");
             pt.ExistsInDatabase = true;
         }
         /// <summary>
