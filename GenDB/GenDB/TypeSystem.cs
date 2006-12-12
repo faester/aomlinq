@@ -15,25 +15,16 @@ namespace GenDB
     /// i klassehierarkiet. Det er trods alt ikke afgørende for at undersøge, om man 
     /// kan få skidtet til at performe effektivt.
     /// </summary>
-    class TypeSystem
+    static class TypeSystem
     {
-        #region Singleton stuff
-        static TypeSystem instance = new TypeSystem();
-
-        internal static TypeSystem Instance
-        {
-            get { return instance; }
-        }
-        #endregion
-
-        private Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement> ();
-        private Dictionary<string, IETCacheElement> name2IEt = new Dictionary<string, IETCacheElement> ();
-        private Dictionary<Type, IETCacheElement> type2IEt = new Dictionary<Type, IETCacheElement> ();
+        private static Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement> ();
+        private static Dictionary<string, IETCacheElement> name2IEt = new Dictionary<string, IETCacheElement> ();
+        private static Dictionary<Type, IETCacheElement> type2IEt = new Dictionary<Type, IETCacheElement> ();
         
-        private Dictionary<long, IPropertyType> ptid2pt = new Dictionary<long, IPropertyType>();
-        private Dictionary<string, IPropertyType> ptName2pt = new Dictionary<string, IPropertyType>();
+        private static Dictionary<long, IPropertyType> ptid2pt = new Dictionary<long, IPropertyType>();
+        private static Dictionary<string, IPropertyType> ptName2pt = new Dictionary<string, IPropertyType>();
 
-        private TypeSystem()
+        static TypeSystem()
         {
             Init();
         }
@@ -47,7 +38,7 @@ namespace GenDB
         /// og persisting entity types, property types and
         /// properties.
         /// </summary>
-        private void Init()
+        private static void Init()
         {
             foreach (IEntityType ets in Configuration.GenDB.GetAllEntityTypes())
             {
@@ -65,7 +56,7 @@ namespace GenDB
         /// and adds it to the database.
         /// </summary>
         /// <param name="et"></param>
-        private void RegisterType(IEntityType et)
+        private static void RegisterType(IEntityType et)
         {
             if (etid2IEt .ContainsKey(et.EntityTypePOID))
             {
@@ -77,7 +68,7 @@ namespace GenDB
             }
             Type t = Type.GetType(et.Name);
             if (t == null) { throw new Exception("Could not find a CLR type with name: " + et.Name); }
-            IETCacheElement ce = new IETCacheElement(et, t, this);
+            IETCacheElement ce = new IETCacheElement(et, t);
             // Use add to ensure exception, if something is attempted to be inputted twice.
             etid2IEt.Add (et.EntityTypePOID, ce);
             name2IEt.Add(et.Name, ce);
@@ -91,7 +82,8 @@ namespace GenDB
             Configuration.GenDB.Save (et);
             Configuration.GenDB.CommitTypeChanges();
         }
-        internal void RegisterType(Type t)
+        
+        internal static void RegisterType(Type t)
         {
             if (!type2IEt.ContainsKey(t))
             {
@@ -109,17 +101,17 @@ namespace GenDB
         /// </summary>
         /// <param name="entityTypePOID"></param>
         /// <returns></returns>
-        public IEntityType GetEntityType(long entityTypePOID)
+        public static IEntityType GetEntityType(long entityTypePOID)
         {
             return etid2IEt[entityTypePOID].Target;
         }
 
-        public DelegateTranslator GetTranslator (Type t)
+        public static DelegateTranslator GetTranslator (Type t)
         {
             return type2IEt[t].Translator;
         }
 
-        public DelegateTranslator GetTranslator (long entityTypePOID )
+        public static DelegateTranslator GetTranslator (long entityTypePOID )
         {
             return etid2IEt[entityTypePOID].Translator;
         }
@@ -129,7 +121,7 @@ namespace GenDB
         /// </summary>
         /// <param name="iet"></param>
         /// <returns></returns>
-        public IEnumerable<IEntityType> GetTypesInstanceOf(IEntityType iet)
+        public static IEnumerable<IEntityType> GetTypesInstanceOf(IEntityType iet)
         {
             // List for storing the result
             LinkedList<IEntityType> result = new LinkedList<IEntityType>();
@@ -149,12 +141,12 @@ namespace GenDB
             return result;
         }
 
-        public IEnumerable<IEntityType> GetTypesInstanceOf(long entityTypePOID)
+        public static IEnumerable<IEntityType> GetTypesInstanceOf(long entityTypePOID)
         {
             return GetTypesInstanceOf(etid2IEt[entityTypePOID].Target);
         }
 
-        public IEntityType ConstructEntityType(Type t)
+        public static IEntityType ConstructEntityType(Type t)
         {
             IEntityType et = Configuration.GenDB.NewEntityType(t.FullName);
 
@@ -194,7 +186,7 @@ namespace GenDB
             return et;
         }
 
-        MappingType FindMappingType (FieldInfo field)
+        static MappingType FindMappingType (FieldInfo field)
         {
             Type t = field.FieldType;
             if (t.IsPrimitive)
@@ -242,7 +234,7 @@ namespace GenDB
             }
         }
 
-        public IPropertyType GetPropertyType(string name)
+        public static IPropertyType GetPropertyType(string name)
         {
             IPropertyType res;
             if (ptName2pt.TryGetValue(name, out res))
@@ -294,11 +286,11 @@ namespace GenDB
                 directSubTypes.Add(iet);
             }
             
-            public IETCacheElement (IEntityType iet, Type t, TypeSystem owner)
+            public IETCacheElement (IEntityType iet, Type t)
             {
                 this.clrType = t;
                 entityType = iet;
-                translator = new DelegateTranslator (t, entityType, owner);
+                translator = new DelegateTranslator (t, entityType);
             }
         }
         #endregion
