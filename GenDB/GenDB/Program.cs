@@ -15,7 +15,6 @@ namespace GenDB
 
         public class Person : AbstractBusinessObject
         {
-            //public IBusinessObject obj = null;
             public string name = null;
             public Person spouse = null;
             public char ch = 'a';
@@ -55,8 +54,6 @@ namespace GenDB
             s.spouse = spouse;
             Type t = typeof(Student);
 
-            TypeSystem.Instance.Init();
-
             TypeSystem.Instance.RegisterType(t);
 
             try {
@@ -89,103 +86,103 @@ namespace GenDB
             Console.ReadLine();
         }
 
-        static void OldMain()
-        {
-            GenericDB genDB = GenericDB.Instance;
-            //genDB.Log = Console.Out;
-#if RECREATE_DB
-            if (genDB.DatabaseExists())
-            {
-                Console.WriteLine("Deleting old database.");
-                genDB.DeleteDatabase();
-            }
-#endif
-            if (!genDB.DatabaseExists())
-            {
-                Console.WriteLine("Building database.");
-                genDB.CreateDatabase();
-                Console.WriteLine("Database built");
-            }
+//        static void OldMain()
+//        {
+//            GenericDB genDB = GenericDB.Instance;
+//            //genDB.Log = Console.Out;
+//#if RECREATE_DB
+//            if (genDB.DatabaseExists())
+//            {
+//                Console.WriteLine("Deleting old database.");
+//                genDB.DeleteDatabase();
+//            }
+//#endif
+//            if (!genDB.DatabaseExists())
+//            {
+//                Console.WriteLine("Building database.");
+//                genDB.CreateDatabase();
+//                Console.WriteLine("Database built");
+//            }
 
-            GenTable genericTable = new GenTable();
+//            GenTable genericTable = new GenTable();
 
-            DateTime then = DateTime.Now;
-            TimeSpan dur = DateTime.Now - then;
+//            DateTime then = DateTime.Now;
+//            TimeSpan dur = DateTime.Now - then;
 
-            Student lastStudent = null;
+//            Student lastStudent = null;
 
-            int elements = 1000;
-            int submitInterval = 2500;
+//            int elements = 1000;
+//            int submitInterval = 2500;
 
-            for (int i = 0; i < elements; i++)
-            {
-                Student s = new Student();
-                s.name = "student no " + i.ToString();
-                s.Enlisted = DateTime.Now;
-                //s.spouse = lastStudent;
+//            for (int i = 0; i < elements; i++)
+//            {
+//                Student s = new Student();
+//                s.name = "student no " + i.ToString();
+//                s.Enlisted = DateTime.Now;
+//                //s.spouse = lastStudent;
 
-                lastStudent = s;
+//                lastStudent = s;
 
-                genericTable.Add(s);
-                if (i % submitInterval == 0)
-                {
-                    dur = DateTime.Now - then;
-                    Console.WriteLine("{0} objects inserted in {1}. {2} objs/s ", i, dur, i / dur.TotalSeconds);
-                    GenericDB.Instance.SubmitChanges();
-                }
-            }
+//                genericTable.Add(s);
+//                if (i % submitInterval == 0)
+//                {
+//                    dur = DateTime.Now - then;
+//                    Console.WriteLine("{0} objects inserted in {1}. {2} objs/s ", i, dur, i / dur.TotalSeconds);
+//                    GenericDB.Instance.SubmitChanges();
+//                }
+//            }
 
-            dur = DateTime.Now - then;
+//            dur = DateTime.Now - then;
 
-            Console.WriteLine("{0} objects inserted in {1}. {2} objs/s ", elements, dur, elements / dur.TotalSeconds);
+//            Console.WriteLine("{0} objects inserted in {1}. {2} objs/s ", elements, dur, elements / dur.TotalSeconds);
 
-            Console.WriteLine("Cached objects: {0}", IBOCache.Instance.Count);
+//            Console.WriteLine("Cached objects: {0}", IBOCache.Instance.Count);
 
-            then = DateTime.Now;
-            int retrieveCount = 0;
+//            then = DateTime.Now;
+//            int retrieveCount = 0;
 
-            IBOCache.Instance.FlushToDB();
+//            IBOCache.Instance.FlushToDB();
 
-            if (false)
-            {
-                EntityTypeDL et = genDB.EntityTypes.Where((EntityTypeDL e) => e.Name.EndsWith("Student")).First();
-                IEnumerable<IBusinessObject> ibosss = genericTable.GetAll(et);
-                foreach (IBusinessObject ibo in ibosss)
-                {
-                    if (retrieveCount % 2 == 0)
-                    {
-                        Student s = (Student)ibo;
-                        s.name = "Navn nr " + retrieveCount;
-                    }
-                    retrieveCount++;
-                    //ObjectDumper.PrintOut(ibo);
-                }
-            }
-            else
-            {
-                foreach (IBusinessObject ibo in genericTable.GetAll())
-                {
-                    if (retrieveCount % 2 == 0)
-                    {
-                        Student s = (Student)ibo;
-                        s.name = "Navn nr " + retrieveCount;
-                    }
-                    retrieveCount++;
-                    //ObjectDumper.PrintOut(ibo);
-                }
-            }
-            dur = DateTime.Now - then;
-            Console.WriteLine("{0} objects retrieved in {1}. {2} obj/sec", retrieveCount, dur, retrieveCount / dur.TotalSeconds);
-            Console.WriteLine("Objects retrieved from cache: {0}", IBOCache.Instance.Retrieved);
-            Console.WriteLine(IBOCache.Instance);
-            Console.WriteLine("Forcing garbage collection.");
-            Console.WriteLine("Flushing cache and submitting DB.");
-            then = DateTime.Now;
-            IBOCache.Instance.FlushToDB();
-            GenericDB.Instance.SubmitChanges();
-            dur = DateTime.Now - then;
-            Console.WriteLine("Cache flush duration: " + dur);
-            Console.ReadLine();
-        }
+//            if (false)
+//            {
+//                EntityTypeDL et = genDB.EntityTypes.Where((EntityTypeDL e) => e.Name.EndsWith("Student")).First();
+//                IEnumerable<IBusinessObject> ibosss = genericTable.GetAll(et);
+//                foreach (IBusinessObject ibo in ibosss)
+//                {
+//                    if (retrieveCount % 2 == 0)
+//                    {
+//                        Student s = (Student)ibo;
+//                        s.name = "Navn nr " + retrieveCount;
+//                    }
+//                    retrieveCount++;
+//                    //ObjectDumper.PrintOut(ibo);
+//                }
+//            }
+//            else
+//            {
+//                foreach (IBusinessObject ibo in genericTable.GetAll())
+//                {
+//                    if (retrieveCount % 2 == 0)
+//                    {
+//                        Student s = (Student)ibo;
+//                        s.name = "Navn nr " + retrieveCount;
+//                    }
+//                    retrieveCount++;
+//                    //ObjectDumper.PrintOut(ibo);
+//                }
+//            }
+//            dur = DateTime.Now - then;
+//            Console.WriteLine("{0} objects retrieved in {1}. {2} obj/sec", retrieveCount, dur, retrieveCount / dur.TotalSeconds);
+//            Console.WriteLine("Objects retrieved from cache: {0}", IBOCache.Instance.Retrieved);
+//            Console.WriteLine(IBOCache.Instance);
+//            Console.WriteLine("Forcing garbage collection.");
+//            Console.WriteLine("Flushing cache and submitting DB.");
+//            then = DateTime.Now;
+//            IBOCache.Instance.FlushToDB();
+//            GenericDB.Instance.SubmitChanges();
+//            dur = DateTime.Now - then;
+//            Console.WriteLine("Cache flush duration: " + dur);
+//            Console.ReadLine();
+//        }
     }
 }

@@ -35,6 +35,7 @@ namespace GenDB
 
         private TypeSystem()
         {
+            Init();
         }
 
         /// <summary>
@@ -46,7 +47,7 @@ namespace GenDB
         /// og persisting entity types, property types and
         /// properties.
         /// </summary>
-        internal void Init()
+        private void Init()
         {
             foreach (IEntityType ets in Configuration.GenDB.GetAllEntityTypes())
             {
@@ -164,7 +165,8 @@ namespace GenDB
 
             foreach (FieldInfo field in fields)
             {
-                if (field.FieldType != typeof(DBTag))
+                Attribute attr = Attribute.GetCustomAttribute(field, typeof(Volatile));
+                if (field.FieldType != typeof(DBTag) && attr == null)
                 {
                     IProperty property = Configuration.GenDB.NewProperty();
                     property.PropertyName = field.Name;

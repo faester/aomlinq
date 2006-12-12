@@ -130,6 +130,9 @@ namespace GenDB
         /// DBTags are silently ignored.
         /// This clone method is used by the IBOCache as 
         /// part of the change tracking mechanism.
+        /// 
+        /// If a field in o is attributed by [Volatile]
+        /// it will not be considered during cloning.
         /// </summary>
         /// <param name="o"></param>
         /// <returns></returns>
@@ -151,7 +154,9 @@ namespace GenDB
 
             foreach (FieldInfo f in fields)
             {
-                if (f.FieldType != TYPEOF_DBTAG)
+                Attribute v = Volatile.GetCustomAttribute(f, typeof(Volatile));
+
+                if (f.FieldType != TYPEOF_DBTAG && v == null)
                 {
                     object fv = f.GetValue(o);
                     f.SetValue(clone, fv);
@@ -186,33 +191,38 @@ namespace GenDB
             foreach(FieldInfo f in fields)
             {
                 Type fieldType = f.FieldType;
-
-                object va = f.GetValue (a);
-                object vb = f.GetValue (b);
-
-                if (fieldType.IsPrimitive)
+                Attribute attr = Attribute.GetCustomAttribute(f, typeof(Volatile));
+                if (attr == null)
                 {
-                    if (!va.Equals(vb)) { return false; }
-                }
-                else
-                {
-                    if (fieldType == TYPEOF_DATETIME) { 
-                        if (!va.Equals (vb))
-                        {
-                            return false;
-                        }
-                    }
-                    else if (fieldType == TYPEOF_STRING) {
-                        if (!va.Equals(vb))
-                        {
-                            return false;
-                        }
+                    object va = f.GetValue(a);
+                    object vb = f.GetValue(b);
+
+                    if (fieldType.IsPrimitive)
+                    {
+                        if (!va.Equals(vb)) { return false; }
                     }
                     else
                     {
-                        if (!Object.ReferenceEquals (va, vb)) 
+                        if (fieldType == TYPEOF_DATETIME)
                         {
-                            return false;
+                            if (!va.Equals(vb))
+                            {
+                                return false;
+                            }
+                        }
+                        else if (fieldType == TYPEOF_STRING)
+                        {
+                            if (!va.Equals(vb))
+                            {
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            if (!Object.ReferenceEquals(va, vb))
+                            {
+                                return false;
+                            }
                         }
                     }
                 }

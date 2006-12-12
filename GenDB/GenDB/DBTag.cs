@@ -33,8 +33,6 @@ namespace GenDB
 
         private DBTag() { /* empty */ }
 
-        private WeakReference wr;
-
         private DBTag (IBOCache cache, long entityPOID)
         {
             this.entityPOID = entityPOID;
