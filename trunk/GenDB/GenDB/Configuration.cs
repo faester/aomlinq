@@ -6,12 +6,14 @@ namespace GenDB
 {
     static class Configuration
     {
-        static IGenericDatabase genDB = MsSql2005DB.Instance;
+        static IGenericDatabase genDB = null;
 
         static internal IGenericDatabase GenDB
         {
-            get { return genDB; }
-            set { genDB = value; }
+            get {
+                if (genDB == null) { genDB = MsSql2005DB.Instance; }
+                return genDB; 
+            }
         }
 
         static string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI";

@@ -80,7 +80,10 @@ namespace GenDB
         }
         #endregion
 
-        private MsSql2005DB() { /* empty */ }
+        private MsSql2005DB()
+        {
+            InitNextIDs();
+        }
 
         #region fields
         StringBuilder sbETInserts = new StringBuilder(); // "Batching" queries as appended strings.
@@ -94,6 +97,7 @@ namespace GenDB
         //LinkedList<IPropertyType> dirtyPropertyTypes = new LinkedList <IPropertyType>();
         //LinkedList<IProperty> dirtyProperties = new LinkedList<IProperty>();
         #endregion
+
 
         #region DB logic
         /// <summary>
@@ -119,9 +123,16 @@ namespace GenDB
         /// <returns></returns>
         public bool DatabaseExists()
         {
-            Console.WriteLine("Deleting database.");
+            Console.WriteLine("Checking if database exists.");
             SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName);
+            try{
             cnn.Open();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                Console.ReadLine();
+            }
             SqlCommand cmd = new SqlCommand("USE " + Configuration.DatabaseName, cnn);
             try
             {
@@ -611,17 +622,17 @@ namespace GenDB
                     SqlCommand cmd = new SqlCommand ();
                     cmd.Connection = cnn;
 
-                    cmd.CommandText = "SELECT CASE WHEN Max(EntityTypePOID) = 0 THEN 0 ELSE Max(EntityTypePOID) + 1 END FROM EntityType";
-                    nextETID = (long)cmd.ExecuteScalar();
+                    cmd.CommandText = "SELECT CASE WHEN Max(EntityTypePOID) = null THEN 0 ELSE Max(EntityTypePOID) + 1 END FROM EntityType";
+                    nextETID = long.Parse (cmd.ExecuteScalar().ToString());
 
-                    cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) = 0 THEN 0 ELSE Max(EntityPOID) + 1 END FROM Entity";
-                    nextEID = (long)cmd.ExecuteScalar();
+                    cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) = null THEN 0 ELSE Max(EntityPOID) + 1 END FROM Entity";
+                    nextEID = long.Parse(cmd.ExecuteScalar().ToString());
 
-                    cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) = 0 THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";
-                    nextPID = (long)cmd.ExecuteScalar();
+                    cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) = null THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";
+                    nextPID = long.Parse(cmd.ExecuteScalar().ToString());
 
-                    cmd.CommandText = "SELECT CASE WHEN Max(PropertyTypePOID) = 0 THEN 0 ELSE Max(PropertyTypePOID) + 1 END FROM PropertyType";
-                    nextPTID = (long)cmd.ExecuteScalar();
+                    cmd.CommandText = "SELECT CASE WHEN Max(PropertyTypePOID) = null THEN 0 ELSE Max(PropertyTypePOID) + 1 END FROM PropertyType";
+                    nextPTID = long.Parse(cmd.ExecuteScalar().ToString());
                 }
             }
         }
