@@ -52,31 +52,21 @@
   <ItemGroup>
     <Compile Include="AbstractBusinessObject.cs" />
     <Compile Include="Configuration.cs" />
-    <Compile Include="Converter.cs" />
-    <Compile Include="DB.cs" />
     <Compile Include="DBTag.cs" />
     <Compile Include="DelegateTranslator.cs" />
     <Compile Include="DynamicMethodCompiler.cs" />
-    <Compile Include="EntityDL.cs" />
-    <Compile Include="EntityTypeDL.cs" />
-    <Compile Include="FieldConverters.cs" />
     <Compile Include="IBOCache.cs" />
     <Compile Include="IBusinessObject.cs" />
     <Compile Include="IGenericDatabase.cs" />
-    <Compile Include="Inheritance.cs" />
     <Compile Include="MsSql2005DB.cs" />
     <Compile Include="NotTranslatableException.cs" />
     <Compile Include="ObjectUtilities.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GenTable.cs" />
-    <Compile Include="Property.cs" />
-    <Compile Include="PropertyType.cs" />
-    <Compile Include="PropertyValue.cs" />
-    <Compile Include="RefTypeTranslator.cs" />
     <Compile Include="Tests.cs" />
-    <Compile Include="Translator.cs" />
     <Compile Include="TypeSystem.cs" />
+    <Compile Include="VolatileAnnotation.cs" />
   </ItemGroup>
   <ItemGroup>
     <Component Include="lib\nunit.core.dll" />
