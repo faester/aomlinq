@@ -15,14 +15,16 @@ namespace GenDB
 
         public class Person : AbstractBusinessObject
         {
+            bool isMale = true;
             public string name = null;
             public Person spouse = null;
             public char ch = 'a';
         }
 
         public class Student : Person { 
-            static long test = 100;
-            public long id = nextID++;
+            static long test = 100; //This should not be persisted since it is static
+            [Volatile]
+            public long id = nextID++; // Should not be persisted due to attribute.
             private DateTime enlisted;
 
             public DateTime Enlisted

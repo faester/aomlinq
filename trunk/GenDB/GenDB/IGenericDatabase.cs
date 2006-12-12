@@ -102,8 +102,7 @@ namespace GenDB
         /// Used to determine if insertion should 
         /// happen using an update or insert command.
         /// </summary>
-        bool ExistsInDatabase { get; set; } 
-    }
+        bool ExistsInDatabase { get; set; }     }
 
     interface IEntity
     {
@@ -116,12 +115,6 @@ namespace GenDB
         void StorePropertyValue(IPropertyValue propertyValue);
 
         IEnumerable<IPropertyValue> AllPropertyValues { get; }
-
-        /// <summary>
-        /// Used to determine if insertion should 
-        /// happen using an update or insert command.
-        /// </summary>
-        bool ExistsInDatabase { get; set; } 
     }
 
     interface IPropertyType
@@ -177,12 +170,6 @@ namespace GenDB
         bool BoolValue { get; set; }
 
         IBOReference RefValue { get; set; }
-
-        /// <summary>
-        /// Used to determine if insertion should 
-        /// happen using an update or insert command.
-        /// </summary>
-        bool ExistsInDatabase { get; set; } 
     }
 
     interface IGenericDatabase
@@ -251,6 +238,24 @@ namespace GenDB
         /// </summary>
         /// <param name="entityType"></param>
         void Save(IEntityType entityType);
+
+        /// <summary>
+        /// Will return all persisted elements ordered by 
+        /// their EntityType. (The ordering happens to ease
+        /// later translation to business objects.)
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<IEntity> GetAllEntities();
+
+
+        /// <summary>
+        /// Will return all persisted elements of the given
+        /// IEntityType or one of its subclasses ordered by 
+        /// their EntityType. (The ordering happens to ease
+        /// later translation to business objects.)
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<IEntity> GetAllEntitiesOfType(IEntityType type);
 
         /// <summary>
         /// Assumes that all neccessary IProperty, IEntityType and IPropertyType 

@@ -75,6 +75,7 @@ namespace GenDB
             uncommittedObject[obj.DBTag.EntityPOID] = obj;
         }
 
+
         private static void AddToCommitted(IBusinessObject obj)
         {
             CacheElement wr = new CacheElement(obj);
