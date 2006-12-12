@@ -41,53 +41,47 @@ namespace GenDB
         }
     }
 
-    internal sealed class IBOCache
+    internal static class IBOCache
     {
-        static IBOCache instance = new IBOCache();
         static long retrieved = 0;
 
-        public long Retrieved
+        public static long Retrieved
         {
             get { return IBOCache.retrieved; }
         }
 
-        public static IBOCache Instance
-        {
-            get { return instance; }
-        }
-
-        private IBOCache() { /* empty */ }
+        static IBOCache() { /* empty */ }
 
         /// <summary>
         /// Stores objects with weak references to allow garbage collection of 
         /// the cached objects.
         /// </summary>
-        Dictionary<long, CacheElement> committedObjects = new Dictionary<long, CacheElement>();
+        static Dictionary<long, CacheElement> committedObjects = new Dictionary<long, CacheElement>();
 
         ///// <summary>
         ///// Stores regular object references. The object must not be gc'ed before 
         ///// it has been written to persistent storage.
         ///// </summary>
-        Dictionary<long, IBusinessObject> uncommittedObject = new Dictionary<long, IBusinessObject>();
+        static Dictionary<long, IBusinessObject> uncommittedObject = new Dictionary<long, IBusinessObject>();
 
         /// <summary>
         /// Adds the given obj to the cache. The DBTag element
         /// must be set prior to calling this method.
         /// </summary>
         /// <param name="obj"></param>
-        public void Add(IBusinessObject obj)
+        public static void Add(IBusinessObject obj)
         {
             if (obj.DBTag == null) { throw new NullReferenceException("DBTag of obj not set"); }
             uncommittedObject[obj.DBTag.EntityPOID] = obj;
         }
 
-        private void AddToCommitted(IBusinessObject obj)
+        private static void AddToCommitted(IBusinessObject obj)
         {
             CacheElement wr = new CacheElement(obj);
             committedObjects[obj.DBTag.EntityPOID] = wr;
         }
         
-        public int Count
+        public static int Count
         {
             get { return committedObjects.Count; }
         }
@@ -99,7 +93,7 @@ namespace GenDB
         /// NullReferenceException is thrown.
         /// </summary>
         /// <param name="id"></param>
-        public IBusinessObject Get(DBTag id)
+        public static IBusinessObject Get(DBTag id)
         {
             if (id == null) { throw new NullReferenceException("id"); }
             return Get(id.EntityPOID);
@@ -112,7 +106,7 @@ namespace GenDB
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public IBusinessObject Get(long id)
+        public static IBusinessObject Get(long id)
         {
             CacheElement wr;
             IBusinessObject result;
@@ -133,12 +127,7 @@ namespace GenDB
             return result;
         }
 
-        public override string ToString()
-        {
-            return "IBOCache. Cache size = " + instance.Count + ", cache retrieves = " + instance.Retrieved;
-        }
-
-        public void FlushToDB()
+        public static void FlushToDB()
         {
             CommitUncommitted();
             CommitChangedCommited();
@@ -146,7 +135,7 @@ namespace GenDB
             Configuration.GenDB.CommitChanges();
         }
 
-        private void CommitUncommitted()
+        private static void CommitUncommitted()
         {
             foreach (IBusinessObject ibo in uncommittedObject.Values)
             {
@@ -156,7 +145,7 @@ namespace GenDB
             }
         }
 
-        private void MoveCommittedToUncommitted()
+        private static void MoveCommittedToUncommitted()
         {
             foreach (IBusinessObject ibo in uncommittedObject.Values)
             {
@@ -165,7 +154,7 @@ namespace GenDB
             uncommittedObject.Clear();
         }
 
-        private void CommitChangedCommited()
+        private static void CommitChangedCommited()
         {
             foreach (CacheElement ce in committedObjects.Values)
             {
@@ -196,7 +185,7 @@ namespace GenDB
         /// the DBTag destructor)
         /// </summary>
         /// <param name="id"></param>
-        internal void Remove(long id)
+        internal static void Remove(long id)
         {
             //TODO: Need to make some kind of commit possible here.
             committedObjects.Remove(id);

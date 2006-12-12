@@ -16,27 +16,25 @@ namespace GenDB
     public sealed class DBTag
     {
         long entityPOID;
-        IBOCache cache;
         
         /// <summary>
-        /// 
+        /// Assigns DBTag with entityPOID == id to the obj given.
+        /// The obj is also added to the cache.
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="id"></param>
-        /// <param name="cache"></param>
-        internal static void AssignDBTagTo(IBusinessObject obj, long id, IBOCache cache)
+        internal static void AssignDBTagTo(IBusinessObject obj, long id)
         {
-            DBTag dbtag = new DBTag(cache, id);
+            DBTag dbtag = new DBTag(id);
             obj.DBTag = dbtag;
-            cache.Add(obj);
+            IBOCache.Add(obj);
         }
 
         private DBTag() { /* empty */ }
 
-        private DBTag (IBOCache cache, long entityPOID)
+        private DBTag (long entityPOID)
         {
             this.entityPOID = entityPOID;
-            this.cache = cache;
         }
 
         /// <summary>
@@ -44,7 +42,7 @@ namespace GenDB
         /// </summary>
         ~DBTag() 
         {
-            cache.Remove(this.EntityPOID);
+            IBOCache.Remove(this.EntityPOID);
         }
 
         public long EntityPOID
