@@ -25,7 +25,7 @@ namespace Tests
         static void Main(string[] args)
         {
             GenTable gt = new GenTable();
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 Person p = new Person();
                 p.Name = "Navn " + i.ToString();
@@ -33,6 +33,11 @@ namespace Tests
             }
 
             gt.CommitChanges();
+
+            foreach (IBusinessObject ibo in gt.GetAll())
+            {
+                ObjectUtilities.PrintOut(ibo);
+            }
         }
     }
 }

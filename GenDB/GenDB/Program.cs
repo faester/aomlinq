@@ -36,16 +36,7 @@ namespace GenDB
 
         public static void Main(string[] args)
         {
-            IGenericDatabase gdb = MsSql2005DB.Instance;
-            if (!gdb.DatabaseExists ()) 
-            {
-                gdb.CreateDatabase();
-            }
-            else
-            {
-                gdb.DeleteDatabase();
-                gdb.CreateDatabase();
-            }
+            IGenericDatabase gdb = Configuration.GenDB;
 
             Person spouse = new Person();
             spouse.name = "In your dreams...";
