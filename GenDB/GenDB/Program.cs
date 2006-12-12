@@ -18,6 +18,7 @@ namespace GenDB
             //public IBusinessObject obj = null;
             public string name = null;
             public Person spouse = null;
+            public char ch = 'a';
         }
 
         public class Student : Person { 
@@ -41,8 +42,8 @@ namespace GenDB
             }
             else
             {
-                //gdb.DeleteDatabase();
-                //gdb.CreateDatabase();
+                gdb.DeleteDatabase();
+                gdb.CreateDatabase();
             }
 
             Person spouse = new Person();
@@ -54,7 +55,20 @@ namespace GenDB
             s.spouse = spouse;
             Type t = typeof(Student);
 
+            TypeSystem.Instance.Init();
+
             TypeSystem.Instance.RegisterType(t);
+
+            try {
+            TypeSystem.Instance.RegisterType(t);
+            }
+            catch( Exception ex)
+            {
+                Console.WriteLine(ex);
+                Console.WriteLine(ex.StackTrace);
+                Console.ReadLine ();
+                return;
+            }
 
             DelegateTranslator dtrans = TypeSystem.Instance.GetTranslator (t);
             IEntity e = dtrans.Translate (s);
@@ -69,8 +83,7 @@ namespace GenDB
             Console.WriteLine(ObjectUtilities.TestFieldEquality (s, copy));
 
             DateTime then = DateTime.Now;
-            Configuration.GenDB.Save (e);
-            Configuration.GenDB.CommitChanges();
+            IBOCache.Instance.FlushToDB();
 
             Console.WriteLine("Commit duration: {0}" , DateTime.Now - then);
             Console.ReadLine();

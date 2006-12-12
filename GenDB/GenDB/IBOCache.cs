@@ -140,20 +140,19 @@ namespace GenDB
 
         public void FlushToDB()
         {
-            GenericDB.Instance.SubmitChanges();
-
             CommitUncommitted();
             CommitChangedCommited();
             MoveCommittedToUncommitted();
-
-            GenericDB.Instance.SubmitChanges();
+            Configuration.GenDB.CommitChanges();
         }
 
         private void CommitUncommitted()
         {
             foreach (IBusinessObject ibo in uncommittedObject.Values)
             {
-                Translator.UpdateDBWith(ibo);
+                DelegateTranslator trans = TypeSystem.Instance.GetTranslator(ibo.GetType());
+                IEntity e = trans.Translate(ibo);
+                Configuration.GenDB.Save (e);
             }
         }
 
@@ -175,7 +174,9 @@ namespace GenDB
                     if (ce.IsAlive)
                     {
                         IBusinessObject ibo = ce.Target;
-                        Translator.UpdateDBWith(ibo);
+                        DelegateTranslator trans = TypeSystem.Instance.GetTranslator(ibo.GetType());
+                        IEntity e = trans.Translate(ibo);
+                        Configuration.GenDB.Save(e);
                         ce.ClearDirtyBit();
                     }
                     else

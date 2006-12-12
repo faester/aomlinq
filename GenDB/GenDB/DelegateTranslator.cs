@@ -185,7 +185,6 @@ namespace GenDB
             {
                 foreach (IProperty property in iet.DeclaredProperties)
                 {
-                    Console.WriteLine("PN: " + property.PropertyName);
                     IPropertyValue propertyValue = Configuration.GenDB.NewPropertyValue();
                     propertyValue.Entity = e;
                     propertyValue.Property = property;
@@ -282,10 +281,6 @@ namespace GenDB
             {
                 return delegate(IEntity ie) { return (int)ie.GetPropertyValue(prop).LongValue; };
             }
-            else if (fi.FieldType == typeof(char))
-            {
-                return delegate(IEntity ie) { return (int)ie.GetPropertyValue(prop).CharValue; };
-            }
             else if (fi.FieldType == typeof(string))
             {
                 return delegate(IEntity ie)
@@ -306,7 +301,9 @@ namespace GenDB
             }
             else if (fi.FieldType == typeof(char))
             {
-                return delegate(IEntity ie) { return ie.GetPropertyValue(prop).CharValue; };
+                return delegate(IEntity ie) {  //
+                    return ie.GetPropertyValue(prop).CharValue; 
+                };
             }
             else
             {
@@ -364,7 +361,10 @@ namespace GenDB
                     {
                         e.GetPropertyValue(p).StringValue = (string)value;
                     };
-                case MappingType.CHAR: return delegate(IEntity e, object value) { e.GetPropertyValue(p).CharValue = (char)value; };
+                case MappingType.CHAR: return 
+                    delegate(IEntity e, object value) { 
+                        e.GetPropertyValue(p).CharValue = (char)value; 
+                    };
                 default:
                     throw new Exception("Unknown MappingType in DelegateTranslator, CreateSetter: " + p.MappingType);
             }
