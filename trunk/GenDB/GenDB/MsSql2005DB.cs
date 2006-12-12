@@ -504,7 +504,6 @@ namespace GenDB
                     string cmdstr = sbPVInserts.ToString();
                     cmd.CommandText = sbPVInserts.ToString();
                     cmd.ExecuteNonQuery();
-                    long l = long.MaxValue;
                 }
             }
             ClearValueInsertStringBuilders();

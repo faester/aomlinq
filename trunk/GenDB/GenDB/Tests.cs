@@ -11,7 +11,7 @@ namespace GenDB
     {
         class EqulityTestPrimitives
         {
-            int i = 0;
+            public int i = 0;
         }
 
         class EqualityTest

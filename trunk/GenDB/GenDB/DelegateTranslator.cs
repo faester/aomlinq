@@ -126,7 +126,8 @@ namespace GenDB
 
             foreach (FieldInfo fi in fields)
             {
-                if (fi.FieldType != typeof(DBTag))
+                Attribute a = Volatile.GetCustomAttribute (fi, typeof(Volatile));
+                if (fi.FieldType != typeof(DBTag) && a == null)
                 {
                     IProperty prop = properties[fi.Name];
                     fieldConverters.AddLast(new FieldConverter(t, fi, prop, owner));
