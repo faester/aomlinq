@@ -66,7 +66,8 @@ namespace GenDB
             {
                 RegisterType(et.SuperEntityType);
             }
-            Type t = Type.GetType(et.Name);
+
+            Type t = Type.GetType(et.Name, true);
             if (t == null) { throw new Exception("Could not find a CLR type with name: " + et.Name); }
             IETCacheElement ce = new IETCacheElement(et, t);
             // Use add to ensure exception, if something is attempted to be inputted twice.
@@ -81,6 +82,7 @@ namespace GenDB
             }
             Configuration.GenDB.Save (et);
             Configuration.GenDB.CommitTypeChanges();
+            DelegateTranslator trans = new DelegateTranslator(ce.ClrType, et);
         }
         
         internal static void RegisterType(Type t)
@@ -114,6 +116,11 @@ namespace GenDB
         public static DelegateTranslator GetTranslator (long entityTypePOID )
         {
             return etid2IEt[entityTypePOID].Translator;
+        }
+
+        public static bool IsTypeKnown(Type t)
+        {
+            return type2IEt.ContainsKey(t);
         }
 
         /// <summary>
