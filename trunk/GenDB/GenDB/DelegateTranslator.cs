@@ -41,7 +41,7 @@ namespace GenDB
         {
             foreach (FieldInfo fi in fields)
             {
-                if (fi.IsStatic) { throw new NotTranslatableException("Can not translate static fields.", fi); }
+                //if (fi.IsStatic) { throw new NotTranslatableException("Can not translate static fields.", fi); }
                 if (fi.FieldType.IsArray) { throw new NotTranslatableException("Can not translate arrays.", fi); }
                 if (fi.FieldType.IsByRef) { CheckRefFieldTranslatability(fi); }
             }
@@ -64,12 +64,10 @@ namespace GenDB
         FieldInfo[] fields;
         LinkedList<FieldConverter> fieldConverters = new LinkedList<FieldConverter>();
         InstantiateObjectHandler instantiator;
-        TypeSystem owner;
         private DelegateTranslator() { /* empty */ }
 
-        public DelegateTranslator(Type t, IEntityType iet, TypeSystem owner)
+        public DelegateTranslator(Type t, IEntityType iet)
         {
-            this.owner = owner;
             this.iet = iet;
             this.t = t;
             Init();
@@ -91,7 +89,7 @@ namespace GenDB
         {
             if (iet.SuperEntityType != null)
             {
-                superTranslator = owner.GetTranslator(iet.SuperEntityType.EntityTypePOID);
+                superTranslator = TypeSystem.GetTranslator(iet.SuperEntityType.EntityTypePOID);
             }
         }
 
@@ -130,7 +128,7 @@ namespace GenDB
                 if (fi.FieldType != typeof(DBTag) && a == null)
                 {
                     IProperty prop = properties[fi.Name];
-                    fieldConverters.AddLast(new FieldConverter(t, fi, prop, owner));
+                    fieldConverters.AddLast(new FieldConverter(t, fi, prop));
                 }
             }
         }
@@ -218,11 +216,9 @@ namespace GenDB
         GetHandler gh;
         Type clrType;
         FieldInfo fi;
-        TypeSystem owner;
 
-        public FieldConverter(Type t, FieldInfo fi, IProperty property, TypeSystem owner)
+        public FieldConverter(Type t, FieldInfo fi, IProperty property)
         {
-            this.owner = owner;
             this.fi = fi;
             clrType = t;
             sh = DynamicMethodCompiler.CreateSetHandler(t, fi);
@@ -263,7 +259,7 @@ namespace GenDB
                         if (res == null)
                         {
                             IEntity e = Configuration.GenDB.GetEntity(entityRef.EntityPOID);
-                            DelegateTranslator trans = owner.GetTranslator(clrType);
+                            DelegateTranslator trans = TypeSystem.GetTranslator(clrType);
                             DBTag.AssignDBTagTo(res, e.EntityPOID, IBOCache.Instance);
                         }
                         return res;

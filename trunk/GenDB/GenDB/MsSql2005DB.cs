@@ -342,7 +342,7 @@ namespace GenDB
                         //entityPOID = (long)reader[0]; // Got that from 
                         entityTypePOID = (long)reader[1];
                         result.EntityPOID = entityPOID;
-                        result.EntityType = TypeSystem.Instance.GetEntityType(entityTypePOID);
+                        result.EntityType = TypeSystem.GetEntityType(entityTypePOID);
                     }
                     if (reader[1] != DBNull.Value) // Does any properties exist?
                     {

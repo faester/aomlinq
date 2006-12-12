@@ -21,6 +21,7 @@ namespace GenDB
         }
 
         public class Student : Person { 
+            static long test = 100;
             public long id = nextID++;
             private DateTime enlisted;
 
@@ -53,9 +54,9 @@ namespace GenDB
             s.spouse = spouse;
             Type t = typeof(Student);
 
-            TypeSystem.Instance.RegisterType(t);
+            TypeSystem.RegisterType(t);
 
-            DelegateTranslator dtrans = TypeSystem.Instance.GetTranslator (t);
+            DelegateTranslator dtrans = TypeSystem.GetTranslator (t);
             IEntity e = dtrans.Translate (s);
             Console.WriteLine (e);
             

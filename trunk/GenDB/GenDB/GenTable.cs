@@ -9,9 +9,8 @@ namespace GenDB
     /*
      * Kan persisteres:
      *  - Objekterne skal implementere IBusinessObject og new() (Dette skal sikres af generisk deklarering på public Table<T> )
-     *      - Kun felter med public getter og setter persisteres
-     *          - Primitive felter persisteres.
-     *          - Felter af referencetype persisteres kun, hvis de implementerer IBusinessObject
+     *      - Primitive felter persisteres.
+     *      - Felter af referencetype persisteres kun, hvis de implementerer IBusinessObject
      *      - Ønskes et felt, der opfylder ovenstående, ikke persisteret kan det annoteres med [Volatile]
      *      - Statiske felter persisteres ikke
      */
@@ -23,7 +22,7 @@ namespace GenDB
 
         public void Add(IBusinessObject ibo)
         {
-            DelegateTranslator trans = TypeSystem.Instance.GetTranslator(ibo.GetType());
+            DelegateTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
             IEntity e = trans.Translate(ibo);
         }
 
