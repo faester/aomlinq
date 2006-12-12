@@ -16,11 +16,15 @@ namespace GenDB
      *  kun eksisterer i memory.
      *  
      *  (Den konkrete type af REFERENCE afgøres ved hjælp af EntityType)
+     *  
+     * Der skrives i "batches", hvilket simpelt hen er implementeret ved at 
+     * sende meget lange tekststrenge med adskillige SQL-kommandoer til 
+     * serveren på en gang. Det er muligvis ikke den rigtige fremgangsmåde, 
+     * men lader til at fungere efter hensigten. 
      */
     class MsSql2005DB : IGenericDatabase
     {
         #region static
-        //TODO: Nedenstående skal instantieres i forhold til db-tilstand. (SELECT MAX(EntityPOID) + 1 FROM...)
         static long nextETID = 0;
 
         public static long NextETID
@@ -79,10 +83,10 @@ namespace GenDB
         private MsSql2005DB() { /* empty */ }
 
         #region fields
-        StringBuilder sbETInserts = new StringBuilder(); // "Batching" queries as 
-        StringBuilder sbPTInserts = new StringBuilder(); // appended strings.
-        StringBuilder sbPInserts = new StringBuilder();  // Stored in different stringbuilders to ensure ordered inserts. (One migth actually suffice.)
-        StringBuilder sbEInserts = new StringBuilder();
+        StringBuilder sbETInserts = new StringBuilder(); // "Batching" queries as appended strings.
+        StringBuilder sbPTInserts = new StringBuilder(); // Stored in different stringbuilders to 
+        StringBuilder sbPInserts = new StringBuilder();  // ensure ordered inserts. (One migth 
+        StringBuilder sbEInserts = new StringBuilder();  // actually suffice.)
         StringBuilder sbPVInserts = new StringBuilder();
 
         LinkedList<IEntityType> dirtyEntityTypes = new LinkedList<IEntityType>();

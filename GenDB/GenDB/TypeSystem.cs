@@ -5,6 +5,16 @@ using System.Reflection;
 
 namespace GenDB
 {
+    /// <summary>
+    /// Vedligeholder typebeskrivelser og oversættere til de forskellige klasser.
+    /// 
+    /// Aktuelt skaber det Exceptions, hvis der ændres i typer i en eksisterende DB.
+    /// Det skal formentlig udbedres, da det i nogen grad fjerner ideen i en generisk
+    /// database. Der skal dog fastlægges en semantik omkring dette, og det er også 
+    /// muligt vi skal vælge at acceptere, at databasen skal nulstilles, når man ændrer
+    /// i klassehierarkiet. Det er trods alt ikke afgørende for at undersøge, om man 
+    /// kan få skidtet til at performe effektivt.
+    /// </summary>
     class TypeSystem
     {
         #region Singleton stuff
