@@ -332,7 +332,7 @@ namespace GenDB
                     return delegate(IEntity e, object value)
                     {
                         Type t = value.GetType();
-                        long v = (int)value;
+                        long v = (long)value;
                         IPropertyValue pv = e.GetPropertyValue(p);
                         pv.LongValue = v;
                     };

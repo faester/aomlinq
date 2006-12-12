@@ -165,6 +165,19 @@ namespace GenDB
             return clone;
         }
 
+        /// <summary>
+        /// Tests if fields of object a equals fields of object b.
+        /// The test returns true if typeof(a) == typeof(b) and 
+        /// all primitive fields have same value. Fields of reference
+        /// type must by ReferenceEquals for the method to return
+        /// true. Note that fields with attribute [Volatile] are 
+        /// not tested, since the method is ment to be used when 
+        /// determining, if an object needs to be rewritten to the
+        /// database. 
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
         public static bool TestFieldEquality(object a, object b)
         {
             if (a == null && b == null)
