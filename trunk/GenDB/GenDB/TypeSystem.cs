@@ -25,7 +25,6 @@ namespace GenDB
 
         private TypeSystem()
         {
-            Init();
         }
 
         /// <summary>
@@ -37,7 +36,7 @@ namespace GenDB
         /// og persisting entity types, property types and
         /// properties.
         /// </summary>
-        void Init()
+        internal void Init()
         {
             foreach (IEntityType ets in Configuration.GenDB.GetAllEntityTypes())
             {
@@ -198,7 +197,7 @@ namespace GenDB
                 }
                 else if (t == typeof(char))
                 {
-                    return MappingType.STRING;
+                    return MappingType.CHAR;
                 }
                 else if (t == typeof(float) || t == typeof(double))
                 {
