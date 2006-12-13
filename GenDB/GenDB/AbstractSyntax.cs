@@ -31,7 +31,7 @@ namespace GenDB
     /// <summary>
     /// An operator such as equals, less than etc.
     /// </summary>
-    interface IBoolOperator : IWhereable {}
+    interface IBoolOperator : IExpression {}
 
     /// <summary>
     /// An expression. 

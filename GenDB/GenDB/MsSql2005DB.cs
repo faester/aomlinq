@@ -434,7 +434,95 @@ namespace GenDB
 
         public IEnumerable<IEntity> Where(IWhereable expression)
         {
-            throw new Exception("Not implemented.....");
+            MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
+            mswsb.Visit (expression);
+            string whereStr = mswsb.WhereStr;
+
+            using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithDBName))
+            {
+                cnn.Open();
+
+                SqlCommand cmd = new SqlCommand (
+                    "SELECT " +
+                    "    e.EntityTypePOID, " + // 0
+                    "    propertyPOID, " + // 1
+                    "    LongValue, " + // 2
+                    "    BoolValue, " + // 3
+                    "    StringValue, " + // 4
+                    "    CharValue, " + // 5
+                    "    DoubleValue, " + // 6
+                    "    e.EntityPOID " + // 7
+                    " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
+                    " WHERE e.entityPOID IN (" + whereStr + " )" +
+                    " ORDER BY e.EntityTypePOID, e.EntityPOID"
+                    );
+
+                Console.WriteLine(cmd.CommandText);
+                cmd.Connection = cnn;
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                IEntity result = null; 
+                IEntityType currentType = null;
+                long propertyPOID = 0;
+                long entityTypePOID = 0;
+                long oldEntityTypePOID = entityTypePOID + 1; // Must be different
+                long entityPOID = 0;
+                long oldEntityPOID = entityPOID + 1; // Must be different
+                bool firstPass = true;
+
+                while (reader.Read ())
+                {
+                    entityTypePOID = long.Parse(reader[0].ToString());
+                    entityPOID = long.Parse(reader[7].ToString());
+                    if (entityTypePOID != oldEntityTypePOID || firstPass) {
+                        currentType = TypeSystem.GetEntityType(entityTypePOID);
+                        oldEntityTypePOID = entityTypePOID;
+                    } // if
+                    if (entityPOID != oldEntityPOID || firstPass)
+                    {
+                        if (result != null) { yield return result; }
+                        result = new MSEntity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
+                        result.EntityType = currentType;
+                        
+                        oldEntityPOID = entityPOID;
+
+                        foreach (IProperty prop in result.EntityType.GetAllProperties)
+                        {
+                            IPropertyValue pv = new MSPropertyValue();
+                            pv.Property = prop;
+                            pv.Entity = result; // TODO: Check if this is needed. Consider removing from interface of PropertyValue
+                            result.StorePropertyValue(pv);
+                        } // foreach
+                    } // if
+                    if (reader[1] != DBNull.Value) // Does any properties exist?
+                    {
+                        propertyPOID = long.Parse(reader[1].ToString());
+                        IProperty p = result.EntityType.GetProperty(propertyPOID);
+                        IPropertyValue pv = result.GetPropertyValue(p); 
+                        switch (p.MappingType)
+                        {
+                            case MappingType.BOOL: pv.BoolValue = bool.Parse(reader[3].ToString()); break;
+                            case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
+                            case MappingType.DOUBLE: pv.DoubleValue = Convert.ToDouble(reader[6]); break;
+                            case MappingType.LONG: pv.LongValue = long.Parse(reader[2].ToString()); break;
+                            case MappingType.REFERENCE: if (reader[2] == DBNull.Value) 
+                                                        { 
+                                                            pv.RefValue = new IBOReference(false); break;
+                                                        } else {
+                                                          pv.RefValue = new IBOReference(long.Parse(reader[2].ToString()));
+                                                          break;
+                                                        }
+                            case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
+                            case MappingType.CHAR: pv.CharValue = Convert.ToChar(reader[5]); break;
+                            default: throw new Exception("Could not translate the property value.");
+                        } // switch
+                    } // if
+                    firstPass = false;
+                } // while
+
+                if (!reader.IsClosed) { reader.Close(); }
+                if (result != null) { yield return result; }
+            }
         }
 
 
@@ -693,13 +781,19 @@ namespace GenDB
 
                 foreach (string insertCommand in llEntityInserts)
                 {
-                    cmd.CommandText = insertCommand;
-                    cmd.ExecuteNonQuery();
+                    if (insertCommand != "")
+                    {
+                        cmd.CommandText = insertCommand;
+                        cmd.ExecuteNonQuery();
+                    }
                 }
                 foreach (string insertCommand in llPropertyValueInserts)
                 {
-                    cmd.CommandText = insertCommand;
-                    cmd.ExecuteNonQuery();
+                    if (insertCommand != "")
+                    {
+                        cmd.CommandText = insertCommand;
+                        cmd.ExecuteNonQuery();
+                    }
                 }
 
                 cmd.Transaction.Commit();
