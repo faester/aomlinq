@@ -490,7 +490,7 @@ namespace GenDB
                         {
                             case MappingType.BOOL: pv.BoolValue = bool.Parse(reader[3].ToString()); break;
                             case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
-                            case MappingType.DOUBLE: pv.DoubleValue = double.Parse(reader[6].ToString()); break;
+                            case MappingType.DOUBLE: pv.DoubleValue = Convert.ToDouble(reader[6]); break;
                             case MappingType.LONG: pv.LongValue = long.Parse(reader[2].ToString()); break;
                             case MappingType.REFERENCE: if (reader[2] == DBNull.Value) 
                                                         { 
@@ -583,19 +583,21 @@ namespace GenDB
             string stringValue = pv.StringValue != null ? pv.StringValue.Replace("'", "\\'") : null;
             int boolValue = pv.BoolValue ? 1 : 0;
 
-            sbPropertyValueInserts.Append (" EXEC sp_SET_PROPERTYVALUE ")
-                       .Append (pv.Entity.EntityPOID)
-                       .Append (',')
-                       .Append (pv.Property.PropertyPOID)
-                       .Append (',')
-                       .Append (longValue)
-                       .Append (",'")
-                       .Append (pv.CharValue.ToString())
-                       .Append ("','") //Todo: Need som check for illegal characters.
-                       .Append (stringValue)
-                       .Append ("',")
-                       .Append (boolValue)
-                       .Append (";");
+            sbPropertyValueInserts.Append(" EXEC sp_SET_PROPERTYVALUE ")
+                       .Append(pv.Entity.EntityPOID)
+                       .Append(',')
+                       .Append(pv.Property.PropertyPOID)
+                       .Append(',')
+                       .Append(longValue)
+                       .Append(",'")
+                       .Append(pv.CharValue.ToString())
+                       .Append("','") //Todo: Need som check for illegal characters.
+                       .Append(stringValue)
+                       .Append("',")
+                       .Append(boolValue)
+                       .Append(',')
+                       .Append(pv.DoubleValue)
+                       .Append(";");
         }
 
         /// <summary>
@@ -863,7 +865,8 @@ namespace GenDB
                                             "	@LongValue AS BIGINT," +
                                             "	@CharValue AS CHAR(1)," +
                                             "	@StringValue AS VARCHAR(max)," +
-                                            "	@BoolValue AS BIT" +
+                                            "	@BoolValue AS BIT, " +
+                                            "   @DoubleValue AS FLOAT " +
                                             " AS " +
                                             "	IF EXISTS (SELECT * FROM PropertyValue WHERE EntityPOID = @EntityPOID AND PropertyPOID = @PropertyPoid) " +
                                             "	BEGIN " +
@@ -871,15 +874,16 @@ namespace GenDB
                                             "			LongValue = @LongValue," +
                                             "			CharValue = @CharValue," +
                                             "			StringValue = @StringValue ," +
-                                            "			BoolValue = @BoolValue " +
+                                            "			BoolValue = @BoolValue, " +
+                                            "			DoubleValue = @DoubleValue " +
                                             "		WHERE " +
                                             "			EntityPOID = @EntityPOID AND PropertyPOID = @PropertyPOID" +
                                             "	END " +
                                             "	ELSE" +
                                             "	BEGIN" +
                                             "		INSERT INTO " +
-                                            "		PropertyValue (EntityPOID, PropertyPOID, LongValue, CharValue , StringValue , BoolValue )" +
-                                            "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @CharValue,	@StringValue, @BoolValue)" +
+                                            "		PropertyValue (EntityPOID, PropertyPOID, LongValue, CharValue , StringValue , BoolValue, DoubleValue)" +
+                                            "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @CharValue,	@StringValue, @BoolValue, @DoubleValue)" +
                                             "	END";
 
 	
