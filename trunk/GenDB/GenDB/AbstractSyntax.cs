@@ -77,7 +77,7 @@ namespace GenDB
         }
     }
 
-    abstract class BinaryExpression : IExpression
+    abstract class AbsBinaryExpression : IExpression
     {
         IExpression left;
 
@@ -94,7 +94,7 @@ namespace GenDB
             set { right = value; }
         }
 
-        public BinaryExpression(IExpression left, IExpression right)
+        public AbsBinaryExpression(IExpression left, IExpression right)
         {
             this.left = left;
             this.right = right;
@@ -103,7 +103,7 @@ namespace GenDB
         public abstract void AcceptVisitor(IAbsSyntaxVisitor visitor);
     }
 
-    class ExprAnd : BinaryExpression
+    class ExprAnd : AbsBinaryExpression
     {
         public ExprAnd(IExpression l, IExpression r) : base(l, r) { /* empty */ }
 
@@ -113,7 +113,7 @@ namespace GenDB
         }
     }
 
-    class ExprOr : BinaryExpression
+    class ExprOr : AbsBinaryExpression
     {
         public ExprOr(IExpression l, IExpression r) : base (l, r) { /* empty */ }
 
