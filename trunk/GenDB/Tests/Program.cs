@@ -25,15 +25,34 @@ namespace Tests
             public char Ch
             {
                 get { return ch; }
+                set { ch = value; }
             }
 
             double d = 400.0;
 
+            public double D
+            {
+                get { return d; }
+                set { d = value; }
+            }
+
             string name;
 
             int age;
-            
-            public Person spouse; 
+
+            public int Age
+            {
+                get { return age; }
+                set { age = value; }
+            }
+
+            private Person spouse;
+
+            public Person Spouse
+            {
+                get { return spouse; }
+                set { spouse = value; }
+            } 
 
             DateTime instantiated = DateTime.Now ;
 
@@ -59,7 +78,7 @@ namespace Tests
             for (int i = 0; i < objcount; i++)
             {
                 Person p = new Person();
-                p.spouse = lastPerson;
+                p.Spouse = lastPerson;
                 p.Name = "Navn " + i.ToString();
                 gt.Add (p);
                 lastPerson = p;
