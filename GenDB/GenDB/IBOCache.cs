@@ -131,31 +131,41 @@ namespace GenDB
 
         public static void FlushToDB()
         {
-            //Console.WriteLine("DEBUG INFORMATION FROM IBOCache.FlushToDB():");
-            //Stopwatch stp = new Stopwatch();
+#if DEBUG
+            Console.WriteLine("DEBUG INFORMATION FROM IBOCache.FlushToDB():");
+            Stopwatch stp = new Stopwatch();
             
-            //stp.Start();
+            stp.Start();
+#endif
             CommitUncommitted();
-            //stp.Stop();
-            //Console.WriteLine("\tCommitUncomitted took: {0}", stp.Elapsed);
-            //stp.Reset();
+#if DEBUG
+            stp.Stop();
+            Console.WriteLine("\tCommitUncomitted took: {0}", stp.Elapsed);
+            stp.Reset();
 
-            //stp.Start();
+            stp.Start();
+#endif
             CommitChangedCommited();
-            //stp.Stop();
-            //Console.WriteLine("\tCommitChangedComitted took: {0}", stp.Elapsed);
+#if DEBUG
+            stp.Stop();
+            Console.WriteLine("\tCommitChangedComitted took: {0}", stp.Elapsed);
 
-            //stp.Reset();
-            //stp.Start();
+            stp.Reset();
+            stp.Start();
+#endif
             MoveCommittedToUncommitted();
-            //stp.Stop();
-            //Console.WriteLine("\tMoveCommittedToUncommitted took: {0}", stp.Elapsed);
+#if DEBUG
+            stp.Stop();
+            Console.WriteLine("\tMoveCommittedToUncommitted took: {0}", stp.Elapsed);
 
-            //stp.Reset();
-            //stp.Start();
+            stp.Reset();
+            stp.Start();
+#endif
             Configuration.GenDB.CommitChanges();
-            //stp.Stop();
-            //Console.WriteLine("\tConfiguration.GenDB.CommitChanges took: {0}", stp.Elapsed);
+#if DEBUG
+            stp.Stop();
+            Console.WriteLine("\tConfiguration.GenDB.CommitChanges took: {0}", stp.Elapsed);
+#endif
         }
 
         private static void CommitUncommitted()
