@@ -238,8 +238,8 @@ namespace GenDB
 
         #region VisitNodeMethods
 
-        //internal IWhereable Visit(Expression exp)
-        internal Expression Visit(Expression exp)
+        internal IWhereable Visit(Expression exp)
+        //internal Expression Visit(Expression exp)
         {
 #if DEBUG
             //Console.WriteLine("Visiting\n");
@@ -253,10 +253,8 @@ namespace GenDB
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                 case ExpressionType.And:
-                    
                         ExceptionThrower (exp);
                         break;
-                    
                 case ExpressionType.AndAlso:
                     // do stuff
                     //return new ExprAnd( translate, translate);
@@ -348,112 +346,114 @@ namespace GenDB
                     //    return this.VisitMethodCall((MethodCallExpression)exp);
                     //}
                 case ExpressionType.New:
-                    {
-                        return this.VisitNew((NewExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitNew((NewExpression)exp);
+                    //}
                 case ExpressionType.NewArrayInit:
                 case ExpressionType.NewArrayBounds:
-                    {
-                        return this.VisitNewArray((NewArrayExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitNewArray((NewArrayExpression)exp);
+                    //}
                 case ExpressionType.Parameter:
-                    {
-                        return this.VisitParameter((ParameterExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitParameter((ParameterExpression)exp);
+                    //}
+                    ExceptionThrower(exp);
+                    break;
             }
             throw new InvalidOperationException(string.Format("Unhandled Expression Type: {0}", exp.NodeType));
         }
 
-        internal Expression VisitBinary(BinaryExpression b)
-        {
-#if DEBUG
-            Console.WriteLine("VisitBinary");
-            Console.WriteLine("Left: {0}, Right: {1}", b.Left, b.Right);
-#endif
+//        internal Expression VisitBinary(BinaryExpression b)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitBinary");
+//            Console.WriteLine("Left: {0}, Right: {1}", b.Left, b.Right);
+//#endif
 
-            // **
+//            // **
 
-            // **
+//            // **
 
-            Expression expression3 = this.Visit(b.Left);
-            Expression expression4 = this.Visit(b.Right);
-            if ((expression3 == b.Left) && (expression4 == b.Right))
-            {
-                return b;
-            }
-            return ExpressionVisitor.MakeBinaryExpression(b.NodeType, expression3, expression4);
-        }
+//            Expression expression3 = this.Visit(b.Left);
+//            Expression expression4 = this.Visit(b.Right);
+//            if ((expression3 == b.Left) && (expression4 == b.Right))
+//            {
+//                return b;
+//            }
+//            return ExpressionVisitor.MakeBinaryExpression(b.NodeType, expression3, expression4);
+//        }
 
-        internal Binding VisitBinding(Binding binding)
-        {
-#if DEBUG
-            Console.WriteLine("VisitBinding\n");
-#endif
-            switch (binding.BindingType)
-            {
-                case BindingType.MemberAssignment:
-                    {
-                        return this.VisitMemberAssignment((MemberAssignment)binding);
-                    }
-                case BindingType.MemberMemberBinding:
-                    {
-                        return this.VisitMemberMemberBinding((MemberMemberBinding)binding);
-                    }
-                case BindingType.MemberListBinding:
-                    {
-                        return this.VisitMemberListBinding((MemberListBinding)binding);
-                    }
-            }
-            throw new InvalidOperationException(string.Format("Unhandled Binding Type: {0}", binding.BindingType));
-        }
+//        internal Binding VisitBinding(Binding binding)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitBinding\n");
+//#endif
+//            switch (binding.BindingType)
+//            {
+//                case BindingType.MemberAssignment:
+//                    {
+//                        return this.VisitMemberAssignment((MemberAssignment)binding);
+//                    }
+//                case BindingType.MemberMemberBinding:
+//                    {
+//                        return this.VisitMemberMemberBinding((MemberMemberBinding)binding);
+//                    }
+//                case BindingType.MemberListBinding:
+//                    {
+//                        return this.VisitMemberListBinding((MemberListBinding)binding);
+//                    }
+//            }
+//            throw new InvalidOperationException(string.Format("Unhandled Binding Type: {0}", binding.BindingType));
+//        }
 
-        internal IEnumerable<Binding> VisitBindingList(ReadOnlyCollection<Binding> original)
-        {
-#if DEBUG
-            Console.WriteLine("VisitBindingList\n");
-#endif
-            List<Binding> list2 = null;
-            int num1 = 0;
-            int num2 = original.Count;
-            while (num1 < num2)
-            {
-                Binding binding1 = this.VisitBinding(original[num1]);
-                if (list2 != null)
-                {
-                    list2.Add(binding1);
-                }
-                else if (binding1 != original[num1])
-                {
-                    list2 = new List<Binding>(num2);
-                    for (int num3 = 0; num3 < num1; num3++)
-                    {
-                        list2.Add(original[num3]);
-                    }
-                    list2.Add(binding1);
-                }
-                num1++;
-            }
-            if (list2 != null)
-            {
-                return list2;
-            }
-            return original;
-        }
+//        internal IEnumerable<Binding> VisitBindingList(ReadOnlyCollection<Binding> original)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitBindingList\n");
+//#endif
+//            List<Binding> list2 = null;
+//            int num1 = 0;
+//            int num2 = original.Count;
+//            while (num1 < num2)
+//            {
+//                Binding binding1 = this.VisitBinding(original[num1]);
+//                if (list2 != null)
+//                {
+//                    list2.Add(binding1);
+//                }
+//                else if (binding1 != original[num1])
+//                {
+//                    list2 = new List<Binding>(num2);
+//                    for (int num3 = 0; num3 < num1; num3++)
+//                    {
+//                        list2.Add(original[num3]);
+//                    }
+//                    list2.Add(binding1);
+//                }
+//                num1++;
+//            }
+//            if (list2 != null)
+//            {
+//                return list2;
+//            }
+//            return original;
+//        }
 
-        internal Expression VisitConditional(ConditionalExpression c)
-        {
-#if DEBUG
-            Console.WriteLine("VisitConditional\n");
-#endif
-            Expression expression4 = this.Visit(c.Test);
-            Expression expression5 = this.Visit(c.IfTrue);
-            Expression expression6 = this.Visit(c.IfFalse);
-            if (((expression4 == c.Test) && (expression5 == c.IfTrue)) && (expression6 == c.IfFalse))
-            {
-                return c;
-            }
-            return Expression.Condition(expression4, expression5, expression6);
-        }
+//        internal Expression VisitConditional(ConditionalExpression c)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitConditional\n");
+//#endif
+//            Expression expression4 = this.Visit(c.Test);
+//            Expression expression5 = this.Visit(c.IfTrue);
+//            Expression expression6 = this.Visit(c.IfFalse);
+//            if (((expression4 == c.Test) && (expression5 == c.IfTrue)) && (expression6 == c.IfFalse))
+//            {
+//                return c;
+//            }
+//            return Expression.Condition(expression4, expression5, expression6);
+//        }
 
         internal Expression VisitConstant(ConstantExpression c)
         {
@@ -464,38 +464,38 @@ namespace GenDB
             return c;
         }
 
-        internal IEnumerable<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
-        {
-#if DEBUG
-            Console.WriteLine("VisitExpressionList");
-#endif
-            List<Expression> list2 = null;
-            int num1 = 0;
-            int num2 = original.Count;
-            while (num1 < num2)
-            {
-                Expression expression1 = this.Visit(original[num1]);
-                if (list2 != null)
-                {
-                    list2.Add(expression1);
-                }
-                else if (expression1 != original[num1])
-                {
-                    list2 = new List<Expression>(num2);
-                    for (int num3 = 0; num3 < num1; num3++)
-                    {
-                        list2.Add(original[num3]);
-                    }
-                    list2.Add(expression1);
-                }
-                num1++;
-            }
-            if (list2 != null)
-            {
-                return list2;
-            }
-            return original;
-        }
+//        internal IEnumerable<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitExpressionList");
+//#endif
+//            List<Expression> list2 = null;
+//            int num1 = 0;
+//            int num2 = original.Count;
+//            while (num1 < num2)
+//            {
+//                Expression expression1 = this.Visit(original[num1]);
+//                if (list2 != null)
+//                {
+//                    list2.Add(expression1);
+//                }
+//                else if (expression1 != original[num1])
+//                {
+//                    list2 = new List<Expression>(num2);
+//                    for (int num3 = 0; num3 < num1; num3++)
+//                    {
+//                        list2.Add(original[num3]);
+//                    }
+//                    list2.Add(expression1);
+//                }
+//                num1++;
+//            }
+//            if (list2 != null)
+//            {
+//                return list2;
+//            }
+//            return original;
+//        }
 
         internal Expression VisitFunclet(FuncletExpression f)
         {
@@ -505,200 +505,200 @@ namespace GenDB
             return f;
         }
 
-        internal Expression VisitInvocation(InvocationExpression iv)
-        {
-#if DEBUG
-            Console.WriteLine("VisitInvocation\n");
-#endif
-            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(iv.Args);
-            Expression expression2 = this.Visit(iv.Expression);
-            if ((enumerable2 != iv.Args) || (expression2 != iv.Expression))
-            {
-                Expression.Invoke((LambdaExpression)expression2, enumerable2);
-            }
-            return iv;
-        }
+//        internal Expression VisitInvocation(InvocationExpression iv)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitInvocation\n");
+//#endif
+//            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(iv.Args);
+//            Expression expression2 = this.Visit(iv.Expression);
+//            if ((enumerable2 != iv.Args) || (expression2 != iv.Expression))
+//            {
+//                Expression.Invoke((LambdaExpression)expression2, enumerable2);
+//            }
+//            return iv;
+//        }
 
-        internal Expression VisitLambda(LambdaExpression lambda)
-        {
-#if DEBUG
-            Console.WriteLine("VisitLambda");
-            Console.WriteLine("Udtryk: {0}, Type: {1}\n", lambda.Body, lambda.Body.NodeType);
-#endif
+//        internal Expression VisitLambda(LambdaExpression lambda)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitLambda");
+//            Console.WriteLine("Udtryk: {0}, Type: {1}\n", lambda.Body, lambda.Body.NodeType);
+//#endif
 
 
-            Expression expression2 = this.Visit(lambda.Body);
-            if (expression2 != lambda.Body)
-            {
-                return Expression.Lambda(lambda.Type, expression2, lambda.Parameters);
-            }
-            return lambda;
-        }
+//            Expression expression2 = this.Visit(lambda.Body);
+//            if (expression2 != lambda.Body)
+//            {
+//                return Expression.Lambda(lambda.Type, expression2, lambda.Parameters);
+//            }
+//            return lambda;
+//        }
 
-        internal Expression VisitListInit(ListInitExpression init)
-        {
-#if DEBUG
-            Console.WriteLine("VisitListInit\n");
-#endif
-            NewExpression expression2 = this.VisitNew(init.NewExpression);
-            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(init.Expressions);
-            if ((expression2 == init.NewExpression) && (enumerable2 == init.Expressions))
-            {
-                return init;
-            }
-            return Expression.ListInit(expression2, enumerable2);
-        }
+//        internal Expression VisitListInit(ListInitExpression init)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitListInit\n");
+//#endif
+//            NewExpression expression2 = this.VisitNew(init.NewExpression);
+//            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(init.Expressions);
+//            if ((expression2 == init.NewExpression) && (enumerable2 == init.Expressions))
+//            {
+//                return init;
+//            }
+//            return Expression.ListInit(expression2, enumerable2);
+//        }
 
-        internal Expression VisitMemberAccess(MemberExpression m)
-        {
-#if DEBUG
-            Console.WriteLine("VisitMemberAccess\n");
-            Type t = m.Member.DeclaringType;
-            if (m.Member.MemberType == MemberTypes.Property)
-            {
-                string p = m.Member.Name;
-                Console.WriteLine("\t{0}.{1}", t, p);
-            }
-#endif
-            Expression expression2 = this.Visit(m.Expression);
-            if (expression2 != m.Expression)
-            {
-                return ExpressionVisitor.MakeMemberExpression(expression2, m.Member);
-            }
-            return m;
-        }
+//        internal Expression VisitMemberAccess(MemberExpression m)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitMemberAccess\n");
+//            Type t = m.Member.DeclaringType;
+//            if (m.Member.MemberType == MemberTypes.Property)
+//            {
+//                string p = m.Member.Name;
+//                Console.WriteLine("\t{0}.{1}", t, p);
+//            }
+//#endif
+//            Expression expression2 = this.Visit(m.Expression);
+//            if (expression2 != m.Expression)
+//            {
+//                return ExpressionVisitor.MakeMemberExpression(expression2, m.Member);
+//            }
+//            return m;
+//        }
 
-        internal MemberAssignment VisitMemberAssignment(MemberAssignment assignment)
-        {
-#if DEBUG
-            Console.WriteLine("VisitMemberAssignment\n");
-#endif
-            Expression expression2 = this.Visit(assignment.Expression);
-            if (expression2 != assignment.Expression)
-            {
-                return Expression.Bind(assignment.Member, expression2);
-            }
-            return assignment;
-        }
+//        internal MemberAssignment VisitMemberAssignment(MemberAssignment assignment)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitMemberAssignment\n");
+//#endif
+//            Expression expression2 = this.Visit(assignment.Expression);
+//            if (expression2 != assignment.Expression)
+//            {
+//                return Expression.Bind(assignment.Member, expression2);
+//            }
+//            return assignment;
+//        }
 
-        internal Expression VisitMemberInit(MemberInitExpression init)
-        {
-#if DEBUG
-            Console.WriteLine("VisitMemberInit\n");
-#endif
-            NewExpression expression2 = this.VisitNew(init.NewExpression);
-            IEnumerable<Binding> enumerable2 = this.VisitBindingList(init.Bindings);
-            if ((expression2 == init.NewExpression) && (enumerable2 == init.Bindings))
-            {
-                return init;
-            }
-            return Expression.MemberInit(expression2, enumerable2);
-        }
+//        internal Expression VisitMemberInit(MemberInitExpression init)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitMemberInit\n");
+//#endif
+//            NewExpression expression2 = this.VisitNew(init.NewExpression);
+//            IEnumerable<Binding> enumerable2 = this.VisitBindingList(init.Bindings);
+//            if ((expression2 == init.NewExpression) && (enumerable2 == init.Bindings))
+//            {
+//                return init;
+//            }
+//            return Expression.MemberInit(expression2, enumerable2);
+//        }
 
-        internal MemberListBinding VisitMemberListBinding(MemberListBinding binding)
-        {
-#if DEBUG
-            Console.WriteLine("VisitMemberListBinding");
-#endif
-            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(binding.Expressions);
-            if (enumerable2 != binding.Expressions)
-            {
-                return Expression.ListBind(binding.Member, enumerable2);
-            }
-            return binding;
-        }
+//        internal MemberListBinding VisitMemberListBinding(MemberListBinding binding)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitMemberListBinding");
+//#endif
+//            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(binding.Expressions);
+//            if (enumerable2 != binding.Expressions)
+//            {
+//                return Expression.ListBind(binding.Member, enumerable2);
+//            }
+//            return binding;
+//        }
 
-        internal MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding binding)
-        {
-#if DEBUG
-            Console.WriteLine("VisitMemberMemberBinding");
-#endif
-            IEnumerable<Binding> enumerable2 = this.VisitBindingList(binding.Bindings);
-            if (enumerable2 != binding.Bindings)
-            {
-                return Expression.MemberBind(binding.Member, enumerable2);
-            }
-            return binding;
-        }
+//        internal MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding binding)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitMemberMemberBinding");
+//#endif
+//            IEnumerable<Binding> enumerable2 = this.VisitBindingList(binding.Bindings);
+//            if (enumerable2 != binding.Bindings)
+//            {
+//                return Expression.MemberBind(binding.Member, enumerable2);
+//            }
+//            return binding;
+//        }
 
-        internal Expression VisitMethodCall(MethodCallExpression m)
-        {
-#if DEBUG
-            Console.WriteLine("VisitMethodCall");
-#endif
-            Expression expression2 = this.Visit(m.Object);
-            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(m.Parameters);
-            if ((expression2 == m.Object) && (enumerable2 == m.Parameters))
-            {
-                return m;
-            }
-            return ExpressionVisitor.MakeMethodCallExpression(m.NodeType, expression2, m.Method, enumerable2);
-        }
+//        internal Expression VisitMethodCall(MethodCallExpression m)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitMethodCall");
+//#endif
+//            Expression expression2 = this.Visit(m.Object);
+//            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(m.Parameters);
+//            if ((expression2 == m.Object) && (enumerable2 == m.Parameters))
+//            {
+//                return m;
+//            }
+//            return ExpressionVisitor.MakeMethodCallExpression(m.NodeType, expression2, m.Method, enumerable2);
+//        }
 
-        internal NewExpression VisitNew(NewExpression nex)
-        {
-#if DEBUG
-            Console.WriteLine("VisitNew");
-#endif
-            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(nex.Args);
-            if (enumerable2 != nex.Args)
-            {
-                return Expression.New(nex.Constructor, enumerable2);
-            }
-            return nex;
-        }
+//        internal NewExpression VisitNew(NewExpression nex)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitNew");
+//#endif
+//            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(nex.Args);
+//            if (enumerable2 != nex.Args)
+//            {
+//                return Expression.New(nex.Constructor, enumerable2);
+//            }
+//            return nex;
+//        }
 
-        internal Expression VisitNewArray(NewArrayExpression na)
-        {
-#if DEBUG
-            Console.WriteLine("VisitNewArray");
-#endif
-            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(na.Expressions);
-            if (enumerable2 == na.Expressions)
-            {
-                return na;
-            }
-            if (na.NodeType == ExpressionType.NewArrayInit)
-            {
-                return Expression.NewArrayInit(na.Type.GetElementType(), enumerable2);
-            }
-            return Expression.NewArrayBounds(na.Type.GetElementType(), enumerable2);
-        }
+//        internal Expression VisitNewArray(NewArrayExpression na)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitNewArray");
+//#endif
+//            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(na.Expressions);
+//            if (enumerable2 == na.Expressions)
+//            {
+//                return na;
+//            }
+//            if (na.NodeType == ExpressionType.NewArrayInit)
+//            {
+//                return Expression.NewArrayInit(na.Type.GetElementType(), enumerable2);
+//            }
+//            return Expression.NewArrayBounds(na.Type.GetElementType(), enumerable2);
+//        }
 
-        internal Expression VisitParameter(ParameterExpression p)
-        {
-#if DEBUG
-            Console.WriteLine("VisitParameter{0}");
-            Console.WriteLine("Name: {0}, Type: {1}\n", p.Name, p.Type);
-#endif
-            return p;
-        }
+//        internal Expression VisitParameter(ParameterExpression p)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitParameter{0}");
+//            Console.WriteLine("Name: {0}, Type: {1}\n", p.Name, p.Type);
+//#endif
+//            return p;
+//        }
 
-        internal Expression VisitTypeIs(TypeBinaryExpression b)
-        {
-#if DEBUG
-            Console.WriteLine("VisitTypeIs\n");
-#endif
-            Expression expression2 = b.Expression;
-            if (expression2 != b.Expression)
-            {
-                return Expression.Is(expression2, b.TypeOperand);
-            }
-            return b;
-        }
+//        internal Expression VisitTypeIs(TypeBinaryExpression b)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitTypeIs\n");
+//#endif
+//            Expression expression2 = b.Expression;
+//            if (expression2 != b.Expression)
+//            {
+//                return Expression.Is(expression2, b.TypeOperand);
+//            }
+//            return b;
+//        }
 
-        internal Expression VisitUnary(UnaryExpression u)
-        {
-#if DEBUG
-            Console.WriteLine("VisitUnary");
-#endif
-            Expression expression2 = this.Visit(u.Operand);
-            if (expression2 != u.Operand)
-            {
-                return ExpressionVisitor.MakeUnaryExpression(u.NodeType, expression2, u.Type);
-            }
-            return u;
-        }
+//        internal Expression VisitUnary(UnaryExpression u)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitUnary");
+//#endif
+//            Expression expression2 = this.Visit(u.Operand);
+//            if (expression2 != u.Operand)
+//            {
+//                return ExpressionVisitor.MakeUnaryExpression(u.NodeType, expression2, u.Type);
+//            }
+//            return u;
+//        }
 
         #endregion
 
