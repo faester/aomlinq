@@ -10,8 +10,6 @@ namespace GenDB
 {
     // internal class fra System.Query.dll, sakset via reflector
 
-
-
     internal class MSSqlExprTranslator
     {
         internal MSSqlExprTranslator()
@@ -255,33 +253,47 @@ namespace GenDB
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                 case ExpressionType.And:
-                    //ExceptionThrower (exp);
+                    
+                        ExceptionThrower (exp);
+                        break;
+                    
                 case ExpressionType.AndAlso:
+                    // do stuff
                     //return new ExprAnd( translate, translate);
                 case ExpressionType.BitwiseAnd:
                 case ExpressionType.BitwiseOr:
                 case ExpressionType.BitwiseXor:
                 case ExpressionType.Coalesce:
                 case ExpressionType.Divide:
+                        ExceptionThrower(exp);
+                        break;
                 case ExpressionType.EQ:
+                    // do stuff
                 case ExpressionType.GT:
+                    // do stuff
                 case ExpressionType.GE:
                 case ExpressionType.Index:
                 case ExpressionType.LE:
                 case ExpressionType.LShift:
+                    ExceptionThrower(exp);
+                    break;
                 case ExpressionType.LT:
+                    // do stuff
                 case ExpressionType.Modulo:
                 case ExpressionType.Multiply:
                 case ExpressionType.MultiplyChecked:
                 case ExpressionType.NE:
                 case ExpressionType.Or:
+                    ExceptionThrower(exp);
+                    break;
                 case ExpressionType.OrElse:
+                    // do stuff
                 case ExpressionType.RShift:
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
-                    {
-                        return this.VisitBinary((BinaryExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitBinary((BinaryExpression)exp);
+                    //}
                 case ExpressionType.As:
                 case ExpressionType.BitwiseNot:
                 case ExpressionType.Cast:
@@ -291,50 +303,50 @@ namespace GenDB
                 case ExpressionType.Negate:
                 case ExpressionType.Not:
                 case ExpressionType.Quote:
-                    {
-                        return this.VisitUnary((UnaryExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitUnary((UnaryExpression)exp);
+                    //}
                 case ExpressionType.Conditional:
-                    {
-                        return this.VisitConditional((ConditionalExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitConditional((ConditionalExpression)exp);
+                    //}
                 case ExpressionType.Constant:
-                    {
-                        return this.VisitConstant((ConstantExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitConstant((ConstantExpression)exp);
+                    //}
                 case ExpressionType.Funclet:
-                    {
-                        return this.VisitFunclet((FuncletExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitFunclet((FuncletExpression)exp);
+                    //}
                 case ExpressionType.Invoke:
-                    {
-                        return this.VisitInvocation((InvocationExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitInvocation((InvocationExpression)exp);
+                    //}
                 case ExpressionType.Is:
-                    {
-                        return this.VisitTypeIs((TypeBinaryExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitTypeIs((TypeBinaryExpression)exp);
+                    //}
                 case ExpressionType.Lambda:
-                    {
-                        return this.VisitLambda((LambdaExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitLambda((LambdaExpression)exp);
+                    //}
                 case ExpressionType.ListInit:
-                    {
-                        return this.VisitListInit((ListInitExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitListInit((ListInitExpression)exp);
+                    //}
                 case ExpressionType.MemberAccess:
-                    {
-                        return this.VisitMemberAccess((MemberExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitMemberAccess((MemberExpression)exp);
+                    //}
                 case ExpressionType.MemberInit:
-                    {
-                        return this.VisitMemberInit((MemberInitExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitMemberInit((MemberInitExpression)exp);
+                    //}
                 case ExpressionType.MethodCall:
                 case ExpressionType.MethodCallVirtual:
-                    {
-                        return this.VisitMethodCall((MethodCallExpression)exp);
-                    }
+                    //{
+                    //    return this.VisitMethodCall((MethodCallExpression)exp);
+                    //}
                 case ExpressionType.New:
                     {
                         return this.VisitNew((NewExpression)exp);
