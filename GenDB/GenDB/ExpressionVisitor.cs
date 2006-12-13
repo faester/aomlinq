@@ -14,10 +14,15 @@ namespace GenDB
     {
         internal ExpressionVisitor()
 		{
-		}
+        }
 
-		internal static BinaryExpression MakeBinaryExpression(ExpressionType eType, Expression left, Expression right)
+        #region MakeTreeMethods
+
+        internal static BinaryExpression MakeBinaryExpression(ExpressionType eType, Expression left, Expression right)
 		{
+#if DEBUG
+            Console.WriteLine("MakeBinaryExpression");
+#endif
 			switch (eType)
 			{
 				case ExpressionType.Add:
@@ -126,6 +131,9 @@ namespace GenDB
 
 		internal static MemberExpression MakeMemberExpression(Expression expr, MemberInfo mi)
 		{
+#if DEBUG
+            Console.WriteLine("MakeMemberExpression");
+#endif
 			FieldInfo info3 = mi as FieldInfo;
 			if (info3 != null)
 			{
@@ -141,6 +149,9 @@ namespace GenDB
 
 		internal static MethodCallExpression MakeMethodCallExpression(ExpressionType eType, Expression obj, MethodInfo method, IEnumerable<Expression> args)
 		{
+#if DEBUG
+            Console.WriteLine("MakeMethodCallExpression");
+#endif
 			switch (eType)
 			{
 				case ExpressionType.MethodCall:
@@ -157,6 +168,9 @@ namespace GenDB
 
 		internal static UnaryExpression MakeUnaryExpression(ExpressionType eType, Expression operand, Type type)
 		{
+#if DEBUG
+            Console.WriteLine("MakeUnaryExpression");
+#endif
 			ExpressionType type1 = eType;
 			if (type1 <= ExpressionType.ConvertChecked)
 			{
@@ -214,8 +228,15 @@ namespace GenDB
 			throw new ArgumentException("eType: " + eType);
 		}
 
+        #endregion
+
+        #region VisitNodeMethods
+
 		internal virtual Expression Visit(Expression exp)
 		{
+#if DEBUG
+            //Console.WriteLine("Visiting");
+#endif
 			if (exp == null)
 			{
 				return exp;
@@ -318,10 +339,14 @@ namespace GenDB
 					}
 			}
 			throw new InvalidOperationException(string.Format("Unhandled Expression Type: {0}", exp.NodeType));
-		}
+        }
 
-		internal virtual Expression VisitBinary(BinaryExpression b)
+        internal virtual Expression VisitBinary(BinaryExpression b)
 		{
+#if DEBUG
+            Console.WriteLine("VisitBinary");
+            Console.WriteLine("Left: {0}, Right: {1}\n",b.Left, b.Right);
+#endif
 			Expression expression3 = this.Visit(b.Left);
 			Expression expression4 = this.Visit(b.Right);
 			if ((expression3 == b.Left) && (expression4 == b.Right))
@@ -333,6 +358,9 @@ namespace GenDB
 
 		internal virtual Binding VisitBinding(Binding binding)
 		{
+#if DEBUG
+            Console.WriteLine("VisitBinding\n");
+#endif
 			switch (binding.BindingType)
 			{
 				case BindingType.MemberAssignment:
@@ -353,6 +381,9 @@ namespace GenDB
 
 		internal virtual IEnumerable<Binding> VisitBindingList(ReadOnlyCollection<Binding> original)
 		{
+#if DEBUG
+            Console.WriteLine("VisitBindingList\n");
+#endif
 			List<Binding> list2 = null;
 			int num1 = 0;
 			int num2 = original.Count;
@@ -383,6 +414,9 @@ namespace GenDB
 
 		internal virtual Expression VisitConditional(ConditionalExpression c)
 		{
+#if DEBUG
+            Console.WriteLine("VisitConditional\n");
+#endif
 			Expression expression4 = this.Visit(c.Test);
 			Expression expression5 = this.Visit(c.IfTrue);
 			Expression expression6 = this.Visit(c.IfFalse);
@@ -395,11 +429,18 @@ namespace GenDB
 
 		internal virtual Expression VisitConstant(ConstantExpression c)
 		{
+#if DEBUG
+            Console.WriteLine("VisitConstant");
+            Console.WriteLine("Value: {0}, Type: {1}\n",c.Value, c.Type);
+#endif
 			return c;
 		}
 
 		internal virtual IEnumerable<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
 		{
+#if DEBUG
+            Console.WriteLine("VisitExpressionList");
+#endif
 			List<Expression> list2 = null;
 			int num1 = 0;
 			int num2 = original.Count;
@@ -430,11 +471,17 @@ namespace GenDB
 
 		internal virtual Expression VisitFunclet(FuncletExpression f)
 		{
+#if DEBUG
+            Console.WriteLine("VisitFunclet");
+#endif
 			return f;
 		}
 
 		internal virtual Expression VisitInvocation(InvocationExpression iv)
 		{
+#if DEBUG
+            Console.WriteLine("VisitInvocation\n");
+#endif
 			IEnumerable<Expression> enumerable2 = this.VisitExpressionList(iv.Args);
 			Expression expression2 = this.Visit(iv.Expression);
 			if ((enumerable2 != iv.Args) || (expression2 != iv.Expression))
@@ -446,6 +493,10 @@ namespace GenDB
 
 		internal virtual Expression VisitLambda(LambdaExpression lambda)
 		{
+#if DEBUG
+            Console.WriteLine("VisitLambda");
+            Console.WriteLine("{0}\n",lambda.Body);
+#endif
 			Expression expression2 = this.Visit(lambda.Body);
 			if (expression2 != lambda.Body)
 			{
@@ -456,6 +507,9 @@ namespace GenDB
 
 		internal virtual Expression VisitListInit(ListInitExpression init)
 		{
+#if DEBUG
+            Console.WriteLine("VisitListInit\n");
+#endif
 			NewExpression expression2 = this.VisitNew(init.NewExpression);
 			IEnumerable<Expression> enumerable2 = this.VisitExpressionList(init.Expressions);
 			if ((expression2 == init.NewExpression) && (enumerable2 == init.Expressions))
@@ -467,6 +521,9 @@ namespace GenDB
 
 		internal virtual Expression VisitMemberAccess(MemberExpression m)
 		{
+#if DEBUG
+            Console.WriteLine("VisitMemberAccess\n");
+#endif
 			Expression expression2 = this.Visit(m.Expression);
 			if (expression2 != m.Expression)
 			{
@@ -477,6 +534,9 @@ namespace GenDB
 
 		internal virtual MemberAssignment VisitMemberAssignment(MemberAssignment assignment)
 		{
+#if DEBUG
+            Console.WriteLine("VisitMemberAssignment\n");
+#endif
 			Expression expression2 = this.Visit(assignment.Expression);
 			if (expression2 != assignment.Expression)
 			{
@@ -487,6 +547,9 @@ namespace GenDB
 
 		internal virtual Expression VisitMemberInit(MemberInitExpression init)
 		{
+#if DEBUG
+            Console.WriteLine("VisitMemberInit\n");
+#endif
 			NewExpression expression2 = this.VisitNew(init.NewExpression);
 			IEnumerable<Binding> enumerable2 = this.VisitBindingList(init.Bindings);
 			if ((expression2 == init.NewExpression) && (enumerable2 == init.Bindings))
@@ -498,6 +561,9 @@ namespace GenDB
 
 		internal virtual MemberListBinding VisitMemberListBinding(MemberListBinding binding)
 		{
+#if DEBUG
+            Console.WriteLine("VisitMemberListBinding");
+#endif
 			IEnumerable<Expression> enumerable2 = this.VisitExpressionList(binding.Expressions);
 			if (enumerable2 != binding.Expressions)
 			{
@@ -508,6 +574,9 @@ namespace GenDB
 
 		internal virtual MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding binding)
 		{
+#if DEBUG
+            Console.WriteLine("VisitMemberMemberBinding");
+#endif
 			IEnumerable<Binding> enumerable2 = this.VisitBindingList(binding.Bindings);
 			if (enumerable2 != binding.Bindings)
 			{
@@ -518,6 +587,9 @@ namespace GenDB
 
 		internal virtual Expression VisitMethodCall(MethodCallExpression m)
 		{
+#if DEBUG
+            Console.WriteLine("VisitMethodCall");
+#endif
 			Expression expression2 = this.Visit(m.Object);
 			IEnumerable<Expression> enumerable2 = this.VisitExpressionList(m.Parameters);
 			if ((expression2 == m.Object) && (enumerable2 == m.Parameters))
@@ -529,6 +601,9 @@ namespace GenDB
 
 		internal virtual NewExpression VisitNew(NewExpression nex)
 		{
+#if DEBUG
+            Console.WriteLine("VisitNew");
+#endif
 			IEnumerable<Expression> enumerable2 = this.VisitExpressionList(nex.Args);
 			if (enumerable2 != nex.Args)
 			{
@@ -539,6 +614,9 @@ namespace GenDB
 
 		internal virtual Expression VisitNewArray(NewArrayExpression na)
 		{
+#if DEBUG
+            Console.WriteLine("VisitNewArray");
+#endif
 			IEnumerable<Expression> enumerable2 = this.VisitExpressionList(na.Expressions);
 			if (enumerable2 == na.Expressions)
 			{
@@ -553,11 +631,18 @@ namespace GenDB
 
 		internal virtual Expression VisitParameter(ParameterExpression p)
 		{
+#if DEBUG
+            Console.WriteLine("VisitParameter{0}");
+            Console.WriteLine("Name: {0}, Type: {1}\n", p.Name, p.Type);
+#endif
 			return p;
 		}
 
 		internal virtual Expression VisitTypeIs(TypeBinaryExpression b)
 		{
+#if DEBUG
+            Console.WriteLine("VisitTypeIs\n");
+#endif
 			Expression expression2 = b.Expression;
 			if (expression2 != b.Expression)
 			{
@@ -568,6 +653,9 @@ namespace GenDB
 
 		internal virtual Expression VisitUnary(UnaryExpression u)
 		{
+#if DEBUG
+            Console.WriteLine("VisitUnary");
+#endif
 			Expression expression2 = this.Visit(u.Operand);
 			if (expression2 != u.Operand)
 			{
@@ -575,5 +663,7 @@ namespace GenDB
 			}
 			return u;
 		}
+
+        #endregion
     }
 }
