@@ -255,6 +255,9 @@ namespace GenDB
         /// <returns></returns>
         IEnumerable<IEntity> GetAllEntities();
 
+        IEnumerable<IEntity> Where(IWhereable expression);
+
+
 
         /// <summary>
         /// Will return all persisted elements of the given

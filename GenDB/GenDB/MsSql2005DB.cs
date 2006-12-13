@@ -426,6 +426,12 @@ namespace GenDB
             }
         }
 
+        public IEnumerable<IEntity> Where(IWhereable expression)
+        {
+            throw new Exception("Not implemented.....");
+        }
+
+
         public IEnumerable<IEntity> GetAllEntities()
         {
             using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithDBName))
