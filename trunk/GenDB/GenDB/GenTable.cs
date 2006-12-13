@@ -32,19 +32,19 @@ namespace GenDB
 
         public void Add(IBusinessObject ibo)
         {
-            timeSpent.Start();
             if (!TypeSystem.IsTypeKnown(ibo.GetType()))
             {
                TypeSystem.RegisterType(ibo.GetType());
             }
             DelegateTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
             IEntity e = trans.Translate(ibo);
-            timeSpent.Stop();
         }
 
         public void CommitChanges()
         {
+            timeSpent.Start();
             IBOCache.FlushToDB();
+            timeSpent.Stop();
         }
 
         /// <summary>

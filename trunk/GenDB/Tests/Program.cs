@@ -16,7 +16,8 @@ namespace Tests
 
             int age;
             
-            [Volatile]
+            public Person spouse; 
+
             DateTime instantiated = DateTime.Now ;
 
             public string Name
@@ -31,15 +32,20 @@ namespace Tests
         {
             Configuration.RebuildDatabase = true;
             Configuration.DbBatchSize = 2000;
-            long objcount = 5000;
+            long objcount = 1000;
 
             DateTime then = DateTime.Now;
             GenTable gt = new GenTable();
+
+            Person lastPerson = null;
+
             for (int i = 0; i < objcount; i++)
             {
                 Person p = new Person();
+                p.spouse = lastPerson;
                 p.Name = "Navn " + i.ToString();
                 gt.Add (p);
+                lastPerson = p;
             }
 
             gt.CommitChanges();
