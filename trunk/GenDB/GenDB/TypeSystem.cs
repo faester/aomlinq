@@ -130,7 +130,7 @@ namespace GenDB
         /// <returns></returns>
         public static IEntityType GetEntityType(Type t)
         {
-            return type2IEt[t].GetType();
+            return type2IEt[t].Target;
         }
 
         public static DelegateTranslator GetTranslator (Type t)

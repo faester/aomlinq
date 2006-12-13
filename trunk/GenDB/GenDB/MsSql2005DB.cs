@@ -1026,6 +1026,19 @@ namespace GenDB
 
         Dictionary<long, IProperty> properties;
 
+        public IProperty GetProperty(string propertyname)
+        {
+            foreach(IProperty p in properties.Values )
+            {
+                if (p.PropertyName == propertyname)
+                {
+                    return p;
+                }
+            }
+            return null;
+        }
+
+
         public string AssemblyDescription
         {
             get { return assemblyDescription; }

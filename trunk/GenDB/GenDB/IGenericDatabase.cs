@@ -101,6 +101,16 @@ namespace GenDB
         IProperty GetProperty(long propertyPOID);
 
         /// <summary>
+        /// Returns the IProperty with the name given if present
+        /// in this IEntityType. Properties of subtypes will not 
+        /// be returned. Null is returned if a matching property 
+        /// could not be found.
+        /// </summary>
+        /// <param name="PropertyName"></param>
+        /// <returns></returns>
+        IProperty GetProperty(string propertyName);
+
+        /// <summary>
         /// Adds a property to the entity type.
         /// </summary>
         /// <param name="property"></param>
