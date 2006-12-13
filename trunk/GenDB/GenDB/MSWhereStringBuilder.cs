@@ -33,12 +33,12 @@ namespace GenDB
             switch (p.MappingType )
             {
                 case MappingType.BOOL : whereStr.Append ("pv.BoolValue "); break;
-                case MappingType.CHAR : whereStr.Append ("pv.BoolValue "); break;
-                case MappingType.DATETIME : whereStr.Append ("pv.BoolValue "); break;
-                case MappingType.DOUBLE : whereStr.Append ("pv.BoolValue "); break;
-                case MappingType.LONG : whereStr.Append ("pv.BoolValue "); break;
-                case MappingType.REFERENCE : whereStr.Append ("pv.BoolValue "); break;
-                case MappingType.STRING : whereStr.Append ("pv.BoolValue "); break;
+                case MappingType.CHAR : whereStr.Append ("pv.CharValue "); break;
+                case MappingType.DATETIME : whereStr.Append ("pv.LongValue "); break;
+                case MappingType.DOUBLE : whereStr.Append ("pv.DoubleValue "); break;
+                case MappingType.LONG : whereStr.Append ("pv.LongValue "); break;
+                case MappingType.REFERENCE : whereStr.Append ("pv.LongValue "); break;
+                case MappingType.STRING : whereStr.Append ("pv.StringValue "); break;
             }
         }
 

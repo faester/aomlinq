@@ -16,14 +16,15 @@ namespace GenDB
 
         #region ICollection members
 
-        public void Add(T t)
+        public void Add(T ibo)
         {
-            if (!TypeSystem.IsTypeKnown(t.GetType()))
+            if (!TypeSystem.IsTypeKnown(ibo.GetType()))
             {
-               TypeSystem.RegisterType(t.GetType());
+               TypeSystem.RegisterType(ibo.GetType());
             }
-            DelegateTranslator trans = TypeSystem.GetTranslator(t.GetType());
-            IEntity e = trans.Translate(t);
+            DelegateTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
+            IEntity e = trans.Translate(ibo);
+            Configuration.GenDB.Save(e);
         }
 
         public void Clear()

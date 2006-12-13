@@ -60,51 +60,53 @@ namespace GenDB
 
         public static void Main(string[] args)
         {
-            // ******
-            Expression<Func<int, bool>> exprLambda1 = x => (x & 1) == 0;
-            Expression<Func<int,int,int>> exprLambda2 = (y,j) => y + j;
+            Configuration.RebuildDatabase = true;
 
-            Expression<Func<Person, bool>> where1 = (Person p) => /* p.Spouse == null && */ p.Name == "Svend";
-            ExpressionRunner wroom = new ExpressionRunner();
-            wroom.LookIn(where1);
+            int objCount = 100;
+
+            Table<Person> tp = new Table<Person>();
+
+            for (int i = 0; i < objCount; i++)
+            {
+                Person p = new Person{ Name = "Navn " + i };
+                tp.Add (p);
+            }
+
+
+            if (!TypeSystem.IsTypeKnown(typeof(Person)))
+            {
+                TypeSystem.RegisterType(typeof(Person));
+            }
+            IEntityType etPerson = TypeSystem.GetEntityType (typeof(Person));
+            IProperty propertyName = etPerson.GetProperty ("Name");
+
+            OP_Equals nc1 = new OP_Equals(new CstProperty (propertyName), new CstString("Navn 1"));
+            //OP_Equals nc2 = new OP_Equals( new CstString("Navn 10"), new CstProperty (propertyName));
+            OP_Equals nc2 = new OP_Equals(new CstProperty (propertyName), new CstString("Navn 10"));
+            IWhereable wc = new ExprOr(nc1, nc2);
+            MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
+            mswsb.Visit(wc);
+            
+            Configuration.GenDB.CommitChanges();
+
+            foreach(IEntity e in Configuration.GenDB.Where (wc))
+            {
+                DelegateTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
+                IBusinessObject ibo = trans.Translate (e);
+                ObjectUtilities.PrintOut(ibo);
+            }
+
+            //Console.WriteLine(mswsb.WhereStr);
+            // ******
+            //Expression<Func<int, bool>> exprLambda1 = x => (x & 1) == 0;
+            //Expression<Func<int,int,int>> exprLambda2 = (y,j) => y + j;
+
+            //Expression<Func<Person, bool>> where1 = (Person p) => /* p.Spouse == null && */ p.Name == "Svend";
+            //ExpressionRunner wroom = new ExpressionRunner();
+            //wroom.LookIn(where1);
             // ******
 
             Console.ReadLine();
-        }
-
-        public static void OldMain(string[] args)
-        {
-            IGenericDatabase gdb = Configuration.GenDB;
-
-            Person spouse = new Person();
-            spouse.Name = "In your dreams...";
-            Student s = new Student();
-            s.Name = "Morten";
-            s.id = 839;
-            s.Enlisted = new DateTime (2006, 12, 31);
-            s.Spouse = spouse;
-            Type t = typeof(Student);
-            
-            TypeSystem.RegisterType(t);
-
-            DelegateTranslator dtrans = TypeSystem.GetTranslator (t);
-            IEntity e = dtrans.Translate (s);
-            Console.WriteLine (e);
-            
-            Student copy = (Student)dtrans.Translate (e);
-            Console.WriteLine("Here goes the original Student: ");
-            ObjectUtilities.PrintOut(s);
-            Console.WriteLine("Here goes the copy: ");
-            ObjectUtilities.PrintOut(copy);
-            Console.WriteLine("Reflection based equality test says: ");
-            Console.WriteLine(ObjectUtilities.TestFieldEquality (s, copy));
-
-            DateTime then = DateTime.Now;
-            IBOCache.FlushToDB();
-
-            Console.WriteLine("Commit duration: {0}" , DateTime.Now - then);
-            Console.ReadLine();
-
         }
     }
 }
