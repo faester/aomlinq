@@ -18,8 +18,35 @@ namespace GenDB
 
         public IWhereable Convert(Expression expr)
         {
-            throw new Exception("asldkj");
-            //return Visit(expr);
+            //throw new Exception("asldkj");
+            return Visit(expr);
+        }
+
+
+        //        internal Expression VisitLambda(LambdaExpression lambda)
+//        {
+//            Expression expression2 = this.Visit(lambda.Body);
+//            if (expression2 != lambda.Body)
+//            {
+//                return Expression.Lambda(lambda.Type, expression2, lambda.Parameters);
+//            }
+//            return lambda;
+//        }
+
+        /// <summary>
+        /// Grabs the body from lambda expression and 
+        /// makes a re-visit
+        /// </summary>
+        /// <param name="lambda"></param>
+        /// <returns></returns>
+        public IWhereable VisitLambdaExpr(LambdaExpression lambda)
+        {
+            return Visit(lambda.Body);
+        }
+
+        public IWhereable VisitMethodCallExpr(MethodCallExpression mce)
+        {
+            return Visit(mce.Object);
         }
 
         #region MakeTreeMethods
@@ -236,18 +263,34 @@ namespace GenDB
 
         #endregion
 
+        private void ExceptionThrower(Expression e)
+        {
+            throw new Exception("Cannot translate " + e.ToString());
+        }
+
+        #region TranslateMethods
+
+        internal Expression TranslateAndAlso()
+        {
+            throw new Exception("AndAlso not implemented");
+            
+        }
+
+        #endregion
+
         #region VisitNodeMethods
 
         internal IWhereable Visit(Expression exp)
         //internal Expression Visit(Expression exp)
         {
-#if DEBUG
-            //Console.WriteLine("Visiting\n");
-#endif
+
             if (exp == null)
             {
+                Console.WriteLine("Call to Visit: NodeType=null");
                 return null;
             }
+            Console.WriteLine("Call to Visit: {0}",exp.NodeType);
+
             switch (exp.NodeType)
             {
                 case ExpressionType.Add:
@@ -257,18 +300,21 @@ namespace GenDB
                         break;
                 case ExpressionType.AndAlso:
                     // do stuff
-                    //return new ExprAnd( translate, translate);
+                    throw new Exception("AndAlso Exception");
+                    //return new ExprAnd( TranslateAndAlso(), TranslateAndAlso());
                 case ExpressionType.BitwiseAnd:
                 case ExpressionType.BitwiseOr:
                 case ExpressionType.BitwiseXor:
                 case ExpressionType.Coalesce:
                 case ExpressionType.Divide:
-                        ExceptionThrower(exp);
+                    ExceptionThrower(exp);
                         break;
                 case ExpressionType.EQ:
                     // do stuff
+                    throw new Exception("EQ Exception");
                 case ExpressionType.GT:
                     // do stuff
+                    throw new Exception("GT Exception");
                 case ExpressionType.GE:
                 case ExpressionType.Index:
                 case ExpressionType.LE:
@@ -277,6 +323,7 @@ namespace GenDB
                     break;
                 case ExpressionType.LT:
                     // do stuff
+                    throw new Exception("LT Exception");
                 case ExpressionType.Modulo:
                 case ExpressionType.Multiply:
                 case ExpressionType.MultiplyChecked:
@@ -286,6 +333,7 @@ namespace GenDB
                     break;
                 case ExpressionType.OrElse:
                     // do stuff
+                    throw new Exception("OrElse Exception");
                 case ExpressionType.RShift:
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
@@ -325,6 +373,7 @@ namespace GenDB
                     //    return this.VisitTypeIs((TypeBinaryExpression)exp);
                     //}
                 case ExpressionType.Lambda:
+                    return VisitLambdaExpr((LambdaExpression)exp);
                     //{
                     //    return this.VisitLambda((LambdaExpression)exp);
                     //}
@@ -341,6 +390,8 @@ namespace GenDB
                     //    return this.VisitMemberInit((MemberInitExpression)exp);
                     //}
                 case ExpressionType.MethodCall:
+                    return VisitMethodCallExpr((MethodCallExpression)exp);
+
                 case ExpressionType.MethodCallVirtual:
                     //{
                     //    return this.VisitMethodCall((MethodCallExpression)exp);
@@ -455,14 +506,14 @@ namespace GenDB
 //            return Expression.Condition(expression4, expression5, expression6);
 //        }
 
-        internal Expression VisitConstant(ConstantExpression c)
-        {
-#if DEBUG
-            Console.WriteLine("VisitConstant");
-            Console.WriteLine("Value: {0}, Type: {1}\n", c.Value, c.Type);
-#endif
-            return c;
-        }
+//        internal Expression VisitConstant(ConstantExpression c)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitConstant");
+//            Console.WriteLine("Value: {0}, Type: {1}\n", c.Value, c.Type);
+//#endif
+//            return c;
+//        }
 
 //        internal IEnumerable<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
 //        {
@@ -497,13 +548,13 @@ namespace GenDB
 //            return original;
 //        }
 
-        internal Expression VisitFunclet(FuncletExpression f)
-        {
-#if DEBUG
-            Console.WriteLine("VisitFunclet");
-#endif
-            return f;
-        }
+//        internal Expression VisitFunclet(FuncletExpression f)
+//        {
+//#if DEBUG
+//            Console.WriteLine("VisitFunclet");
+//#endif
+//            return f;
+//        }
 
 //        internal Expression VisitInvocation(InvocationExpression iv)
 //        {
@@ -521,12 +572,6 @@ namespace GenDB
 
 //        internal Expression VisitLambda(LambdaExpression lambda)
 //        {
-//#if DEBUG
-//            Console.WriteLine("VisitLambda");
-//            Console.WriteLine("Udtryk: {0}, Type: {1}\n", lambda.Body, lambda.Body.NodeType);
-//#endif
-
-
 //            Expression expression2 = this.Visit(lambda.Body);
 //            if (expression2 != lambda.Body)
 //            {
@@ -623,9 +668,6 @@ namespace GenDB
 
 //        internal Expression VisitMethodCall(MethodCallExpression m)
 //        {
-//#if DEBUG
-//            Console.WriteLine("VisitMethodCall");
-//#endif
 //            Expression expression2 = this.Visit(m.Object);
 //            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(m.Parameters);
 //            if ((expression2 == m.Object) && (enumerable2 == m.Parameters))
@@ -701,11 +743,6 @@ namespace GenDB
 //        }
 
         #endregion
-
-        private void ExceptionThrower(Expression e)
-        {
-            throw new Exception("Cannot translate " + e.ToString());
-        }
 
     }
 }
