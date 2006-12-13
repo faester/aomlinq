@@ -270,7 +270,7 @@ namespace GenDB
 				case ExpressionType.OrElse:
 				case ExpressionType.RShift:
 				case ExpressionType.Subtract:
-				case ExpressionType.SubtractChecked:
+				case ExpressionType.SubtractChecked: 
 					{
 						return this.VisitBinary((BinaryExpression)exp);
 					}
