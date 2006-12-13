@@ -565,14 +565,21 @@ namespace GenDB
             }
             propertyValueInsertCount++;
             long longValue; // DateTimes are stored as ticks to avoid problems with limited date span in SQL-server
-            if (pv.Property.MappingType == MappingType.DATETIME)
+            bool longValueIsNull = false;
+            switch(pv.Property.MappingType)
             {
-                longValue = pv.DateTimeValue.Ticks;
+                case MappingType.REFERENCE: 
+                    longValue = pv.RefValue.EntityPOID; 
+                    longValueIsNull = pv.RefValue.IsNullReference; 
+                    break;
+                case MappingType.DATETIME:
+                    longValue = pv.DateTimeValue.Ticks;
+                    break;
+                default: 
+                    longValue = pv.LongValue; 
+                    break;
             }
-            else
-            {
-                longValue = pv.LongValue;
-            }
+
             string stringValue = pv.StringValue != null ? pv.StringValue.Replace("'", "\\'") : null;
             int boolValue = pv.BoolValue ? 1 : 0;
 
@@ -692,7 +699,7 @@ namespace GenDB
 
         public void RollbackTransaction()
         {
-            throw new Exception("Not implemented");
+            ClearValueInsertStringBuilders();
         }
 
         public void RollbackTypeTransaction()
@@ -705,51 +712,23 @@ namespace GenDB
         {
             if (DatabaseExists())
             {
-                using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithDBName))
+                using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
                 {
                     cnn.Open();
-                    SqlCommand cmd = new SqlCommand ();
+                    SqlCommand cmd = new SqlCommand();
                     cmd.Connection = cnn;
 
-                    try
-                    {
-                        cmd.CommandText = "SELECT CASE WHEN Max(EntityTypePOID) is null THEN 0 ELSE Max(EntityTypePOID) + 1 END FROM EntityType";
-                        nextETID = long.Parse(cmd.ExecuteScalar().ToString());
-                    }
-                    catch (Exception)
-                    { 
-                        Console.WriteLine("Error retrieving max EntityTypePOID.");
-                    }
+                    cmd.CommandText = "SELECT CASE WHEN Max(EntityTypePOID) is null THEN 0 ELSE Max(EntityTypePOID) + 1 END FROM EntityType";
+                    nextETID = long.Parse(cmd.ExecuteScalar().ToString());
 
-                    try
-                    {
-                        cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) is null THEN 0 ELSE Max(EntityPOID) + 1 END FROM Entity";
-                        nextEID = long.Parse(cmd.ExecuteScalar().ToString());
-                    }
-                    catch (Exception)
-                    { 
-                        Console.WriteLine("Error retrieving max EntityPOID.");
-                    }
+                    cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) is null THEN 0 ELSE Max(EntityPOID) + 1 END FROM Entity";
+                    nextEID = long.Parse(cmd.ExecuteScalar().ToString());
 
-                    try
-                    {
-                        cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) is null THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";
-                        nextPID = long.Parse(cmd.ExecuteScalar().ToString());
-                    }
-                    catch (Exception)
-                    { 
-                        Console.WriteLine("Error retrieving max PropertyPOID.");
-                    }
+                    cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) is null THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";
+                    nextPID = long.Parse(cmd.ExecuteScalar().ToString());
 
-                    try
-                    {
-                        cmd.CommandText = "SELECT CASE WHEN Max(PropertyTypePOID) is null THEN 0 ELSE Max(PropertyTypePOID) + 1 END FROM PropertyType";
-                        nextPTID = long.Parse(cmd.ExecuteScalar().ToString());
-                    }
-                    catch (Exception)
-                    { 
-                        Console.WriteLine("Error retrieving max PropertyTypePOID.");
-                    }
+                    cmd.CommandText = "SELECT CASE WHEN Max(PropertyTypePOID) is null THEN 0 ELSE Max(PropertyTypePOID) + 1 END FROM PropertyType";
+                    nextPTID = long.Parse(cmd.ExecuteScalar().ToString());
 
                     cnn.Close();
                 }

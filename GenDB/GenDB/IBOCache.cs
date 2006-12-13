@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace GenDB
 {
@@ -130,10 +131,31 @@ namespace GenDB
 
         public static void FlushToDB()
         {
+            //Console.WriteLine("DEBUG INFORMATION FROM IBOCache.FlushToDB():");
+            //Stopwatch stp = new Stopwatch();
+            
+            //stp.Start();
             CommitUncommitted();
+            //stp.Stop();
+            //Console.WriteLine("\tCommitUncomitted took: {0}", stp.Elapsed);
+            //stp.Reset();
+
+            //stp.Start();
             CommitChangedCommited();
+            //stp.Stop();
+            //Console.WriteLine("\tCommitChangedComitted took: {0}", stp.Elapsed);
+
+            //stp.Reset();
+            //stp.Start();
             MoveCommittedToUncommitted();
+            //stp.Stop();
+            //Console.WriteLine("\tMoveCommittedToUncommitted took: {0}", stp.Elapsed);
+
+            //stp.Reset();
+            //stp.Start();
             Configuration.GenDB.CommitChanges();
+            //stp.Stop();
+            //Console.WriteLine("\tConfiguration.GenDB.CommitChanges took: {0}", stp.Elapsed);
         }
 
         private static void CommitUncommitted()
