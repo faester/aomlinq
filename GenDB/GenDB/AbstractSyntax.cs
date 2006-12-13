@@ -177,6 +177,8 @@ namespace GenDB
 
     /// <summary>
     /// Contains a reference to a property property.
+    /// 
+    /// Find property: TypeSystem.GetEntityType(obj.GetType()).GetProperty
     /// </summary>
     class CstProperty : INumerical
     {
