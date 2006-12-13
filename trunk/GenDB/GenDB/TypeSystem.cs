@@ -86,6 +86,13 @@ namespace GenDB
             DelegateTranslator trans = new DelegateTranslator(ce.ClrType, et);
         }
         
+
+        /// <summary>
+        /// Registers the type for usage internally in the 
+        /// translation system and writes the metadescription
+        /// to the DB.
+        /// </summary>
+        /// <param name="t"></param>
         internal static void RegisterType(Type t)
         {
             if (!type2IEt.ContainsKey(t))
@@ -109,6 +116,23 @@ namespace GenDB
             return etid2IEt[entityTypePOID].Target;
         }
 
+
+        /// <summary>
+        /// Does not check if the Type is recognized
+        /// by the TypeSystem. Throws exception if this
+        /// is not the case. Use IsTypeKnown to determine
+        /// if it is the case. 
+        /// 
+        /// If Type is unknown the internal method RegisterType 
+        /// can be used to make it known to the TypeSystem.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static IEntityType GetEntityType(Type t)
+        {
+            return type2IEt[t].GetType();
+        }
+
         public static DelegateTranslator GetTranslator (Type t)
         {
             return type2IEt[t].Translator;
@@ -129,7 +153,7 @@ namespace GenDB
         /// </summary>
         /// <param name="iet"></param>
         /// <returns></returns>
-        public static IEnumerable<IEntityType> GetTypesInstanceOf(IEntityType iet)
+        public static IEnumerable<IEntityType> GetEntityTypesInstanceOf(IEntityType iet)
         {
             // List for storing the result
             LinkedList<IEntityType> result = new LinkedList<IEntityType>();
@@ -141,7 +165,7 @@ namespace GenDB
             foreach (IEntityType et in etid2IEt[iet.EntityTypePOID].DirectSubTypes)
             {
                 // Add the sub type and all its sub types recursively.
-                foreach (IEntityType et2 in GetTypesInstanceOf(et))
+                foreach (IEntityType et2 in GetEntityTypesInstanceOf(et))
                 {
                     result.AddLast (et2);
                 }
@@ -149,9 +173,29 @@ namespace GenDB
             return result;
         }
 
-        public static IEnumerable<IEntityType> GetTypesInstanceOf(long entityTypePOID)
+
+        /// <summary>
+        /// Gets all known sub types of t. (That is all types written to the
+        /// DB, since the TypeSystem is always kept in alignment with the database
+        /// as regards types.)
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static IEnumerable<IEntityType> GetEntityTypesInstanceOf(Type t)
         {
-            return GetTypesInstanceOf(etid2IEt[entityTypePOID].Target);
+            return GetEntityTypesInstanceOf(type2IEt[t].Target);
+        }
+
+        /// <summary>
+        /// Gets all known sub types of t. (That is all types written to the
+        /// DB, since the TypeSystem is always kept in alignment with the database
+        /// as regards types.)
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static IEnumerable<IEntityType> GetEntityTypesInstanceOf(long entityTypePOID)
+        {
+            return GetEntityTypesInstanceOf(etid2IEt[entityTypePOID].Target);
         }
 
         public static IEntityType ConstructEntityType(Type t)
