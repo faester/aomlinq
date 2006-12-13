@@ -16,9 +16,14 @@ namespace GenDB
 
         #region ICollection members
 
-        public void Add(T e)
+        public void Add(T t)
         {
-            throw new Exception("Not implemented");
+            if (!TypeSystem.IsTypeKnown(t.GetType()))
+            {
+               TypeSystem.RegisterType(t.GetType());
+            }
+            DelegateTranslator trans = TypeSystem.GetTranslator(t.GetType());
+            IEntity e = trans.Translate(t);
         }
 
         public void Clear()
