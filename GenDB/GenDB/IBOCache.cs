@@ -145,7 +145,7 @@ namespace GenDB
 
             stp.Start();
 #endif
-            CommitChangedCommited();
+            CommitChangedCommitted();
 #if DEBUG
             stp.Stop();
             Console.WriteLine("\tCommitChangedComitted took: {0}", stp.Elapsed);
@@ -187,7 +187,7 @@ namespace GenDB
             uncommittedObject.Clear();
         }
 
-        private static void CommitChangedCommited()
+        private static void CommitChangedCommitted()
         {
             foreach (CacheElement ce in committedObjects.Values)
             {
