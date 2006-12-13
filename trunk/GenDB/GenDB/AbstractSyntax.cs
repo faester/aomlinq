@@ -6,6 +6,7 @@ namespace GenDB
 {
     interface IAbsSyntaxVisitor
     {
+        void Visit(IWhereable clause);
         void VisitNumericalProperty(CstProperty vp);
         void VisitCstString(CstString cs);
         void VisitCstBool(CstBool cb);
