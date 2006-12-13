@@ -19,6 +19,7 @@ namespace GenDB
         void VisitNotExpr(ExprNot expr);
         void VisitAndExpr(ExprAnd expr);
         void VisitOrExpr(ExprOr expr);
+        void VisitCstDateTime(CstDateTime cdt);
     }
 
     interface IWhereable
@@ -194,6 +195,27 @@ namespace GenDB
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitNumericalProperty(this);
+        }
+    }
+
+    class CstDateTime : INumerical
+    {
+        DateTime value;
+
+        public DateTime Value
+        {
+            get { return this.value; }
+            set { this.value = value; }
+        }
+
+        public CstDateTime(DateTime value)
+        {
+            this.value = value;
+        }
+
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitCstDateTime(this);
         }
     }
 
