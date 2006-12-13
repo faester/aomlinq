@@ -56,6 +56,7 @@
     <Compile Include="DBTag.cs" />
     <Compile Include="DelegateTranslator.cs" />
     <Compile Include="DynamicMethodCompiler.cs" />
+    <Compile Include="ExpressionVisitor.cs" />
     <Compile Include="IBOCache.cs" />
     <Compile Include="IBusinessObject.cs" />
     <Compile Include="IGenericDatabase.cs" />
