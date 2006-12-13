@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractBusinessObject.cs" />
+    <Compile Include="AbstractSyntax.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="DBTag.cs" />
     <Compile Include="DelegateTranslator.cs" />

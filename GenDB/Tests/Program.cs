@@ -10,6 +10,17 @@ namespace Tests
 {
     class Program
     {
+        class Car : AbstractBusinessObject 
+        {
+            string brand;
+
+            public string Brand
+            {
+                get { return brand; }
+                set { brand = value; }
+            }
+        }
+
         class Person : AbstractBusinessObject
         {
             float f = 600f;
@@ -52,7 +63,16 @@ namespace Tests
             {
                 get { return spouse; }
                 set { spouse = value; }
-            } 
+            }
+
+            private Car car;
+
+            public Car Car
+            {
+                get { return car; }
+                set { car = value; }
+            }
+
 
             DateTime instantiated = DateTime.Now ;
 
@@ -68,7 +88,7 @@ namespace Tests
         {
             Configuration.RebuildDatabase = true;
             Configuration.DbBatchSize = 2000;
-            long objcount = 10;
+            long objcount = 500;
 
             DateTime then = DateTime.Now;
             GenTable gt = new GenTable();
@@ -77,10 +97,13 @@ namespace Tests
 
             for (int i = 0; i < objcount; i++)
             {
+                Car c = new Car{Brand = "Car " + i };
                 Person p = new Person();
+                p.Car = c;
                 p.Spouse = lastPerson;
                 p.Name = "Navn " + i.ToString();
                 gt.Add (p);
+                gt.Add (c);
                 lastPerson = p;
             }
 
@@ -92,7 +115,7 @@ namespace Tests
             foreach (IBusinessObject ibo in gt.GetAll())
             {
                 objcount++;
-                ObjectUtilities.PrintOut(ibo);
+                //ObjectUtilities.PrintOut(ibo);
             }
             dur = DateTime.Now - then;
             Console.WriteLine ("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
