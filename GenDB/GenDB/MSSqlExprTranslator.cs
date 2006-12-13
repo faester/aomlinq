@@ -240,7 +240,8 @@ namespace GenDB
 
         #region VisitNodeMethods
 
-        internal IWhereable Visit(Expression exp)
+        //internal IWhereable Visit(Expression exp)
+        internal Expression Visit(Expression exp)
         {
 #if DEBUG
             //Console.WriteLine("Visiting\n");
@@ -254,9 +255,9 @@ namespace GenDB
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                 case ExpressionType.And:
-                    ExceptionThrower (exp);
+                    //ExceptionThrower (exp);
                 case ExpressionType.AndAlso:
-                    return new ExprAnd( translate, translate);
+                    //return new ExprAnd( translate, translate);
                 case ExpressionType.BitwiseAnd:
                 case ExpressionType.BitwiseOr:
                 case ExpressionType.BitwiseXor:
