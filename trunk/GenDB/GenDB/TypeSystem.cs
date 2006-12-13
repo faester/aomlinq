@@ -118,32 +118,35 @@ namespace GenDB
 
 
         /// <summary>
+        /// Returns the IEntityType used to describe
+        /// a Type internally.
+        /// <p/>
         /// Does not check if the Type is recognized
         /// by the TypeSystem. Throws exception if this
         /// is not the case. Use IsTypeKnown to determine
         /// if it is the case. 
-        /// 
+        /// <p/>
         /// If Type is unknown the internal method RegisterType 
         /// can be used to make it known to the TypeSystem.
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static IEntityType GetEntityType(Type t)
+        internal static IEntityType GetEntityType(Type t)
         {
             return type2IEt[t].Target;
         }
 
-        public static DelegateTranslator GetTranslator (Type t)
+        internal static DelegateTranslator GetTranslator (Type t)
         {
             return type2IEt[t].Translator;
         }
 
-        public static DelegateTranslator GetTranslator (long entityTypePOID )
+        internal static DelegateTranslator GetTranslator (long entityTypePOID )
         {
             return etid2IEt[entityTypePOID].Translator;
         }
 
-        public static bool IsTypeKnown(Type t)
+        internal static bool IsTypeKnown(Type t)
         {
             return type2IEt.ContainsKey(t);
         }
