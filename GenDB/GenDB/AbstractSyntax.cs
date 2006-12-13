@@ -6,7 +6,7 @@ namespace GenDB
 {
     interface IAbsSyntaxVisitor
     {
-        void VisitNumericalProperty(CstNumericalProperty vp);
+        void VisitNumericalProperty(CstProperty vp);
         void VisitCstString(CstString cs);
         void VisitCstBool(CstBool cb);
         void VisitCstLong(CstLong cl);
@@ -178,7 +178,7 @@ namespace GenDB
     /// <summary>
     /// Contains a reference to a property property.
     /// </summary>
-    class CstNumericalProperty : INumerical
+    class CstProperty : INumerical
     {
         IProperty property = null;
 
@@ -187,7 +187,7 @@ namespace GenDB
             get { return property; }
         }
 
-        public CstNumericalProperty(IProperty property)
+        public CstProperty(IProperty property)
         {
             this.property = property;
         }
