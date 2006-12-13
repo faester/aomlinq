@@ -11,9 +11,9 @@ namespace GenDB
     /*
      * Kan persisteres:
      *  - Objekterne skal implementere IBusinessObject og new() (Dette skal sikres af generisk deklarering på public Table<T> )
-     *      - Primitive felter persisteres.
-     *      - Felter af referencetype persisteres kun, hvis de implementerer IBusinessObject
-     *      - Ønskes et felt, der opfylder ovenstående, ikke persisteret kan det annoteres med [Volatile]
+     *  - Kun Properties med public getter og setter persisteres
+     *      - Propertiens type skal være primitiv, DateTime, String eller en type, der implementerer IBusinessObject
+     *      - Ønskes en property, der opfylder ovenstående, ikke persisteret kan det annoteres med [Volatile]
      *      - Statiske felter persisteres ikke
      */
     public class GenTable

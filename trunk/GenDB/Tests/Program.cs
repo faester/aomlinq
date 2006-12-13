@@ -14,6 +14,19 @@ namespace Tests
         {
             float f = 600f;
 
+            public float F
+            {
+                get { return f; }
+                set { f = value; }
+            }
+
+            char ch = 'a';
+
+            public char Ch
+            {
+                get { return ch; }
+            }
+
             double d = 400.0;
 
             string name;
@@ -36,7 +49,7 @@ namespace Tests
         {
             Configuration.RebuildDatabase = true;
             Configuration.DbBatchSize = 2000;
-            long objcount = 1000;
+            long objcount = 10;
 
             DateTime then = DateTime.Now;
             GenTable gt = new GenTable();
@@ -60,7 +73,7 @@ namespace Tests
             foreach (IBusinessObject ibo in gt.GetAll())
             {
                 objcount++;
-                //ObjectUtilities.PrintOut(ibo);
+                ObjectUtilities.PrintOut(ibo);
             }
             dur = DateTime.Now - then;
             Console.WriteLine ("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);

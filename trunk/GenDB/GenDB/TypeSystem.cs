@@ -161,18 +161,18 @@ namespace GenDB
             et.Name = t.FullName;
             et.AssemblyDescription = t.Assembly.FullName;
 
-            FieldInfo[] fields = t.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance |
-                                        BindingFlags.Public | BindingFlags.NonPublic );
+            PropertyInfo[] clrProperties = t.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance |
+                                        BindingFlags.Public );
 
-            foreach (FieldInfo field in fields)
+            foreach (PropertyInfo clrProperty in clrProperties)
             {
-                Attribute attr = Attribute.GetCustomAttribute(field, typeof(Volatile));
-                if (field.FieldType != typeof(DBTag) && attr == null)
+                Attribute attr = Attribute.GetCustomAttribute(clrProperty, typeof(Volatile));
+                if (clrProperty.PropertyType != typeof(DBTag) && attr == null)
                 {
                     IProperty property = Configuration.GenDB.NewProperty();
-                    property.PropertyName = field.Name;
-                    property.PropertyType = GetPropertyType(field.FieldType.FullName);
-                    property.MappingType = FindMappingType(field);
+                    property.PropertyName = clrProperty.Name;
+                    property.PropertyType = GetPropertyType(clrProperty.PropertyType.FullName);
+                    property.MappingType = FindMappingType(clrProperty);
                     property.EntityType = et;
                     et.AddProperty(property);
                 }
@@ -195,9 +195,9 @@ namespace GenDB
             return et;
         }
 
-        static MappingType FindMappingType (FieldInfo field)
+        static MappingType FindMappingType (PropertyInfo clrProperty)
         {
-            Type t = field.FieldType;
+            Type t = clrProperty.PropertyType;
             if (t.IsPrimitive)
             {
                 if (t == typeof(int) || t == typeof(long) || t == typeof(short))
@@ -218,12 +218,12 @@ namespace GenDB
                 }
                 else 
                 {
-                    throw new NotTranslatableException("Did not know how to map primitive field", field);
+                    throw new NotTranslatableException("Did not know how to map primitive Property", clrProperty);
                 }
             }
             else if (t.IsArray )
             {
-                throw new NotTranslatableException("Can not translate ararys.", field);
+                throw new NotTranslatableException("Can not translate arrays.", clrProperty);
             }
             else if (t == typeof(string))
             {
@@ -239,7 +239,7 @@ namespace GenDB
             }
             else
             {
-                throw new NotTranslatableException("Can not find mappingtype of field.", field);
+                throw new NotTranslatableException("Can not find mappingtype of property.", clrProperty);
             }
         }
 

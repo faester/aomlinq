@@ -26,24 +26,28 @@ namespace GenDB
             if (hasIBO == null) { throw new NotTranslatableException("Reference types must implement IBusinessObject.", t); }
         }
 
-        public static void CheckRefFieldTranslatability(FieldInfo fi)
+        public static void CheckRefFieldTranslatability(PropertyInfo clrProperty)
         {
-            if (fi.FieldType == typeof(string)) { /* ok */ }
-            else if (fi.FieldType == typeof(DateTime)) { /* ok */ }
+            if (clrProperty.PropertyType == typeof(string)) { /* ok */ }
+            else if (clrProperty.PropertyType == typeof(DateTime)) { /* ok */ }
             else
             {
-                Type hasIBO = fi.FieldType.GetInterface(IBO_NAME);
-                if (hasIBO == null) { throw new NotTranslatableException("Reference type fields must implement IBusinessObject", fi); }
+                Type hasIBO = clrProperty.PropertyType.GetInterface(IBO_NAME);
+                if (hasIBO == null) { throw new NotTranslatableException("Reference type fields must implement IBusinessObject", clrProperty); }
             }
         }
 
-        public static void CheckFieldTranslatability(FieldInfo[] fields)
+        public static void CheckPropertyTranslatability(PropertyInfo[] clrProperties)
         {
-            foreach (FieldInfo fi in fields)
+            foreach (PropertyInfo clrProperty in clrProperties)
             {
-                //if (fi.IsStatic) { throw new NotTranslatableException("Can not translate static fields.", fi); }
-                if (fi.FieldType.IsArray) { throw new NotTranslatableException("Can not translate arrays.", fi); }
-                if (fi.FieldType.IsByRef) { CheckRefFieldTranslatability(fi); }
+                //if (clrProperty.IsStatic) { throw new NotTranslatableException("Can not translate static fields.", clrProperty); }
+                MethodInfo setter = clrProperty.GetSetMethod();
+                MethodInfo getter = clrProperty.GetGetMethod();
+                if(setter == null || !setter.IsPublic) { throw new NotTranslatableException ("Public property has no setter or setter is non-public", clrProperty);}
+                if(getter == null || !getter.IsPublic) { throw new NotTranslatableException ("Public property has no getter or getter is non-public", clrProperty);}
+                if (clrProperty.PropertyType.IsArray) { throw new NotTranslatableException("Can not translate arrays.", clrProperty); }
+                if (clrProperty.PropertyType.IsByRef) { CheckRefFieldTranslatability(clrProperty); }
             }
         }
     }
@@ -61,7 +65,7 @@ namespace GenDB
         DelegateTranslator superTranslator = null;
         IEntityType iet;
         Type t;
-        FieldInfo[] fields;
+        PropertyInfo[] fields;
         LinkedList<FieldConverter> fieldConverters = new LinkedList<FieldConverter>();
         InstantiateObjectHandler instantiator;
         private DelegateTranslator() { /* empty */ }
@@ -76,8 +80,8 @@ namespace GenDB
         private void Init()
         {
             CheckTranslatability();
-            SetFieldInfo();
-            InitFieldTranslators();
+            SetPropertyInfo();
+            InitPropertyTranslators();
             InitInstantiator();
             InitSuperTranslator();
         }
@@ -94,14 +98,13 @@ namespace GenDB
         }
 
         /// <summary>
-        /// Stores the FieldInfo array of fields to translate.
+        /// Stores the PropertyInfo array of fields to translate.
         /// </summary>
-        private void SetFieldInfo()
+        private void SetPropertyInfo()
         {
-            fields = t.GetFields(
+            fields = t.GetProperties(
                 BindingFlags.Public
                 | BindingFlags.DeclaredOnly
-                | BindingFlags.NonPublic
                 | BindingFlags.Instance
                 );
         }
@@ -112,23 +115,23 @@ namespace GenDB
         private void CheckTranslatability()
         {
             TranslatorChecks.CheckObjectTypeTranslateability(t);
-            FieldInfo[] allFields = t.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Static
-                | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            TranslatorChecks.CheckFieldTranslatability(allFields);
+            PropertyInfo[] allFields = t.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Static
+                | BindingFlags.Public | BindingFlags.Instance);
+            TranslatorChecks.CheckPropertyTranslatability(allFields);
         }
 
-        private void InitFieldTranslators()
+        private void InitPropertyTranslators()
         {
             Dictionary<string, IProperty> properties =
                 iet.GetAllProperties.ToDictionary((IProperty p) => p.PropertyName);
 
-            foreach (FieldInfo fi in fields)
+            foreach (PropertyInfo clrProperty in fields)
             {
-                Attribute a = Volatile.GetCustomAttribute (fi, typeof(Volatile));
-                if (fi.FieldType != typeof(DBTag) && a == null)
+                Attribute a = Volatile.GetCustomAttribute (clrProperty, typeof(Volatile));
+                if (clrProperty.PropertyType != typeof(DBTag) && a == null)
                 {
-                    IProperty prop = properties[fi.Name];
-                    fieldConverters.AddLast(new FieldConverter(t, fi, prop));
+                    IProperty prop = properties[clrProperty.Name];
+                    fieldConverters.AddLast(new FieldConverter(t, clrProperty, prop));
                 }
             }
         }
@@ -215,9 +218,9 @@ namespace GenDB
         SetHandler sh;
         GetHandler gh;
         Type clrType;
-        FieldInfo fi;
+        PropertyInfo fi;
 
-        public FieldConverter(Type t, FieldInfo fi, IProperty property)
+        public FieldConverter(Type t, PropertyInfo fi, IProperty property)
         {
             this.fi = fi;
             clrType = t;
@@ -242,13 +245,13 @@ namespace GenDB
         /// TODO: Change the GetHandler etc to use primitives and objects.
         /// (Should be GetLongHandler etc..)
         /// </summary>
-        /// <param name="fi"></param>
+        /// <param name="clrProperty"></param>
         /// <param name="prop"></param>
         /// <returns></returns>
-        private PropertyValueGetter CreateGetter(FieldInfo fi, IProperty prop)
+        private PropertyValueGetter CreateGetter(PropertyInfo fi, IProperty prop)
         {
-            if ((fi.FieldType.IsByRef || fi.FieldType.IsClass) 
-                && !(fi.FieldType == typeof(string) || fi.FieldType == typeof(DateTime))
+            if ((fi.PropertyType.IsByRef || fi.PropertyType.IsClass) 
+                && !(fi.PropertyType == typeof(string) || fi.PropertyType == typeof(DateTime))
                 )
             { // Handles references other than string and DateTime
                 return delegate(IEntity ie)
@@ -272,49 +275,49 @@ namespace GenDB
                 };
 
             }
-            if (fi.FieldType == typeof(long))
+            if (fi.PropertyType == typeof(long))
             {
                 return delegate(IEntity ie)
                 {
                     return ie.GetPropertyValue(prop).LongValue;
                 };
             }
-            else if (fi.FieldType == typeof(int))
+            else if (fi.PropertyType == typeof(int))
             {
                 return delegate(IEntity ie) { return (int)ie.GetPropertyValue(prop).LongValue; };
             }
-            else if (fi.FieldType == typeof(string))
+            else if (fi.PropertyType == typeof(string))
             {
                 return delegate(IEntity ie)
                 {
                     return ie.GetPropertyValue(prop).StringValue;
                 };
             }
-            else if (fi.FieldType == typeof(DateTime))
+            else if (fi.PropertyType == typeof(DateTime))
             {
                 return delegate(IEntity ie)
                 {
                     return ie.GetPropertyValue(prop).DateTimeValue;
                 };
             }
-            else if (fi.FieldType == typeof(bool))
+            else if (fi.PropertyType == typeof(bool))
             {
                 return delegate(IEntity ie) { return ie.GetPropertyValue(prop).BoolValue; };
             }
-            else if (fi.FieldType == typeof(char))
+            else if (fi.PropertyType == typeof(char))
             {
                 return delegate(IEntity ie) {  //
                     return ie.GetPropertyValue(prop).CharValue; 
                 };
             }
-            else if (fi.FieldType == typeof(float))
+            else if (fi.PropertyType == typeof(float))
             {
                 return delegate(IEntity ie)
                 {  //
                     return Convert.ToSingle(ie.GetPropertyValue(prop).DoubleValue);
                 };
             }
-            else if (fi.FieldType == typeof(double))
+            else if (fi.PropertyType == typeof(double))
             {
                 return delegate(IEntity ie)
                 {  //
