@@ -24,6 +24,12 @@ namespace GenDB
      */
     class MsSql2005DB : IGenericDatabase
     {
+        internal static string SqlSanitizeString(string s)
+        {
+            string res = s.Replace ("'", "''");
+            return res;
+        }
+
         long nextETID = 0;
         bool nextIDsInitialized = false;
         public long NextETID
@@ -586,7 +592,7 @@ namespace GenDB
                     break;
             }
 
-            string stringValue = pv.StringValue != null ? pv.StringValue.Replace("'", "\\'") : null;
+            string stringValue = pv.StringValue != null ? pv.StringValue = SqlSanitizeString(pv.StringValue) : null;
             int boolValue = pv.BoolValue ? 1 : 0;
 
             sbPropertyValueInserts.Append(" EXEC sp_SET_PROPERTYVALUE ")
