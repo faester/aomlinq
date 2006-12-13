@@ -8,6 +8,16 @@ namespace GenDB
     {
         StringBuilder whereStr = new StringBuilder();
 
+        public String WhereStr 
+        {
+            get { return whereStr.ToString(); }
+        }
+
+        public void Reset()
+        {
+            whereStr = new StringBuilder();
+        }
+
         public void Visit(IWhereable clause)
         {
             clause.AcceptVisitor(this);
@@ -22,13 +32,13 @@ namespace GenDB
             whereStr.Append (" AND ");
             switch (p.MappingType )
             {
-                case MappingType.BOOL : left.Append ("pv.BoolValue "); break;
-                case MappingType.CHAR : left.Append ("pv.BoolValue "); break;
-                case MappingType.DATETIME : left.Append ("pv.BoolValue "); break;
-                case MappingType.DOUBLE : left.Append ("pv.BoolValue "); break;
-                case MappingType.LONG : left.Append ("pv.BoolValue "); break;
-                case MappingType.REFERENCE : left.Append ("pv.BoolValue "); break;
-                case MappingType.STRING : left.Append ("pv.BoolValue "); break;
+                case MappingType.BOOL : whereStr.Append ("pv.BoolValue "); break;
+                case MappingType.CHAR : whereStr.Append ("pv.BoolValue "); break;
+                case MappingType.DATETIME : whereStr.Append ("pv.BoolValue "); break;
+                case MappingType.DOUBLE : whereStr.Append ("pv.BoolValue "); break;
+                case MappingType.LONG : whereStr.Append ("pv.BoolValue "); break;
+                case MappingType.REFERENCE : whereStr.Append ("pv.BoolValue "); break;
+                case MappingType.STRING : whereStr.Append ("pv.BoolValue "); break;
             }
         }
 
@@ -98,18 +108,18 @@ namespace GenDB
         public void VisitOPLessThan(OP_LessThan lt)
         {
             whereStr.Append (" (SELECT DISTINCT EntityPOID FROM PropertyValue WHERE ");
-            eq.Left.AcceptVisitor(this);
+            lt.Left.AcceptVisitor(this);
             whereStr.Append ('<');
-            eq.Right.AcceptVisitor (this);
+            lt.Right.AcceptVisitor (this);
             whereStr.Append(") ");
         }
 
         public void VisitOPGreaterThan(OP_GreaterThan gt)
         {
             whereStr.Append (" (SELECT DISTINCT EntityPOID FROM PropertyValue WHERE ");
-            eq.Left.AcceptVisitor(this);
+            gt.Left.AcceptVisitor(this);
             whereStr.Append ('>');
-            eq.Right.AcceptVisitor (this);
+            gt.Right.AcceptVisitor (this);
             whereStr.Append(") ");
         }
 
@@ -125,7 +135,7 @@ namespace GenDB
             whereStr.Append (" (");
             expr.Left.AcceptVisitor (this);
             whereStr.Append (") INTERSECT (");
-            expr.Right.AcceptVisitor (THIS);
+            expr.Right.AcceptVisitor (this);
             whereStr.Append (") ");
         }
 
@@ -134,7 +144,7 @@ namespace GenDB
             whereStr.Append (" (");
             expr.Left.AcceptVisitor (this);
             whereStr.Append (") UNION (");
-            expr.Right.AcceptVisitor (THIS);
+            expr.Right.AcceptVisitor (this);
             whereStr.Append (") ");
         }
         
