@@ -229,7 +229,8 @@ namespace GenDB
 
         public void SetObjectFieldValue(IBusinessObject ibo, IEntity entity)
         {
-            sh(ibo, pvg(entity));
+            object value = pvg(entity);
+            sh(ibo, value);
         }
 
         public void SetEntityPropertyValue(IBusinessObject ibo, IEntity e)
@@ -306,6 +307,20 @@ namespace GenDB
                     return ie.GetPropertyValue(prop).CharValue; 
                 };
             }
+            else if (fi.FieldType == typeof(float))
+            {
+                return delegate(IEntity ie)
+                {  //
+                    return Convert.ToSingle(ie.GetPropertyValue(prop).DoubleValue);
+                };
+            }
+            else if (fi.FieldType == typeof(double))
+            {
+                return delegate(IEntity ie)
+                {  //
+                    return ie.GetPropertyValue(prop).DoubleValue;
+                };
+            }
             else
             {
                 throw new NotTranslatableException("Have not implemented PropertyValueGetter for field type.", fi);
@@ -317,19 +332,23 @@ namespace GenDB
             switch (p.MappingType)
             {
                 case MappingType.BOOL:
-                    return delegate(IEntity e, object value) { e.GetPropertyValue(p).BoolValue = (bool)value; };
+                    return delegate(IEntity e, object value) {
+                        e.GetPropertyValue(p).BoolValue = Convert.ToBoolean(value);
+                    };
                 case MappingType.DATETIME:
                     return delegate(IEntity e, object value)
                     {
-                        e.GetPropertyValue(p).DateTimeValue = (DateTime)value;
+                        e.GetPropertyValue(p).DateTimeValue = Convert.ToDateTime(value);
                     };
-                case MappingType.DOUBLE: return delegate(IEntity e, object value) { e.GetPropertyValue(p).DoubleValue = (double)value; };
+                case MappingType.DOUBLE: 
+                    return delegate(IEntity e, object value)
+                    { 
+                        e.GetPropertyValue(p).DoubleValue = Convert.ToDouble(value);
+                    };
                 case MappingType.LONG:
                     return delegate(IEntity e, object value)
                     {
-                        long v = Convert.ToInt64(value);
-                        IPropertyValue pv = e.GetPropertyValue(p);
-                        pv.LongValue = v;
+                        e.GetPropertyValue(p).LongValue = Convert.ToInt64(value);
                     };
                 case MappingType.REFERENCE:
                     return delegate(IEntity e, object value)
@@ -359,11 +378,11 @@ namespace GenDB
                 case MappingType.STRING:
                     return delegate(IEntity e, object value)
                     {
-                        e.GetPropertyValue(p).StringValue = (string)value;
+                        e.GetPropertyValue(p).StringValue = Convert.ToString(value);
                     };
                 case MappingType.CHAR: return 
                     delegate(IEntity e, object value) { 
-                        e.GetPropertyValue(p).CharValue = (char)value; 
+                        e.GetPropertyValue(p).CharValue = Convert.ToChar (value);
                     };
                 default:
                     throw new Exception("Unknown MappingType in DelegateTranslator, CreateSetter: " + p.MappingType);

@@ -12,6 +12,10 @@ namespace Tests
     {
         class Person : AbstractBusinessObject
         {
+            float f = 600f;
+
+            double d = 400.0;
+
             string name;
 
             int age;
