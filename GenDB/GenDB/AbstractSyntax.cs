@@ -6,12 +6,19 @@ namespace GenDB
 {
     interface IAbsSyntaxVisitor
     {
-        void VisitVarProperty(VarProperty vp);
+        void VisitNumericalProperty(CstNumericalProperty vp);
         void VisitCstString(CstString cs);
         void VisitCstBool(CstBool cb);
         void VisitCstLong(CstLong cl);
         void VisitCstDouble(CstDouble cd);
-        void VisitCstReference(CstReference cr);
+        void VisitCstReference(VarReference cr);
+        void VisitPropertyOfReferredObject(PropertyOfReferredObject pro);
+        void VisitOPEquals(OP_Equals eq);
+        void VisitOPLessThan(OP_LessThan lt);
+        void VisitOPGreaterThan(OP_GreaterThan gt);
+        void VisitNotExpr(ExprNot expr);
+        void VisitAndExpr(ExprAnd expr);
+        void VisitOrExpr(ExprOr expr);
     }
 
     interface IWhereable
@@ -19,12 +26,158 @@ namespace GenDB
         void AcceptVisitor(IAbsSyntaxVisitor visitor);
     }
 
-    interface IValue { }
+    /// <summary>
+    /// An operator such as equals, less than etc.
+    /// </summary>
+    interface IBoolOperator : IWhereable {}
+
+    /// <summary>
+    /// An expression. 
+    /// </summary>
+    interface IExpression : IWhereable { }
+
+    /// <summary>
+    /// Something with a value
+    /// </summary>
+    interface IValue : IWhereable { } 
+
+    /// <summary>
+    /// Constant values.
+    /// </summary>
+    interface IConstant : IValue    {}
+
+    /// <summary>
+    /// Numerical values. Can be compared using LE, GT etc.
+    /// </summary>
+    interface INumerical : IConstant {}
+
+    /// <summary>
+    /// String values. More restricted comparison options than numerical.
+    /// </summary>
+    interface IStringvalue : IConstant {}
+
+    class ExprNot : IExpression
+    {
+        IExpression expression;
+
+        internal IExpression Expression
+        {
+            get { return expression; }
+        }
+
+        public ExprNot(IExpression expr)
+        {
+            this.expression = expr;
+        }
+
+        public void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitNotExpr(this);
+        }
+    }
+
+    abstract class BinaryExpression : IExpression
+    {
+        IExpression left;
+
+        internal IExpression Left
+        {
+            get { return left; }
+            set { left = value; }
+        }
+        IExpression right;
+
+        internal IExpression Right
+        {
+            get { return right; }
+            set { right = value; }
+        }
+
+        public BinaryExpression(IExpression left, IExpression right)
+        {
+            this.left = left;
+            this.right = right;
+        }
+
+        public abstract void AcceptVisitor(IAbsSyntaxVisitor visitor);
+    }
+
+    class ExprAnd : BinaryExpression
+    {
+        public ExprAnd(IExpression l, IExpression r) : base(l, r) { /* empty */ }
+
+        public override void AcceptVisitor(IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitAndExpr (this);
+        }
+    }
+
+    class ExprOr : BinaryExpression
+    {
+        public ExprOr(IExpression l, IExpression r) : base (l, r) { /* empty */ }
+
+        public override void AcceptVisitor(IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitOrExpr(this);
+        }
+    }
+
+    abstract class BinaryOperator : IBoolOperator
+    {
+        IValue left;
+        internal IValue Left
+        {
+            get { return left; }
+        }
+
+        IValue right;
+        internal IValue Right
+        {
+            get { return right; }
+        }
+
+        public BinaryOperator (IValue left, IValue right)
+        {
+            this.left = left;
+            this.right = right;
+        }
+
+        public abstract void AcceptVisitor(IAbsSyntaxVisitor visitor);
+    }
+
+    class OP_Equals :  BinaryOperator, IBoolOperator
+    {
+        public OP_Equals(IValue left, IValue right) : base(left, right) { }
+
+        public override void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitOPEquals(this);
+        }
+    }
+
+    class OP_LessThan : BinaryOperator, IBoolOperator
+    {
+        public OP_LessThan(IValue left, IValue right) : base(left, right) { }
+        public override void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitOPLessThan(this);
+        }
+    }
+
+    class OP_GreaterThan : BinaryOperator, IBoolOperator
+    {
+        public OP_GreaterThan(IValue left, IValue right) : base(left, right) { }
+        public override void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitOPGreaterThan(this);
+        }
+    }
+
 
     /// <summary>
     /// Contains a reference to a property property.
     /// </summary>
-    class VarProperty : IWhereable, IValue
+    class CstNumericalProperty : INumerical
     {
         IProperty property = null;
 
@@ -33,18 +186,18 @@ namespace GenDB
             get { return property; }
         }
 
-        public VarProperty(IProperty property)
+        public CstNumericalProperty(IProperty property)
         {
             this.property = property;
         }
 
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
-            visitor.VisitVarProperty(this);
+            visitor.VisitNumericalProperty(this);
         }
     }
 
-    class CstString : IWhereable, IValue
+    class CstString : IStringvalue
     {
         string value;
 
@@ -64,7 +217,7 @@ namespace GenDB
         }
     }
 
-    class CstBool : IWhereable, IValue
+    class CstBool : IConstant
     {
         bool value;
 
@@ -85,7 +238,7 @@ namespace GenDB
     }
 
 
-    class CstLong : IWhereable, IValue
+    class CstLong : INumerical
     {
         long value;
 
@@ -105,7 +258,7 @@ namespace GenDB
         }
     }
 
-    class CstDouble : IWhereable, IValue
+    class CstDouble : INumerical
     {
         double value;
 
@@ -125,7 +278,10 @@ namespace GenDB
         }
     }
 
-    class CstReference : IWhereable, IValue
+    /// <summary>
+    /// A reference to an object.
+    /// </summary>
+    class VarReference : IValue 
     {
         IBOReference value;
 
@@ -134,7 +290,7 @@ namespace GenDB
             get { return this.value; }
         }
 
-        public CstReference(IBOReference reference)
+        public VarReference(IBOReference reference)
         {
             this.value = reference;
         }
@@ -142,6 +298,41 @@ namespace GenDB
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitCstReference(this);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    class PropertyOfReferredObject : IWhereable, IValue
+    {
+        VarReference referredObject;
+
+        internal VarReference ReferredObject
+        {
+            get { return referredObject; }
+            set { referredObject = value; }
+        }
+
+        IConstant referencedField;
+
+        internal IConstant ReferencedField
+        {
+            get { return referencedField; }
+            set { referencedField = value; }
+        }
+
+        public PropertyOfReferredObject (VarReference referredObject, IConstant referencedField)
+        {
+            if (referredObject == null) { throw new NullReferenceException("referredObject"); }
+            if (referredObject == null) { throw new NullReferenceException("referredObject"); }
+            this.referencedField = referencedField;
+            this.referredObject = referredObject;
+        }
+
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitPropertyOfReferredObject(this);
         }
     }
 }
