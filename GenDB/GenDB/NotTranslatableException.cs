@@ -3,13 +3,20 @@ using System.Reflection;
 
 public class NotTranslatableException : Exception
 {
-    FieldInfo fi;
+    FieldInfo fi = null;
+    PropertyInfo clrProperty = null;
     Type t;
 
     public NotTranslatableException(string msg, FieldInfo fi)
         : base(msg)
     {
         this.fi = fi;
+    }
+
+    public NotTranslatableException(string msg, PropertyInfo clrProperty)
+        : base(msg)
+    {
+        this.clrProperty = clrProperty;
     }
 
     public NotTranslatableException(string msg, Type t)
@@ -33,6 +40,7 @@ public class NotTranslatableException : Exception
         string res = Message;
         if (fi != null) { res += " (Conflicting Field: " + fi.ToString() + ")"; }
         if (t != null) { res += " (Conflicting Type: " + t.ToString() + ")"; }
+        if (clrProperty != null) { res += " (Conflicting Type: " + clrProperty.ToString() + ")"; }
         return res;
     }
 }

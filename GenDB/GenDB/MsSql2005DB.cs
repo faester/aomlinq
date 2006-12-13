@@ -500,7 +500,7 @@ namespace GenDB
                                                           break;
                                                         }
                             case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
-                            case MappingType.CHAR: pv.CharValue = (char)reader[5]; break;
+                            case MappingType.CHAR: pv.CharValue = Convert.ToChar(reader[5]); break;
                             default: throw new Exception("Could not translate the property value.");
                         } // switch
                     } // if
