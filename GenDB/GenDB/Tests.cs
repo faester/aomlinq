@@ -52,7 +52,7 @@ namespace GenDB
             et1 = new EqualityTest();
             et1.TheString = "Knud";
             et2 = new EqualityTest();
-            et2.TheString = ""; // Ensure string are compared by value. 
+            et2.TheString = ""; // Ensure string are compared by property. 
             et2.TheString += "K"; // Using same literal would make them 
             et2.TheString += "n"; // reference equal due to compiler 
             et2.TheString += "u"; // optimizations.
