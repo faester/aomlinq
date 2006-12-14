@@ -60,9 +60,33 @@ namespace GenDB
 
         public static void Main(string[] args)
         {
+
+            // ******
             Configuration.RebuildDatabase = true;
 
+            Table<Person> table = new Table<Person>();
+            table.Add(new Person {Name = "Poul"});
+            table.Add(new Person {Name = "Nulle"});
+
+            //Person[] pArray = new Person[]{
+            //    new Person {Name = "Poul"},
+            //    new Person {Name = "Nulle"}
+            //};
+
+            var pList = from p in table 
+                        where p.Name == "Poul" 
+                        select p;
+
+            foreach(Person p in pList)
+                Console.WriteLine(p.Name);
+
+            //Expression<Func<Person, bool>> where1 = (Person p) => /* p.Spouse == null && */ p.Name == "Svend";
+            //ExpressionRunner wroom = new ExpressionRunner();
+            //wroom.LookIn(where1);
+            // ******
+
             int objCount = 100;
+
 
             Table<Person> tp = new Table<Person>();
 

@@ -249,6 +249,9 @@ namespace GenDB
 				case ExpressionType.Add:
 				case ExpressionType.AddChecked:
 				case ExpressionType.And:
+                    {
+                        throw new Exception("");
+                    }
 				case ExpressionType.AndAlso: 
 				case ExpressionType.BitwiseAnd:
 				case ExpressionType.BitwiseOr:
