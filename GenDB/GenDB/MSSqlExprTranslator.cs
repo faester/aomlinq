@@ -21,32 +21,55 @@ namespace GenDB
             //throw new Exception("asldkj");
             return Visit(expr);
         }
-
-
-        //        internal Expression VisitLambda(LambdaExpression lambda)
-//        {
-//            Expression expression2 = this.Visit(lambda.Body);
-//            if (expression2 != lambda.Body)
-//            {
-//                return Expression.Lambda(lambda.Type, expression2, lambda.Parameters);
-//            }
-//            return lambda;
-//        }
-
-        /// <summary>
-        /// Grabs the body from lambda expression and 
-        /// makes a re-visit
-        /// </summary>
-        /// <param name="lambda"></param>
-        /// <returns></returns>
+        
         public IWhereable VisitLambdaExpr(LambdaExpression lambda)
         {
             return Visit(lambda.Body);
         }
 
-        public IWhereable VisitMethodCallExpr(MethodCallExpression mce)
+        public IWhereable VisitMethodCallExpr(MethodCallExpression m)
+        {  
+
+//            Expression expression2 = this.Visit(m.Object);
+//            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(m.Parameters);
+//            if ((expression2 == m.Object) && (enumerable2 == m.Parameters))
+//            {
+//                return m;
+//            }
+//            return ExpressionVisitor.MakeMethodCallExpression(m.NodeType, expression2, m.Method, enumerable2);
+
+
+            throw new Exception("not implemented");
+        }
+
+        internal IEnumerable<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
         {
-            return Visit(mce.Object);
+            List<Expression> list2 = null;
+            int num1 = 0;
+            int num2 = original.Count;
+            while (num1 < num2)
+            {
+                Expression expression1 = (Expression)this.Visit(original[num1]);
+                if (list2 != null)
+                {
+                    list2.Add(expression1);
+                }
+                else if (expression1 != original[num1])
+                {
+                    list2 = new List<Expression>(num2);
+                    for (int num3 = 0; num3 < num1; num3++)
+                    {
+                        list2.Add(original[num3]);
+                    }
+                    list2.Add(expression1);
+                }
+                num1++;
+            }
+            if (list2 != null)
+            {
+                return list2;
+            }
+            return original;
         }
 
         #region MakeTreeMethods
@@ -182,9 +205,6 @@ namespace GenDB
 
         internal static MethodCallExpression MakeMethodCallExpression(ExpressionType eType, Expression obj, MethodInfo method, IEnumerable<Expression> args)
         {
-#if DEBUG
-            Console.WriteLine("MakeMethodCallExpression\n");
-#endif
             switch (eType)
             {
                 case ExpressionType.MethodCall:
@@ -268,15 +288,6 @@ namespace GenDB
             throw new Exception("Cannot translate " + e.ToString());
         }
 
-        #region TranslateMethods
-
-        internal Expression TranslateAndAlso()
-        {
-            throw new Exception("AndAlso not implemented");
-            
-        }
-
-        #endregion
 
         #region VisitNodeMethods
 
@@ -517,9 +528,6 @@ namespace GenDB
 
 //        internal IEnumerable<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
 //        {
-//#if DEBUG
-//            Console.WriteLine("VisitExpressionList");
-//#endif
 //            List<Expression> list2 = null;
 //            int num1 = 0;
 //            int num2 = original.Count;
