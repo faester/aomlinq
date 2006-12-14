@@ -483,6 +483,7 @@ namespace GenDB
                         if (result != null) { yield return result; }
                         result = new MSEntity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
                         result.EntityType = currentType;
+                        result.EntityPOID = entityPOID;
                         
                         oldEntityPOID = entityPOID;
 
@@ -991,8 +992,6 @@ namespace GenDB
                                             "		PropertyValue (EntityPOID, PropertyPOID, LongValue, CharValue , StringValue , BoolValue, DoubleValue)" +
                                             "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @CharValue,	@StringValue, @BoolValue, @DoubleValue)" +
                                             "	END";
-
-	
 
                 ExecuteNonQueries(new string[] { sp_UP_INS_ENTITY, sp_SET_PROPERTYVALUE });
         }
