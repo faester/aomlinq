@@ -141,10 +141,29 @@ namespace GenDB
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler(t);
         }
 
+        /// <summary>
+        /// Translates the IEntity given to a IBusinessObject 
+        /// instance. If the cache contains a business object 
+        /// with an id edentical to e.EntityPOID the cached 
+        /// businessobject will be returned, regardless of the 
+        /// PropertyValues in e.
+        /// <p/> 
+        /// TODO: Consider if the responsibility of cache checking 
+        /// and object substitution should happen in the Table 
+        /// class instead.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        
         public IBusinessObject Translate(IEntity e)
         {
-            IBusinessObject res = (IBusinessObject)instantiator();
-            SetValues(e, res);
+            IBusinessObject res = IBOCache.Get(e.EntityPOID);
+            if (res == null)
+            {
+                res = (IBusinessObject)instantiator();
+                SetValues(e, res);
+                DBTag.AssignDBTagTo(res, e.EntityPOID);
+            }
             return res;
         }
 
