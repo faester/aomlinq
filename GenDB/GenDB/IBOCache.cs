@@ -11,11 +11,19 @@ namespace GenDB
         WeakReference wr;
         long entityPOID;
         IBusinessObject clone;
+        IBusinessObject original;
+
+        public IBusinessObject Original
+        {
+            get { return original; }
+            set { original = value; }
+        }
 
         private CacheElement() { /* empty */ }
 
         public CacheElement(IBusinessObject target)
         {
+            original = target;
             wr = new WeakReference(target);
             clone = (IBusinessObject)ObjectUtilities.MakeClone(target);
             entityPOID = target.DBTag.EntityPOID;
@@ -129,6 +137,31 @@ namespace GenDB
             return result;
         }
 
+        /// <summary>
+        /// Will null the regular references to the cached objects.
+        /// Try to perform a garbage collection and let the DBTag destructor 
+        /// remove irrelevant elements. Subsequently the strong references
+        /// are set to point to the WeakReference's targets, to suppress garbage
+        /// collection until next commit.
+        /// </summary>
+        private static void TryGC()
+        {
+            Console.WriteLine("Committed objects contains {0} elements", committedObjects.Count);
+            foreach (CacheElement ce in committedObjects.Values)
+            {
+                ce.Original = null;
+            }
+            GC.Collect();
+            foreach (CacheElement ce in committedObjects.Values)
+            {
+                if (ce.IsAlive)
+                {
+                    ce.Original = ce.Target;
+                }
+            }
+            Console.WriteLine("Committed objects now contains {0} elements", committedObjects.Count);
+        }
+
         public static void FlushToDB()
         {
 #if DEBUG
@@ -146,6 +179,7 @@ namespace GenDB
             stp.Start();
 #endif
             CommitChangedCommitted();
+            TryGC();
 #if DEBUG
             stp.Stop();
             Console.WriteLine("\tCommitChangedComitted took: {0}", stp.Elapsed);
