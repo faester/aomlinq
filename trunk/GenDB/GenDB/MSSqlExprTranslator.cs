@@ -24,25 +24,26 @@ namespace GenDB
         
         public IWhereable VisitLambdaExpr(LambdaExpression lambda)
         {
+            Console.Write("");
             return Visit(lambda.Body);
         }
 
         public IWhereable VisitMethodCallExpr(MethodCallExpression m)
         {  
-
+            Console.WriteLine(m.Parameters[0]);
+            Console.WriteLine("decType: {0}",m.Method.DeclaringType);
+            
             Expression expression2 = m.Object;
             IEnumerable<Expression> enumerable2 = this.VisitExpressionList(m.Parameters);
-            if ((expression2 == m.Object) && (enumerable2 == m.Parameters))
-            {
-                return Visit(m);
-            }
+            
+            Console.Write("");
+            //if ((expression2 == m.Object) && (enumerable2 == m.Parameters))
+            //{
+            //    return Visit(m);
+            //}
             
             MethodCallExpression mce = MakeMethodCallExpression(m.NodeType, expression2, m.Method, enumerable2);
             return Visit(mce);
-            //return ExpressionVisitor.MakeMethodCallExpression(m.NodeType, expression2, m.Method, enumerable2);
-
-
-            //throw new Exception("not implemented");
         }
 
         internal IEnumerable<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
@@ -52,7 +53,7 @@ namespace GenDB
             int num2 = original.Count;
             while (num1 < num2)
             {
-                Expression expression1 = (Expression)this.Visit(original[num1]);
+                Expression expression1 = (Expression)Visit(original[num1]);
                 if (list2 != null)
                 {
                     list2.Add(expression1);
@@ -73,6 +74,39 @@ namespace GenDB
                 return list2;
             }
             return original;
+        }
+
+        internal IWhereable VisitMemberAccess(MemberExpression m)
+        { 
+            Expression expression2 = (Expression)Visit(m.Expression);
+            //if (expression2 != m.Expression)
+            //{
+            //    return ExpressionVisitor.MakeMemberExpression(expression2, m.Member);
+            //}
+            throw new Exception("STOP");
+            //return Visit(m);
+        }
+
+        internal IEntityType VisitParam(ParameterExpression p)
+        {
+            Type t = p.Type;
+            IEntityType et = TypeSystem.GetEntityType(t);
+            return et;
+        }
+
+        internal IWhereable VisitParameter(ParameterExpression p)
+        {
+            Type t = p.Type;
+            
+            IEntityType et = TypeSystem.GetEntityType(t);
+            Console.WriteLine("EntityType: {0}", et.Name);
+            
+            //IProperty po = et.GetProperty("Name");
+            //Console.WriteLine("PropertyTypeName: {0}",po.PropertyType.Name);
+            
+            
+            //return new CstProperty();
+            throw new Exception("STOP");
         }
 
         #region MakeTreeMethods
@@ -400,7 +434,9 @@ namespace GenDB
                     //    return this.VisitListInit((ListInitExpression)exp);
                     //}
                 case ExpressionType.MemberAccess:
-                    
+                    Console.Write("");
+                    return VisitMemberAccess((MemberExpression)exp);
+                    throw new Exception("not impl");
                     //{
                     //    return this.VisitMemberAccess((MemberExpression)exp);
                     //}
@@ -424,6 +460,9 @@ namespace GenDB
                     //    return this.VisitNewArray((NewArrayExpression)exp);
                     //}
                 case ExpressionType.Parameter:
+                    return VisitParameter((ParameterExpression) exp);
+                    //Console.Write("");
+                    
                     //{
                     //    return this.VisitParameter((ParameterExpression)exp);
                     //}
@@ -433,7 +472,9 @@ namespace GenDB
             throw new InvalidOperationException(string.Format("Unhandled Expression Type: {0}", exp.NodeType));
         }
 
-//        internal Expression VisitBinary(BinaryExpression b)
+        #region OLDCODE
+
+        //        internal Expression VisitBinary(BinaryExpression b)
 //        {
 //#if DEBUG
 //            Console.WriteLine("VisitBinary");
@@ -609,24 +650,7 @@ namespace GenDB
 //            return Expression.ListInit(expression2, enumerable2);
 //        }
 
-//        internal Expression VisitMemberAccess(MemberExpression m)
-//        {
-//#if DEBUG
-//            Console.WriteLine("VisitMemberAccess\n");
-//            Type t = m.Member.DeclaringType;
-//            if (m.Member.MemberType == MemberTypes.Property)
-//            {
-//                string p = m.Member.Name;
-//                Console.WriteLine("\t{0}.{1}", t, p);
-//            }
-//#endif
-//            Expression expression2 = this.Visit(m.Expression);
-//            if (expression2 != m.Expression)
-//            {
-//                return ExpressionVisitor.MakeMemberExpression(expression2, m.Member);
-//            }
-//            return m;
-//        }
+        
 
 //        internal MemberAssignment VisitMemberAssignment(MemberAssignment assignment)
 //        {
@@ -722,14 +746,7 @@ namespace GenDB
 //            return Expression.NewArrayBounds(na.Type.GetElementType(), enumerable2);
 //        }
 
-//        internal Expression VisitParameter(ParameterExpression p)
-//        {
-//#if DEBUG
-//            Console.WriteLine("VisitParameter{0}");
-//            Console.WriteLine("Name: {0}, Type: {1}\n", p.Name, p.Type);
-//#endif
-//            return p;
-//        }
+        
 
 //        internal Expression VisitTypeIs(TypeBinaryExpression b)
 //        {
@@ -756,6 +773,8 @@ namespace GenDB
 //            }
 //            return u;
 //        }
+
+        #endregion
 
         #endregion
 
