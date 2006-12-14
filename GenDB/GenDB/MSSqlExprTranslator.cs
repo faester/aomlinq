@@ -30,16 +30,19 @@ namespace GenDB
         public IWhereable VisitMethodCallExpr(MethodCallExpression m)
         {  
 
-//            Expression expression2 = this.Visit(m.Object);
-//            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(m.Parameters);
-//            if ((expression2 == m.Object) && (enumerable2 == m.Parameters))
-//            {
-//                return m;
-//            }
-//            return ExpressionVisitor.MakeMethodCallExpression(m.NodeType, expression2, m.Method, enumerable2);
+            Expression expression2 = m.Object;
+            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(m.Parameters);
+            if ((expression2 == m.Object) && (enumerable2 == m.Parameters))
+            {
+                return Visit(m);
+            }
+            
+            MethodCallExpression mce = MakeMethodCallExpression(m.NodeType, expression2, m.Method, enumerable2);
+            return Visit(mce);
+            //return ExpressionVisitor.MakeMethodCallExpression(m.NodeType, expression2, m.Method, enumerable2);
 
 
-            throw new Exception("not implemented");
+            //throw new Exception("not implemented");
         }
 
         internal IEnumerable<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
@@ -380,6 +383,8 @@ namespace GenDB
                     //    return this.VisitInvocation((InvocationExpression)exp);
                     //}
                 case ExpressionType.Is:
+                    ExceptionThrower(exp);
+                    break;
                     //{
                     //    return this.VisitTypeIs((TypeBinaryExpression)exp);
                     //}
@@ -389,10 +394,13 @@ namespace GenDB
                     //    return this.VisitLambda((LambdaExpression)exp);
                     //}
                 case ExpressionType.ListInit:
+                    ExceptionThrower(exp);
+                    break;
                     //{
                     //    return this.VisitListInit((ListInitExpression)exp);
                     //}
                 case ExpressionType.MemberAccess:
+                    
                     //{
                     //    return this.VisitMemberAccess((MemberExpression)exp);
                     //}
@@ -401,9 +409,8 @@ namespace GenDB
                     //    return this.VisitMemberInit((MemberInitExpression)exp);
                     //}
                 case ExpressionType.MethodCall:
-                    return VisitMethodCallExpr((MethodCallExpression)exp);
-
                 case ExpressionType.MethodCallVirtual:
+                    return VisitMethodCallExpr((MethodCallExpression)exp);
                     //{
                     //    return this.VisitMethodCall((MethodCallExpression)exp);
                     //}
