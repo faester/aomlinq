@@ -8,6 +8,11 @@ namespace GenDB
     {
         StringBuilder whereStr = new StringBuilder();
 
+        public MSWhereStringBuilder()
+        {
+
+        }
+
         public String WhereStr 
         {
             get { return whereStr.ToString(); }
