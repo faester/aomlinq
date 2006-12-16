@@ -94,7 +94,11 @@ namespace GenDB
                 
             IBOCache.FlushToDB();
 
-            foreach(IEntity e in Configuration.GenDB.Where (wc))
+            //var es = from epp in tp
+            //         where epp.Name == "Navn 1" || epp.Age == 9
+            //         select epp;
+
+            foreach (IEntity e in Configuration.GenDB.Where(wc))
             {
                 DelegateTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
                 IBusinessObject ibo = trans.Translate (e);
