@@ -6,21 +6,35 @@ namespace GenDB
 {
     class MSWhereStringBuilder : IAbsSyntaxVisitor
     {
-        StringBuilder whereStr = new StringBuilder();
+        StringBuilder selectPart = null;
+        StringBuilder wherePart = new StringBuilder();
+        StringBuilder joinPart = new StringBuilder();
+        int currentPropertyNumber = 0;
 
         public MSWhereStringBuilder()
         {
-
+            Reset();
         }
 
         public String WhereStr 
         {
-            get { return whereStr.ToString(); }
+            get {
+                StringBuilder res = new StringBuilder(selectPart.Length + wherePart.Length + joinPart.Length + 30);
+                res.Append(selectPart);
+                res.Append (" \n\tWHERE (");
+                res.Append (wherePart );
+                res.Append (") AND (");
+                res.Append (joinPart);
+                res.Append (")");
+
+                return res.ToString();
+            }
         }
 
         public void Reset()
         {
-            whereStr = new StringBuilder();
+            selectPart = new StringBuilder("SELECT DISTINCT e.EntityPOID FROM Entity e");
+            wherePart = new StringBuilder();
         }
 
         public void Visit(IWhereable clause)
@@ -31,29 +45,49 @@ namespace GenDB
         //Leaf
         public void VisitNumericalProperty(CstProperty vp)
         {
+
+            string pvName = "pv" + currentPropertyNumber;
+            selectPart.Append (", PropertyValue " + pvName);
             IProperty p = vp.Property;
-            whereStr.Append ("pv.PropertyPOID = ");
-            whereStr.Append (p.PropertyPOID);
-            whereStr.Append (" AND ");
+            if (currentPropertyNumber > 0)
+            {
+                joinPart.Append(" AND ");
+            }
+            joinPart.Append(pvName );
+            joinPart.Append(".EntityPOID = e.EntityPOID AND ");
+            joinPart.Append(pvName);
+            joinPart.Append(".PropertyPOID = ");
+            joinPart.Append(p.PropertyPOID);
             switch (p.MappingType )
             {
-                case MappingType.BOOL : whereStr.Append ("pv.BoolValue "); break;
-                case MappingType.CHAR : whereStr.Append ("pv.CharValue "); break;
-                case MappingType.DATETIME : whereStr.Append ("pv.LongValue "); break;
-                case MappingType.DOUBLE : whereStr.Append ("pv.DoubleValue "); break;
-                case MappingType.LONG : whereStr.Append ("pv.LongValue "); break;
-                case MappingType.REFERENCE : whereStr.Append ("pv.LongValue "); break;
-                case MappingType.STRING : whereStr.Append ("pv.StringValue "); break;
+                case MappingType.BOOL: 
+                    wherePart.Append(pvName + ".BoolValue "); break;
+                case MappingType.CHAR: 
+                    wherePart.Append(pvName + ".CharValue "); break;
+                case MappingType.DATETIME: 
+                    wherePart.Append(pvName + ".LongValue "); break;
+                case MappingType.DOUBLE: 
+                    wherePart.Append(pvName + ".DoubleValue "); break;
+                case MappingType.LONG: 
+                    wherePart.Append(pvName + ".LongValue "); break;
+                case MappingType.REFERENCE: 
+                    wherePart.Append(pvName + ".LongValue "); break;
+                case MappingType.STRING: 
+                    wherePart.Append(pvName + ".StringValue "); break;
+                default:
+                    throw new Exception("Unknown property mapping.");
             }
+            wherePart.Append (' ');
+            currentPropertyNumber++;
         }
 
         //Leaf
         public void VisitCstString(CstString cs)
         {
-            whereStr.Append ('\'');
-            whereStr.Append (cs.Value);
-            whereStr.Append ('\'');
-            whereStr.Append (' ');
+            wherePart.Append ('\'');
+            wherePart.Append (cs.Value);
+            wherePart.Append ('\'');
+            wherePart.Append (' ');
         }
 
         //Leaf
@@ -61,24 +95,24 @@ namespace GenDB
         {
             if (cb.Value )
             {
-                whereStr.Append ('0');
+                wherePart.Append ('0');
             }
             else
             {
-                whereStr.Append ('1');
+                wherePart.Append ('1');
             }
         }
 
         //Leaf
         public void VisitCstLong(CstLong cl)
         {
-            whereStr.Append(cl.Value);
+            wherePart.Append(cl.Value);
         }
 
         //Leaf
         public void VisitCstDouble(CstDouble cd)
         {
-            whereStr.Append(cd.Value);
+            wherePart.Append(cd.Value);
         }
 
         //Leaf
@@ -86,11 +120,11 @@ namespace GenDB
         {
             if (cr.Value.IsNullReference )
             {
-                whereStr.Append (" null ");
+                wherePart.Append (" null ");
             }
             else
             {
-                whereStr.Append(cr.Value.EntityPOID);
+                wherePart.Append(cr.Value.EntityPOID);
             }
         }
 
@@ -103,59 +137,54 @@ namespace GenDB
         //Node
         public void VisitOPEquals(OP_Equals eq)
         {
-            whereStr.Append (" (SELECT DISTINCT EntityPOID FROM PropertyValue WHERE ");
             eq.Left.AcceptVisitor(this);
-            whereStr.Append ('=');
+            wherePart.Append ('=');
             eq.Right.AcceptVisitor (this);
-            whereStr.Append(") ");
         }
 
         public void VisitOPLessThan(OP_LessThan lt)
         {
-            whereStr.Append (" (SELECT DISTINCT EntityPOID FROM PropertyValue WHERE ");
             lt.Left.AcceptVisitor(this);
-            whereStr.Append ('<');
+            wherePart.Append ('<');
             lt.Right.AcceptVisitor (this);
-            whereStr.Append(") ");
         }
 
         public void VisitOPGreaterThan(OP_GreaterThan gt)
         {
-            whereStr.Append (" (SELECT DISTINCT EntityPOID FROM PropertyValue WHERE ");
+
             gt.Left.AcceptVisitor(this);
-            whereStr.Append ('>');
+            wherePart.Append ('>');
             gt.Right.AcceptVisitor (this);
-            whereStr.Append(") ");
         }
 
         public void VisitNotExpr(ExprNot expr)
         {
-            whereStr.Append (" EXCEPT ( ");
+            wherePart.Append (" NOT ( ");
             expr.Expression.AcceptVisitor(this);
-            whereStr.Append (") ");
+            wherePart.Append (") ");
         }
 
         public void VisitAndExpr(ExprAnd expr)
         {
-            whereStr.Append (" (");
+            wherePart.Append (" (");
             expr.Left.AcceptVisitor (this);
-            whereStr.Append (") INTERSECT (");
+            wherePart.Append (") AND (");
             expr.Right.AcceptVisitor (this);
-            whereStr.Append (") ");
+            wherePart.Append (") ");
         }
 
         public void VisitOrExpr(ExprOr expr)
         {
-            whereStr.Append (" (");
+            wherePart.Append (" (");
             expr.Left.AcceptVisitor (this);
-            whereStr.Append (") UNION (");
+            wherePart.Append (") OR (");
             expr.Right.AcceptVisitor (this);
-            whereStr.Append (") ");
+            wherePart.Append (") ");
         }
         
         public void VisitCstDateTime(CstDateTime cdt)
         {
-            whereStr.Append(cdt.Value.Ticks);
+            wherePart.Append(cdt.Value.Ticks);
         }
     }
 }

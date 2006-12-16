@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
+#if DEBUG
 using System.Diagnostics;
+#endif
 
 namespace GenDB
 {
@@ -146,7 +148,9 @@ namespace GenDB
         /// </summary>
         private static void TryGC()
         {
+#if DEBUG
             Console.WriteLine("Committed objects contains {0} elements", committedObjects.Count);
+#endif 
             foreach (CacheElement ce in committedObjects.Values)
             {
                 ce.Original = null;
@@ -159,7 +163,9 @@ namespace GenDB
                     ce.Original = ce.Target;
                 }
             }
+#if DEBUG
             Console.WriteLine("Committed objects now contains {0} elements", committedObjects.Count);
+#endif
         }
 
         public static void FlushToDB()

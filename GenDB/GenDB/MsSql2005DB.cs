@@ -456,8 +456,11 @@ namespace GenDB
                     " WHERE e.entityPOID IN (" + whereStr + " )" +
                     " ORDER BY e.EntityTypePOID, e.EntityPOID"
                     );
-
+#if DEBUG
+                Console.WriteLine ("WHEREBUILDER CONSTRUCTED: " + whereStr);
+                Console.WriteLine();
                 Console.WriteLine(cmd.CommandText);
+#endif
                 cmd.Connection = cnn;
                 SqlDataReader reader = cmd.ExecuteReader();
 

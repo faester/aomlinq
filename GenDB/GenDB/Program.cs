@@ -60,34 +60,10 @@ namespace GenDB
 
         public static void Main(string[] args)
         {
-
             // ******
             Configuration.RebuildDatabase = true;
 
             int objCount = 10;
-
-            Table<Person> table = new Table<Person>();
-            table.Add(new Person {Name = "Poul"});
-            table.Add(new Person {Name = "Nulle"});
-
-            //Person[] pArray = new Person[]{
-            //    new Person {Name = "Poul"},
-            //    new Person {Name = "Nulle"}
-            //};
-
-            var pList = from p in table 
-                        where p.Name == "Poul" 
-                        select p;
-
-            foreach(Person p in pList)
-                Console.WriteLine(p.Name);
-
-            //Expression<Func<Person, bool>> where1 = (Person p) => /* p.Spouse == null && */ p.Name == "Svend";
-            //ExpressionRunner wroom = new ExpressionRunner();
-            //wroom.LookIn(where1);
-            // ******
-
-            int objCount = 100;
 
             Table<Person> tp = new Table<Person>();
 
@@ -97,21 +73,16 @@ namespace GenDB
                 tp.Add (p);
             }
 
-
-            if (!TypeSystem.IsTypeKnown(typeof(Person)))
-            {
-                TypeSystem.RegisterType(typeof(Person));
-            }
             IEntityType etPerson = TypeSystem.GetEntityType (typeof(Person));
             IProperty propertyName = etPerson.GetProperty ("Name");
 
             OP_Equals nc1 = new OP_Equals(new CstProperty (propertyName), new CstString("Navn 1"));
-            //OP_Equals nc2 = new OP_Equals( new CstString("Navn 10"), new CstProperty (propertyName));
-            OP_Equals nc2 = new OP_Equals(new CstProperty (propertyName), new CstString("Navn 5"));
+            OP_Equals nc2 = new OP_Equals( new CstString("Navn 5"), new CstProperty (propertyName));
+            //OP_Equals nc2 = new OP_Equals(new CstProperty (propertyName), new CstString("Navn 5"));
             IWhereable wc = new ExprOr(nc1, nc2);
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
             mswsb.Visit(wc);
-            
+                
             IBOCache.FlushToDB();
 
             foreach(IEntity e in Configuration.GenDB.Where (wc))
@@ -119,7 +90,7 @@ namespace GenDB
                 DelegateTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
                 IBusinessObject ibo = trans.Translate (e);
                 Person pers = (Person)ibo;
-                pers.Name = "Knud Lavert";
+                //pers.Name = "Knud Lavert";
                 ObjectUtilities.PrintOut(ibo);
             }
 
