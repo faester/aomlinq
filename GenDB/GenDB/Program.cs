@@ -42,7 +42,14 @@ namespace GenDB
                 get { return spouse; }
                 set { spouse = value; }
             }
-            public char ch = 'a';
+
+            int age;
+
+            public int Age
+            {
+                get { return age; }
+                set { age = value; }
+            }
         }
 
         public class Student : Person { 
@@ -70,14 +77,16 @@ namespace GenDB
             for (int i = 0; i < objCount; i++)
             {
                 Person p = new Person{ Name = "Navn " + i };
+                p.Age = i;
                 tp.Add (p);
             }
 
             IEntityType etPerson = TypeSystem.GetEntityType (typeof(Person));
             IProperty propertyName = etPerson.GetProperty ("Name");
+            IProperty propertyAge = etPerson.GetProperty("Age");
 
-            OP_Equals nc1 = new OP_Equals(new CstProperty (propertyName), new CstString("Navn 1"));
-            OP_Equals nc2 = new OP_Equals( new CstString("Navn 5"), new CstProperty (propertyName));
+            OP_Equals nc1 = new OP_Equals(new CstProperty(propertyName), new CstString("Navn 1"));
+            OP_LessThan nc2 = new OP_LessThan(new CstProperty(propertyAge), new CstLong(5));
             //OP_Equals nc2 = new OP_Equals(new CstProperty (propertyName), new CstString("Navn 5"));
             IWhereable wc = new ExprOr(nc1, nc2);
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
