@@ -75,7 +75,7 @@ namespace GenDB
         public static void Main(string[] args)
         {
             // ******
-            Configuration.RebuildDatabase = false;
+            Configuration.RebuildDatabase = true;
 
             Table<Person> table = new Table<Person>();
 

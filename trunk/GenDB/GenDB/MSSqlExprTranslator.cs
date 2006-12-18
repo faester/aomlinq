@@ -40,7 +40,12 @@ namespace GenDB
                     if(tmp.NodeType.ToString()=="MemberAccess")
                     {
                         Type t = pe.Type;
-                        IEntityType et = TypeSystem.GetEntityType(t);
+                        IEntityType et;
+
+                        if(!TypeSystem.IsTypeKnown(t))
+                            TypeSystem.RegisterType (t);
+                            
+                        et = TypeSystem.GetEntityType(t);
 
                         string entstr = et.Name;
                         string propstr = tmp.Member.Name;
