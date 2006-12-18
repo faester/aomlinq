@@ -24,7 +24,6 @@ namespace GenDB
         
         public IWhereable VisitLambdaExpr(LambdaExpression lambda)
         {
-            //MethodCallExpression mec = (MethodCallExpression)lambda.Body;
             string mecstr = lambda.Body.ToString();
             if (mecstr.StartsWith("op_Equality("))
             {
@@ -83,13 +82,23 @@ namespace GenDB
                     {
                         throw new Exception("NodeType unknown "+tmp.NodeType.ToString());
                     }
-            
                 }
                 else
                 {
                     throw new Exception("Can not translate method with more than two parameters");
-                }
-                
+                }                
+            }
+            else if(mecstr.StartsWith("EQ("))
+            {
+                throw new Exception("operator not implemented"+ mecstr);
+            }
+            else if(mecstr.StartsWith("AndAlso("))
+            {
+                throw new Exception("operator not implemented "+ mecstr);
+            }
+            else if(mecstr.StartsWith("OrElse("))
+            {
+                throw new Exception("operator not implemented "+ mecstr);
             }
             else
             {
