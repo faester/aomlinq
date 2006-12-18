@@ -25,12 +25,13 @@ namespace GenDB
         public IWhereable VisitLambdaExpr(LambdaExpression lambda)
         {
             string mecstr = lambda.Body.ToString();
+
             if (mecstr.StartsWith("op_Equality("))
-            {
+            {   
                 MethodCallExpression mce = (MethodCallExpression) lambda.Body;
                 ReadOnlyCollection<Expression> roc = mce.Parameters;
-                List<IValue> list = new List<IValue>();
-
+                IValue[] parArr= new IValue[2];
+                
                 if(roc.Count==2) 
                 {    
                     MemberExpression tmp = (MemberExpression)roc[0];
@@ -46,37 +47,22 @@ namespace GenDB
                             
                         et = TypeSystem.GetEntityType(t);
 
-                        string entstr = et.Name;
+                        //string entstr = et.Name;
                         string propstr = tmp.Member.Name;
 
                         IProperty po = et.GetProperty(propstr);
 
-                        list.Add(new CstProperty(po));
+                        parArr[0] = new CstProperty(po);
                         
                         switch(TypeSystem.FindMappingType(roc[1].Type))
                         {
                             case MappingType.STRING:
-                                list.Add(new CstString(roc[1].ToString().Trim('"')));
+                                parArr[1] = new CstString(roc[1].ToString().Trim('"'));
                                 break;
-                            case MappingType.BOOL:
-                                throw new Exception("not implemented");
-                            case MappingType.CHAR:
-                                throw new Exception("not implemented");
-                            case MappingType.DATETIME:
-                                throw new Exception("not implemented");
-                            case MappingType.DOUBLE:
-                                throw new Exception("not implemented");
-                            case MappingType.LONG:
-                                throw new Exception("not implemented");
-                            case MappingType.REFERENCE:
-                                throw new Exception("not implemented");
                             default:
-                                break;
+                                throw new Exception("type not implemented "+TypeSystem.FindMappingType(roc[1].Type));
                         }
-
-                        return new GenDB.OP_Equals (list[0], list[1]);
-
-                        throw new Exception("STOP");
+                        return new GenDB.OP_Equals (parArr[0], parArr[1]);
                     }
                     else
                     {
@@ -89,8 +75,36 @@ namespace GenDB
                 }                
             }
             else if(mecstr.StartsWith("EQ("))
-            {
-                throw new Exception("operator not implemented"+ mecstr);
+            {   
+                Expression expr = (Expression)lambda.Body;
+                BinaryExpression be = (BinaryExpression)lambda.Body;
+                IValue[] parArr = new IValue[2];
+
+                MemberExpression me = (MemberExpression) be.Left;
+                Type t = me.Expression.Type;
+
+                if(!TypeSystem.IsTypeKnown(t))
+                    TypeSystem.RegisterType(t);
+
+                IEntityType et = TypeSystem.GetEntityType(t);
+                string propstr = me.Member.Name;
+
+                IProperty po = et.GetProperty(propstr);
+                parArr[0] = new CstProperty(po);
+
+                switch(TypeSystem.FindMappingType(expr.Type))
+                {
+                case MappingType.BOOL:
+                    parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
+                    break;
+
+                default:
+                    throw new Exception("type not implemented "+expr.Type);
+                }
+
+                
+                return new GenDB.OP_Equals (parArr[0], parArr[1]);
+
             }
             else if(mecstr.StartsWith("AndAlso("))
             {
@@ -105,58 +119,8 @@ namespace GenDB
                 throw new Exception("Can not translate method name " + mecstr);
             }
 
-            throw new Exception("not implemented");
         }
-
-        public IWhereable VisitMethodCallExpr(MethodCallExpression m)
-        {  
-            Console.WriteLine(m.Parameters[0]);
-            Console.WriteLine("decType: {0}",m.Method.DeclaringType);
-            
-            Expression expression2 = m.Object;
-            IEnumerable<Expression> enumerable2 = this.VisitExpressionList(m.Parameters);
-            
-            Console.Write("");
-            //if ((expression2 == m.Object) && (enumerable2 == m.Parameters))
-            //{
-            //    return Visit(m);
-            //}
-            
-            MethodCallExpression mce = MakeMethodCallExpression(m.NodeType, expression2, m.Method, enumerable2);
-            return Visit(mce);
-        }
-
-        internal IEnumerable<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
-        {
-            List<IWhereable> list2 = null;
-            int num1 = 0;
-            int num2 = original.Count;
-            while (num1 < num2)
-            {
-                IWhereable whereable = Visit(original[num1]);
-                if (list2 != null)
-                {
-                    list2.Add(whereable);
-                }
-                //else if (expression1 != original[num1])
-                //{
-                //    list2 = new List<Expression>(num2);
-                //    for (int num3 = 0; num3 < num1; num3++)
-                //    {
-                //        list2.Add(original[num3]);
-                //    }
-                //    list2.Add(expression1);
-                //}
-                num1++;
-            }
-            //if (list2 != null)
-            //{
-            //    return list2;
-            //}
-            //return original;
-            throw new Exception("not implemented");
-        }
-
+        
         internal IWhereable VisitMemberAccess(MemberExpression m)
         { 
             Expression expression2 = (Expression)Visit(m.Expression);
@@ -173,8 +137,6 @@ namespace GenDB
             Type t = p.Type;
             
             IEntityType et = TypeSystem.GetEntityType(t);
-            
-            
             
             Console.WriteLine("EntityType: {0}", et.Name);
             IProperty po = et.GetProperty("Name");
@@ -510,7 +472,6 @@ namespace GenDB
                 case ExpressionType.MemberAccess:
                     Console.Write("");
                     return VisitMemberAccess((MemberExpression)exp);
-                    throw new Exception("not impl");
                     //{
                     //    return this.VisitMemberAccess((MemberExpression)exp);
                     //}
@@ -520,7 +481,8 @@ namespace GenDB
                     //}
                 case ExpressionType.MethodCall:
                 case ExpressionType.MethodCallVirtual:
-                    return VisitMethodCallExpr((MethodCallExpression)exp);
+                    throw new Exception("not implemented");
+                    //return VisitMethodCallExpr((MethodCallExpression)exp);
                     //{
                     //    return this.VisitMethodCall((MethodCallExpression)exp);
                     //}
@@ -540,8 +502,6 @@ namespace GenDB
                     //{
                     //    return this.VisitParameter((ParameterExpression)exp);
                     //}
-                    ExceptionThrower(exp);
-                    break;
             }
             throw new InvalidOperationException(string.Format("Unhandled Expression Type: {0}", exp.NodeType));
         }
