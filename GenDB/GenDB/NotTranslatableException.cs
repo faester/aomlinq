@@ -19,6 +19,12 @@ public class NotTranslatableException : Exception
         this.clrProperty = clrProperty;
     }
 
+    public NotTranslatableException(string msg, PropertyInfo clrProperty, NotTranslatableException inner)
+        : base(msg, inner)
+    {
+        this.clrProperty = clrProperty;
+    }
+
     public NotTranslatableException(string msg, Type t)
         : base(msg)
     {

@@ -242,9 +242,9 @@ namespace GenDB
             return et;
         }
 
-        static MappingType FindMappingType (PropertyInfo clrProperty)
+        static MappingType FindMappingType(Type t)
         {
-            Type t = clrProperty.PropertyType;
+            if (t == null) { throw new NullReferenceException("Type t"); }
             if (t.IsPrimitive)
             {
                 if (t == typeof(int) || t == typeof(long) || t == typeof(short))
@@ -265,12 +265,12 @@ namespace GenDB
                 }
                 else 
                 {
-                    throw new NotTranslatableException("Did not know how to map primitive Property", clrProperty);
+                    throw new NotTranslatableException("Did not know how to map primitive Type", t);
                 }
             }
             else if (t.IsArray )
             {
-                throw new NotTranslatableException("Can not translate arrays.", clrProperty);
+                throw new NotTranslatableException("Can not translate arrays.", t);
             }
             else if (t == typeof(string))
             {
@@ -286,7 +286,19 @@ namespace GenDB
             }
             else
             {
-                throw new NotTranslatableException("Can not find mappingtype of property.", clrProperty);
+                throw new NotTranslatableException("Can not find mappingtype of property.", t);
+            }
+        }
+
+        public static MappingType FindMappingType (PropertyInfo clrProperty)
+        {
+            Type t = clrProperty.PropertyType;
+            try {
+                return FindMappingType(t);
+            }
+            catch(NotTranslatableException e)
+            {
+                throw new NotTranslatableException ("Can not translate Property", clrProperty, e);
             }
         }
 
