@@ -77,15 +77,15 @@ namespace GenDB
             // ******
             Configuration.RebuildDatabase = true;
 
-            Table<Person> table = new Table<Person>();
+            //Table<Person> table = new Table<Person>();
 
-            var pList = from p in table 
-                        //where p.Age == 2
-                        where p.Name == "Poul" 
-                        select p;
+            //var pList = from p in table 
+            //            //where p.Age == 2
+            //            where p.Name == "Poul" 
+            //            select p;
 
-            foreach(Person p in pList)
-                Console.WriteLine(p.Name);
+            //foreach(Person p in pList)
+            //    Console.WriteLine(p.Name);
 
             //Expression<Func<Person, bool>> where1 = (Person p) => /* p.Spouse == null && */ p.Name == "Svend";
             //ExpressionRunner wroom = new ExpressionRunner();
@@ -117,7 +117,8 @@ namespace GenDB
             IBOCache.FlushToDB();
 
             var es = from epp in tp
-                     where epp.Name == "Navn 5" 
+                     //where epp.Name == "Navn 5"
+                     where epp.Age == 6
                      select epp;
 
             //foreach (IEntity e in Configuration.GenDB.Where(wc))
