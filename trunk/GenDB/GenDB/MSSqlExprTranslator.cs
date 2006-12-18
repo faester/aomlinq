@@ -24,8 +24,62 @@ namespace GenDB
         
         public IWhereable VisitLambdaExpr(LambdaExpression lambda)
         {
-            Console.Write("");
-            return Visit(lambda.Body);
+            MethodCallExpression mec = (MethodCallExpression)lambda.Body;
+            string mecstr = lambda.Body.ToString();
+            if (mecstr.StartsWith("op_Equality("))
+            {
+                MethodCallExpression mce = (MethodCallExpression) lambda.Body;
+                ReadOnlyCollection<Expression> roc = mce.Parameters;
+                List<IWhereable> list = new List<IWhereable>();
+
+                if(roc.Count==2) 
+                {    
+                    MemberExpression tmp = (MemberExpression)roc[0];
+                    ParameterExpression pe = (ParameterExpression) tmp.Expression;
+
+                    if(tmp.NodeType.ToString()=="MemberAccess")
+                    {
+                        Type t = pe.Type;
+                        IEntityType et = TypeSystem.GetEntityType(t);
+
+                        string entstr = et.Name;
+                        string propstr = tmp.Member.Name;
+
+                        //Console.WriteLine(entstr+"."+propstr);
+
+                        IProperty po = et.GetProperty(propstr);
+
+                        list.Add(new CstProperty(po));
+                        
+                        switch(roc[1].Type.Name)
+                        {
+                            case "String":
+                                list.Add(new CstString(roc[1].ToString().Trim('"')));
+                                break;
+                            default:
+                                break;
+                        }
+
+                        throw new Exception("STOP");
+                    }
+                    else
+                    {
+                        throw new Exception("NodeType unknown "+tmp.NodeType.ToString());
+                    }
+            
+                }
+                else
+                {
+                    throw new Exception("Can not translate method with more than two parameters");
+                }
+                
+            }
+            else
+            {
+                throw new Exception("Can not translate method name " + mecstr);
+            }
+
+            throw new Exception("not implemented");
         }
 
         public IWhereable VisitMethodCallExpr(MethodCallExpression m)
@@ -48,32 +102,33 @@ namespace GenDB
 
         internal IEnumerable<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
         {
-            List<Expression> list2 = null;
+            List<IWhereable> list2 = null;
             int num1 = 0;
             int num2 = original.Count;
             while (num1 < num2)
             {
-                Expression expression1 = (Expression)Visit(original[num1]);
+                IWhereable whereable = Visit(original[num1]);
                 if (list2 != null)
                 {
-                    list2.Add(expression1);
+                    list2.Add(whereable);
                 }
-                else if (expression1 != original[num1])
-                {
-                    list2 = new List<Expression>(num2);
-                    for (int num3 = 0; num3 < num1; num3++)
-                    {
-                        list2.Add(original[num3]);
-                    }
-                    list2.Add(expression1);
-                }
+                //else if (expression1 != original[num1])
+                //{
+                //    list2 = new List<Expression>(num2);
+                //    for (int num3 = 0; num3 < num1; num3++)
+                //    {
+                //        list2.Add(original[num3]);
+                //    }
+                //    list2.Add(expression1);
+                //}
                 num1++;
             }
-            if (list2 != null)
-            {
-                return list2;
-            }
-            return original;
+            //if (list2 != null)
+            //{
+            //    return list2;
+            //}
+            //return original;
+            throw new Exception("not implemented");
         }
 
         internal IWhereable VisitMemberAccess(MemberExpression m)
@@ -87,24 +142,17 @@ namespace GenDB
             //return Visit(m);
         }
 
-        internal IEntityType VisitParam(ParameterExpression p)
-        {
-            Type t = p.Type;
-            IEntityType et = TypeSystem.GetEntityType(t);
-            return et;
-        }
-
         internal IWhereable VisitParameter(ParameterExpression p)
         {
             Type t = p.Type;
             
             IEntityType et = TypeSystem.GetEntityType(t);
+            
+            
+            
             Console.WriteLine("EntityType: {0}", et.Name);
-            
-            //IProperty po = et.GetProperty("Name");
+            IProperty po = et.GetProperty("Name");
             //Console.WriteLine("PropertyTypeName: {0}",po.PropertyType.Name);
-            
-            
             //return new CstProperty();
             throw new Exception("STOP");
         }
