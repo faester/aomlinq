@@ -24,13 +24,13 @@ namespace GenDB
         
         public IWhereable VisitLambdaExpr(LambdaExpression lambda)
         {
-            MethodCallExpression mec = (MethodCallExpression)lambda.Body;
+            //MethodCallExpression mec = (MethodCallExpression)lambda.Body;
             string mecstr = lambda.Body.ToString();
             if (mecstr.StartsWith("op_Equality("))
             {
                 MethodCallExpression mce = (MethodCallExpression) lambda.Body;
                 ReadOnlyCollection<Expression> roc = mce.Parameters;
-                List<IWhereable> list = new List<IWhereable>();
+                List<IValue> list = new List<IValue>();
 
                 if(roc.Count==2) 
                 {    
@@ -45,20 +45,32 @@ namespace GenDB
                         string entstr = et.Name;
                         string propstr = tmp.Member.Name;
 
-                        //Console.WriteLine(entstr+"."+propstr);
-
                         IProperty po = et.GetProperty(propstr);
 
                         list.Add(new CstProperty(po));
                         
-                        switch(roc[1].Type.Name)
+                        switch(TypeSystem.FindMappingType(roc[1].Type))
                         {
-                            case "String":
+                            case MappingType.STRING:
                                 list.Add(new CstString(roc[1].ToString().Trim('"')));
                                 break;
+                            case MappingType.BOOL:
+                                throw new Exception("not implemented");
+                            case MappingType.CHAR:
+                                throw new Exception("not implemented");
+                            case MappingType.DATETIME:
+                                throw new Exception("not implemented");
+                            case MappingType.DOUBLE:
+                                throw new Exception("not implemented");
+                            case MappingType.LONG:
+                                throw new Exception("not implemented");
+                            case MappingType.REFERENCE:
+                                throw new Exception("not implemented");
                             default:
                                 break;
                         }
+
+                        return new GenDB.OP_Equals (list[0], list[1]);
 
                         throw new Exception("STOP");
                     }
