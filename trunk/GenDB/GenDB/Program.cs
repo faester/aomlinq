@@ -27,6 +27,13 @@ namespace GenDB
 
         public class Person : AbstractBusinessObject
         {
+            //int[] arr = new int[30];
+
+            //public int[] Arr
+            //{
+            //    get { return arr; }
+            //    set { arr = value; }
+            //}
             bool isMale = true;
             private string name = null;
 
@@ -68,7 +75,7 @@ namespace GenDB
         public static void Main(string[] args)
         {
             // ******
-            Configuration.RebuildDatabase = true;
+            Configuration.RebuildDatabase = false;
 
             int objCount = 10;
 
