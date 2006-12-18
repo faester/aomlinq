@@ -74,7 +74,7 @@ namespace GenDB
                     throw new Exception("Can not translate method with more than two parameters");
                 }                
             }
-            else if(mecstr.StartsWith("EQ("))
+            else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT("))
             {   
                 Expression expr = (Expression)lambda.Body;
                 BinaryExpression be = (BinaryExpression)lambda.Body;
@@ -102,9 +102,14 @@ namespace GenDB
                     throw new Exception("type not implemented "+expr.Type);
                 }
 
-                
-                return new GenDB.OP_Equals (parArr[0], parArr[1]);
-
+                if(expr.NodeType.ToString()=="GT")
+                    return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
+                else if(expr.NodeType.ToString()=="LT")
+                    return new GenDB.OP_LessThan(parArr[0], parArr[1]);
+                else if(expr.NodeType.ToString()=="EQ")
+                    return new GenDB.OP_Equals (parArr[0], parArr[1]);
+                else
+                    throw new Exception("NodeType unknown "+expr.NodeType.ToString());
             }
             else if(mecstr.StartsWith("AndAlso("))
             {

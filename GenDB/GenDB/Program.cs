@@ -118,7 +118,8 @@ namespace GenDB
 
             var es = from epp in tp
                      //where epp.Name == "Navn 5"
-                     where epp.Age == 6
+                     //where epp.Age == 6
+                     where epp.Age < 7
                      select epp;
 
             //foreach (IEntity e in Configuration.GenDB.Where(wc))
