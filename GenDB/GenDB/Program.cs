@@ -77,7 +77,22 @@ namespace GenDB
             // ******
             Configuration.RebuildDatabase = false;
 
-            int objCount = 10;
+            Table<Person> table = new Table<Person>();
+
+            var pList = from p in table 
+                        //where p.Age == 2
+                        where p.Name == "Poul" 
+                        select p;
+
+            foreach(Person p in pList)
+                Console.WriteLine(p.Name);
+
+            //Expression<Func<Person, bool>> where1 = (Person p) => /* p.Spouse == null && */ p.Name == "Svend";
+            //ExpressionRunner wroom = new ExpressionRunner();
+            //wroom.LookIn(where1);
+            // ******
+
+            int objCount = 100;
 
             Table<Person> tp = new Table<Person>();
 
@@ -101,17 +116,22 @@ namespace GenDB
                 
             IBOCache.FlushToDB();
 
-            //var es = from epp in tp
-            //         where epp.Name == "Navn 1" || epp.Age == 9
-            //         select epp;
+            var es = from epp in tp
+                     where epp.Name == "Navn 5" 
+                     select epp;
 
-            foreach (IEntity e in Configuration.GenDB.Where(wc))
+            //foreach (IEntity e in Configuration.GenDB.Where(wc))
+            //{
+            //    DelegateTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
+            //    IBusinessObject ibo = trans.Translate (e);
+            //    Person pers = (Person)ibo;
+            //    //pers.Name = "Knud Lavert";
+            //    ObjectUtilities.PrintOut(ibo);
+            //}
+
+            foreach(Person p in es)
             {
-                DelegateTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
-                IBusinessObject ibo = trans.Translate (e);
-                Person pers = (Person)ibo;
-                //pers.Name = "Knud Lavert";
-                ObjectUtilities.PrintOut(ibo);
+                ObjectUtilities.PrintOut (p);
             }
 
             IBOCache.FlushToDB();
