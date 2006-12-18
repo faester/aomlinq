@@ -21,6 +21,7 @@ namespace GenDB
         void VisitAndExpr(ExprAnd expr);
         void VisitOrExpr(ExprOr expr);
         void VisitCstDateTime(CstDateTime cdt);
+        void VisitEntityPOIDEquals(EntityPOIDEquals epe);
     }
 
     interface IWhereable
@@ -358,6 +359,26 @@ namespace GenDB
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitPropertyOfReferredObject(this);
+        }
+    }
+
+    class EntityPOIDEquals : IExpression
+    {
+        long entityPOID;
+
+        public long EntityPOID
+        {
+            get { return entityPOID; }
+        }
+
+        public EntityPOIDEquals(long entityPOID)
+        {
+            this.entityPOID = entityPOID;
+        }
+
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitEntityPOIDEquals(this);
         }
     }
 }

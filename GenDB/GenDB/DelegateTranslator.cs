@@ -283,7 +283,7 @@ namespace GenDB
                         {
                             IEntity e = Configuration.GenDB.GetEntity(entityRef.EntityPOID);
                             DelegateTranslator trans = TypeSystem.GetTranslator(clrType);
-                            DBTag.AssignDBTagTo(res, e.EntityPOID);
+                            res = trans.Translate(e);
                         }
                         return res;
                     }

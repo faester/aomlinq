@@ -7,8 +7,8 @@ namespace GenDB
     class MSWhereStringBuilder : IAbsSyntaxVisitor
     {
         StringBuilder selectPart = null;
-        StringBuilder wherePart = new StringBuilder();
-        StringBuilder joinPart = new StringBuilder();
+        StringBuilder wherePart = null;
+        StringBuilder joinPart = null;
         int currentPropertyNumber = 0;
 
         public MSWhereStringBuilder()
@@ -23,8 +23,11 @@ namespace GenDB
                 res.Append(selectPart);
                 res.Append (" \n\tWHERE (");
                 res.Append (wherePart );
-                res.Append (") AND (");
-                res.Append (joinPart);
+                if (joinPart.Length > 0)
+                {
+                    res.Append(") AND (");
+                    res.Append(joinPart);
+                }
                 res.Append (")");
 
                 return res.ToString();
@@ -35,6 +38,7 @@ namespace GenDB
         {
             selectPart = new StringBuilder("SELECT DISTINCT e.EntityPOID FROM Entity e");
             wherePart = new StringBuilder();
+            joinPart = new StringBuilder();
         }
 
         public void Visit(IWhereable clause)
@@ -185,6 +189,13 @@ namespace GenDB
         public void VisitCstDateTime(CstDateTime cdt)
         {
             wherePart.Append(cdt.Value.Ticks);
+        }
+
+        //Leaf
+        public void VisitEntityPOIDEquals(EntityPOIDEquals epe)
+        {
+            wherePart.Append("e.entityPOID = ");
+            wherePart.Append(epe.EntityPOID);
         }
     }
 }

@@ -367,69 +367,16 @@ namespace GenDB
 
         public IEntity GetEntity(long entityPOID)
         {
-            using (SqlConnection cnn = new SqlConnection (Configuration.ConnectStringWithoutDBName))
+            IWhereable we = new EntityPOIDEquals(entityPOID);
+            int count = 0;
+            IEntity res = null;
+            foreach (IEntity e in Where(we))
             {
-                cnn.Open();
-
-                SqlCommand cmd = new SqlCommand (
-                    "SELECT " +
-                    "    e.EntityTypePOID, " + // 0
-                    "    propertyPOID, " + // 1
-                    "    LongValue, " + // 2
-                    "    BoolValue, " + // 3
-                    "    StringTimeValue, " + // 4
-                    "    CharValue, " + // 5
-                    "    DoubleValue " + // 6
-                    " FROM EntityPOID e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" + 
-                    " WHERE e.EntityPOID = " + entityPOID.ToString()
-                    );
-                SqlDataReader reader = cmd.ExecuteReader();
-
-                IEntity result = new MSEntity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
-                bool found = false;
-                long propertyPOID = 0;
-                long entityTypePOID = 0;
-
-                while (reader.Read ())
-                {
-                    if (!found) {
-                        found = true;
-                        //entityPOID = (long)reader[0]; // Got that from 
-                        entityTypePOID = (long)reader[1];
-                        result.EntityPOID = entityPOID;
-                        result.EntityType = TypeSystem.GetEntityType(entityTypePOID);
-                    }
-                    if (reader[1] != DBNull.Value) // Does any properties exist?
-                    {
-                        IProperty p = result.EntityType.GetProperty(propertyPOID);
-                        IPropertyValue pv = new MSPropertyValue();
-                        pv.Property = p;
-                        switch (p.MappingType)
-                        {
-                            case MappingType.BOOL: pv.BoolValue = (bool)reader[3]; break;
-                            case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
-                            case MappingType.DOUBLE: pv.DoubleValue = (double)reader[6]; break;
-                            case MappingType.LONG: pv.LongValue = (long)reader[2]; break;
-                            case MappingType.REFERENCE: if (reader[2] == DBNull.Value) 
-                                                        { 
-                                                            pv.RefValue = new IBOReference(false); break;
-                                                        } else {
-                                                          pv.RefValue = new IBOReference((long)reader[2]);
-                                                          break;
-                                                        }
-                            case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
-                            case MappingType.CHAR: pv.CharValue = (char)reader[5]; break;
-                            default: throw new Exception("Could not translate the property value.");
-                        }
-                        result.StorePropertyValue(pv);
-                        pv.Entity = result;
-                    }
-                }
-
-                if (!reader.IsClosed) { reader.Close(); }
-                if (!found) { throw new Exception("Request for unknown entityPOID: " + entityPOID);}
-                return result;
+                res = e;
+                count++;
+                if (count > 1) { throw new Exception("Error in GetEntity method."); }
             }
+            return res;
         }
 
         public IEnumerable<IEntity> Where(IWhereable expression)
@@ -511,7 +458,7 @@ namespace GenDB
                             case MappingType.LONG: pv.LongValue = long.Parse(reader[2].ToString()); break;
                             case MappingType.REFERENCE: if (reader[2] == DBNull.Value) 
                                                         { 
-                                                            pv.RefValue = new IBOReference(false); break;
+                                                            pv.RefValue = new IBOReference(true); break;
                                                         } else {
                                                           pv.RefValue = new IBOReference(long.Parse(reader[2].ToString()));
                                                           break;
@@ -691,9 +638,18 @@ namespace GenDB
                        .Append(pv.Entity.EntityPOID)
                        .Append(',')
                        .Append(pv.Property.PropertyPOID)
-                       .Append(',')
-                       .Append(longValue)
-                       .Append(",'")
+                       .Append(',');
+
+            if (longValueIsNull)
+            {
+                sbPropertyValueInserts.Append (" null ");
+            }
+            else
+            {
+                sbPropertyValueInserts.Append(longValue);
+            }
+
+            sbPropertyValueInserts.Append(",'")
                        .Append(pv.CharValue.ToString())
                        .Append("','") //Todo: Need som check for illegal characters.
                        .Append(stringValue)
