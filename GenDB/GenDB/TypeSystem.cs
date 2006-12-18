@@ -242,7 +242,7 @@ namespace GenDB
             return et;
         }
 
-        static MappingType FindMappingType(Type t)
+        public static MappingType FindMappingType(Type t)
         {
             if (t == null) { throw new NullReferenceException("Type t"); }
             if (t.IsPrimitive)
