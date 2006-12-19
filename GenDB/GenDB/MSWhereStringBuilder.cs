@@ -161,6 +161,14 @@ namespace GenDB
             gt.Right.AcceptVisitor (this);
         }
 
+        public void VisitOPNotEquals(OP_NotEquals neq)
+        {
+
+            neq.Left.AcceptVisitor(this);
+            wherePart.Append (" <> ");
+            neq.Right.AcceptVisitor (this);
+        }
+
         public void VisitNotExpr(ExprNot expr)
         {
             wherePart.Append (" NOT ( ");
