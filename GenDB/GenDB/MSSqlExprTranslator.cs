@@ -25,8 +25,8 @@ namespace GenDB
         public IWhereable VisitLambdaExpr(LambdaExpression lambda)
         {
             string mecstr = lambda.Body.ToString();
-
-            if (mecstr.StartsWith("op_Equality("))
+            
+            if (mecstr.StartsWith("op_Equality(") /* || mecstr.StartsWith("op_Inequality") */ )
             {   
                 MethodCallExpression mce = (MethodCallExpression) lambda.Body;
                 ReadOnlyCollection<Expression> roc = mce.Parameters;
@@ -62,7 +62,11 @@ namespace GenDB
                             default:
                                 throw new Exception("type not implemented "+TypeSystem.FindMappingType(roc[1].Type));
                         }
-                        return new GenDB.OP_Equals (parArr[0], parArr[1]);
+                        
+                        //if(mecstr.StartsWith("op_Equality("))
+                            return new GenDB.OP_Equals (parArr[0], parArr[1]);
+                        //else if(mecstr.StartsWith("op_Inequality"))
+                            
                     }
                     else
                     {
@@ -113,6 +117,15 @@ namespace GenDB
             }
             else if(mecstr.StartsWith("AndAlso("))
             {
+                BinaryExpression be = (BinaryExpression) lambda.Body;
+                IWhereable left = Visit(be.Left);
+                //IWhereable right = Visit((Expression) be.Right);
+                
+                throw new Exception("sd");
+
+                //Console.WriteLine(be.Left.NodeType);
+                //IExpression left = TypeSystem.
+                //return new GenDB.ExprAnd(be.Left, be.Right);
                 throw new Exception("operator not implemented "+ mecstr);
             }
             else if(mecstr.StartsWith("OrElse("))
@@ -124,6 +137,13 @@ namespace GenDB
                 throw new Exception("Can not translate method name " + mecstr);
             }
 
+        }
+
+        internal IWhereable VisitEqExpr(Expression exp)
+        {
+            
+            return VisitLambdaExpr((LambdaExpression)exp);
+            throw new Exception("not implemented");
         }
         
         internal IWhereable VisitMemberAccess(MemberExpression m)
@@ -400,6 +420,8 @@ namespace GenDB
                         break;
                 case ExpressionType.EQ:
                     // do stuff
+                    VisitEqExpr((BinaryExpression)exp);
+                    //VisitLambdaExpr((LambdaExpression)exp);
                     throw new Exception("EQ Exception");
                 case ExpressionType.GT:
                     // do stuff
