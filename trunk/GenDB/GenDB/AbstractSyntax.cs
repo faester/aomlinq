@@ -22,6 +22,7 @@ namespace GenDB
         void VisitOrExpr(ExprOr expr);
         void VisitCstDateTime(CstDateTime cdt);
         void VisitEntityPOIDEquals(EntityPOIDEquals epe);
+        void VisitOPNotEquals(OP_NotEquals ieq);
     }
 
     interface IWhereable
@@ -176,6 +177,14 @@ namespace GenDB
         }
     }
 
+    class OP_NotEquals : BinaryOperator, IBoolOperator
+    {
+        public OP_NotEquals(IValue left, IValue right) : base (left, right) {}
+        public override void AcceptVisitor(IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitOPNotEquals(this);
+        }
+    }
 
     /// <summary>
     /// Contains a reference to a property property.
