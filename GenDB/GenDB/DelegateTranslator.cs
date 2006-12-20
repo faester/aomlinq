@@ -341,7 +341,14 @@ namespace GenDB
                     return ie.GetPropertyValue(prop).DoubleValue;
                 };
             }
-            else
+            else if (fi.PropertyType.IsEnum)
+            {
+                return delegate (IEntity ie)
+                {
+                    return Enum.Parse(fi.PropertyType,ie.GetPropertyValue(prop).StringValue);
+                };
+            }
+            else 
             {
                 throw new NotTranslatableException("Have not implemented PropertyValueGetter for field type.", fi);
             }

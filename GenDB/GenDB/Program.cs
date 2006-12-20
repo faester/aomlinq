@@ -21,12 +21,22 @@ namespace GenDB
 
     }
 
+    public enum Sex { MALE, FEMALE };
+
     class Program
     {
         static int nextID = 0;
 
         public class Person : AbstractBusinessObject
         {
+            Sex sex;
+
+            public Sex Sex
+            {
+                get { return sex; }
+                set { sex = value; }
+            }
+
             //int[] arr = new int[30];
 
             //public int[] Arr
@@ -89,6 +99,7 @@ namespace GenDB
             for (short i = 0; i < objCount; i++)
             {
                 Person p = new Person{ Name = "Navn " + i };
+                if (i % 2 == 0) { p.Sex = Sex.FEMALE; }
                 p.Age = i;
                 tp.Add (p);
             }
@@ -107,7 +118,8 @@ namespace GenDB
             IBOCache.FlushToDB();
 
             var es = from epp in tp
-                     where epp.Name == "Navn 5"
+                     where epp.Name == "Navn 4"
+                     //where epp.Sex == Sex.FEMALE
                      //where epp.Age == 6 && epp.Name == ""
                      select epp;
 
