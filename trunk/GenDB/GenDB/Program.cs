@@ -12,15 +12,6 @@ using GenDB.DB;
 namespace GenDB
 {
 
-    public class ExpressionRunner : ExpressionVisitor
-    {
-           
-        public Expression LookIn(Expression expr)
-        {
-            return Visit(expr);
-        }
-
-    }
 
     public enum Sex { MALE, FEMALE };
 
