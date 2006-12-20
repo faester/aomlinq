@@ -763,10 +763,7 @@ namespace GenDB
             }
 
             ClearValueInsertStringBuilders();
-
         }
-
-
 
         public void RollbackTransaction()
         {
