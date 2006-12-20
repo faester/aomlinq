@@ -271,8 +271,6 @@ namespace GenDB
 
         IEnumerable<IEntity> Where(IWhereable expression);
 
-
-
         /// <summary>
         /// Will return all persisted elements of the given
         /// IEntityType or one of its subclasses ordered by 
@@ -303,7 +301,11 @@ namespace GenDB
     interface IGenCollectionElement
     {
         IEntity Entity { get; set; }
-        
+
+        int ElementID { get; set; }
+
+        MappingType MappingType { get; set; }
+
         string StringValue { get; set; }
         
         long LongValue { get; set; }

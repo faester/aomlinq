@@ -107,6 +107,7 @@ namespace GenDB
         const string TB_PROPERTY_NAME = "Property";
         const string TB_PROPERTYVALUE_NAME = "PropertyValue";
         const string TB_COLLECTION_ELEMENT_NAME = "CollectionElement";
+        const string TB_COLLECTION_KEY_NAME = "CollectionKey";
         #endregion
 
         #region Singleton
@@ -153,8 +154,19 @@ namespace GenDB
             using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName))
             {
                 cnn.Open();
-                SqlCommand cmd = new SqlCommand("CREATE DATABASE " + Configuration.DatabaseName, cnn);
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    SqlCommand cmd = new SqlCommand("CREATE DATABASE " 
+                        + Configuration.DatabaseName 
+                        + " COLLATE Danish_Norwegian_CS_AS"
+                        , cnn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch(SqlException ex)
+                {
+                    throw new Exception("Error creating DB. See inner exception for details.", ex);
+
+                }
             }
             CreateTables();
             CreateIndexes();
@@ -393,7 +405,7 @@ namespace GenDB
                 SqlCommand cmd = new SqlCommand (
                     "SELECT " +
                     "    e.EntityTypePOID, " + // 0
-                    "    propertyPOID, " + // 1
+                    "    PropertyPOID, " + // 1
                     "    LongValue, " + // 2
                     "    BoolValue, " + // 3
                     "    StringValue, " + // 4
@@ -401,7 +413,7 @@ namespace GenDB
                     "    DoubleValue, " + // 6
                     "    e.EntityPOID " + // 7
                     " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
-                    " WHERE e.entityPOID IN (" + whereStr + " )" +
+                    " WHERE e.EntityPOID IN (" + whereStr + " )" +
                     " ORDER BY e.EntityTypePOID, e.EntityPOID"
                     );
 #if DEBUG
@@ -487,7 +499,7 @@ namespace GenDB
                 SqlCommand cmd = new SqlCommand (
                     "SELECT " +
                     "    e.EntityTypePOID, " + // 0
-                    "    propertyPOID, " + // 1
+                    "    PropertyPOID, " + // 1
                     "    LongValue, " + // 2
                     "    BoolValue, " + // 3
                     "    StringValue, " + // 4
@@ -688,7 +700,7 @@ namespace GenDB
                 EntityInsertStringBuilderToLL();         
             }
             entityInsertCount++;
-            sbEntityInserts.Append(" EXEC sp_UP_INS_Entity ")
+            sbEntityInserts.Append(" EXEC sp_UP_INS_ENTITY ")
                       .Append(entity.EntityPOID)
                       .Append (',')
                       .Append (entity.EntityType.EntityTypePOID)
@@ -826,7 +838,7 @@ namespace GenDB
 
             sbEntityTypeInserts.Append (" INSERT INTO ");
             sbEntityTypeInserts.Append (TB_ENTITYTYPE_NAME);
-            sbEntityTypeInserts.Append (" (EntityTypePOID, Name, SuperEntityTypePOID, assemblyDescription) VALUES (");
+            sbEntityTypeInserts.Append (" (EntityTypePOID, Name, SuperEntityTypePOID, AssemblyDescription) VALUES (");
             sbEntityTypeInserts.Append (et.EntityTypePOID);
             sbEntityTypeInserts.Append (", '");
             sbEntityTypeInserts.Append (et.Name);
@@ -891,10 +903,10 @@ namespace GenDB
         {
             LinkedList<string> tCC = new LinkedList<string>(); //Table create commands
 
-            tCC.AddLast("CREATE TABLE " + TB_ENTITYTYPE_NAME + " (EntityTypePOID int primary key, SuperEntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) , Name VARCHAR(max), assemblyDescription VARCHAR(MAX)); ");
+            tCC.AddLast("CREATE TABLE " + TB_ENTITYTYPE_NAME + " (EntityTypePOID int primary key, SuperEntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) , Name VARCHAR(max), AssemblyDescription VARCHAR(MAX)); ");
             tCC.AddLast("CREATE TABLE " + TB_PROPERTYTYPE_NAME + " (PropertyTypePOID int primary key, Name VARCHAR(max), MappingType smallint); ");
             tCC.AddLast("CREATE TABLE " + TB_ENTITY_NAME + " (EntityPOID int primary key, EntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID)); ");
-            tCC.AddLast("CREATE TABLE " + TB_PROPERTY_NAME + " (PropertyPOID int primary key, PropertyTypePOID int references " + TB_PROPERTYTYPE_NAME + "(PropertyTypePOID), EntityTypePOID int references entityType (entityTypePOID) on delete cascade on update cascade, PropertyName VARCHAR(max)); ");
+            tCC.AddLast("CREATE TABLE " + TB_PROPERTY_NAME + " (PropertyPOID int primary key, PropertyTypePOID int references " + TB_PROPERTYTYPE_NAME + "(PropertyTypePOID), EntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) on delete cascade on update cascade, PropertyName VARCHAR(max)); ");
             tCC.AddLast("CREATE TABLE "
                 + TB_PROPERTYVALUE_NAME + " ( "
                 + " PropertyPOID int not null references " + TB_PROPERTY_NAME + " (PropertyPOID) ON DELETE CASCADE, "
@@ -907,7 +919,18 @@ namespace GenDB
                 );
             tCC.AddLast("CREATE TABLE "
                 + TB_COLLECTION_ELEMENT_NAME + " ( "
-                + " ElementIndex int not null, "
+                + " ElementID int not null, "
+                + " EntityPOID int not null references " + TB_ENTITY_NAME + " (EntityPOID) ON DELETE CASCADE, "
+                + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
+                + " BoolValue BIT, "
+                + " StringValue VARCHAR(MAX), "
+                + " DoubleValue FLOAT, "
+                + " CharValue CHAR(1))"
+                );
+
+            tCC.AddLast("CREATE TABLE "
+                + TB_COLLECTION_KEY_NAME + " ( "
+                + " KeyID int not null, "
                 + " EntityPOID int not null references " + TB_ENTITY_NAME + " (EntityPOID) ON DELETE CASCADE, "
                 + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
                 + " BoolValue BIT, "
@@ -917,7 +940,10 @@ namespace GenDB
                 );
 
             tCC.AddLast("ALTER TABLE " + TB_PROPERTYVALUE_NAME + " ADD PRIMARY KEY (PropertyPOID, EntityPOID)");
-            tCC.AddLast("ALTER TABLE " + TB_COLLECTION_ELEMENT_NAME + " ADD PRIMARY KEY ( EntityPOID, ElementIndex)");
+            tCC.AddLast("ALTER TABLE " + TB_COLLECTION_ELEMENT_NAME + " ADD PRIMARY KEY ( EntityPOID, ElementID)");
+            tCC.AddLast("ALTER TABLE " + TB_COLLECTION_KEY_NAME + " ADD PRIMARY KEY ( EntityPOID, KeyID)");
+            tCC.AddLast("ALTER TABLE " + TB_COLLECTION_KEY_NAME + " ADD FOREIGN KEY (EntityPOID, KeyID) REFERENCES " + TB_COLLECTION_ELEMENT_NAME + " (EntityPOID, ElementID) ");
+            
             ExecuteNonQueries(tCC);
         }
 
@@ -965,7 +991,63 @@ namespace GenDB
                                             "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @CharValue,	@StringValue, @BoolValue, @DoubleValue)" +
                                             "	END";
 
-                ExecuteNonQueries(new string[] { sp_UP_INS_ENTITY, sp_SET_PROPERTYVALUE });
+                string sp_SET_COLLECTION_ELEMENT 
+                                            = "CREATE PROCEDURE sp_SET_COLLECTION_ELEMENT " +
+                                            "	@EntityPOID AS INT, " +
+                                            "	@ElementID AS INT," +
+                                            "	@LongValue AS BIGINT," +
+                                            "	@CharValue AS CHAR(1)," +
+                                            "	@StringValue AS VARCHAR(max)," +
+                                            "	@BoolValue AS BIT, " +
+                                            "   @DoubleValue AS FLOAT " +
+                                            " AS " +
+                                            "	IF EXISTS (SELECT * FROM " + TB_COLLECTION_ELEMENT_NAME + " WHERE EntityPOID = @EntityPOID AND ElementID = @ElementID) " +
+                                            "	BEGIN " +
+                                            "		UPDATE " + TB_COLLECTION_ELEMENT_NAME + " SET " +
+                                            "			LongValue = @LongValue," +
+                                            "			CharValue = @CharValue," +
+                                            "			StringValue = @StringValue ," +
+                                            "			BoolValue = @BoolValue, " +
+                                            "			DoubleValue = @DoubleValue " +
+                                            "		WHERE " +
+                                            "			EntityPOID = @EntityPOID AND ElementID = @ElementID" +
+                                            "	END " +
+                                            "	ELSE" +
+                                            "	BEGIN" +
+                                            "		INSERT INTO " + TB_COLLECTION_ELEMENT_NAME +
+                                            "		(EntityPOID, ElementID, LongValue, CharValue , StringValue , BoolValue, DoubleValue)" +
+                                            "		VALUES (@EntityPOID, @ElementID, @LongValue, @CharValue,	@StringValue, @BoolValue, @DoubleValue)" +
+                                            "	END";
+
+                            string sp_SET_COLLECTION_KEY
+                                            = "CREATE PROCEDURE sp_SET_COLLECTION_KEY " +
+                                            "	@EntityPOID AS INT, " +
+                                            "	@KeyID AS INT," +
+                                            "	@LongValue AS BIGINT," +
+                                            "	@CharValue AS CHAR(1)," +
+                                            "	@StringValue AS VARCHAR(max)," +
+                                            "	@BoolValue AS BIT, " +
+                                            "   @DoubleValue AS FLOAT " +
+                                            " AS " +
+                                            "	IF EXISTS (SELECT * FROM " + TB_COLLECTION_KEY_NAME + " WHERE EntityPOID = @EntityPOID AND KeyID = @KeyID) " +
+                                            "	BEGIN " +
+                                            "		UPDATE " + TB_COLLECTION_KEY_NAME + " SET " +
+                                            "			LongValue = @LongValue," +
+                                            "			CharValue = @CharValue," +
+                                            "			StringValue = @StringValue ," +
+                                            "			BoolValue = @BoolValue, " +
+                                            "			DoubleValue = @DoubleValue " +
+                                            "		WHERE " +
+                                            "			EntityPOID = @EntityPOID AND KeyID = @KeyID " +
+                                            "	END " +
+                                            "	ELSE" +
+                                            "	BEGIN" +
+                                            "		INSERT INTO " + TB_COLLECTION_KEY_NAME +
+                                            "		(EntityPOID, KeyID, LongValue, CharValue , StringValue , BoolValue, DoubleValue)" +
+                                            "		VALUES (@EntityPOID, @KeyID, @LongValue, @CharValue,	@StringValue, @BoolValue, @DoubleValue)" +
+                                            "	END";
+
+                ExecuteNonQueries(new string[] { sp_UP_INS_ENTITY, sp_SET_PROPERTYVALUE, sp_SET_COLLECTION_ELEMENT, sp_SET_COLLECTION_KEY });
         }
 
         /// <summary>
@@ -980,15 +1062,21 @@ namespace GenDB
             SqlCommand cmd = new SqlCommand();
             cmd.Connection = cnn;
 
-            cmd.CommandText = "BEGIN TRANSACTION";
-            cmd.ExecuteNonQuery();
-            foreach (string cmdStr in cmdStrings)
+            cmd.Transaction = cnn.BeginTransaction();
+
+            try
             {
-                cmd.CommandText = cmdStr;
-                cmd.ExecuteNonQuery();
+                foreach (string cmdStr in cmdStrings)
+                {
+                    cmd.CommandText = cmdStr;
+                    cmd.ExecuteNonQuery();
+                }
+                cmd.Transaction.Commit();
             }
-            cmd.CommandText = " COMMIT ";
-            cmd.ExecuteNonQuery();
+            catch (SqlException ex)
+            {
+                throw new Exception("Could not create database.", ex);
+            }
             cnn.Close();
         }
         #endregion
