@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB.DB;
 
-namespace GenDB
+namespace GenDB.DB
 {
     class MSWhereStringBuilder : IAbsSyntaxVisitor
     {
