@@ -59,7 +59,9 @@
     <Compile Include="ExpressionVisitor.cs" />
     <Compile Include="IBOCache.cs" />
     <Compile Include="IBusinessObject.cs" />
+    <Compile Include="IETCacheElement.cs" />
     <Compile Include="IGenericDatabase.cs" />
+    <Compile Include="IIBoToEntityTranslator.cs" />
     <Compile Include="MsSql2005DB.cs" />
     <Compile Include="MSSqlExprTranslator.cs" />
     <Compile Include="MSWhereStringBuilder.cs" />

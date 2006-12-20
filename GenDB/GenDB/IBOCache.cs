@@ -212,7 +212,7 @@ namespace GenDB
         {
             foreach (IBusinessObject ibo in uncommittedObject.Values)
             {
-                DelegateTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
+                IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
                 IEntity e = trans.Translate(ibo);
                 Configuration.GenDB.Save (e);
             }
@@ -236,7 +236,7 @@ namespace GenDB
                     if (ce.IsAlive)
                     {
                         IBusinessObject ibo = ce.Target;
-                        DelegateTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
+                        IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
                         IEntity e = trans.Translate(ibo);
                         Configuration.GenDB.Save(e);
                         ce.ClearDirtyBit();
