@@ -44,7 +44,7 @@ namespace Tests
         {
             Configuration.RebuildDatabase = true;
             Configuration.DbBatchSize = 2000;
-            long objcount = 500;
+            long objcount = 10;
 
             Table<Person> tp = new Table<Person>();
 
@@ -58,8 +58,13 @@ namespace Tests
                 Student s = new Student();
 
                 s.Name = "Student " + i.ToString();
-                s.Avg = i / objcount;
+                s.Avg = (double)i / objcount;
+                
+                ObjectUtilities.PrintOut (s);
+
                 p.Name = "Navn " + i.ToString();
+                p.Age = i;
+
                 tp.Add (p);
                 tp.Add (s);
                 lastPerson = p;
@@ -74,7 +79,7 @@ namespace Tests
             foreach (Person ibo in tp)
             {
                 objcount++;
-                //ObjectUtilities.PrintOut(ibo);
+                ObjectUtilities.PrintOut(ibo);
             }
             dur = DateTime.Now - then;
             Console.WriteLine ("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
