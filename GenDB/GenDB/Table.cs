@@ -89,7 +89,7 @@ namespace GenDB
 
         public Table<T> Where(Expression<Func<T, bool>> expr)
         {
-            MSSqlExprTranslator exprTranslator = new MSSqlExprTranslator();
+            SqlExprTranslator exprTranslator = new SqlExprTranslator();
             this.expression = exprTranslator.Convert (expr);
             return this;
         }
