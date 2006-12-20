@@ -123,9 +123,13 @@ namespace GenDB
             }
             else if(mecstr.StartsWith("AndAlso("))
             {
+                
                 BinaryExpression be = (BinaryExpression) lambda.Body;
-                IWhereable left = Visit(be.Left);
-                //IWhereable right = Visit((Expression) be.Right);
+                //IExpression left = new 
+
+                //return new GenDB.ExprAnd(be.Left, be.Right);
+                throw new Exception("stop");
+                
                 
                 throw new Exception("sd");
 
