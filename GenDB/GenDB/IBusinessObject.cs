@@ -13,4 +13,17 @@ namespace GenDB
         /// </summary>
         DBTag DBTag { get; set; }
     }
+
+    public class BODictionary<K, V> : Dictionary<K, V>, IBusinessObject
+    {
+        DBTag dbtag;
+
+        public DBTag DBTag
+        {
+            get { return dbtag; }
+            set { dbtag = value; }
+        }
+
+        
+    }
 }

@@ -10,8 +10,7 @@ namespace GenDB
      * http://www.codeproject.com/csharp/delegates_and_reflection.asp
      * http://www.codeproject.com/useritems/Dynamic_Code_Generation.asp
      * 
-     * Mangler setter-metode til PropertyValue. Udelad PropertyType og brug 
-     * kun enum. Gem diskriminator i Property i stedet.
+     * Udelad PropertyType og brug kun enum. 
      */
     delegate object PropertyValueGetter(IEntity e);
     delegate void PropertyValueSetter(IEntity e, object value);
@@ -292,7 +291,6 @@ namespace GenDB
                         return null;
                     }
                 };
-
             }
             if (fi.PropertyType == typeof(long))
             {

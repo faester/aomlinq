@@ -86,7 +86,7 @@ namespace GenDB
 
             Table<Person> tp = new Table<Person>();
 
-            for (int i = 0; i < objCount; i++)
+            for (short i = 0; i < objCount; i++)
             {
                 Person p = new Person{ Name = "Navn " + i };
                 p.Age = i;
