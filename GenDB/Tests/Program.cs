@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Query;
-using System.Xml.XLinq;
 using GenDB;
 
 namespace Tests
@@ -13,6 +12,20 @@ namespace Tests
         {
             string name = null;
             int age;
+            string cpr = "051032-3232";
+            Person spouse;
+
+            public Person Spouse
+            {
+                get { return spouse; }
+                set { spouse = value; }
+            }
+
+            public string Cpr
+            {
+                get { return cpr; }
+                set { cpr = value; }
+            }
 
             public int Age
             {
@@ -44,7 +57,7 @@ namespace Tests
         {
             Configuration.RebuildDatabase = true;
             Configuration.DbBatchSize = 2000;
-            long objcount = 3;
+            long objcount = 200;
 
             Table<Person> tp = new Table<Person>();
 
@@ -59,7 +72,8 @@ namespace Tests
 
                 s.Name = "Student " + i.ToString();
                 s.Avg = (double)i / objcount;
-                
+                s.Spouse = p;
+
                 p.Name = "Navn " + i.ToString();
                 p.Age = i;
 
@@ -71,13 +85,14 @@ namespace Tests
             Configuration.SubmitChanges();
 
             TimeSpan dur = DateTime.Now - then;
+            objcount *= 2;
             Console.WriteLine ("Insertion of {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
             then = DateTime.Now;
             objcount = 0;
             foreach (Person ibo in tp)
             {
                 objcount++;
-                ObjectUtilities.PrintOut(ibo);
+                //ObjectUtilities.PrintOut(ibo);
             }
             dur = DateTime.Now - then;
             Console.WriteLine ("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
