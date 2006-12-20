@@ -76,13 +76,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GenTable.cs" />
     <Compile Include="Table.cs" />
-    <Compile Include="Tests.cs" />
     <Compile Include="TypeSystem.cs" />
     <Compile Include="VolatileAnnotation.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Component Include="lib\nunit.core.dll" />
-    <Component Include="lib\nunit.framework.dll" />
   </ItemGroup>
   <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
 </Project>
