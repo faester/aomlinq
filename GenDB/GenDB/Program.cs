@@ -117,9 +117,9 @@ namespace GenDB
             IBOCache.FlushToDB();
 
             var es = from epp in tp
-                     where epp.Name == "Navn 4"
+                     where epp.Name != "Navn 83"
                      //where epp.Sex == Sex.FEMALE
-                     //where epp.Age == 6 && epp.Name == ""
+                     //where epp.Age == 6 && epp.Age == 7
                      select epp;
 
             //foreach (IEntity e in Configuration.GenDB.Where(wc))
@@ -137,7 +137,7 @@ namespace GenDB
             }
 
             IBOCache.FlushToDB();
-
+            
             //Console.WriteLine(mswsb.WhereStr);
             // ******
             //Expression<Func<int, bool>> exprLambda1 = x => (x & 1) == 0;
@@ -152,3 +152,5 @@ namespace GenDB
         }
     }
 }
+
+
