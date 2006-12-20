@@ -44,7 +44,6 @@ namespace GenDB
             //    get { return arr; }
             //    set { arr = value; }
             //}
-            bool isMale = true;
             private string name = null;
 
             public string Name
@@ -70,7 +69,7 @@ namespace GenDB
         }
 
         public class Student : Person { 
-            static long test = 100; //This should not be persisted since it is static
+            public static long test = 100; //This should not be persisted since it is static
             [Volatile]
             public long id = nextID++; // Should not be persisted due to attribute.
             private DateTime enlisted;

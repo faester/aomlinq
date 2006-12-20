@@ -202,7 +202,7 @@ namespace GenDB
         //Leaf
         public void VisitEntityPOIDEquals(EntityPOIDEquals epe)
         {
-            wherePart.Append("e.entityPOID = ");
+            wherePart.Append("e.EntityPOID = ");
             wherePart.Append(epe.EntityPOID);
         }
     }
