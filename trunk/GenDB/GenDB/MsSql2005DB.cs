@@ -8,19 +8,9 @@ using System.Query;
 namespace GenDB
 {
     /*
-     *  PropertyType tabellen kan helt udelades. 
-     *  Der vil aldrig være andre typer, end dem 
-     *  beskrevet i MappingType, og da der er tale 
-     *  om et sæt med en endelig størrelse vil det 
-     *  være bedre at gøre det til en enum, der 
-     *  kun eksisterer i memory.
-     *  
-     *  (Den konkrete type af REFERENCE afgøres ved hjælp af EntityType)
-     *  
      * Der skrives i "batches", hvilket simpelt hen er implementeret ved at 
      * sende meget lange tekststrenge med adskillige SQL-kommandoer til 
-     * serveren på en gang. Det er muligvis ikke den rigtige fremgangsmåde, 
-     * men lader til at fungere efter hensigten. 
+     * serveren på en gang. 
      */
     class MsSql2005DB : IGenericDatabase
     {

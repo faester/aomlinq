@@ -17,7 +17,6 @@ namespace GenDB
         DBTag DBTag { get; set; }
     }
 
-
     /// <summary>
     /// BOList has identical functionality to a regular list, but can be stored in the generic db system.
     /// </summary>
