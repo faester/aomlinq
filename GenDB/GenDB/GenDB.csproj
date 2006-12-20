@@ -59,7 +59,8 @@
     <Compile Include="DB\Property.cs" />
     <Compile Include="DB\PropertyType.cs" />
     <Compile Include="DB\PropertyValue.cs" />
-    <Compile Include="DelegateTranslator.cs" />
+    <Compile Include="FieldConverter.cs" />
+    <Compile Include="IBOTranslator.cs" />
     <Compile Include="DynamicMethodCompiler.cs" />
     <Compile Include="IBOCache.cs" />
     <Compile Include="IBusinessObject.cs" />
