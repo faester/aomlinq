@@ -24,53 +24,52 @@ namespace GenDB
         internal IWhereable VisitMethodCall(MethodCallExpression mce)
         {
             ReadOnlyCollection<Expression> roc = mce.Parameters;
-                IValue[] parArr= new IValue[2];
-                
-                if(roc.Count==2) 
-                {    
-                    MemberExpression tmp = (MemberExpression)roc[0];
-                    ParameterExpression pe = (ParameterExpression) tmp.Expression;
+            IValue[] parArr= new IValue[2];
 
-                    if(tmp.NodeType.ToString()=="MemberAccess")
-                    {
-                        Type t = pe.Type;
-                        IEntityType et;
+            if(roc.Count==2) 
+            {    
+                MemberExpression tmp = (MemberExpression)roc[0];
+                ParameterExpression pe = (ParameterExpression) tmp.Expression;
 
-                        if(!TypeSystem.IsTypeKnown(t))
-                            TypeSystem.RegisterType (t);
+                if(tmp.NodeType.ToString()=="MemberAccess")
+                {
+                    Type t = pe.Type;
+                    IEntityType et;
+
+                    if(!TypeSystem.IsTypeKnown(t))
+                    TypeSystem.RegisterType (t);
                             
-                        et = TypeSystem.GetEntityType(t);
+                    et = TypeSystem.GetEntityType(t);
+                    string propstr = tmp.Member.Name;
+                    IProperty po = et.GetProperty(propstr);
 
-                        //string entstr = et.Name;
-                        string propstr = tmp.Member.Name;
-
-                        IProperty po = et.GetProperty(propstr);
-
-                        parArr[0] = new CstProperty(po);
+                    parArr[0] = new CstProperty(po);
                         
-                        switch(TypeSystem.FindMappingType(roc[1].Type))
-                        {
-                            case MappingType.STRING:
-                                parArr[1] = new CstString(roc[1].ToString().Trim('"'));
-                                break;
-                            default:
-                                throw new Exception("type not implemented "+TypeSystem.FindMappingType(roc[1].Type));
-                        }
-                        
-                        //if(mecstr.StartsWith("op_Equality("))
-                            return new GenDB.OP_Equals (parArr[0], parArr[1]);
-                        //else if(mecstr.StartsWith("op_Inequality"))
-                            
-                    }
-                    else
+                    switch(TypeSystem.FindMappingType(roc[1].Type))
                     {
-                        throw new Exception("NodeType unknown "+tmp.NodeType.ToString());
+                        case MappingType.STRING:
+                            parArr[1] = new CstString(roc[1].ToString().Trim('"'));
+                            break;
+                        default:
+                            throw new Exception("type not implemented "+TypeSystem.FindMappingType(roc[1].Type));
                     }
+                        
+                    if(mce.Method.Name=="op_Equality")
+                        return new GenDB.OP_Equals (parArr[0], parArr[1]);
+                    else if(mce.Method.Name=="op_Inequality")
+                        return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
+                    else 
+                        throw new Exception("Method unknown "+mce.Method.Name);
                 }
                 else
                 {
-                    throw new Exception("Can not translate method with more than two parameters");
+                    throw new Exception("NodeType unknown "+tmp.NodeType.ToString());
                 }
+            }
+            else
+            {
+                throw new Exception("Can not translate method with more than two parameters");
+            }
         }
 
         internal IWhereable VisitBinaryExpression(BinaryExpression be)
@@ -114,7 +113,7 @@ namespace GenDB
         {
             string mecstr = lambda.Body.ToString();
             
-            if (mecstr.StartsWith("op_Equality(") /* || mecstr.StartsWith("op_Inequality") */ )
+            if (mecstr.StartsWith("op_Equality(") || mecstr.StartsWith("op_Inequality"))
             {
                 return VisitMethodCall((MethodCallExpression) lambda.Body);                
             }
