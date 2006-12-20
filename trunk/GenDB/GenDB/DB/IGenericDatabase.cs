@@ -10,8 +10,6 @@ namespace GenDB.DB
     /// Representation of DB reference to another
     /// object. We need some way to represent DBNull, 
     /// since this indicates that the reference is empty.
-    /// 
-    /// 
     /// </summary>
     struct IBOReference
     {
