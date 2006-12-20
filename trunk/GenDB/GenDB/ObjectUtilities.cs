@@ -76,16 +76,34 @@ namespace GenDB
             
             if (!o.GetType().IsPublic) { prefix = '-'; }
 
-            FieldInfo[] staticFields = t.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            FieldInfo[] localPubFields = t.GetFields (BindingFlags.Public | BindingFlags.Instance);
-            FieldInfo[] localNonPubFields = t.GetFields (BindingFlags.NonPublic | BindingFlags.Instance);
+            IEnumerable<FieldInfo> staticFields = GetFieldsRecurse(t, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            IEnumerable<FieldInfo> localPubFields = GetFieldsRecurse(t, BindingFlags.Public | BindingFlags.Instance);
+            IEnumerable<FieldInfo> localNonPubFields = GetFieldsRecurse(t, BindingFlags.NonPublic | BindingFlags.Instance);
             output.WriteLine("{0}{1}Type: {2}", Indent(indentLevel), prefix, t.FullName);
             PrintFields(o, staticFields, output, indentLevel + 1);
             PrintFields(o, localPubFields, output, indentLevel + 1);
             PrintFields(o, localNonPubFields, output, indentLevel + 1);
         }
 
-        private static void PrintFields (object o, FieldInfo[] fields, TextWriter output, int indentLevel)
+        private static IEnumerable<FieldInfo> GetFieldsRecurse (Type t, BindingFlags bflags)
+        {
+            LinkedList<FieldInfo> fields = new LinkedList<FieldInfo>();
+
+            foreach (FieldInfo fi in t.GetFields(bflags))
+            {
+                fields.AddLast(fi);
+            }
+            if (t.BaseType != null)
+            {
+                foreach (FieldInfo fi in GetFieldsRecurse(t.BaseType, bflags ))
+                {
+                    fields.AddLast(fi);
+                }
+            }
+            return fields;
+        }
+
+        private static void PrintFields(object o, IEnumerable<FieldInfo> fields, TextWriter output, int indentLevel)
         {
             string indentString = Indent (indentLevel);
             foreach (FieldInfo fi in fields)
