@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Query;
 using System.Expressions;
+using GenDB.DB;
 
 namespace GenDB
 {
