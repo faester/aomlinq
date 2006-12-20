@@ -11,8 +11,6 @@ using GenDB.DB;
 
 namespace GenDB
 {
-
-
     public enum Sex { MALE, FEMALE };
 
     class Program
