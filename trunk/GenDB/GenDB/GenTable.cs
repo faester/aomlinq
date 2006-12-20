@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Reflection;
 using System.Diagnostics;
+using GenDB.DB;
 
 namespace GenDB
 {

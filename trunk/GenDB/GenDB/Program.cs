@@ -7,6 +7,7 @@ using System.Xml.XLinq;
 using System.Data.DLinq;
 using System.Data.SqlClient;
 using System.Expressions;
+using GenDB.DB;
 
 namespace GenDB
 {

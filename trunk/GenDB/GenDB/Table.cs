@@ -4,6 +4,7 @@ using System.Collections;
 using System.Text;
 using System.Query;
 using System.Expressions;
+using GenDB.DB;
 
 namespace GenDB
 {
