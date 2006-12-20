@@ -18,13 +18,13 @@ namespace GenDB
 
     /// <summary>
     /// Translates between IBusinessObject and IEntity. Not type safe, so the 
-    /// DelegateTranslator should be stored in a hash table with types as key.
+    /// IBOTranslator should be stored in a hash table with types as key.
     /// (Or be instantiated anew for each type, which is of course ineffective
     /// due to instantiation time.)
-    /// The DelegateTranslator got its name because it uses delegates for translation, 
+    /// The IBOTranslator got its name because it uses delegates for translation, 
     /// rather than reflection. Might be misleading.
     /// </summary>
-    class DelegateTranslator : IIBoToEntityTranslator
+    class IBOTranslator : IIBoToEntityTranslator
     {
         IIBoToEntityTranslator superTranslator = null;
         IEntityType iet;
@@ -32,9 +32,9 @@ namespace GenDB
         PropertyInfo[] fields;
         LinkedList<FieldConverter> fieldConverters = new LinkedList<FieldConverter>();
         InstantiateObjectHandler instantiator;
-        private DelegateTranslator() { /* empty */ }
+        private IBOTranslator() { /* empty */ }
 
-        public DelegateTranslator(Type t, IEntityType iet)
+        public IBOTranslator(Type t, IEntityType iet)
         {
             this.iet = iet;
             this.t = t;

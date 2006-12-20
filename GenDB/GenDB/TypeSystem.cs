@@ -87,7 +87,7 @@ namespace GenDB
             }
             Configuration.GenDB.Save(et);
             Configuration.GenDB.CommitTypeChanges();
-            DelegateTranslator trans = new DelegateTranslator(ce.ClrType, et);
+            IBOTranslator trans = new IBOTranslator(ce.ClrType, et);
         }
 
 
