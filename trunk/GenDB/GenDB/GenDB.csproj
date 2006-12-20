@@ -68,8 +68,8 @@
     <Compile Include="DB\IGenericDatabase.cs" />
     <Compile Include="IIBoToEntityTranslator.cs" />
     <Compile Include="DB\MsSql2005DB.cs" />
-    <Compile Include="MSSqlExprTranslator.cs" />
-    <Compile Include="MSWhereStringBuilder.cs" />
+    <Compile Include="SqlExprTranslator.cs" />
+    <Compile Include="DB\MSWhereStringBuilder.cs" />
     <Compile Include="NotTranslatableException.cs" />
     <Compile Include="ObjectUtilities.cs" />
     <Compile Include="Program.cs" />
