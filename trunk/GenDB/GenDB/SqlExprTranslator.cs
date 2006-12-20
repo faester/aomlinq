@@ -22,7 +22,7 @@ namespace GenDB
             return Visit(expr);
         }
 
-        internal IWhereable VisitMethodCall(MethodCallExpression mce)
+        internal IExpression VisitMethodCall(MethodCallExpression mce)
         {
             ReadOnlyCollection<Expression> roc = mce.Parameters;
             IValue[] parArr= new IValue[2];
@@ -73,7 +73,7 @@ namespace GenDB
             }
         }
 
-        internal IWhereable VisitBinaryExpression(BinaryExpression be)
+        internal IExpression VisitBinaryExpression(BinaryExpression be)
         {
             Expression expr = (Expression) be;
             IValue[] parArr = new IValue[2];
@@ -110,50 +110,112 @@ namespace GenDB
                 throw new Exception("NodeType unknown "+expr.NodeType.ToString());
         }
         
-        public IWhereable VisitLambdaExpr(LambdaExpression lambda)
+        public IExpression VisitExpr(Expression expr)
         {
-            string mecstr = lambda.Body.ToString();
+            if(expr.NodeType.ToString()=="Lambda")
+            {
+                LambdaExpression lambda = (LambdaExpression)expr;
+                string mecstr = lambda.Body.ToString();
             
-            if (mecstr.StartsWith("op_Equality(") || mecstr.StartsWith("op_Inequality"))
-            {
-                return VisitMethodCall((MethodCallExpression) lambda.Body);                
-            }
-            else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT("))
-            {   
-                return VisitBinaryExpression((BinaryExpression) lambda.Body);
-            }
-            else if(mecstr.StartsWith("AndAlso("))
-            {
-                
-                BinaryExpression be = (BinaryExpression) lambda.Body;
-                //IExpression left = new 
+                if (mecstr.StartsWith("op_Equality(") || mecstr.StartsWith("op_Inequality"))
+                {
+                    return VisitMethodCall((MethodCallExpression) lambda.Body);                
+                }
+                else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT("))
+                {   
+                    return VisitBinaryExpression((BinaryExpression) lambda.Body);
+                }
+                else if(mecstr.StartsWith("AndAlso("))
+                {
+                    BinaryExpression be = (BinaryExpression) lambda.Body;
+                    IExpression left, right;
+                    string typeName;
+                    
+                    // doing the left hand side
+                    typeName = be.Left.GetType().Name;
+                    if(be.Left.GetType().Name.ToString()=="BinaryExpression")
+                    {
+                        BinaryExpression b_tmp = (BinaryExpression) be.Left;
+                        left = VisitBinaryExpression(b_tmp);
+                    }
+                    else if(typeName=="MethodCallExpression")
+                    {
+                        MethodCallExpression m_tmp = (MethodCallExpression) be.Left;
+                        left = VisitMethodCall(m_tmp);
+                    }
+                    else
+                        throw new Exception("Expression type unknown "+be.Left.GetType().Name);
 
-                //return new GenDB.ExprAnd(be.Left, be.Right);
-                throw new Exception("stop");
+                    // doing the right hand side
+                    typeName = be.Right.GetType().Name;
+                    if(typeName=="BinaryExpression")
+                    {
+                        BinaryExpression b_tmp = (BinaryExpression) be.Right;
+                        right = VisitBinaryExpression(b_tmp);
+                    } 
+                    else if(typeName=="MethodCallExpression")
+                    {
+                        MethodCallExpression m_tmp = (MethodCallExpression) be.Right;
+                        right = VisitMethodCall(m_tmp);
+                    }
+                    else 
+                        throw new Exception("Expression type unknown "+typeName);
+                    
+                    return new GenDB.ExprAnd(left, right);
                 
-                
+                }
+                else if(mecstr.StartsWith("OrElse("))
+                {
+                    LambdaExpression le = (LambdaExpression) expr;
+                    BinaryExpression be = (BinaryExpression) le.Body;
+                    IExpression left, right;
+                    string typeName;
+
+                    // doing the left hand side
+                    typeName = be.Left.GetType().Name;
+                    if(typeName=="BinaryExpression")
+                    {
+                        BinaryExpression b_tmp = (BinaryExpression) be.Left;
+                        left = VisitBinaryExpression(b_tmp);
+                    }
+                    else if(typeName=="MethodCallExpression")
+                    {
+                        MethodCallExpression m_tmp = (MethodCallExpression) be.Left;
+                        left = VisitMethodCall(m_tmp);
+                    }
+                    else
+                        throw new Exception("Expression type unkown "+typeName);
+                   
+                    // doing the right hand side
+                    typeName = be.Right.GetType().Name;
+                    if(typeName=="BinaryExpression")
+                    {
+                        BinaryExpression b_tmp = (BinaryExpression) be.Right;
+                        right = VisitBinaryExpression(b_tmp);
+                    }
+                    else if(typeName=="MethodCallExpression")
+                    {
+                        MethodCallExpression m_tmp = (MethodCallExpression) be.Right;
+                        right = VisitMethodCall(m_tmp);
+                    }
+                    else
+                        throw new Exception("Expression type unkown "+typeName);
+ 
+                    return new GenDB.ExprOr(left, right);
+                }
+                else
+                {
+                    throw new Exception("Can not translate method name " + mecstr);
+                }
+            }
+            else 
                 throw new Exception("sd");
-
-                //Console.WriteLine(be.Left.NodeType);
-                //IExpression left = TypeSystem.
-                //return new GenDB.ExprAnd(be.Left, be.Right);
-                throw new Exception("operator not implemented "+ mecstr);
-            }
-            else if(mecstr.StartsWith("OrElse("))
-            {
-                throw new Exception("operator not implemented "+ mecstr);
-            }
-            else
-            {
-                throw new Exception("Can not translate method name " + mecstr);
-            }
-
         }
 
         internal IWhereable VisitEqExpr(Expression exp)
         {
             
-            return VisitLambdaExpr((LambdaExpression)exp);
+            return VisitExpr(exp);
             throw new Exception("not implemented");
         }
         
@@ -497,7 +559,7 @@ namespace GenDB
                     //    return this.VisitTypeIs((TypeBinaryExpression)exp);
                     //}
                 case ExpressionType.Lambda:
-                    return VisitLambdaExpr((LambdaExpression)exp);
+                    return VisitExpr(exp);
                     //{
                     //    return this.VisitLambda((LambdaExpression)exp);
                     //}
