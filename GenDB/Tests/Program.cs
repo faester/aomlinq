@@ -46,7 +46,7 @@ namespace Tests
             Configuration.DbBatchSize = 2000;
             long objcount = 500;
 
-            Table<Person> table = new Table<Person>();
+            Table<Person> tp = new Table<Person>();
 
             DateTime then = DateTime.Now;
 
@@ -60,8 +60,8 @@ namespace Tests
                 s.Name = "Student " + i.ToString();
                 s.Avg = i / objcount;
                 p.Name = "Navn " + i.ToString();
-                table.Add (p);
-                table.Add (s);
+                tp.Add (p);
+                tp.Add (s);
                 lastPerson = p;
             }
 
@@ -71,7 +71,7 @@ namespace Tests
             Console.WriteLine ("Insertion of {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
             then = DateTime.Now;
             objcount = 0;
-            foreach (Person ibo in table)
+            foreach (Person ibo in tp)
             {
                 objcount++;
                 //ObjectUtilities.PrintOut(ibo);
