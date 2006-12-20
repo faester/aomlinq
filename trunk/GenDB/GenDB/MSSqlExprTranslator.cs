@@ -11,9 +11,9 @@ namespace GenDB
 {
     // internal class fra System.Query.dll, sakset via reflector
 
-    internal class MSSqlExprTranslator
+    internal class SqlExprTranslator
     {
-        internal MSSqlExprTranslator()
+        internal SqlExprTranslator()
         {
         }
 
