@@ -115,7 +115,7 @@ namespace GenDB
 
             //foreach (IEntity e in Configuration.GenDB.Where(wc))
             //{
-            //    DelegateTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
+            //    IBOTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
             //    IBusinessObject ibo = trans.Translate (e);
             //    Person pers = (Person)ibo;
             //    //pers.Name = "Knud Lavert";

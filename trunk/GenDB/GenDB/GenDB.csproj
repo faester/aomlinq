@@ -74,6 +74,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Table.cs" />
+    <Compile Include="TranslatorChecks.cs" />
     <Compile Include="TypeSystem.cs" />
     <Compile Include="VolatileAnnotation.cs" />
   </ItemGroup>

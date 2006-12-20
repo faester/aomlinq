@@ -43,7 +43,7 @@ namespace GenDB
         {
             this.clrType = t;
             entityType = iet;
-            translator = new DelegateTranslator(t, entityType);
+            translator = new IBOTranslator(t, entityType);
         }
     }
 }
