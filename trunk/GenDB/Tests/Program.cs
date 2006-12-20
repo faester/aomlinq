@@ -60,8 +60,6 @@ namespace Tests
                 s.Name = "Student " + i.ToString();
                 s.Avg = (double)i / objcount;
                 
-                ObjectUtilities.PrintOut (s);
-
                 p.Name = "Navn " + i.ToString();
                 p.Age = i;
 
