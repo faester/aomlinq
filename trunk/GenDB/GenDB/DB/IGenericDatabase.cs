@@ -120,8 +120,8 @@ namespace GenDB.DB
         /// </summary>
         bool ExistsInDatabase { get; set; }
 
-        //bool IsList { get; set; }
-        //bool IsDictionary { get; set; }
+        bool IsList { get; set; }
+        bool IsDictionary { get; set; }
     }
 
     interface IEntity
