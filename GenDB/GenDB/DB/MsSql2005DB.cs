@@ -613,7 +613,7 @@ namespace GenDB.DB
 
         public void Save(IEntity entity)
         {
-            DoSave(entity);
+            InternalEntitySave(entity);
             foreach (IPropertyValue pv in entity.AllPropertyValues)
             {
                 SavePropertyValue(pv);
@@ -668,7 +668,7 @@ namespace GenDB.DB
                        .Append("',")
                        .Append(boolValue)
                        .Append(',')
-                       .Append(pv.DoubleValue)
+                       .Append( pv.DoubleValue.ToString().Replace(',', '.'))
                        .Append(";");
         }
 
@@ -692,7 +692,7 @@ namespace GenDB.DB
             propertyValueInsertCount = 0;
         }
 
-        private void DoSave(IEntity entity)
+        private void InternalEntitySave(IEntity entity)
         {
             if (entityInsertCount > Configuration.DbBatchSize)
             {
