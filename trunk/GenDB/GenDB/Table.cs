@@ -22,7 +22,7 @@ namespace GenDB
             {
                TypeSystem.RegisterType(ibo.GetType());
             }
-            DelegateTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
+            IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
             IEntity e = trans.Translate(ibo);
             Configuration.GenDB.Save(e);
         }
@@ -60,7 +60,7 @@ namespace GenDB
         public System.Collections.Generic.IEnumerator<T> GetEnumerator()
         {
             IEntityType lastType = null;
-            DelegateTranslator translator = null;
+            IIBoToEntityTranslator translator = null;
             foreach (IEntity e in Configuration.GenDB.Where(expression))
             {
                 if (lastType != e.EntityType)

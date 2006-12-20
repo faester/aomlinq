@@ -36,7 +36,7 @@ namespace GenDB
             {
                TypeSystem.RegisterType(ibo.GetType());
             }
-            DelegateTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
+            IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
             IEntity e = trans.Translate(ibo);
         }
 
@@ -56,7 +56,7 @@ namespace GenDB
         public IEnumerable<IBusinessObject> GetAll()
         {
             IEntityType lastType = null;
-            DelegateTranslator translator = null;
+            IIBoToEntityTranslator translator = null;
             foreach (IEntity e in Configuration.GenDB.GetAllEntities())
             {
                 if (lastType != e.EntityType)

@@ -20,10 +20,10 @@ namespace GenDB
         private const string COLLECTION_ELEMENT_TYPE_PROPERTY_NAME = "++ElementType"; // prefixed with ++ which is not legal in a C# property name
         private const string COLLECTION_ELEMENT_KEY_PROPERTY_NAME = "++KeyType";      // to avoid clashes with existing properties.
 
-        private static Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement> ();
-        private static Dictionary<string, IETCacheElement> name2IEt = new Dictionary<string, IETCacheElement> ();
-        private static Dictionary<Type, IETCacheElement> type2IEt = new Dictionary<Type, IETCacheElement> ();
-        
+        private static Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement>();
+        private static Dictionary<string, IETCacheElement> name2IEt = new Dictionary<string, IETCacheElement>();
+        private static Dictionary<Type, IETCacheElement> type2IEt = new Dictionary<Type, IETCacheElement>();
+
         private static Dictionary<long, IPropertyType> ptid2pt = new Dictionary<long, IPropertyType>();
         private static Dictionary<string, IPropertyType> ptName2pt = new Dictionary<string, IPropertyType>();
 
@@ -49,8 +49,8 @@ namespace GenDB
             }
             foreach (IPropertyType pt in Configuration.GenDB.GetAllPropertyTypes())
             {
-                ptid2pt.Add (pt.PropertyTypePOID, pt);
-                ptName2pt.Add (pt.Name, pt);
+                ptid2pt.Add(pt.PropertyTypePOID, pt);
+                ptName2pt.Add(pt.Name, pt);
             }
         }
 
@@ -61,7 +61,7 @@ namespace GenDB
         /// <param name="et"></param>
         private static void RegisterType(IEntityType et)
         {
-            if (etid2IEt .ContainsKey(et.EntityTypePOID))
+            if (etid2IEt.ContainsKey(et.EntityTypePOID))
             {
                 return;
             }
@@ -75,20 +75,20 @@ namespace GenDB
             if (t == null) { throw new Exception("Could not find a CLR type with name: " + et.Name); }
             IETCacheElement ce = new IETCacheElement(et, t);
             // Use add to ensure exception, if something is attempted to be inputted twice.
-            etid2IEt.Add (et.EntityTypePOID, ce);
+            etid2IEt.Add(et.EntityTypePOID, ce);
             name2IEt.Add(et.Name, ce);
-            type2IEt.Add (ce.ClrType, ce);
+            type2IEt.Add(ce.ClrType, ce);
 
             // Register et at its supertype, if one is present
             if (et.SuperEntityType != null)
             {
-                etid2IEt[et.SuperEntityType.EntityTypePOID].AddSubType (et);
+                etid2IEt[et.SuperEntityType.EntityTypePOID].AddSubType(et);
             }
-            Configuration.GenDB.Save (et);
+            Configuration.GenDB.Save(et);
             Configuration.GenDB.CommitTypeChanges();
             DelegateTranslator trans = new DelegateTranslator(ce.ClrType, et);
         }
-        
+
 
         /// <summary>
         /// Registers the type for usage internally in the 
@@ -139,12 +139,12 @@ namespace GenDB
             return type2IEt[t].Target;
         }
 
-        internal static DelegateTranslator GetTranslator (Type t)
+        internal static IIBoToEntityTranslator GetTranslator(Type t)
         {
             return type2IEt[t].Translator;
         }
 
-        internal static DelegateTranslator GetTranslator (long entityTypePOID )
+        internal static IIBoToEntityTranslator GetTranslator(long entityTypePOID)
         {
             return etid2IEt[entityTypePOID].Translator;
         }
@@ -165,7 +165,7 @@ namespace GenDB
             LinkedList<IEntityType> result = new LinkedList<IEntityType>();
 
             // Add the element it self to the list
-            result.AddLast (iet);
+            result.AddLast(iet);
 
             //Traverse through all direct sub types
             foreach (IEntityType et in etid2IEt[iet.EntityTypePOID].DirectSubTypes)
@@ -173,7 +173,7 @@ namespace GenDB
                 // Add the sub type and all its sub types recursively.
                 foreach (IEntityType et2 in GetEntityTypesInstanceOf(et))
                 {
-                    result.AddLast (et2);
+                    result.AddLast(et2);
                 }
             }
             return result;
@@ -212,7 +212,7 @@ namespace GenDB
             et.AssemblyDescription = t.Assembly.FullName;
 
             PropertyInfo[] clrProperties = t.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance |
-                                        BindingFlags.Public );
+                                        BindingFlags.Public);
 
             foreach (PropertyInfo clrProperty in clrProperties)
             {
@@ -231,13 +231,13 @@ namespace GenDB
             Type superType = t.BaseType;
             if (superType != null && superType != typeof(object))
             {
-                if (type2IEt.ContainsKey (superType))
+                if (type2IEt.ContainsKey(superType))
                 {
                     et.SuperEntityType = type2IEt[superType].Target;
                 }
                 else
                 {
-                    IEntityType set = ConstructEntityType (superType);
+                    IEntityType set = ConstructEntityType(superType);
                     RegisterType(set);
                     et.SuperEntityType = set;
                 }
@@ -270,12 +270,12 @@ namespace GenDB
                 {
                     return MappingType.DOUBLE;
                 }
-                else 
+                else
                 {
                     throw new NotTranslatableException("Did not know how to map primitive Type", t);
                 }
             }
-            else if (t.IsArray )
+            else if (t.IsArray)
             {
                 throw new NotTranslatableException("Can not translate arrays.", t);
             }
@@ -297,15 +297,16 @@ namespace GenDB
             }
         }
 
-        public static MappingType FindMappingType (PropertyInfo clrProperty)
+        public static MappingType FindMappingType(PropertyInfo clrProperty)
         {
             Type t = clrProperty.PropertyType;
-            try {
+            try
+            {
                 return FindMappingType(t);
             }
-            catch(NotTranslatableException e)
+            catch (NotTranslatableException e)
             {
-                throw new NotTranslatableException ("Can not translate Property", clrProperty, e);
+                throw new NotTranslatableException("Can not translate Property", clrProperty, e);
             }
         }
 
@@ -316,58 +317,15 @@ namespace GenDB
             {
                 return res;
             }
-            else 
+            else
             {
                 res = Configuration.GenDB.NewPropertyType();
                 res.Name = name;
-                ptName2pt.Add (res.Name, res);
-                ptid2pt.Add (res.PropertyTypePOID, res);
+                ptName2pt.Add(res.Name, res);
+                ptid2pt.Add(res.PropertyTypePOID, res);
             }
             return res;
         }
-
-        #region IETCacheElemetn definition
-        private class IETCacheElement
-        {
-            IEntityType entityType;
-            Type clrType;
-            DelegateTranslator translator;
-
-            public DelegateTranslator Translator
-            {
-                get { return translator; }
-            }
-
-            public Type ClrType
-            {
-                get { return clrType; }
-            }
-
-            public IEntityType Target
-            {
-                get { return entityType; }
-                set { entityType = value; }
-            }
-
-            ICollection<IEntityType> directSubTypes = new LinkedList<IEntityType>();
-
-            public IEnumerable<IEntityType> DirectSubTypes
-            {
-                get { return directSubTypes; }
-            }
-
-            public void AddSubType(IEntityType iet)
-            {
-                directSubTypes.Add(iet);
-            }
-            
-            public IETCacheElement (IEntityType iet, Type t)
-            {
-                this.clrType = t;
-                entityType = iet;
-                translator = new DelegateTranslator (t, entityType);
-            }
-        }
-        #endregion
     }
+
 }

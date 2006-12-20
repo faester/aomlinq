@@ -59,9 +59,9 @@ namespace GenDB
     /// The DelegateTranslator got its name because it uses delegates for translation, 
     /// rather than reflection. Might be misleading.
     /// </summary>
-    class DelegateTranslator
+    class DelegateTranslator : IIBoToEntityTranslator
     {
-        DelegateTranslator superTranslator = null;
+        IIBoToEntityTranslator superTranslator = null;
         IEntityType iet;
         Type t;
         PropertyInfo[] fields;
@@ -173,7 +173,7 @@ namespace GenDB
         /// </summary>
         /// <param name="e"></param>
         /// <param name="ibo"></param>
-        private void SetValues(IEntity e, IBusinessObject ibo)
+        public void SetValues(IEntity e, IBusinessObject ibo)
         {
             foreach (FieldConverter c in fieldConverters)
             {
@@ -281,7 +281,7 @@ namespace GenDB
                         if (res == null)
                         {
                             IEntity e = Configuration.GenDB.GetEntity(entityRef.EntityPOID);
-                            DelegateTranslator trans = TypeSystem.GetTranslator(clrType);
+                            IIBoToEntityTranslator trans = TypeSystem.GetTranslator(clrType);
                             res = trans.Translate(e);
                         }
                         return res;
