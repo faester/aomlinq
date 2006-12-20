@@ -28,6 +28,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="nunit.core, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\nunit.core.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Query" />
@@ -39,12 +47,17 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GenDB\GenDB.csproj">
       <Project>{9AF38389-51DB-4558-BC94-14A6E0ABF323}</Project>
       <Name>GenDB</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Component Include="lib\nunit.core.dll" />
+    <Component Include="lib\nunit.framework.dll" />
   </ItemGroup>
   <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
 </Project>
