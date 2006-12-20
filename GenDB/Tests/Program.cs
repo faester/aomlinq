@@ -70,11 +70,11 @@ namespace Tests
                 Person p = new Person();
                 Student s = new Student();
 
-                s.Name = "Student " + i.ToString();
+                s.Name = "Student '" + i.ToString();
                 s.Avg = (double)i / objcount;
                 s.Spouse = p;
-
-                p.Name = "Navn " + i.ToString();
+                
+                p.Name = "Navn " + i;
                 p.Age = i;
 
                 tp.Add (p);

@@ -17,8 +17,8 @@ namespace GenDB.DB
     {
         internal static string SqlSanitizeString(string s)
         {
-            string res = s.Replace("'", "''");
-            return res;
+            if (s == null) { return "null"; }
+            return s.Replace("'", "''");
         }
 
         long nextETID = 0;
@@ -80,8 +80,7 @@ namespace GenDB.DB
                 return nextPID++;
             }
         }
-
-
+        
         #region CONSTS
         /* ADO.NET opretholder en connection pool. 
          * Dette forudsætter at forbindelser åbnes 
@@ -493,7 +492,6 @@ namespace GenDB.DB
             }
         }
 
-
         public IEnumerable<IEntity> GetAllEntities()
         {
             using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
@@ -628,6 +626,20 @@ namespace GenDB.DB
             }
         }
 
+        private void InternalEntitySave(IEntity entity)
+        {
+            if (entityInsertCount > Configuration.DbBatchSize)
+            {
+                EntityInsertStringBuilderToLL();
+            }
+            entityInsertCount++;
+            sbEntityInserts.Append(" EXEC sp_UP_INS_ENTITY ")
+                      .Append(entity.EntityPOID)
+                      .Append(',')
+                      .Append(entity.EntityType.EntityTypePOID)
+                      .Append(';');
+        }
+
         private void SavePropertyValue(IPropertyValue pv)
         {
             if (propertyValueInsertCount > Configuration.DbBatchSize)
@@ -698,20 +710,6 @@ namespace GenDB.DB
             llPropertyValueInserts.AddLast(sbPropertyValueInserts.ToString());
             sbPropertyValueInserts = new StringBuilder();
             propertyValueInsertCount = 0;
-        }
-
-        private void InternalEntitySave(IEntity entity)
-        {
-            if (entityInsertCount > Configuration.DbBatchSize)
-            {
-                EntityInsertStringBuilderToLL();
-            }
-            entityInsertCount++;
-            sbEntityInserts.Append(" EXEC sp_UP_INS_ENTITY ")
-                      .Append(entity.EntityPOID)
-                      .Append(',')
-                      .Append(entity.EntityType.EntityTypePOID)
-                      .Append(';');
         }
 
         public void CommitChanges()
