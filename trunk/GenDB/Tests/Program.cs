@@ -44,7 +44,7 @@ namespace Tests
         {
             Configuration.RebuildDatabase = true;
             Configuration.DbBatchSize = 2000;
-            long objcount = 10;
+            long objcount = 3;
 
             Table<Person> tp = new Table<Person>();
 
