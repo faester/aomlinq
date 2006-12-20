@@ -18,8 +18,8 @@ namespace GenDB
     /// </summary>
     static class TypeSystem
     {
-        private const string COLLECTION_ELEMENT_TYPE_PROPERTY_NAME = "++ElementType"; // prefixed with ++ which is not legal in a C# property name
-        private const string COLLECTION_ELEMENT_KEY_PROPERTY_NAME = "++KeyType";      // to avoid clashes with existing properties.
+        internal const string COLLECTION_ELEMENT_TYPE_PROPERTY_NAME = "++ElementType"; // prefixed with ++ which is not legal in a C# property name
+        internal const string COLLECTION_ELEMENT_KEY_PROPERTY_NAME = "++KeyType";      // to avoid clashes with existing properties.
 
         private static Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement>();
         private static Dictionary<string, IETCacheElement> name2IEt = new Dictionary<string, IETCacheElement>();
