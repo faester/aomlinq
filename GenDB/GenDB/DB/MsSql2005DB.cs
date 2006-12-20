@@ -325,15 +325,23 @@ namespace GenDB.DB
             using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
             {
                 cnn.Open();
-                SqlCommand cmd = new SqlCommand("SELECT EntityTypePOID, Name, AssemblyDescription FROM " + TB_ENTITYTYPE_NAME, cnn);
+                SqlCommand cmd = new SqlCommand(
+                    "SELECT EntityTypePOID, Name, AssemblyDescription, IsList, IsDictionary FROM " + TB_ENTITYTYPE_NAME
+                    , cnn);
                 SqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
                     string t1 = reader[0].ToString();
                     string t2 = reader[1].ToString();
                     long id = long.Parse(reader[0].ToString());
+
+                    Boolean isList = (Boolean)reader[3]; 
+                    Boolean isDictionary = (Boolean)reader[4];
+
                     string name = (string)reader[1];
                     IEntityType et = new EntityType();
+                    et.IsList = isList;
+                    et.IsDictionary = isDictionary;
                     et.Name = name;
                     et.AssemblyDescription = (string)reader[2];
                     et.EntityTypePOID = id;
@@ -834,7 +842,7 @@ namespace GenDB.DB
 
             sbEntityTypeInserts.Append(" INSERT INTO ");
             sbEntityTypeInserts.Append(TB_ENTITYTYPE_NAME);
-            sbEntityTypeInserts.Append(" (EntityTypePOID, Name, SuperEntityTypePOID, AssemblyDescription) VALUES (");
+            sbEntityTypeInserts.Append(" (EntityTypePOID, Name, SuperEntityTypePOID, AssemblyDescription, IsList, IsDictionary) VALUES (");
             sbEntityTypeInserts.Append(et.EntityTypePOID);
             sbEntityTypeInserts.Append(", '");
             sbEntityTypeInserts.Append(et.Name);
@@ -843,7 +851,10 @@ namespace GenDB.DB
             else { sbEntityTypeInserts.Append(et.SuperEntityType.EntityTypePOID); }
             sbEntityTypeInserts.Append(",'");
             sbEntityTypeInserts.Append(et.AssemblyDescription);
-            sbEntityTypeInserts.Append('\'');
+            sbEntityTypeInserts.Append("',");
+            sbEntityTypeInserts.Append ( et.IsList ? 1 : 0);
+            sbEntityTypeInserts.Append (',');
+            sbEntityTypeInserts.Append ( et.IsDictionary ? 1 : 0);
             sbEntityTypeInserts.Append(") ");
             if (et.DeclaredProperties != null)
             {
@@ -899,7 +910,7 @@ namespace GenDB.DB
         {
             LinkedList<string> tCC = new LinkedList<string>(); //Table create commands
 
-            tCC.AddLast("CREATE TABLE " + TB_ENTITYTYPE_NAME + " (EntityTypePOID int primary key, SuperEntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) , Name VARCHAR(max), AssemblyDescription VARCHAR(MAX)); ");
+            tCC.AddLast("CREATE TABLE " + TB_ENTITYTYPE_NAME + " (EntityTypePOID int primary key, SuperEntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) , Name VARCHAR(max), AssemblyDescription VARCHAR(MAX), IsList bit not null, IsDictionary bit not null); ");
             tCC.AddLast("CREATE TABLE " + TB_PROPERTYTYPE_NAME + " (PropertyTypePOID int primary key, Name VARCHAR(max), MappingType smallint); ");
             tCC.AddLast("CREATE TABLE " + TB_ENTITY_NAME + " (EntityPOID int primary key, EntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID)); ");
             tCC.AddLast("CREATE TABLE " + TB_PROPERTY_NAME + " (PropertyPOID int primary key, PropertyTypePOID int references " + TB_PROPERTYTYPE_NAME + "(PropertyTypePOID), EntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) on delete cascade on update cascade, PropertyName VARCHAR(max)); ");

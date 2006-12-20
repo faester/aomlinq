@@ -8,6 +8,9 @@ namespace GenDB.DB
     {
         string name;
         string assemblyDescription;
+        bool isList;
+        bool isDictionary;
+
 
         bool persistent;
         long entityTypePOID;
@@ -120,6 +123,18 @@ namespace GenDB.DB
         {
             get { return name; }
             set { name = value; }
+        }
+
+        public bool IsDictionary
+        {
+            get { return isDictionary; }
+            set { isDictionary = value; }
+        }
+
+        public bool IsList
+        {
+            get { return isList; }
+            set { isList = value; }
         }
     }
 }
