@@ -78,6 +78,8 @@ namespace GenDB
             Expression expr = (Expression) be;
             IValue[] parArr = new IValue[2];
 
+            //throw new Exception("enum");
+
             MemberExpression me = (MemberExpression) be.Left;
             Type t = me.Expression.Type;
 
@@ -100,14 +102,22 @@ namespace GenDB
                     throw new Exception("type not implemented "+expr.Type);
             }
 
-            if(expr.NodeType.ToString()=="GT")
+            string nodeType = expr.NodeType.ToString();
+            if(nodeType=="GT")
                 return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
-            else if(expr.NodeType.ToString()=="LT")
+            else if(nodeType=="LT")
                 return new GenDB.OP_LessThan(parArr[0], parArr[1]);
-            else if(expr.NodeType.ToString()=="EQ")
+            else if(nodeType=="EQ")
                 return new GenDB.OP_Equals (parArr[0], parArr[1]);
+            else if(nodeType=="NE")
+                return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
             else
                 throw new Exception("NodeType unknown "+expr.NodeType.ToString());
+        }
+
+        internal IExpression VisitUnaryExpression(UnaryExpression ue)
+        {
+            throw new Exception("unary exception");
         }
         
         public IExpression VisitExpr(Expression expr)
@@ -121,8 +131,8 @@ namespace GenDB
                 {
                     return VisitMethodCall((MethodCallExpression) lambda.Body);                
                 }
-                else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT("))
-                {   
+                else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT(") || mecstr.StartsWith("NE("))
+                {
                     return VisitBinaryExpression((BinaryExpression) lambda.Body);
                 }
                 else if(mecstr.StartsWith("AndAlso("))
