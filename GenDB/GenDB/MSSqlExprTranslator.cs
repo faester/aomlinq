@@ -18,18 +18,12 @@ namespace GenDB
 
         public IWhereable Convert(Expression expr)
         {
-            //throw new Exception("asldkj");
             return Visit(expr);
         }
-        
-        public IWhereable VisitLambdaExpr(LambdaExpression lambda)
+
+        internal IWhereable VisitMethodCall(MethodCallExpression mce)
         {
-            string mecstr = lambda.Body.ToString();
-            
-            if (mecstr.StartsWith("op_Equality(") /* || mecstr.StartsWith("op_Inequality") */ )
-            {   
-                MethodCallExpression mce = (MethodCallExpression) lambda.Body;
-                ReadOnlyCollection<Expression> roc = mce.Parameters;
+            ReadOnlyCollection<Expression> roc = mce.Parameters;
                 IValue[] parArr= new IValue[2];
                 
                 if(roc.Count==2) 
@@ -76,44 +70,57 @@ namespace GenDB
                 else
                 {
                     throw new Exception("Can not translate method with more than two parameters");
-                }                
-            }
-            else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT("))
-            {   
-                Expression expr = (Expression)lambda.Body;
-                BinaryExpression be = (BinaryExpression)lambda.Body;
-                IValue[] parArr = new IValue[2];
+                }
+        }
 
-                MemberExpression me = (MemberExpression) be.Left;
-                Type t = me.Expression.Type;
+        internal IWhereable VisitBinaryExpression(BinaryExpression be)
+        {
+            Expression expr = (Expression) be;
+            IValue[] parArr = new IValue[2];
 
-                if(!TypeSystem.IsTypeKnown(t))
-                    TypeSystem.RegisterType(t);
+            MemberExpression me = (MemberExpression) be.Left;
+            Type t = me.Expression.Type;
 
-                IEntityType et = TypeSystem.GetEntityType(t);
-                string propstr = me.Member.Name;
+            if(!TypeSystem.IsTypeKnown(t))
+                TypeSystem.RegisterType(t);
 
-                IProperty po = et.GetProperty(propstr);
-                parArr[0] = new CstProperty(po);
+            IEntityType et = TypeSystem.GetEntityType(t);
+            string propstr = me.Member.Name;
 
-                switch(TypeSystem.FindMappingType(expr.Type))
-                {
+            IProperty po = et.GetProperty(propstr);
+            parArr[0] = new CstProperty(po);
+
+            switch(TypeSystem.FindMappingType(expr.Type))
+            {
                 case MappingType.BOOL:
                     parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
                     break;
 
                 default:
                     throw new Exception("type not implemented "+expr.Type);
-                }
+            }
 
-                if(expr.NodeType.ToString()=="GT")
-                    return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
-                else if(expr.NodeType.ToString()=="LT")
-                    return new GenDB.OP_LessThan(parArr[0], parArr[1]);
-                else if(expr.NodeType.ToString()=="EQ")
-                    return new GenDB.OP_Equals (parArr[0], parArr[1]);
-                else
-                    throw new Exception("NodeType unknown "+expr.NodeType.ToString());
+            if(expr.NodeType.ToString()=="GT")
+                return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
+            else if(expr.NodeType.ToString()=="LT")
+                return new GenDB.OP_LessThan(parArr[0], parArr[1]);
+            else if(expr.NodeType.ToString()=="EQ")
+                return new GenDB.OP_Equals (parArr[0], parArr[1]);
+            else
+                throw new Exception("NodeType unknown "+expr.NodeType.ToString());
+        }
+        
+        public IWhereable VisitLambdaExpr(LambdaExpression lambda)
+        {
+            string mecstr = lambda.Body.ToString();
+            
+            if (mecstr.StartsWith("op_Equality(") /* || mecstr.StartsWith("op_Inequality") */ )
+            {
+                return VisitMethodCall((MethodCallExpression) lambda.Body);                
+            }
+            else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT("))
+            {   
+                return VisitBinaryExpression((BinaryExpression) lambda.Body);
             }
             else if(mecstr.StartsWith("AndAlso("))
             {
