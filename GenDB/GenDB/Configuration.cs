@@ -69,5 +69,10 @@ namespace GenDB
             get { return dbname; }
             set { dbname = value; }
         }
+
+        public static void SubmitChanges()
+        {
+            IBOCache.FlushToDB();
+        }
     }
 }

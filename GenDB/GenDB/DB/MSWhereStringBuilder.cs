@@ -47,6 +47,26 @@ namespace GenDB.DB
             clause.AcceptVisitor(this);
         }
 
+        public void VisitInstanceOf(ExprInstanceOf instanceOf)
+        {
+            IEnumerable<IEntityType> types = TypeSystem.GetEntityTypesInstanceOf(instanceOf.ClrType);
+            bool notFirst = false;
+
+            StringBuilder entityTypePoids = new StringBuilder("e.EntityTypePOID IN (");
+
+            // Construct list of EntityTypePOIDs
+            foreach (IEntityType et in types)
+            {
+                if (notFirst) { entityTypePoids.Append(','); }
+                else { notFirst = true; }
+                entityTypePoids.Append (et.EntityTypePOID);
+            }
+
+            entityTypePoids.Append (")");
+
+            wherePart.Append (entityTypePoids);
+        }
+
         //Leaf
         public void VisitNumericalProperty(CstProperty vp)
         {

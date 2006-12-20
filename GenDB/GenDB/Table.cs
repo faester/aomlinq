@@ -13,7 +13,7 @@ namespace GenDB
     public class Table<T> : ICollection<T>, IEnumerable<T>
         where T : IBusinessObject
     {
-        IWhereable expression;
+        IWhereable expression = new ExprInstanceOf(typeof(T));
 
         #region ICollection members
 

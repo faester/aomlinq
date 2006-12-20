@@ -24,6 +24,7 @@ namespace GenDB
         void VisitCstDateTime(CstDateTime cdt);
         void VisitEntityPOIDEquals(EntityPOIDEquals epe);
         void VisitOPNotEquals(OP_NotEquals ieq);
+        void VisitInstanceOf(ExprInstanceOf instanceOf);
     }
 
     interface IWhereable
@@ -78,6 +79,26 @@ namespace GenDB
         public void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
             visitor.VisitNotExpr(this);
+        }
+    }
+
+    class ExprInstanceOf : IExpression
+    {
+        Type clrType;
+
+        public Type ClrType
+        {
+            get { return clrType; }
+        }
+
+        public ExprInstanceOf(Type clrType)
+        {
+            this.clrType = clrType;
+        }
+
+        public void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitInstanceOf (this);
         }
     }
 
