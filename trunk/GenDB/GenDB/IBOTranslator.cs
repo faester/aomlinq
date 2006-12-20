@@ -17,7 +17,7 @@ namespace GenDB
     /// <summary>
     /// Translates between IBusinessObject and IEntity. Not type safe, so the 
     /// IBOTranslator should be stored in a hash table with types as key.
-    /// (Or be instantiated anew for each type, which is of course ineffective
+    /// (Or be instantiated anew for each type, which is of course less effective
     /// due to instantiation time.)
     /// The IBOTranslator got its name because it uses delegates for translation, 
     /// rather than reflection. Might be misleading.
@@ -191,5 +191,4 @@ namespace GenDB
             }
         }
     }
-
 }

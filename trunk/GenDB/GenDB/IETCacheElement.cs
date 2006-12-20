@@ -42,7 +42,7 @@ namespace GenDB
         public IETCacheElement(IEntityType iet, Type t)
         {
             this.clrType = t;
-            entityType = iet;
+            this.entityType = iet;
             translator = new IBOTranslator(t, entityType);
         }
     }

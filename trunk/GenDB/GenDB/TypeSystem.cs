@@ -217,8 +217,8 @@ namespace GenDB
 
             foreach (PropertyInfo clrProperty in clrProperties)
             {
-                Attribute attr = Attribute.GetCustomAttribute(clrProperty, typeof(Volatile));
-                if (clrProperty.PropertyType != typeof(DBTag) && attr == null)
+                Attribute volatileAttribute = Attribute.GetCustomAttribute(clrProperty, typeof(Volatile));
+                if (clrProperty.PropertyType != typeof(DBTag) && volatileAttribute == null)
                 {
                     IProperty property = Configuration.GenDB.NewProperty();
                     property.PropertyName = clrProperty.Name;
