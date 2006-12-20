@@ -120,7 +120,11 @@ namespace GenDB
         /// Used to determine if insertion should 
         /// happen using an update or insert command.
         /// </summary>
-        bool ExistsInDatabase { get; set; }     }
+        bool ExistsInDatabase { get; set; }
+
+        //bool IsList { get; set; }
+        //bool IsDictionary { get; set; }
+    }
 
     interface IEntity
     {
@@ -294,5 +298,24 @@ namespace GenDB
         void CommitTypeChanges();
         void RollbackTypeTransaction();
         void RollbackTransaction();
+    }
+
+    interface IGenCollectionElement
+    {
+        IEntity Entity { get; set; }
+        
+        string StringValue { get; set; }
+        
+        long LongValue { get; set; }
+
+        double DoubleValue { get; set; }
+
+        DateTime DateTimeValue { get; set; }
+
+        char CharValue { get; set; }
+
+        bool BoolValue { get; set; }
+
+        IBOReference RefValue { get; set; }
     }
 }

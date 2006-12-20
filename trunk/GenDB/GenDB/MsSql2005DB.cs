@@ -106,6 +106,7 @@ namespace GenDB
         const string TB_PROPERTYTYPE_NAME = "PropertyType";
         const string TB_PROPERTY_NAME = "Property";
         const string TB_PROPERTYVALUE_NAME = "PropertyValue";
+        const string TB_COLLECTION_ELEMENT_NAME = "CollectionElement";
         #endregion
 
         #region Singleton
@@ -904,7 +905,19 @@ namespace GenDB
                 + " DoubleValue FLOAT, "
                 + " CharValue CHAR(1))"
                 );
+            tCC.AddLast("CREATE TABLE "
+                + TB_COLLECTION_ELEMENT_NAME + " ( "
+                + " ElementIndex int not null, "
+                + " EntityPOID int not null references " + TB_ENTITY_NAME + " (EntityPOID) ON DELETE CASCADE, "
+                + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
+                + " BoolValue BIT, "
+                + " StringValue VARCHAR(MAX), "
+                + " DoubleValue FLOAT, "
+                + " CharValue CHAR(1))"
+                );
 
+            tCC.AddLast("ALTER TABLE " + TB_PROPERTYVALUE_NAME + " ADD PRIMARY KEY (PropertyPOID, EntityPOID)");
+            tCC.AddLast("ALTER TABLE " + TB_COLLECTION_ELEMENT_NAME + " ADD PRIMARY KEY ( EntityPOID, ElementIndex)");
             ExecuteNonQueries(tCC);
         }
 
