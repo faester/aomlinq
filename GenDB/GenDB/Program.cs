@@ -107,7 +107,8 @@ namespace GenDB
             IBOCache.FlushToDB();
 
             var es = from epp in tp
-                     //where epp.Name == "Navn 83"
+                     //where epp.Age != 83
+                     //where epp.Name != "Navn 3"
                      //where epp.Sex == Sex.FEMALE
                      where epp.Name == "Navn 6" || epp.Age == 7
                      select epp;
