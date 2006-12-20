@@ -245,7 +245,11 @@ namespace GenDB
         public static MappingType FindMappingType(Type t)
         {
             if (t == null) { throw new NullReferenceException("Type t"); }
-            if (t.IsPrimitive)
+            if (t.IsEnum)
+            {
+                return MappingType.STRING;
+            }
+            else if (t.IsPrimitive)
             {
                 if (t == typeof(int) || t == typeof(long) || t == typeof(short))
                 {
@@ -286,7 +290,7 @@ namespace GenDB
             }
             else
             {
-                throw new NotTranslatableException("Can not find mappingtype of property.", t);
+                throw new NotTranslatableException("Can not find mappingtype of type.", t);
             }
         }
 
