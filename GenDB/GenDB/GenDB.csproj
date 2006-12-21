@@ -54,6 +54,7 @@
     <Compile Include="AbstractSyntax.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="DBTag.cs" />
+    <Compile Include="DB\BOListTranslator.cs" />
     <Compile Include="DB\Entity.cs" />
     <Compile Include="DB\EntityType.cs" />
     <Compile Include="DB\Property.cs" />
