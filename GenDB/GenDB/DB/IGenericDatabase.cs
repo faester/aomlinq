@@ -253,6 +253,13 @@ namespace GenDB.DB
         IProperty GetProperty(IEntityType entityType, IPropertyType propertyType);
 
         /// <summary>
+        /// Clears all elements stored for the 
+        /// collection with the given collectionEntityPOID
+        /// </summary>
+        /// <param name="collectionEntityPOID"></param>
+        void ClearCollection(long collectionEntityPOID);
+
+        /// <summary>
         /// Saves the entityType as well as any unsaved 
         /// super types, properties and property types.
         /// </summary>
@@ -300,7 +307,7 @@ namespace GenDB.DB
     {
         IEntity Entity { get; set; }
 
-        int ElementID { get; set; }
+        int ElementIndex { get; set; }
 
         MappingType MappingType { get; set; }
 
@@ -318,4 +325,27 @@ namespace GenDB.DB
 
         IBOReference RefValue { get; set; }
     }
+
+    //interface IGenCollectionElement
+    //{
+    //    IEntity Entity { get; set; }
+
+    //    int KeyIndex { get; set; }
+
+    //    MappingType MappingType { get; set; }
+
+    //    string StringValue { get; set; }
+
+    //    long LongValue { get; set; }
+
+    //    double DoubleValue { get; set; }
+
+    //    DateTime DateTimeValue { get; set; }
+
+    //    char CharValue { get; set; }
+
+    //    bool BoolValue { get; set; }
+
+    //    IBOReference RefValue { get; set; }
+    //}
 }
