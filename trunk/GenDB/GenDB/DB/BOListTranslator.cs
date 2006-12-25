@@ -34,26 +34,36 @@ namespace GenDB.DB
 
             Type theType = typeof(int);
             object o = typeOfBOList.MakeGenericType(theType);
-
         }
 
         public IBusinessObject Translate(IEntity ie)
         {
-            throw new Exception ("Not implemented.");
+            IBusinessObject res = IBOCache.Get(ie.EntityPOID);
+            if (res != null)
+            {
+                return res;
+            }
+            else
+            {
+                
+                return null;
+            }
+
+
         }
         public IEntity Translate(IBusinessObject ibo)
         {
-            throw new Exception ("Not implemented.");
+            throw new Exception("Not implemented.");
         }
 
         public void SetValues(IBusinessObject ibo, IEntity ie)
         {
-            throw new Exception ("Not implemented.");
+            throw new Exception("Not implemented.");
         }
 
         public void SetValues(IEntity ie, IBusinessObject ibo)
         {
-            throw new Exception ("Not implemented.");
+            throw new Exception("Not implemented.");
         }
 
     }

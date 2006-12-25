@@ -121,12 +121,19 @@ namespace GenDB.DB
         StringBuilder sbPropertyInserts = new StringBuilder();  // ensure ordered inserts. (One migth 
         StringBuilder sbEntityInserts = new StringBuilder();  // actually suffice.)
         StringBuilder sbPropertyValueInserts = new StringBuilder();
+        StringBuilder sbCollectionElementOperations = new StringBuilder();
+        StringBuilder sbSetKeyInserts = new StringBuilder();
+
 
         LinkedList<string> llEntityInserts = new LinkedList<string>();
         LinkedList<string> llPropertyValueInserts = new LinkedList<string>();
+        LinkedList<string> llCollectionElementInserts = new LinkedList <string>();
+        LinkedList<string> llSetKeyInserts = new LinkedList <string>();
 
         int entityInsertCount = 0;
         int propertyValueInsertCount = 0;
+        int collectionElementOperationCount = 0;
+        int collectionKeyOperationCount = 0;
 
         //LinkedList<IEntityType> dirtyEntityTypes = new LinkedList<IEntityType>();
         //LinkedList<IEntity> dirtyEntities = new LinkedList<IEntity>();
@@ -597,7 +604,6 @@ namespace GenDB.DB
             throw new Exception("Not implemented");
         }
 
-
         public IProperty GetProperty(long propertyPOID)
         {
             throw new Exception("Not implemented");
@@ -712,10 +718,25 @@ namespace GenDB.DB
             propertyValueInsertCount = 0;
         }
 
+        private void CollectionElementStringBuilderToLL()
+        {
+            llCollectionElementInserts.AddLast(sbCollectionElementOperations.ToString());
+            sbCollectionElementOperations = new StringBuilder();
+            collectionElementOperationCount = 0;
+        }
+
+        private void CollectionKeyStringBuilderToLL()
+        {
+            llSetKeyInserts.AddLast(sbSetKeyInserts.ToString());
+            sbSetKeyInserts = new StringBuilder();
+            collectionKeyOperationCount = 0;
+        }
+
         public void CommitChanges()
         {
             CommitTypeChanges();
             CommitValueChanges();
+            CommitCollections();
         }
 
         public void CommitTypeChanges()
@@ -742,6 +763,45 @@ namespace GenDB.DB
                 }
             }
             ClearInsertStringBuilders();
+        }
+
+        private void CommitCollections()
+        {
+            if (collectionElementOperationCount > 0) { CollectionElementStringBuilderToLL(); }
+            if (collectionKeyOperationCount > 0) { CollectionKeyStringBuilderToLL(); }
+            SqlCommand cmd = new SqlCommand();
+
+            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+            {
+                cnn.Open();
+                cmd.Connection = cnn;
+                cmd.Transaction = cnn.BeginTransaction();
+
+                foreach (string insCmd in llSetKeyInserts)
+                {
+                    cmd.CommandText = insCmd;
+                    cmd.ExecuteNonQuery();
+                }
+
+                foreach (string insCmd in llCollectionElementInserts)
+                {
+                    cmd.CommandText = insCmd;
+                    cmd.ExecuteNonQuery();
+                }
+
+                cmd.Transaction.Commit();
+            }
+            ClearCollectionCommands();
+        }
+
+        private void ClearCollectionCommands()
+        {
+            llCollectionElementInserts = new LinkedList<string>();
+            llSetKeyInserts = new LinkedList <string>();
+            sbCollectionElementOperations = new StringBuilder();
+            sbSetKeyInserts = new StringBuilder();
+            collectionElementOperationCount = 0;
+            collectionKeyOperationCount = 0;
         }
 
         private void CommitValueChanges()
@@ -783,6 +843,7 @@ namespace GenDB.DB
         public void RollbackTransaction()
         {
             ClearValueInsertStringBuilders();
+            ClearCollectionCommands();
         }
 
         public void RollbackTypeTransaction()
@@ -790,7 +851,39 @@ namespace GenDB.DB
             ClearInsertStringBuilders();
         }
 
+        public void ClearCollection(long collectionEntityPOID)
+        {
+            ClearCollectionElements(collectionEntityPOID);
+            ClearCollectionKeys(collectionEntityPOID);
+        }
+
         #region Private methods.
+        private void ClearCollectionElements(long collectionEntityPOID)
+        {
+            if (collectionElementOperationCount > Configuration.DbBatchSize)
+            {
+                CollectionElementStringBuilderToLL();
+            }
+            collectionElementOperationCount++;
+            sbCollectionElementOperations.Append(" DELETE FROM ");
+            sbCollectionElementOperations.Append(TB_COLLECTION_ELEMENT_NAME);
+            sbCollectionElementOperations.Append (" WHERE EntityPOID = ");
+            sbCollectionElementOperations.Append(collectionEntityPOID);
+        }
+
+        private void ClearCollectionKeys(long collectionEntityPOID)
+        {
+            if (collectionKeyOperationCount > Configuration.DbBatchSize)
+            {
+                CollectionKeyStringBuilderToLL();
+            }
+            collectionKeyOperationCount++;
+            sbSetKeyInserts.Append (" DELETE FROM ");
+            sbSetKeyInserts.Append (TB_COLLECTION_KEY_NAME);
+            sbSetKeyInserts.Append (" WHERE EntityPOID = ");
+            sbSetKeyInserts.Append (collectionEntityPOID);
+        }
+
         private void InitNextIDs()
         {
             if (DatabaseExists())

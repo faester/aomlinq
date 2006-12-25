@@ -92,8 +92,13 @@ namespace Tests
             foreach (Person ibo in tp)
             {
                 objcount++;
+                if (objcount % 500 == 0)
+                {
+                    ibo.Age = (ibo.Age + 1) * 2;
+                }
                 //ObjectUtilities.PrintOut(ibo);
             }
+            Configuration.SubmitChanges();
             dur = DateTime.Now - then;
             Console.WriteLine ("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
             Console.ReadLine();
