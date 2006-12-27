@@ -76,22 +76,41 @@ namespace GenDB
         internal IExpression VisitBinaryExpression(BinaryExpression be)
         {
             Expression expr = (Expression) be;
+
             IValue[] parArr = new IValue[2];
 
-            //throw new Exception("enum");
+            // doing the left side
+            String leftSideName = be.Left.GetType().Name;
+            if(leftSideName=="MemberExpression") 
+            {
+                MemberExpression me = (MemberExpression) be.Left;
+                Type t = me.Expression.Type;
+                
+                if(!TypeSystem.IsTypeKnown(t))
+                    TypeSystem.RegisterType(t);
 
-            MemberExpression me = (MemberExpression) be.Left;
-            Type t = me.Expression.Type;
+                IEntityType et = TypeSystem.GetEntityType(t);
+                string propstr = me.Member.Name;
 
-            if(!TypeSystem.IsTypeKnown(t))
-                TypeSystem.RegisterType(t);
+                IProperty po = et.GetProperty(propstr);
+                parArr[0] = new CstProperty(po);
+            }
+            else if(leftSideName=="UnaryExpression")
+            {
+                UnaryExpression ue = (UnaryExpression) be.Left;
+                MemberExpression me = (MemberExpression)ue.Operand;
+                Type t = me.Member.DeclaringType;
 
-            IEntityType et = TypeSystem.GetEntityType(t);
-            string propstr = me.Member.Name;
+                if(!TypeSystem.IsTypeKnown(t))
+                    TypeSystem.RegisterType(t);
 
-            IProperty po = et.GetProperty(propstr);
-            parArr[0] = new CstProperty(po);
+                IEntityType et = TypeSystem.GetEntityType(t);
+                string propstr = me.Member.Name;
+                IProperty po = et.GetProperty(propstr);
+                parArr[0] = new CstProperty(po);
+            }
 
+            // doing the right side
             switch(TypeSystem.FindMappingType(expr.Type))
             {
                 case MappingType.BOOL:
