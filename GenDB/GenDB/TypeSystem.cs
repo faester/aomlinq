@@ -251,7 +251,7 @@ namespace GenDB
             if (t == null) { throw new NullReferenceException("Type t"); }
             if (t.IsEnum)
             {
-                return MappingType.STRING;
+                return MappingType.LONG;
             }
             else if (t.IsPrimitive)
             {
