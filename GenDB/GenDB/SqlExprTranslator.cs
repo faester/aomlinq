@@ -97,17 +97,7 @@ namespace GenDB
             }
             else if(leftSideName=="UnaryExpression")
             {
-                UnaryExpression ue = (UnaryExpression) be.Left;
-                MemberExpression me = (MemberExpression)ue.Operand;
-                Type t = me.Member.DeclaringType;
-
-                if(!TypeSystem.IsTypeKnown(t))
-                    TypeSystem.RegisterType(t);
-
-                IEntityType et = TypeSystem.GetEntityType(t);
-                string propstr = me.Member.Name;
-                IProperty po = et.GetProperty(propstr);
-                parArr[0] = new CstProperty(po);
+                parArr[0] = VisitUnaryExpression((UnaryExpression)be.Left);
             }
 
             // doing the right side
@@ -134,9 +124,24 @@ namespace GenDB
                 throw new Exception("NodeType unknown "+expr.NodeType.ToString());
         }
 
-        internal IExpression VisitUnaryExpression(UnaryExpression ue)
+        internal IValue VisitUnaryExpression(UnaryExpression ue)
         {
-            throw new Exception("unary exception");
+            //UnaryExpression ue = (UnaryExpression) be.Left;
+            MemberExpression me = (MemberExpression)ue.Operand;
+            Type t = me.Member.DeclaringType;
+
+            if(!TypeSystem.IsTypeKnown(t))
+                TypeSystem.RegisterType(t);
+
+            IEntityType et = TypeSystem.GetEntityType(t);
+            string propstr = me.Member.Name;
+            IProperty po = et.GetProperty(propstr);
+            return new CstProperty(po);
+        }
+
+        internal IValue VisitMemberExpression(MemberExpression me)
+        {
+            throw new Exception("not implemented");
         }
         
         public IExpression VisitExpr(Expression expr)
