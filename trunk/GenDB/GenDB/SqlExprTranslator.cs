@@ -83,17 +83,7 @@ namespace GenDB
             String leftSideName = be.Left.GetType().Name;
             if(leftSideName=="MemberExpression") 
             {
-                MemberExpression me = (MemberExpression) be.Left;
-                Type t = me.Expression.Type;
-                
-                if(!TypeSystem.IsTypeKnown(t))
-                    TypeSystem.RegisterType(t);
-
-                IEntityType et = TypeSystem.GetEntityType(t);
-                string propstr = me.Member.Name;
-
-                IProperty po = et.GetProperty(propstr);
-                parArr[0] = new CstProperty(po);
+                parArr[0] = VisitMemberExpression((MemberExpression) be.Left);
             }
             else if(leftSideName=="UnaryExpression")
             {
@@ -126,7 +116,6 @@ namespace GenDB
 
         internal IValue VisitUnaryExpression(UnaryExpression ue)
         {
-            //UnaryExpression ue = (UnaryExpression) be.Left;
             MemberExpression me = (MemberExpression)ue.Operand;
             Type t = me.Member.DeclaringType;
 
@@ -141,7 +130,15 @@ namespace GenDB
 
         internal IValue VisitMemberExpression(MemberExpression me)
         {
-            throw new Exception("not implemented");
+            Type t = me.Expression.Type;
+                
+            if(!TypeSystem.IsTypeKnown(t))
+                TypeSystem.RegisterType(t);
+
+            IEntityType et = TypeSystem.GetEntityType(t);
+            string propstr = me.Member.Name;
+            IProperty po = et.GetProperty(propstr);
+            return new CstProperty(po);
         }
         
         public IExpression VisitExpr(Expression expr)
