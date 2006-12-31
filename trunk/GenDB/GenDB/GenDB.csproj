@@ -57,6 +57,7 @@
     <Compile Include="DB\BOListTranslator.cs" />
     <Compile Include="DB\Entity.cs" />
     <Compile Include="DB\EntityType.cs" />
+    <Compile Include="DB\GenCollectionElement.cs" />
     <Compile Include="DB\Property.cs" />
     <Compile Include="DB\PropertyType.cs" />
     <Compile Include="DB\PropertyValue.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Table.cs" />
     <Compile Include="TranslatorChecks.cs" />
+    <Compile Include="Translators.cs" />
     <Compile Include="TypeSystem.cs" />
     <Compile Include="VolatileAnnotation.cs" />
   </ItemGroup>

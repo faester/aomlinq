@@ -46,7 +46,7 @@ namespace GenDB.DB
 
         public override string ToString()
         {
-            string res = "MSEntity { " + this.EntityType.ToString();
+            string res = "Entity { " + this.EntityType.ToString();
             foreach (IPropertyValue pv in propertyValues.Values)
             {
                 res += "\n" + pv.ToString();

@@ -19,7 +19,7 @@ namespace GenDB
     static class TypeSystem
     {
         internal const string COLLECTION_ELEMENT_TYPE_PROPERTY_NAME = "++ElementType"; // prefixed with ++ which is not legal in a C# property name
-        internal const string COLLECTION_ELEMENT_KEY_PROPERTY_NAME = "++KeyType";      // to avoid clashes with existing properties.
+        internal const string COLLECTION_KEY_PROPERTY_NAME = "++KeyType";      // to avoid clashes with existing properties.
 
         private static Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement>();
         private static Dictionary<string, IETCacheElement> name2IEt = new Dictionary<string, IETCacheElement>();
@@ -48,11 +48,20 @@ namespace GenDB
             {
                 RegisterType(ets);
             }
+
             foreach (IPropertyType pt in Configuration.GenDB.GetAllPropertyTypes())
             {
                 ptid2pt.Add(pt.PropertyTypePOID, pt);
                 ptName2pt.Add(pt.Name, pt);
             }
+
+            foreach (IETCacheElement ce in etid2IEt.Values)
+            {
+                ce.InitTranslator();
+            }
+#if DEBUG
+            Console.WriteLine("Type system init done.");
+#endif
         }
 
         /// <summary>
@@ -79,6 +88,10 @@ namespace GenDB
             etid2IEt.Add(et.EntityTypePOID, ce);
             name2IEt.Add(et.Name, ce);
             type2IEt.Add(ce.ClrType, ce);
+            
+            //// We need the type to appear to be known prior to instantiating the 
+            //// translator. Otherwise recursive data structures migth cause infinite loop.
+            //ce.InitTranslator();
 
             // Register et at its supertype, if one is present
             if (et.SuperEntityType != null)
@@ -87,7 +100,6 @@ namespace GenDB
             }
             Configuration.GenDB.Save(et);
             Configuration.GenDB.CommitTypeChanges();
-            IBOTranslator trans = new IBOTranslator(ce.ClrType, et);
         }
 
 
@@ -104,6 +116,7 @@ namespace GenDB
                 IEntityType et = ConstructEntityType(t);
                 RegisterType(et);
                 Configuration.GenDB.Save(et);
+                etid2IEt[et.EntityTypePOID].InitTranslator();
             }
         }
 

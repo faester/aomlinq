@@ -12,7 +12,7 @@ namespace GenDB
 
     public class Table<T> : ICollection<T>, IEnumerable<T>
         where T : IBusinessObject
-    {
+    {   
         IWhereable expression = new ExprInstanceOf(typeof(T));
 
         #region ICollection members
@@ -78,8 +78,6 @@ namespace GenDB
             Console.WriteLine("SECOND");
             return GetEnumerator();			  
         }
-
-
 
         #endregion
 

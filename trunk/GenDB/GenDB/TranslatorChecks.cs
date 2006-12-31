@@ -16,14 +16,19 @@ namespace GenDB
             if (hasIBO == null) { throw new NotTranslatableException("Reference types must implement IBusinessObject.", t); }
         }
 
+        public static bool ImplementsIBusinessObject(Type t)
+        {
+                Type hasIBO = t.GetInterface(IBO_NAME);
+                return hasIBO != null;
+        }
+
         public static void CheckRefFieldTranslatability(PropertyInfo clrProperty)
         {
             if (clrProperty.PropertyType == typeof(string)) { /* ok */ }
             else if (clrProperty.PropertyType == typeof(DateTime)) { /* ok */ }
-            else
+            else if (!ImplementsIBusinessObject(clrProperty.PropertyType))
             {
-                Type hasIBO = clrProperty.PropertyType.GetInterface(IBO_NAME);
-                if (hasIBO == null) { throw new NotTranslatableException("Reference type fields must implement IBusinessObject", clrProperty); }
+                throw new NotTranslatableException("Reference type fields must implement IBusinessObject", clrProperty); 
             }
         }
 
