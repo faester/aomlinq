@@ -414,7 +414,7 @@ namespace GenDB.DB
                     "    e.EntityTypePOID, " + // 0
                     "    PropertyPOID, " + // 1
                     "    LongValue, " + // 2
-                    "    BoolValue, " + // 3
+                    "    BoolValue, " + // 3x
                     "    StringValue, " + // 4
                     "    CharValue, " + // 5
                     "    DoubleValue, " + // 6
@@ -612,6 +612,77 @@ namespace GenDB.DB
         public IProperty GetProperty(IEntityType entityType, IPropertyType propertyType)
         {
             throw new Exception("Not implemented");
+        }
+
+        public IEnumerable<IGenCollectionElement> AllElements(long collectionEntityPOID)
+        {
+            //TODO:
+            /*
+             * The collection is generic, so all elements must 
+             * share the same MappingType. 
+             * Start by finding that:
+             */
+            IEntity ie = GetEntity(collectionEntityPOID);
+            // TODO: Check below should be superfluous. Kept for debugging db consistency.
+            if (ie == null) {throw new Exception("Internal error in database. Request for unknown collection's elements!"); }
+
+            // Find mapping type for the elements.
+            MappingType mapping = ie.EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).MappingType;
+
+            LinkedList<IGenCollectionElement> res = new LinkedList<IGenCollectionElement>();
+
+            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+            {
+                cnn.Open();
+                string sqlStr = "SELECT ElementID, LongValue, BoolValue, StringValue, DoubleValue, CharValue FROM " + TB_COLLECTION_ELEMENT_NAME + " WHERE EntityPOID = " + collectionEntityPOID.ToString();
+                SqlCommand cmd = new SqlCommand(sqlStr, cnn);
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    IGenCollectionElement element = new GenCollectionElement();
+                    element.ElementIndex = (int)reader[0];
+                    switch (mapping)
+                    {
+                        case MappingType.BOOL:
+                            element.BoolValue = (bool)reader[2];
+                            break;
+                        case MappingType.CHAR:
+                            element.CharValue = (char)reader[5]; 
+                            break;
+                        case MappingType.DATETIME:
+                            element.DateTimeValue = new DateTime ((long)reader[1]);
+                            break;
+                        case MappingType.DOUBLE:
+                            element.DoubleValue = (double)reader[4];
+                            break;
+                        case MappingType.LONG:
+                            element.LongValue = (long)reader[1];
+                            break;
+                        case MappingType.REFERENCE:
+                            {
+                                if (reader[1] == DBNull.Value )
+                                {
+                                    element.RefValue = new IBOReference (true);
+                                }
+                                else
+                                {
+                                    element.RefValue = new IBOReference((long)reader[1]);
+                                }
+                            }
+                            break;
+                        case MappingType.STRING:
+                            element.StringValue = reader[3].ToString();
+                            break;
+                        default: throw new Exception("Can not fetch collection elements of type " + mapping.ToString());
+                    }
+
+                    res.AddLast(element);
+                }
+            }
+
+            return res;
         }
 
         /// <summary>

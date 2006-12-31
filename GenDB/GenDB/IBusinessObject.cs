@@ -30,6 +30,10 @@ namespace GenDB
         private void RetrieveElements()
         {
             isElementsRetrieved = true;
+            IIBoToEntityTranslator trans = TypeSystem.GetTranslator (GetType());
+
+            
+
             throw new Exception("Not implemented.");
         }
 

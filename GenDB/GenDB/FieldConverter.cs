@@ -58,7 +58,8 @@ namespace GenDB
                         if (res == null)
                         {
                             IEntity e = Configuration.GenDB.GetEntity(entityRef.EntityPOID);
-                            IIBoToEntityTranslator trans = TypeSystem.GetTranslator(clrType);
+                            //IIBoToEntityTranslator trans = TypeSystem.GetTranslator(clrType);
+                            IIBoToEntityTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
                             res = trans.Translate(e);
                         }
                         return res;

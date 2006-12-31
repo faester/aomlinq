@@ -17,9 +17,39 @@ namespace GenDB
     {
         static int nextID = 0;
 
+        public class Car : AbstractBusinessObject
+        {
+            string brand = "Volvo";
+
+            public string Brand
+            {
+                get { return brand; }
+                set { brand = value; }
+            }
+        }
+
         public class Person : AbstractBusinessObject
         {
             Sex sex;
+
+            public Person() { /* empty */ }
+
+            Car car = new Car();
+
+            public Car Car
+            {
+                get { return car; }
+                set { car = value; }
+            }
+
+
+            BOList<Person> others = new BOList<Person>();
+            [Volatile]
+            public BOList<Person> Others
+            {
+                get { return others; }
+                set { others = value; }
+            }
 
             public Sex Sex
             {
@@ -74,35 +104,38 @@ namespace GenDB
         public static void Main(string[] args)
         {
             // ******
-            Configuration.RebuildDatabase = true;
+            Configuration.RebuildDatabase = false;
 
             //Expression<Func<Person, bool>> where1 = (Person p) => /* p.Spouse == null && */ p.Name == "Svend";
             //ExpressionRunner wroom = new ExpressionRunner();
             //wroom.LookIn(where1);
             // ******
 
-            int objCount = 100;
+            int objCount = 0;
 
             Table<Person> tp = new Table<Person>();
 
             for (short i = 0; i < objCount; i++)
             {
+                Car c = new Car();
+                c.Brand += i.ToString();
                 Person p = new Person{ Name = "Navn " + i };
+                p.Car = c;
                 if (i % 2 == 0) { p.Sex = Sex.FEMALE; }
                 p.Age = i;
                 tp.Add (p);
             }
 
-            IEntityType etPerson = TypeSystem.GetEntityType (typeof(Person));
-            IProperty propertyName = etPerson.GetProperty ("Name");
-            IProperty propertyAge = etPerson.GetProperty("Age");
+            //IEntityType etPerson = TypeSystem.GetEntityType (typeof(Person));
+            //IProperty propertyName = etPerson.GetProperty ("Name");
+            //IProperty propertyAge = etPerson.GetProperty("Age");
 
-            OP_Equals nc1 = new OP_Equals(new CstProperty(propertyName), new CstString("Navn 1"));
-            OP_LessThan nc2 = new OP_LessThan(new CstProperty(propertyAge), new CstLong(5));
-            //OP_Equals nc2 = new OP_Equals(new CstProperty (propertyName), new CstString("Navn 5"));
-            IWhereable wc = new ExprOr(nc1, nc2);
-            MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
-            mswsb.Visit(wc);
+            //OP_Equals nc1 = new OP_Equals(new CstProperty(propertyName), new CstString("Navn 1"));
+            //OP_LessThan nc2 = new OP_LessThan(new CstProperty(propertyAge), new CstLong(5));
+            ////OP_Equals nc2 = new OP_Equals(new CstProperty (propertyName), new CstString("Navn 5"));
+            //IWhereable wc = new ExprOr(nc1, nc2);
+            //MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
+            //mswsb.Visit(wc);
                 
             IBOCache.FlushToDB();
 

@@ -39,11 +39,15 @@ namespace GenDB
             directSubTypes.Add(iet);
         }
 
+        public void InitTranslator()
+        {
+            translator = Translators.GetTranslator(clrType, entityType);
+        }
+
         public IETCacheElement(IEntityType iet, Type t)
         {
             this.clrType = t;
             this.entityType = iet;
-            translator = new IBOTranslator(t, entityType);
         }
     }
 }

@@ -158,7 +158,7 @@ namespace GenDB.DB
 
     interface IProperty
     {
-        //TODO: Bør flyttes til PropertyType....
+        //TODO: Bør flyttes til PropertyType.... (Eller bevares i sin nuværende form, hvor der blot indvirkes et kald på PropertyType)
         MappingType MappingType { get; set; }
         IPropertyType PropertyType { get; set; }
         IEntityType EntityType { get; set; }
@@ -260,6 +260,14 @@ namespace GenDB.DB
         void ClearCollection(long collectionEntityPOID);
 
         /// <summary>
+        /// Returns all elements pertaining to the collection 
+        /// identified by the given ID.
+        /// </summary>
+        /// <param name="CollectionEntityPOID"></param>
+        /// <returns></returns>
+        IEnumerable<IGenCollectionElement> AllElements(long collectionEntityPOID);
+
+        /// <summary>
         /// Saves the entityType as well as any unsaved 
         /// super types, properties and property types.
         /// </summary>
@@ -305,11 +313,11 @@ namespace GenDB.DB
 
     interface IGenCollectionElement
     {
-        IEntity Entity { get; set; }
+        //IEntity Entity { get; set; }
 
         int ElementIndex { get; set; }
 
-        MappingType MappingType { get; set; }
+        //MappingType MappingType { get; set; }
 
         string StringValue { get; set; }
 
@@ -325,27 +333,4 @@ namespace GenDB.DB
 
         IBOReference RefValue { get; set; }
     }
-
-    //interface IGenCollectionElement
-    //{
-    //    IEntity Entity { get; set; }
-
-    //    int KeyIndex { get; set; }
-
-    //    MappingType MappingType { get; set; }
-
-    //    string StringValue { get; set; }
-
-    //    long LongValue { get; set; }
-
-    //    double DoubleValue { get; set; }
-
-    //    DateTime DateTimeValue { get; set; }
-
-    //    char CharValue { get; set; }
-
-    //    bool BoolValue { get; set; }
-
-    //    IBOReference RefValue { get; set; }
-    //}
 }
