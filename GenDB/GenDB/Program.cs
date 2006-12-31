@@ -103,13 +103,7 @@ namespace GenDB
 
         public static void Main(string[] args)
         {
-            // ******
-            Configuration.RebuildDatabase = false;
-
-            //Expression<Func<Person, bool>> where1 = (Person p) => /* p.Spouse == null && */ p.Name == "Svend";
-            //ExpressionRunner wroom = new ExpressionRunner();
-            //wroom.LookIn(where1);
-            // ******
+            Configuration.RebuildDatabase = true;
 
             int objCount = 0;
 
@@ -126,17 +120,6 @@ namespace GenDB
                 tp.Add (p);
             }
 
-            //IEntityType etPerson = TypeSystem.GetEntityType (typeof(Person));
-            //IProperty propertyName = etPerson.GetProperty ("Name");
-            //IProperty propertyAge = etPerson.GetProperty("Age");
-
-            //OP_Equals nc1 = new OP_Equals(new CstProperty(propertyName), new CstString("Navn 1"));
-            //OP_LessThan nc2 = new OP_LessThan(new CstProperty(propertyAge), new CstLong(5));
-            ////OP_Equals nc2 = new OP_Equals(new CstProperty (propertyName), new CstString("Navn 5"));
-            //IWhereable wc = new ExprOr(nc1, nc2);
-            //MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
-            //mswsb.Visit(wc);
-                
             IBOCache.FlushToDB();
 
             var es = from epp in tp
@@ -146,15 +129,6 @@ namespace GenDB
                      //where epp.Name == "Navn 6" || epp.Age == 7
                      select epp;
 
-            //foreach (IEntity e in Configuration.GenDB.Where(wc))
-            //{
-            //    IBOTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
-            //    IBusinessObject ibo = trans.Translate (e);
-            //    Person pers = (Person)ibo;
-            //    //pers.Name = "Knud Lavert";
-            //    ObjectUtilities.PrintOut(ibo);
-            //}
-
             foreach(Person p in es)
             {
                 ObjectUtilities.PrintOut (p);
@@ -162,16 +136,6 @@ namespace GenDB
 
             IBOCache.FlushToDB();
             
-            //Console.WriteLine(mswsb.WhereStr);
-            // ******
-            //Expression<Func<int, bool>> exprLambda1 = x => (x & 1) == 0;
-            //Expression<Func<int,int,int>> exprLambda2 = (y,j) => y + j;
-
-            //Expression<Func<Person, bool>> where1 = (Person p) => /* p.Spouse == null && */ p.Name == "Svend";
-            //ExpressionRunner wroom = new ExpressionRunner();
-            //wroom.LookIn(where1);
-            // ******
-
             Console.ReadLine();
         }
     }
