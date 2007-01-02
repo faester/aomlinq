@@ -127,7 +127,6 @@ namespace GenDB
 
         internal IValue VisitUnaryExpression(UnaryExpression ue)
         {
-           // throw new Exception(ue.Operand.GetType().Name);
             string exprType = ue.Operand.GetType().Name;
             if(exprType=="MemberExpression")
             {
@@ -139,11 +138,21 @@ namespace GenDB
 
                 IEntityType et = TypeSystem.GetEntityType(t);
                 string propstr = me.Member.Name;
+                //throw new Exception(propstr);
                 IProperty po = et.GetProperty(propstr);
                 return new CstProperty(po);
             }
             else if(exprType=="ConstantExpression")
             {
+                ConstantExpression ce = (ConstantExpression) ue.Operand;
+                Type t = ce.Type;
+
+                if(!TypeSystem.IsTypeKnown(t))
+                    TypeSystem.RegisterType(t);
+
+                IEntityType et = TypeSystem.GetEntityType(t);
+                
+
                 throw new Exception("not implemented: "+ue.Operand.GetType().Name);
             }
             else
