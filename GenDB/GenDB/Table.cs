@@ -50,7 +50,7 @@ namespace GenDB
 
         public int Count
         {
-            get { throw new Exception("Not implemented"); }
+            get{return Configuration.GenDB.Where(expression).Count();}
         }
 
         public bool IsReadOnly
@@ -75,7 +75,6 @@ namespace GenDB
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            Console.WriteLine("SECOND");
             return GetEnumerator();			  
         }
 
