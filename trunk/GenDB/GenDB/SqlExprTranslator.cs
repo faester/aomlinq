@@ -90,9 +90,14 @@ namespace GenDB
                 parArr[0] = VisitUnaryExpression((UnaryExpression)be.Left);
             }
 
+            //throw new Exception(be.Right.GetType().Name);
+            
             // doing the right side
-            switch(TypeSystem.FindMappingType(expr.Type))
+            String rightSideName = be.Right.GetType().Name;
+            if(rightSideName=="ConstantExpression")
             {
+                switch(TypeSystem.FindMappingType(expr.Type))
+                {
                 // hvad hvis be.Right er null eller et objekt?
                 case MappingType.BOOL:
                     parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
@@ -100,8 +105,13 @@ namespace GenDB
 
                 default:
                     throw new Exception("type not implemented "+expr.Type);
+                }
+            } 
+            else if(rightSideName=="UnaryExpression")
+            {
+                parArr[1] = VisitUnaryExpression((UnaryExpression)be.Right);
             }
-
+            
             string nodeType = expr.NodeType.ToString();
             if(nodeType=="GT")
                 return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
@@ -117,16 +127,30 @@ namespace GenDB
 
         internal IValue VisitUnaryExpression(UnaryExpression ue)
         {
-            MemberExpression me = (MemberExpression)ue.Operand;
-            Type t = me.Member.DeclaringType;
+           // throw new Exception(ue.Operand.GetType().Name);
+            string exprType = ue.Operand.GetType().Name;
+            if(exprType=="MemberExpression")
+            {
+                MemberExpression me = (MemberExpression)ue.Operand;
+                Type t = me.Member.DeclaringType;
 
-            if(!TypeSystem.IsTypeKnown(t))
-                TypeSystem.RegisterType(t);
+                if(!TypeSystem.IsTypeKnown(t))
+                    TypeSystem.RegisterType(t);
 
-            IEntityType et = TypeSystem.GetEntityType(t);
-            string propstr = me.Member.Name;
-            IProperty po = et.GetProperty(propstr);
-            return new CstProperty(po);
+                IEntityType et = TypeSystem.GetEntityType(t);
+                string propstr = me.Member.Name;
+                IProperty po = et.GetProperty(propstr);
+                return new CstProperty(po);
+            }
+            else if(exprType=="ConstantExpression")
+            {
+                throw new Exception("not implemented: "+ue.Operand.GetType().Name);
+            }
+            else
+            {
+                throw new Exception("Unknown type: "+ue.Operand.GetType().Name);
+            }
+
         }
 
         internal IValue VisitMemberExpression(MemberExpression me)
