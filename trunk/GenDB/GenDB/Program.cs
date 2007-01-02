@@ -105,7 +105,7 @@ namespace GenDB
         {
             Configuration.RebuildDatabase = true;
 
-            int objCount = 0;
+            int objCount = 10;
 
             Table<Person> tp = new Table<Person>();
 
@@ -120,22 +120,33 @@ namespace GenDB
                 tp.Add (p);
             }
 
+            //Person s_p = new Person{ Name = "SpousePerson"};
+            //tp.Add (s_p);
+
+            //Person p_p = new Person {Name = "NormalPerson", Spouse=s_p, Age=121};
+            //tp.Add (p_p);
+
             IBOCache.FlushToDB();
 
             var es = from epp in tp
-                     //where epp.Age == 83
+                     where epp.Age == 83
                      //where epp.Name == "Navn 3"
-                     where epp.Sex == Sex.MALE
+                     //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 97"
                      //where epp.Name == "Navn 6" || epp.Age == 7
+                     //where epp.Spouse == s_p
                      select epp;
+
+            
 
             foreach(Person p in es)
             {
                 ObjectUtilities.PrintOut (p);
             }
 
+            Console.WriteLine("Size of list: "+es.Count);
+
             IBOCache.FlushToDB();
-            
+
             Console.ReadLine();
         }
     }

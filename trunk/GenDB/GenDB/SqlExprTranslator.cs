@@ -93,6 +93,7 @@ namespace GenDB
             // doing the right side
             switch(TypeSystem.FindMappingType(expr.Type))
             {
+                // hvad hvis be.Right er null eller et objekt?
                 case MappingType.BOOL:
                     parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
                     break;
@@ -131,7 +132,7 @@ namespace GenDB
         internal IValue VisitMemberExpression(MemberExpression me)
         {
             Type t = me.Expression.Type;
-                
+
             if(!TypeSystem.IsTypeKnown(t))
                 TypeSystem.RegisterType(t);
 
