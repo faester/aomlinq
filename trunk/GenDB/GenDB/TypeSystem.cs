@@ -69,7 +69,7 @@ namespace GenDB
         /// and adds it to the database.
         /// </summary>
         /// <param name="et"></param>
-        private static void RegisterType(IEntityType et)
+        internal static void RegisterType(IEntityType et)
         {
             if (etid2IEt.ContainsKey(et.EntityTypePOID))
             {
@@ -102,7 +102,6 @@ namespace GenDB
             Configuration.GenDB.CommitTypeChanges();
         }
 
-
         /// <summary>
         /// Registers the type for usage internally in the 
         /// translation system and writes the metadescription
@@ -133,6 +132,10 @@ namespace GenDB
             return etid2IEt[entityTypePOID].Target;
         }
 
+        public static Type GetClrType(IEntityType et)
+        {
+            return etid2IEt[et.EntityTypePOID].ClrType;
+        }
 
         /// <summary>
         /// Returns the IEntityType used to describe
@@ -324,6 +327,13 @@ namespace GenDB
             }
         }
 
+        /// <summary>
+        /// Will return a PropertyType with the given name. If none exists
+        /// prior to calling this method, a new PropertyType will be added 
+        /// to the DB automatically.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static IPropertyType GetPropertyType(string name)
         {
             IPropertyType res;

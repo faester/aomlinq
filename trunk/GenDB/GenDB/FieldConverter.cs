@@ -171,8 +171,6 @@ namespace GenDB
                         IBusinessObject ibo = (IBusinessObject)value;
                         if (ibo.DBTag == null)
                         {
-                            // TODO: Do a lot of checking.... :(
-                            // Is it safe not to perform any real translation here??
                             IEntity refered = Configuration.GenDB.NewEntity();
                             DBTag.AssignDBTagTo(ibo, refered.EntityPOID);
                             IBOReference reference = new IBOReference (ibo.DBTag.EntityPOID);

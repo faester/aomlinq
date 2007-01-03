@@ -302,6 +302,8 @@ namespace GenDB.DB
         /// <param name="entity"></param>
         void Save(IEntity entity);
 
+        void Save(IGenCollectionElement ce, long collectionElementPOID, MappingType mt);
+
         void CommitChanges();
 
         /// <summary>

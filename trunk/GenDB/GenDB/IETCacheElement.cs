@@ -49,5 +49,10 @@ namespace GenDB
             this.clrType = t;
             this.entityType = iet;
         }
+
+        public override string ToString()
+        {
+            return GetType().FullName + "{ clr type = " + this.ClrType + ", IEntityType " + this.Target + ", Translator = " + this.Translator + " }";
+        }
     }
 }
