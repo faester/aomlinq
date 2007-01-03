@@ -139,27 +139,15 @@ namespace GenDB
         }
 
         [Test]
-        public void TestStringAndProperties()
-        {
-
-        }
-
-        [Test]
-        public void TestEnumAndProperties()
-        {
-
-        }
-
-        [Test]
-        public void TestReferencesAndProperties()
-        {
-
-        }
-
-        [Test]
         public void EqualityExists()
         {
             Assert.IsTrue(propertyEqualsNumber(tp,3));
+        }
+
+        [Test]
+        public void EqualityNotExist()
+        {
+            Assert.IsFalse(propertyEqualsNumber(tp,-1));
         }
 
         #endregion
