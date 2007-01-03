@@ -40,7 +40,12 @@ namespace GenDB
 
         public void CopyTo(T[] arr, int i)
         {
-            throw new Exception("Not implemented");
+            int idx = i;
+
+            foreach(T t in this)
+            {
+                arr[idx++] = t;
+            }
         }
 
         public bool Remove(T e)
@@ -50,7 +55,7 @@ namespace GenDB
 
         public int Count
         {
-            get{return Configuration.GenDB.Where(expression).Count();}
+            get { return Configuration.GenDB.Count(expression); }
         }
 
         public bool IsReadOnly
