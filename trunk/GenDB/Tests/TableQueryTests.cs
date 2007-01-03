@@ -12,9 +12,6 @@ using System.Expressions;
 
 namespace GenDB
 {
-    //public enum Sex { MALE, FEMALE, NEUTER };
-
-
 
     [TestFixture]
     public class TestTableQuery
