@@ -25,6 +25,8 @@ namespace GenDB
         void VisitEntityPOIDEquals(EntityPOIDEquals epe);
         void VisitOPNotEquals(OP_NotEquals ieq);
         void VisitInstanceOf(ExprInstanceOf instanceOf);
+        void VisitCstIsTrue(CstIsTrue valueIsTrue);
+        void VisitCstIsFalse(CstIsFalse valueIsFalse);
     }
 
     interface IWhereable
@@ -61,6 +63,22 @@ namespace GenDB
     /// String values. More restricted comparison options than numerical.
     /// </summary>
     interface IStringvalue : IConstant {}
+
+    class CstIsTrue : IValue
+    {
+        public void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitCstIsTrue(this);
+        }
+    }
+
+    class CstIsFalse : IValue
+    {
+        public void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitCstIsFalse(this);
+        }
+    }
 
     class ExprNot : IExpression
     {
