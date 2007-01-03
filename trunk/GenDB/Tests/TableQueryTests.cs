@@ -12,14 +12,16 @@ using System.Expressions;
 
 namespace GenDB
 {
-    
+    //public enum Sex { MALE, FEMALE, NEUTER };
+
+
 
     [TestFixture]
     public class TestTableQuery
     {
         #region configuration
 
-        public enum Sex { MALE, FEMALE };
+        public enum Sex { MALE, FEMALE, NEUTER };
         static int nextID = 0;
         Table<Person> tp;
 
@@ -83,7 +85,6 @@ namespace GenDB
         }
 
         public class Student : Person { 
-            public static long test = 100; //This should not be persisted since it is static
             [Volatile]
             public long id = nextID++; // Should not be persisted due to attribute.
             private DateTime enlisted;
@@ -95,11 +96,15 @@ namespace GenDB
             }
         }
 
+        [TestFixtureSetUp]
+        public void Initialize()
+        {
+            Configuration.RebuildDatabase = true;
+        }
 
         [SetUp]
         public void TestQuery()
         {
-            //Configuration.RebuildDatabase = true;
             int objCount = 10;
             tp = new Table<Person>();
 
@@ -131,23 +136,27 @@ namespace GenDB
         public void EqualityExists()
         {
             // int's
-            Assert.IsTrue(propertyEqualsNumber(tp,3));
-            Assert.IsTrue(propertyLessThanNumber(tp,3));
-            Assert.IsTrue(propertyLargerThanNumber(tp,3));
-            Assert.IsTrue(propertyNotEqualsNumber(tp,3));
+            Assert.IsTrue(propertyEqualsNumber(tp,3),"Age should exist");
+            Assert.IsTrue(propertyLessThanNumber(tp,3),"Age less than should exist");
+            Assert.IsTrue(propertyLargerThanNumber(tp,3),"Age larger than should exist");
+            Assert.IsTrue(propertyNotEqualsNumber(tp,3),"Age not equal to should exist");
             // string's
             Assert.IsTrue(propertyEqualsString(tp,"Navn 3"),"name should exist");
+            // enum's
+            Assert.IsTrue(propertyEqualsEnum(tp,Sex.FEMALE),"a female should exist");
         }
 
         [Test]
         public void EqualityNotExist()
         {
             // int's
-            Assert.IsFalse(propertyEqualsNumber(tp,-1));
-            Assert.IsFalse(propertyLessThanNumber(tp,0));
-            Assert.IsFalse(propertyLargerThanNumber(tp,10));
+            Assert.IsFalse(propertyEqualsNumber(tp,-1),"Age should not exist");
+            Assert.IsFalse(propertyLessThanNumber(tp,0),"Age less than should not exist");
+            Assert.IsFalse(propertyLargerThanNumber(tp,10),"Age larger than should not exists");
             // string's
-            Assert.IsFalse(propertyEqualsString(tp,"**HubbaBubba**"),"name should NOT exist");
+            Assert.IsFalse(propertyEqualsString(tp,"**HubbaBubba**"),"name should not exist");
+            // enum's
+            Assert.IsFalse(propertyEqualsEnum(tp,Sex.NEUTER),"a nueter should not exist");
         }
 
         #endregion
@@ -202,6 +211,17 @@ namespace GenDB
         {
             var v = from col in t
                     where col.Name == s
+                    select col;
+            if(v.Count>0)
+                return true;
+            else
+                return false;
+        }
+
+        private bool propertyEqualsEnum(Table<Person> t, Sex e)
+        {
+            var v = from col in t
+                    where col.Sex == e
                     select col;
             if(v.Count>0)
                 return true;
