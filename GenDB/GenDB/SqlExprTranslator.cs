@@ -122,7 +122,7 @@ namespace GenDB
                 } 
                 catch(Exception e)
                 {
-                    parArr[1] = new CstIsFalse();
+                    //parArr[1] = new CstIsFalse();
                 }
                 
                 throw new Exception("not implemented");
