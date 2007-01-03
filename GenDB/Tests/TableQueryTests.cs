@@ -142,12 +142,16 @@ namespace GenDB
         public void EqualityExists()
         {
             Assert.IsTrue(propertyEqualsNumber(tp,3));
+            Assert.IsTrue(propertyLessThanNumber(tp,3));
+            Assert.IsTrue(propertyLargerThanNumber(tp,3));
         }
 
         [Test]
         public void EqualityNotExist()
         {
             Assert.IsFalse(propertyEqualsNumber(tp,-1));
+            Assert.IsFalse(propertyLessThanNumber(tp,0));
+            Assert.IsFalse(propertyLargerThanNumber(tp,10));
         }
 
         #endregion
@@ -165,28 +169,37 @@ namespace GenDB
                 return false;
         }
 
-        private int propertyLessThanNumber(Table<Person> t, int n)
+        private bool propertyLessThanNumber(Table<Person> t, int n)
         {
             var v = from col in t
                     where col.Age < n
                     select col;
-            return v.Count;
+            if(v.Count>0)
+                return true;
+            else
+                return false;
         }
 
-        private int propertyLargerThanNumber(Table<Person> t, int n)
+        private bool propertyLargerThanNumber(Table<Person> t, int n)
         {
             var v = from col in t
                     where col.Age > n
                     select col;
-            return v.Count;
+            if(v.Count>0)
+                return true;
+            else
+                return false;
         }
 
-        private int propertyNotEqualsNumber(Table<Person> t, int n)
+        private bool propertyNotEqualsNumber(Table<Person> t, int n)
         {
             var v = from col in t
                     where col.Age != n
                     select col;
-            return v.Count;
+            if(v.Count>0)
+                return true;
+            else
+                return false;
         }
 
         #endregion
