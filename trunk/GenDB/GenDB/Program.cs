@@ -98,7 +98,7 @@ namespace GenDB
             {
                 get { return enlisted; }
                 set { enlisted = value; }
-            } 
+            }
         }
 
         public static void Main(string[] args)
@@ -129,23 +129,21 @@ namespace GenDB
             IBOCache.FlushToDB();
 
             var es = from epp in tp
-                     where epp.Age == 83
+                     //where epp.Age == 3
                      //where epp.Name == "Navn 3"
-                     //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 97"
+                     where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                      //where epp.Name == "Navn 6" || epp.Age == 7
                      //where epp.Spouse == s_p
                      select epp;
-
-            
 
             foreach(Person p in es)
             {
                 ObjectUtilities.PrintOut (p);
             }
 
-            Console.WriteLine("Size of list: "+es.Count);
-
             IBOCache.FlushToDB();
+
+            Console.WriteLine("Size of Table: "+es.Count);
 
             Console.ReadLine();
         }
