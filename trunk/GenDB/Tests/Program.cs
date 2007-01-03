@@ -55,52 +55,76 @@ namespace Tests
 
         static void Main(string[] args)
         {
-            Configuration.RebuildDatabase = true;
-            Configuration.DbBatchSize = 2000;
-            long objcount = 200;
-
-            Table<Person> tp = new Table<Person>();
-
-            DateTime then = DateTime.Now;
-
-            Person lastPerson = null;
-
-            for (int i = 0; i < objcount; i++)
+#if DEBUG
+            try
             {
-                Person p = new Person();
-                Student s = new Student();
+#endif
+                Configuration.RebuildDatabase = true;
 
-                s.Name = "Student '" + i.ToString();
-                s.Avg = (double)i / objcount;
-                s.Spouse = p;
-                
-                p.Name = "Navn " + i;
-                p.Age = i;
+                Console.WriteLine("Her....");
 
-                tp.Add (p);
-                tp.Add (s);
-                lastPerson = p;
-            }
+                Configuration.DbBatchSize = 2000;
+                long objcount = 1;
 
-            Configuration.SubmitChanges();
+                Table<BOList<Person>> tl = new Table<BOList<Person>>();
 
-            TimeSpan dur = DateTime.Now - then;
-            objcount *= 2;
-            Console.WriteLine ("Insertion of {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
-            then = DateTime.Now;
-            objcount = 0;
-            foreach (Person ibo in tp)
-            {
-                objcount++;
-                if (objcount % 500 == 0)
+                BOList<Person> lp = new BOList<Person>();
+
+                tl.Add(lp);
+
+                Table<Person> tp = new Table<Person>();
+
+                DateTime then = DateTime.Now;
+
+                Person lastPerson = null;
+
+                for (int i = 0; i < objcount; i++)
                 {
-                    ibo.Age = (ibo.Age + 1) * 2;
+                    Person p = new Person();
+                    Student s = new Student();
+
+                    s.Name = "Student '" + i.ToString();
+                    s.Avg = (double)i / objcount;
+                    s.Spouse = p;
+
+                    p.Name = "Navn " + i;
+                    p.Age = i;
+
+                    tp.Add(p);
+                    tp.Add(s);
+                    lastPerson = p;
                 }
-                //ObjectUtilities.PrintOut(ibo);
+
+                Configuration.SubmitChanges();
+
+                TimeSpan dur = DateTime.Now - then;
+                objcount *= 2;
+                Console.WriteLine("Insertion of {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
+                then = DateTime.Now;
+                objcount = 0;
+                foreach (Person ibo in tp)
+                {
+                    objcount++;
+                    if (objcount % 500 == 0)
+                    {
+                        ibo.Age = (ibo.Age + 1) * 2;
+                    }
+                    //ObjectUtilities.PrintOut(ibo);
+                }
+                Configuration.SubmitChanges();
+                dur = DateTime.Now - then;
+                Console.WriteLine("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
+                Console.WriteLine("Indeholder nu {0} objekter", tp.Count);
+
+                Person[] ps = new Person[tp.Count];
+                tp.CopyTo(ps, 0);
+#if DEBUG
             }
-            Configuration.SubmitChanges();
-            dur = DateTime.Now - then;
-            Console.WriteLine ("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
+            catch (NotTranslatableException ex)
+            {
+                Console.WriteLine(ex);
+            }
+#endif
             Console.ReadLine();
         }
     }
