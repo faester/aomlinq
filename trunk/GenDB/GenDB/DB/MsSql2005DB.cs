@@ -399,6 +399,25 @@ namespace GenDB.DB
             return res;
         }
 
+        public int Count(IWhereable expression)
+        {
+            MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
+            mswsb.Visit(expression);
+            string whereStr = mswsb.WhereStr;
+            
+            int res = 0;
+
+            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+            {
+                cnn.Open();
+
+                SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Entity WHERE EntityPOID IN (" + whereStr + ")");
+                res = (int)cmd.ExecuteScalar();
+            }
+            
+            return res;
+        }
+
         public IEnumerable<IEntity> Where(IWhereable expression)
         {
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
