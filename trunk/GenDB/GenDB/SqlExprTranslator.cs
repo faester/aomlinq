@@ -76,7 +76,6 @@ namespace GenDB
         internal IExpression VisitBinaryExpression(BinaryExpression be)
         {
             Expression expr = (Expression) be;
-
             IValue[] parArr = new IValue[2];
 
             // doing the left side
@@ -90,8 +89,6 @@ namespace GenDB
                 parArr[0] = VisitUnaryExpression((UnaryExpression)be.Left);
             }
 
-            //throw new Exception(be.Right.GetType().Name);
-            
             // doing the right side
             String rightSideName = be.Right.GetType().Name;
             if(rightSideName=="ConstantExpression")
@@ -109,7 +106,32 @@ namespace GenDB
             } 
             else if(rightSideName=="UnaryExpression")
             {
+                UnaryExpression un = (UnaryExpression) be.Right;
+                ConstantExpression ce = (ConstantExpression) un.Operand;   
+                IBusinessObject ib;
+       
+                try
+                {
+                
+                    ib = (IBusinessObject) ce.Value;
+       
+                    throw new Exception("stop");
+                    //parArr[1] = new VarReference(ib); 
+                    // IBoReference??
+                    // tjek DBTag
+                } 
+                catch(Exception e)
+                {
+                    parArr[1] = new CstIsFalse();
+                }
+                
+                throw new Exception("not implemented");
+
                 parArr[1] = VisitUnaryExpression((UnaryExpression)be.Right);
+            } 
+            else
+            {
+                throw new Exception("Unknown Type of Right side: "+rightSideName);
             }
             
             string nodeType = expr.NodeType.ToString();
@@ -143,14 +165,12 @@ namespace GenDB
 
                 IEntityType et = TypeSystem.GetEntityType(t);
                 
-
                 throw new Exception("not implemented: "+ue.Operand.GetType().Name);
             }
             else
             {
                 throw new Exception("Unknown type: "+ue.Operand.GetType().Name);
             }
-
         }
 
         internal IValue VisitMemberExpression(MemberExpression me)
