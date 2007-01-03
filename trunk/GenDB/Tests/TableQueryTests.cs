@@ -130,18 +130,24 @@ namespace GenDB
         [Test]
         public void EqualityExists()
         {
+            // int's
             Assert.IsTrue(propertyEqualsNumber(tp,3));
             Assert.IsTrue(propertyLessThanNumber(tp,3));
             Assert.IsTrue(propertyLargerThanNumber(tp,3));
             Assert.IsTrue(propertyNotEqualsNumber(tp,3));
+            // string's
+            Assert.IsTrue(propertyEqualsString(tp,"Navn 3"),"name should exist");
         }
 
         [Test]
         public void EqualityNotExist()
         {
+            // int's
             Assert.IsFalse(propertyEqualsNumber(tp,-1));
             Assert.IsFalse(propertyLessThanNumber(tp,0));
             Assert.IsFalse(propertyLargerThanNumber(tp,10));
+            // string's
+            Assert.IsFalse(propertyEqualsString(tp,"**HubbaBubba**"),"name should NOT exist");
         }
 
         #endregion
@@ -185,6 +191,17 @@ namespace GenDB
         {
             var v = from col in t
                     where col.Age != n
+                    select col;
+            if(v.Count>0)
+                return true;
+            else
+                return false;
+        }
+
+        private bool propertyEqualsString(Table<Person> t, string s) 
+        {
+            var v = from col in t
+                    where col.Name == s
                     select col;
             if(v.Count>0)
                 return true;
