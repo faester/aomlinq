@@ -284,6 +284,8 @@ namespace GenDB.DB
 
         IEnumerable<IEntity> Where(IWhereable expression);
 
+        int Count(IWhereable expression);
+
         /// <summary>
         /// Will return all persisted elements of the given
         /// IEntityType or one of its subclasses ordered by 
