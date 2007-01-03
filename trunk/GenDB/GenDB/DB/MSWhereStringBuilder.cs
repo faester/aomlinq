@@ -226,5 +226,14 @@ namespace GenDB.DB
             wherePart.Append("e.EntityPOID = ");
             wherePart.Append(epe.EntityPOID);
         }
+
+        public void VisitCstIsTrue(CstIsTrue csi)
+        {
+            wherePart.Append ("1 = 1");
+        }
+        public void VisitCstIsFalse(CstIsFalse csi)
+        {
+            wherePart.Append ("1 = 0");
+        }
     }
 }
