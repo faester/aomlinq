@@ -66,6 +66,15 @@ namespace GenDB
 
     class CstIsTrue : IValue
     {
+        private CstIsTrue() { /* empty, singleton */ }
+
+        static CstIsTrue instance = new CstIsTrue();
+
+        internal static CstIsTrue Instance
+        {
+            get { return CstIsTrue.instance; }
+        }
+
         public void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
             visitor.VisitCstIsTrue(this);
@@ -74,6 +83,15 @@ namespace GenDB
 
     class CstIsFalse : IValue
     {
+        private CstIsFalse() { /* empty, singleton */ }
+
+        static CstIsFalse instance = new CstIsFalse();
+
+        internal static CstIsFalse Instance
+        {
+            get { return CstIsFalse.instance; }
+        }
+
         public void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
             visitor.VisitCstIsFalse(this);
