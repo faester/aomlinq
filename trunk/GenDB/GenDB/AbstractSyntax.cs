@@ -376,16 +376,31 @@ namespace GenDB
     /// </summary>
     class VarReference : IValue 
     {
-        IBOReference value;
+        /// <summary>
+        /// Stores the object to test internally, since it may
+        /// be persisted after the expression is created.
+        /// TODO: What are the consequences of this references 
+        /// as regards the garbage collection?
+        /// </summary>
+        IBusinessObject referencedObject = null;
 
         public IBOReference Value
         {
-            get { return this.value; }
+            get { 
+                if (referencedObject == null || referencedObject.DBTag == null)
+                {
+                    return new IBOReference(true);
+                }
+                else 
+                {
+                    return new IBOReference(referencedObject.DBTag.EntityPOID);
+                }
+            }
         }
 
-        public VarReference(IBOReference reference)
+        public VarReference(IBusinessObject referencedObject)
         {
-            this.value = reference;
+            this.referencedObject = referencedObject;
         }
 
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
