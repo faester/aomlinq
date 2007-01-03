@@ -53,6 +53,17 @@ namespace Tests
 
         }
 
+        class TestlistElement : AbstractBusinessObject
+        {
+            int i;
+
+            public int I
+            {
+                get { return i; }
+                set { i = value; }
+            }
+        }
+
         static void Main(string[] args)
         {
 #if DEBUG
@@ -66,11 +77,18 @@ namespace Tests
                 Configuration.DbBatchSize = 2000;
                 long objcount = 1;
 
-                Table<BOList<Person>> tl = new Table<BOList<Person>>();
+                //Table<BOList<TestlistElement>> tl = new Table<BOList<TestlistElement>>();
 
-                BOList<Person> lp = new BOList<Person>();
+                //BOList<TestlistElement> lp = new BOList<TestlistElement>();
 
-                tl.Add(lp);
+                //for (int i = 0; i < 10; i++)
+                //{
+                //    TestlistElement tle = new TestlistElement();
+                //    tle.I = i;
+                //    lp.Add(tle);
+                //}
+
+                //tl.Add(lp);
 
                 Table<Person> tp = new Table<Person>();
 

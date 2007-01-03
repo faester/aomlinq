@@ -8,6 +8,8 @@ namespace GenDB
 {
     static partial class Translators
     {
+        static Type bolistGeneric = typeof(GenDB.BOList<>);
+
         static Dictionary<Type, IIBoToEntityTranslator> translators = new Dictionary<Type, IIBoToEntityTranslator>();
 
         /// <summary>
@@ -26,13 +28,26 @@ namespace GenDB
             return translators[t];
         }
 
+
+        /// <summary>
+        /// Creates translator for the given type and performs translatability checking 
+        /// for the types at the same time.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="et"></param>
+        /// <returns></returns>
         private static IIBoToEntityTranslator CreateTranslator(Type t, IEntityType et)
         {
             if (t.IsGenericType)
             {
-                throw new Exception("Problems with generic types. Don't know how to grab BOList<> instances");
-                return new BOListTranslator();
-                Console.WriteLine(t);
+                if (t.GetGenericTypeDefinition() == bolistGeneric)
+                {
+                    return new BOListTranslator();
+                }
+                else
+                {
+                    throw new NotTranslatableException("Can not translate generic types", t);
+                }
             }
             else
             {

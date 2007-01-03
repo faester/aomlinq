@@ -722,6 +722,44 @@ namespace GenDB.DB
             }
         }
 
+        public void Save(IGenCollectionElement ce, long collectionEntityPOID, MappingType mt)
+        {
+            StringBuilder sb = new StringBuilder("exec sp_SET_COLLECTION_ELEMENT ");
+            sb.Append(collectionEntityPOID)
+            .Append(',')
+            .Append(ce.ElementIndex)
+            .Append(',');
+
+            switch (mt)
+            {
+                case MappingType.LONG:
+                    sb.Append(ce.LongValue);
+                    break;
+                case MappingType.REFERENCE:
+                    if (ce.RefValue.IsNullReference)
+                    {
+                        sb.Append("null");
+                    }
+                    else
+                    {
+                        sb.Append(ce.RefValue.EntityPOID);
+                    }
+                    break;
+                case MappingType.DATETIME:
+                    sb.Append(ce.DateTimeValue.Ticks);
+                    break;
+            }
+            sb.Append(",'")
+            .Append(ce.CharValue)
+            .Append("','")
+            .Append(SqlSanitizeString(ce.StringValue))
+            .Append("',")
+            .Append(ce.DoubleValue);
+
+            collectionElementOperationCount++;
+            sbCollectionElementOperations.Append(sb.ToString());
+       }
+
         private void InternalEntitySave(IEntity entity)
         {
             if (entityInsertCount > Configuration.DbBatchSize)
@@ -779,12 +817,12 @@ namespace GenDB.DB
 
             sbPropertyValueInserts.Append(",'")
                        .Append(pv.CharValue.ToString())
-                       .Append("','") //Todo: Need som check for illegal characters.
-                       .Append(stringValue)
+                       .Append("','") 
+                       .Append(SqlSanitizeString(stringValue))
                        .Append("',")
                        .Append(boolValue)
                        .Append(',')
-                       .Append( pv.DoubleValue.ToString().Replace(',', '.'))
+                       .Append( pv.DoubleValue.ToString().Replace(',', '.')) // ',' -> '.' to sole localization issues.
                        .Append(";");
         }
 
@@ -855,6 +893,60 @@ namespace GenDB.DB
             ClearInsertStringBuilders();
         }
 
+        public void RollbackTransaction()
+        {
+            ClearValueInsertStringBuilders();
+            ClearCollectionCommands();
+        }
+
+        public void RollbackTypeTransaction()
+        {
+            ClearInsertStringBuilders();
+        }
+
+        public void ClearCollection(long collectionEntityPOID)
+        {
+            ClearCollectionElements(collectionEntityPOID);
+            ClearCollectionKeys(collectionEntityPOID);
+        }
+
+        #region Private methods.
+        private void CommitValueChanges()
+        {
+            PropertyValueStringBuilderToLL();
+            EntityInsertStringBuilderToLL();
+
+            SqlCommand cmd = new SqlCommand();
+
+            using (SqlConnection cnn =  new SqlConnection(Configuration.ConnectStringWithDBName))
+            {
+                cnn.Open();
+                cmd.Connection = cnn;
+                cmd.Transaction = cnn.BeginTransaction();
+
+                foreach (string insertCommand in llEntityInserts)
+                {
+                    if (insertCommand != "")
+                    {
+                        cmd.CommandText = insertCommand;
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                foreach (string insertCommand in llPropertyValueInserts)
+                {
+                    if (insertCommand != "")
+                    {
+                        cmd.CommandText = insertCommand;
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                cmd.Transaction.Commit();
+            }
+
+            ClearValueInsertStringBuilders();
+        }
+
         private void CommitCollections()
         {
             if (collectionElementOperationCount > 0) { CollectionElementStringBuilderToLL(); }
@@ -894,60 +986,6 @@ namespace GenDB.DB
             collectionKeyOperationCount = 0;
         }
 
-        private void CommitValueChanges()
-        {
-            PropertyValueStringBuilderToLL();
-            EntityInsertStringBuilderToLL();
-
-            SqlCommand cmd = new SqlCommand();
-
-            using (SqlConnection cnn =  new SqlConnection(Configuration.ConnectStringWithDBName))
-            {
-                cnn.Open();
-                cmd.Connection = cnn;
-                cmd.Transaction = cnn.BeginTransaction();
-
-                foreach (string insertCommand in llEntityInserts)
-                {
-                    if (insertCommand != "")
-                    {
-                        cmd.CommandText = insertCommand;
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                foreach (string insertCommand in llPropertyValueInserts)
-                {
-                    if (insertCommand != "")
-                    {
-                        cmd.CommandText = insertCommand;
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-
-                cmd.Transaction.Commit();
-            }
-
-            ClearValueInsertStringBuilders();
-        }
-
-        public void RollbackTransaction()
-        {
-            ClearValueInsertStringBuilders();
-            ClearCollectionCommands();
-        }
-
-        public void RollbackTypeTransaction()
-        {
-            ClearInsertStringBuilders();
-        }
-
-        public void ClearCollection(long collectionEntityPOID)
-        {
-            ClearCollectionElements(collectionEntityPOID);
-            ClearCollectionKeys(collectionEntityPOID);
-        }
-
-        #region Private methods.
         private void ClearCollectionElements(long collectionEntityPOID)
         {
             if (collectionElementOperationCount > Configuration.DbBatchSize)

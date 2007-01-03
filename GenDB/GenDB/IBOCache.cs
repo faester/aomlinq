@@ -215,8 +215,7 @@ namespace GenDB
             foreach (IBusinessObject ibo in uncommittedObject.Values)
             {
                 IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
-                IEntity e = trans.Translate(ibo);
-                Configuration.GenDB.Save (e);
+                trans.SaveToDB (Configuration.GenDB, ibo);
             }
         }
 
@@ -239,13 +238,14 @@ namespace GenDB
                     {
                         IBusinessObject ibo = ce.Target;
                         IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
-                        IEntity e = trans.Translate(ibo);
-                        Configuration.GenDB.Save(e);
+                        trans.SaveToDB  (Configuration.GenDB, ibo);
+                        //IEntity e = trans.Translate(ibo);
+                        //Configuration.GenDB.Save(e);
                         ce.ClearDirtyBit();
                     }
                     else
                     {
-                        //TODO:
+                        //TODO: Should never happen, but need proper testing....
                         throw new Exception("Object reclaimed before if was flushed to the DB.");
                     }
                 }

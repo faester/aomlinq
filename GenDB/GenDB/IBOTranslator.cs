@@ -42,6 +42,12 @@ namespace GenDB
                 Init();
             }
 
+            public void SaveToDB(IGenericDatabase db, IBusinessObject ibo)
+            {
+                IEntity e = this.Translate (ibo);
+                db.Save(e);
+            }
+
             private void Init()
             {
                 CheckTranslatability();
