@@ -411,7 +411,7 @@ namespace GenDB.DB
             {
                 cnn.Open();
 
-                SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Entity WHERE EntityPOID IN (" + whereStr + ")");
+                SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Entity WHERE EntityPOID IN (" + whereStr + ")", cnn);
                 res = (int)cmd.ExecuteScalar();
             }
             
