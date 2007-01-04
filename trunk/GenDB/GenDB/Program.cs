@@ -11,7 +11,7 @@ using GenDB.DB;
 
 namespace GenDB
 {
-    public enum Sex { MALE, FEMALE };
+    public enum Sex { MALE, FEMALE, NEUTER };
 
     class Program
     {
@@ -120,20 +120,21 @@ namespace GenDB
                 tp.Add (p);
             }
 
-            //Person s_p = new Person{ Name = "SpousePerson"};
-            //tp.Add (s_p);
+            Person s_p = new Person{ Name = "SpousePerson"};
+            s_p.Age = 99;
+            tp.Add (s_p);
 
-            //Person p_p = new Person {Name = "NormalPerson", Spouse=s_p, Age=121};
-            //tp.Add (p_p);
+            Person p_p = new Person {Name = "NormalPerson", Spouse=s_p, Age=121};
+            tp.Add (p_p);
 
             IBOCache.FlushToDB();
-
+            
             var es = from epp in tp
                      //where epp.Age == 3
                      //where epp.Name == "Navn 3"
-                     where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
+                     //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                      //where epp.Name == "Navn 6" || epp.Age == 7
-                     //where epp.Spouse == s_p
+                     where epp.Spouse == s_p
                      select epp;
 
             foreach(Person p in es)

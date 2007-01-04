@@ -103,7 +103,7 @@ namespace GenDB
                 default:
                     throw new Exception("type not implemented "+expr.Type);
                 }
-            } 
+            }
             else if(rightSideName=="UnaryExpression")
             {
                 UnaryExpression un = (UnaryExpression) be.Right;
@@ -112,23 +112,16 @@ namespace GenDB
        
                 try
                 {
-                
                     ib = (IBusinessObject) ce.Value;
-       
-                    throw new Exception("stop");
-                    //parArr[1] = new VarReference(ib); 
-                    // IBoReference??
-                    // tjek DBTag
+                    parArr[1] = new VarReference(ib);
                 } 
                 catch(Exception e)
                 {
-                    //parArr[1] = new CstIsFalse();
+                    parArr[1] = CstIsFalse.Instance;
                 }
                 
-                throw new Exception("not implemented");
-
-                parArr[1] = VisitUnaryExpression((UnaryExpression)be.Right);
-            } 
+                //parArr[1] = VisitUnaryExpression((UnaryExpression)be.Right);
+            }
             else
             {
                 throw new Exception("Unknown Type of Right side: "+rightSideName);
