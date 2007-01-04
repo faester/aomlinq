@@ -28,19 +28,16 @@ namespace GenDB
             IValue[] parArr= new IValue[2];
 
             if(roc.Count==2) 
-            {    
-                MemberExpression tmp = (MemberExpression)roc[0];
-                ParameterExpression pe = (ParameterExpression) tmp.Expression;
-
-                if(tmp.NodeType.ToString()=="MemberAccess")
+            {   
+                if(roc[0].NodeType.ToString()=="MemberAccess")
                 {
-                    Type t = pe.Type;
-                    IEntityType et;
-
+                    MemberExpression tmp = (MemberExpression)roc[0];                    
+                    Type t = tmp.Expression.Type;
+                    
                     if(!TypeSystem.IsTypeKnown(t))
                     TypeSystem.RegisterType (t);
                             
-                    et = TypeSystem.GetEntityType(t);
+                    IEntityType et = TypeSystem.GetEntityType(t);
                     string propstr = tmp.Member.Name;
                     IProperty po = et.GetProperty(propstr);
 
@@ -64,7 +61,7 @@ namespace GenDB
                 }
                 else
                 {
-                    throw new Exception("NodeType unknown "+tmp.NodeType.ToString());
+                    throw new Exception("NodeType unknown");
                 }
             }
             else
@@ -121,6 +118,11 @@ namespace GenDB
                     parArr[1] = CstIsFalse.Instance;
                 }
                 //parArr[1] = VisitUnaryExpression((UnaryExpression)be.Right);
+            }
+            else if(rightSideName=="MethodCallExpression")
+            {
+                parArr[1] = (IValue)VisitMethodCall((MethodCallExpression)be.Right);
+                throw new Exception("not implemented: "+be.Right);
             }
             else
             {
