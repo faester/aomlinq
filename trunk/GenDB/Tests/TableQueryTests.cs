@@ -156,9 +156,9 @@ namespace GenDB
             // enum's
             Assert.IsTrue(PropertyEqualsEnum(tp,trueEnum),"a female should exist");
             // OrElse
-            Assert.IsTrue(StringOrElseNumber(tp,trueStr, trueInt),"Name or Age should exist");
+            Assert.IsTrue(StringOrElseNumber(tp,trueStr, falseInt),"Name(true) OR Age(false) should exist");
             // AndAlso
-            Assert.IsTrue(StringAndAlsoNumber(tp,trueStr,trueInt),"Name and Age should exist");
+            Assert.IsTrue(StringAndAlsoNumber(tp,trueStr,trueInt),"Name(true) AND Age(true) should exist");
         }
 
         [Test]
@@ -173,8 +173,9 @@ namespace GenDB
             // enum's
             Assert.IsFalse(PropertyEqualsEnum(tp,falseEnum),"a nueter should not exist");
             // OrElse
-            //Assert.IsFalse();
+            Assert.IsFalse(StringOrElseNumber(tp,falseStr,falseInt),"Name(false) OR Age(false), should not exist");
             // AndAlso
+            Assert.IsFalse(StringAndAlsoNumber(tp,falseStr, trueInt),"Name(false) AND Age(true), should not exist");
         }
 
         #endregion
