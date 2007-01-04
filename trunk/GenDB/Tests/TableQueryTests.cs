@@ -16,7 +16,7 @@ namespace GenDB
     [TestFixture]
     public class TestTableQuery
     {
-        #region configuration
+        #region member data
 
         public enum Sex { MALE, FEMALE, NEUTER };
         static int nextID = 0;
@@ -97,6 +97,10 @@ namespace GenDB
             }
         }
 
+        #endregion
+
+        #region configuration
+
         [TestFixtureSetUp]
         public void Initialize()
         {
@@ -134,9 +138,21 @@ namespace GenDB
         }
 
         [SetUp]
-        public void TestQuery()
+        public void StartTest()
         {
             
+        }
+
+        [TearDown]
+        public void EndTest()
+        {
+
+        }
+
+        [TestFixtureTearDown]
+        public void Destroy()
+        {
+
         }
 
         #endregion
