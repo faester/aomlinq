@@ -91,7 +91,9 @@ namespace GenDB
 
             // doing the right side
             String rightSideName = be.Right.GetType().Name;
-            if(rightSideName=="ConstantExpression")
+            if(be.Right.ToString()=="null")
+                parArr[1] = new VarReference(null);
+            else if(rightSideName=="ConstantExpression")
             {
                 switch(TypeSystem.FindMappingType(expr.Type))
                 {
@@ -109,7 +111,6 @@ namespace GenDB
                 UnaryExpression un = (UnaryExpression) be.Right;
                 ConstantExpression ce = (ConstantExpression) un.Operand;   
                 IBusinessObject ib;
-       
                 try
                 {
                     ib = (IBusinessObject) ce.Value;
@@ -119,7 +120,6 @@ namespace GenDB
                 {
                     parArr[1] = CstIsFalse.Instance;
                 }
-                
                 //parArr[1] = VisitUnaryExpression((UnaryExpression)be.Right);
             }
             else

@@ -96,10 +96,6 @@ namespace GenDB
             return this;
         }
 
-        public ICollection<T> Select<U>(Expression<Func<T, U>> projection)
-        {
-            throw new Exception("Select ikke implementeret.");
-        }
 
         #endregion
     }
