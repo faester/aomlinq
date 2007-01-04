@@ -25,6 +25,7 @@ namespace GenDB
         private string trueStr, falseStr;
         private int trueInt, falseInt, smallInt, largeInt;
         private Sex trueEnum, falseEnum;
+        private Person spouse, johnDoe;
 
         public class Car : AbstractBusinessObject
         {
@@ -119,11 +120,13 @@ namespace GenDB
                 tp.Add (p);
             }
 
-            Person s_p = new Person{ Name = "SpousePerson"};
-            s_p.Age = 9;
-            tp.Add (s_p);
-            Person p_p = new Person {Name = "NormalPerson", Spouse=s_p, Age=1};
-            tp.Add (p_p);
+            spouse = new Person{Name = "spouse", Age = 9};
+            johnDoe = new Person{Name = "John Doe"};
+            tp.Add(spouse);
+            tp.Add(johnDoe);
+
+            //Person p_p = new Person {Name = "NormalPerson", Spouse=spouse, Age=1};
+            tp.Add (new Person {Name = "NormalPerson", Spouse=spouse, Age=1});
             
             Configuration.SubmitChanges();
 
@@ -175,6 +178,8 @@ namespace GenDB
             Assert.IsTrue(StringOrElseNumber(tp,trueStr, falseInt),"Name(true) OR Age(false) should exist");
             // AndAlso
             Assert.IsTrue(StringAndAlsoNumber(tp,trueStr,trueInt),"Name(true) AND Age(true) should exist");
+            // Reference
+            Assert.IsTrue(PropertyEqualsReference(tp,spouse),"Spouse should exist");
         }
 
         [Test]
@@ -192,6 +197,8 @@ namespace GenDB
             Assert.IsFalse(StringOrElseNumber(tp,falseStr,falseInt),"Name(false) OR Age(false), should not exist");
             // AndAlso
             Assert.IsFalse(StringAndAlsoNumber(tp,falseStr, trueInt),"Name(false) AND Age(true), should not exist");
+            // Reference
+            Assert.IsFalse(PropertyEqualsReference(tp,johnDoe),"John Doe should not be a Spouse");
         }
 
         #endregion
@@ -279,6 +286,17 @@ namespace GenDB
         {
             var v = from col in t
                     where col.Name == s || col.Age == n
+                    select col;
+            if(v.Count>0)
+                return true;
+            else
+                return false;
+        }
+
+        private bool PropertyEqualsReference(Table<Person> t, Person p)
+        {
+            var v = from col in t
+                    where col.Spouse == p
                     select col;
             if(v.Count>0)
                 return true;
