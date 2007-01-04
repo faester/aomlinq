@@ -724,7 +724,16 @@ namespace GenDB.DB
 
         public void Save(IGenCollectionElement ce, long collectionEntityPOID, MappingType mt)
         {
-            StringBuilder sb = new StringBuilder("exec sp_SET_COLLECTION_ELEMENT ");
+            //  = "CREATE PROCEDURE sp_SET_COLLECTION_ELEMENT " +
+            //"	@EntityPOID AS INT, " +
+            //"	@ElementID AS INT," +
+            //"	@LongValue AS BIGINT," +
+            //"	@CharValue AS CHAR(1)," +
+            //"	@StringValue AS VARCHAR(max)," +
+            //"	@BoolValue AS BIT, " +
+            //"   @DoubleValue AS FLOAT " +
+
+            StringBuilder sb = new StringBuilder(" exec sp_SET_COLLECTION_ELEMENT ");
             sb.Append(collectionEntityPOID)
             .Append(',')
             .Append(ce.ElementIndex)
@@ -754,6 +763,8 @@ namespace GenDB.DB
             .Append("','")
             .Append(SqlSanitizeString(ce.StringValue))
             .Append("',")
+            .Append (ce.BoolValue)
+            .Append (',')
             .Append(ce.DoubleValue);
 
             collectionElementOperationCount++;

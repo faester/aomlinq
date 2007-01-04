@@ -75,7 +75,7 @@ namespace GenDB
         ///// Stores regular object references. The object must not be gc'ed before 
         ///// it has been written to persistent storage.
         ///// </summary>
-        static Dictionary<long, IBusinessObject> uncommittedObject = new Dictionary<long, IBusinessObject>();
+        static Dictionary<long, IBusinessObject> uncommittedObjects = new Dictionary<long, IBusinessObject>();
 
         /// <summary>
         /// Adds the given obj to the cache. The DBTag element
@@ -85,7 +85,7 @@ namespace GenDB
         public static void Add(IBusinessObject obj)
         {
             if (obj.DBTag == null) { throw new NullReferenceException("DBTag of obj not set"); }
-            uncommittedObject[obj.DBTag.EntityPOID] = obj;
+            uncommittedObjects[obj.DBTag.EntityPOID] = obj;
         }
 
 
@@ -126,7 +126,7 @@ namespace GenDB
             IBusinessObject result;
             if (!committedObjects.TryGetValue(id, out wr))
             {
-                if (!uncommittedObject.TryGetValue(id, out result))
+                if (!uncommittedObjects.TryGetValue(id, out result))
                 {
                     return null;
                 }
@@ -178,7 +178,8 @@ namespace GenDB
             
             stp.Start();
 #endif
-            CommitUncommitted();
+            CommitChangedCommitted();
+            TryGC();
 #if DEBUG
             stp.Stop();
             Console.WriteLine("\tCommitUncomitted took: {0}", stp.Elapsed);
@@ -186,8 +187,7 @@ namespace GenDB
 
             stp.Start();
 #endif
-            CommitChangedCommitted();
-            TryGC();
+            CommitUncommitted();
 #if DEBUG
             stp.Stop();
             Console.WriteLine("\tCommitChangedComitted took: {0}", stp.Elapsed);
@@ -195,7 +195,7 @@ namespace GenDB
             stp.Reset();
             stp.Start();
 #endif
-            MoveCommittedToUncommitted();
+            //AddToUncomitted();
 #if DEBUG
             stp.Stop();
             Console.WriteLine("\tMoveCommittedToUncommitted took: {0}", stp.Elapsed);
@@ -212,21 +212,29 @@ namespace GenDB
 
         private static void CommitUncommitted()
         {
-            foreach (IBusinessObject ibo in uncommittedObject.Values)
+            while (uncommittedObjects.Count > 0)
             {
-                IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
-                trans.SaveToDB (Configuration.GenDB, ibo);
+                Dictionary<long, IBusinessObject> tmpUncomitted = uncommittedObjects;
+
+                // Make a new uncomitted collection to allow translators to add objects to the cache.
+                uncommittedObjects = new Dictionary<long, IBusinessObject>();
+
+                foreach (IBusinessObject ibo in tmpUncomitted.Values)
+                {
+                    IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
+                    trans.SaveToDB(Configuration.GenDB, ibo);
+                    AddToCommitted(ibo);
+                }
             }
         }
 
-        private static void MoveCommittedToUncommitted()
-        {
-            foreach (IBusinessObject ibo in uncommittedObject.Values)
-            {
-                AddToCommitted(ibo);
-            }
-            uncommittedObject.Clear();
-        }
+        //private static void AddToUncomitted(Dictionary<long, IBusinessObject> coll)
+        //{
+        //    foreach (IBusinessObject ibo in coll.Values)
+        //    {
+        //        AddToCommitted(ibo);
+        //    }
+        //}
 
         private static void CommitChangedCommitted()
         {
@@ -264,7 +272,7 @@ namespace GenDB
         {
             //TODO: Need to make some kind of commit possible here.
             committedObjects.Remove(id);
-            uncommittedObject.Remove(id);
+            uncommittedObjects.Remove(id);
         }
     }
 }

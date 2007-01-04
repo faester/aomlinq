@@ -73,6 +73,10 @@ namespace GenDB.DB
                 genericBOListEntityType = BOListEntityType();
                 TypeSystem.RegisterType(genericBOListEntityType);
             }
+            else if (genericBOListEntityType == null)
+            {
+                genericBOListEntityType = TypeSystem.GetEntityType(typeOfBOList);
+            }
 
             if (!TypeSystem.IsTypeKnown (elementType))
             {

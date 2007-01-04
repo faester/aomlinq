@@ -70,25 +70,35 @@ namespace Tests
             try
             {
 #endif
-                Configuration.RebuildDatabase = true;
+                Configuration.RebuildDatabase = false;
 
                 Console.WriteLine("Her....");
 
                 Configuration.DbBatchSize = 2000;
                 long objcount = 1;
 
-                //Table<BOList<TestlistElement>> tl = new Table<BOList<TestlistElement>>();
+                Table<BOList<TestlistElement>> tl = new Table<BOList<TestlistElement>>();
 
-                //BOList<TestlistElement> lp = new BOList<TestlistElement>();
+                BOList<TestlistElement> lp = new BOList<TestlistElement>();
 
-                //for (int i = 0; i < 10; i++)
-                //{
-                //    TestlistElement tle = new TestlistElement();
-                //    tle.I = i;
-                //    lp.Add(tle);
-                //}
+                for (int i = 0; i < 10; i++)
+                {
+                    TestlistElement tle = new TestlistElement();
+                    tle.I = i;
+                    lp.Add(tle);
+                }
 
-                //tl.Add(lp);
+                tl.Add(lp);
+
+                Configuration.SubmitChanges();
+
+                foreach (BOList<TestlistElement> list in tl)
+                {
+                    foreach (TestlistElement le in list)
+                    {
+                        ObjectUtilities.PrintOut(le);
+                    }
+                }
 
                 Table<Person> tp = new Table<Person>();
 
