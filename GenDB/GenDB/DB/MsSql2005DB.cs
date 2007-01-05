@@ -828,9 +828,18 @@ namespace GenDB.DB
 
             sbPropertyValueInserts.Append(",'")
                        .Append(pv.CharValue.ToString())
-                       .Append("','") 
-                       .Append(SqlSanitizeString(stringValue))
-                       .Append("',")
+                       .Append("',") ;
+            if (stringValue == null)
+            {
+                sbPropertyValueInserts.Append(" null ");
+            }
+            else
+            {
+                sbPropertyValueInserts.Append('\'');
+                sbPropertyValueInserts.Append(SqlSanitizeString(stringValue));
+                sbPropertyValueInserts.Append('\'');
+            }
+            sbPropertyValueInserts.Append(',')
                        .Append(boolValue)
                        .Append(',')
                        .Append( pv.DoubleValue.ToString().Replace(',', '.')) // ',' -> '.' to sole localization issues.
