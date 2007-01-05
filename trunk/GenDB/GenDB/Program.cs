@@ -134,6 +134,7 @@ namespace GenDB
                      //where epp.Name == "Navn 3"
                      //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                      //where epp.Name == "Navn 6" || epp.Age == 7
+                     //where s_p != epp.Spouse
                      where epp.Spouse != s_p
                      //where epp.Age == tp.Max(ep => ep.Age)
                      select epp;
