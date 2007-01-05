@@ -225,9 +225,18 @@ namespace GenDB.DB
                 neq.Left.AcceptVisitor(this);
                 wherePart.Append (" <> ");
                 neq.Right.AcceptVisitor (this);
-                wherePart.Append (" OR ");
-                neq.Left.AcceptVisitor(this);
-                wherePart.Append(" IS NULL ");
+                if(neq.Left is VarReference)
+                {
+                    wherePart.Append (" OR ");
+                    neq.Right.AcceptVisitor(this);
+                    wherePart.Append(" IS NULL ");
+                }
+                else if(neq.Right is VarReference)
+                {
+                    wherePart.Append (" OR ");
+                    neq.Left.AcceptVisitor(this);
+                    wherePart.Append(" IS NULL ");
+                }
             }
             else if(leftIsNullReference)
             {
@@ -241,8 +250,6 @@ namespace GenDB.DB
                 neq.Left.AcceptVisitor(this);
                 wherePart.Append(" IS NULL ");
             }
-
-            
         }
         
         public void VisitNotExpr(ExprNot expr)
