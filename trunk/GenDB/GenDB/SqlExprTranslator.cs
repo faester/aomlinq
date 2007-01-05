@@ -130,6 +130,7 @@ namespace GenDB
             }
             
             string nodeType = expr.NodeType.ToString();
+            //throw new Exception("STOP");
             if(nodeType=="GT")
                 return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
             else if(nodeType=="LT")
