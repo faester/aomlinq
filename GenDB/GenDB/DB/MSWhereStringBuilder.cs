@@ -172,7 +172,7 @@ namespace GenDB.DB
                     leftIsNullReference = true;
                 }
             }    
-            else if(eq.Right is VarReference)
+            if(eq.Right is VarReference)
             {                                  
                 VarReference rv = (VarReference) eq.Right;
                 if(rv.Value.IsNullReference)
@@ -201,17 +201,45 @@ namespace GenDB.DB
         
         public void VisitOPNotEquals(OP_NotEquals neq)
         {
-            //bool LeftIsNullReference=false;
-            //bool RightIsNullRefernce=false;
-            //if(neq.Left is VarReference)
-            //{
-            //    VarReference lv = (VarReference) 
-            //}
+            bool leftIsNullReference=false;
+            bool rightIsNullReference=false;
+            if(neq.Left is VarReference)
+            {
+                VarReference lv = (VarReference) neq.Left;
+                if(lv.Value.IsNullReference)
+                {
+                    leftIsNullReference=true;
+                }
+            }
+            if(neq.Right is VarReference)
+            {
+                VarReference rv = (VarReference) neq.Right;
+                if(rv.Value.IsNullReference)
+                {
+                    rightIsNullReference=true;
+                }
+            }
 
+            if(!leftIsNullReference && !rightIsNullReference)
+            {
+                neq.Left.AcceptVisitor(this);
+                wherePart.Append (" <> ");
+                neq.Right.AcceptVisitor (this);
+            }
+            else if(leftIsNullReference)
+            {
+                wherePart.Append(" NOT ");
+                neq.Right.AcceptVisitor (this);
+                wherePart.Append(" IS NULL ");
+            }
+            else if(rightIsNullReference)
+            {
+                wherePart.Append(" NOT ");
+                neq.Left.AcceptVisitor(this);
+                wherePart.Append(" IS NULL ");
+            }
 
-            neq.Left.AcceptVisitor(this);
-            wherePart.Append (" <> ");
-            neq.Right.AcceptVisitor (this);
+            
         }
         
         public void VisitNotExpr(ExprNot expr)
