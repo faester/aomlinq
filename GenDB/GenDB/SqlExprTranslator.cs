@@ -76,25 +76,22 @@ namespace GenDB
             IValue[] parArr = new IValue[2];
 
             // doing the left side
-            String leftSideName = be.Left.GetType().Name;
-            if(leftSideName=="MemberExpression") 
+            if(be.Left is MemberExpression)
             {
                 parArr[0] = VisitMemberExpression((MemberExpression) be.Left);
             }
-            else if(leftSideName=="UnaryExpression")
+            else if(be.Left is UnaryExpression)
             {
                 parArr[0] = VisitUnaryExpression((UnaryExpression)be.Left);
             }
 
             // doing the right side
-            String rightSideName = be.Right.GetType().Name;
             if(be.Right.ToString()=="null")
                 parArr[1] = new VarReference(null);
-            else if(rightSideName=="ConstantExpression")
+            else if(be.Right is ConstantExpression)
             {
                 switch(TypeSystem.FindMappingType(expr.Type))
                 {
-                // hvad hvis be.Right er null eller et objekt?
                 case MappingType.BOOL:
                     parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
                     break;
@@ -103,7 +100,7 @@ namespace GenDB
                     throw new Exception("type not implemented "+expr.Type);
                 }
             }
-            else if(rightSideName=="UnaryExpression")
+            else if(be.Right is UnaryExpression)
             {
                 UnaryExpression un = (UnaryExpression) be.Right;
                 ConstantExpression ce = (ConstantExpression) un.Operand;   
@@ -119,18 +116,19 @@ namespace GenDB
                 }
                 //parArr[1] = VisitUnaryExpression((UnaryExpression)be.Right);
             }
-            else if(rightSideName=="MethodCallExpression")
+            else if(be.Right is MethodCallExpression)
             {
                 parArr[1] = (IValue)VisitMethodCall((MethodCallExpression)be.Right);
                 throw new Exception("not implemented: "+be.Right);
             }
             else
             {
-                throw new Exception("Unknown Type of Right side: "+rightSideName);
+                throw new Exception("Unknown Type of Right side: "+be.Right.ToString());
             }
             
             string nodeType = expr.NodeType.ToString();
             //throw new Exception("STOP");
+
             if(nodeType=="GT")
                 return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
             else if(nodeType=="LT")
@@ -274,6 +272,10 @@ namespace GenDB
                         throw new Exception("Expression type unkown "+typeName);
  
                     return new GenDB.ExprOr(left, right);
+                }
+                else if(mecstr.StartsWith("GE("))
+                {
+                    throw new Exception("not implemented");
                 }
                 else
                 {
