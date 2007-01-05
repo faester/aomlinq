@@ -125,7 +125,6 @@ namespace GenDB
             tp.Add(spouse);
             tp.Add(johnDoe);
 
-            //Person p_p = new Person {Name = "NormalPerson", Spouse=spouse, Age=1};
             tp.Add (new Person {Name = "NormalPerson", Spouse=spouse, Age=1});
             
             Configuration.SubmitChanges();
@@ -163,42 +162,46 @@ namespace GenDB
         #region Tests
 
         [Test]
-        public void EqualityExists()
+        public void Equality()
         {
             // int's
             Assert.IsTrue(PropertyEqualsNumber(tp,trueInt),"Age should exist");
-            Assert.IsTrue(PropertyLessThanNumber(tp,trueInt),"Age less than should exist");
-            Assert.IsTrue(PropertyLargerThanNumber(tp,trueInt),"Age larger than should exist");
+            Assert.IsFalse(PropertyEqualsNumber(tp,falseInt),"Age should not exist");
             Assert.IsTrue(PropertyNotEqualsNumber(tp,trueInt),"Age not equal to should exist");
             // string's
             Assert.IsTrue(PropertyEqualsString(tp,trueStr),"name should exist");
+            Assert.IsFalse(PropertyEqualsString(tp,falseStr),"name should not exist");
             // enum's
             Assert.IsTrue(PropertyEqualsEnum(tp,trueEnum),"a female should exist");
-            // OrElse
-            Assert.IsTrue(StringOrElseNumber(tp,trueStr, falseInt),"Name(true) OR Age(false) should exist");
-            // AndAlso
-            Assert.IsTrue(StringAndAlsoNumber(tp,trueStr,trueInt),"Name(true) AND Age(true) should exist");
+            Assert.IsFalse(PropertyEqualsEnum(tp,falseEnum),"a nueter should not exist");
             // Reference
             Assert.IsTrue(PropertyEqualsReference(tp,spouse),"Spouse should exist");
+            Assert.IsFalse(PropertyEqualsReference(tp,johnDoe),"John Doe should not be a Spouse");
+            // Null Reference
+            Assert.IsTrue(PropertyEqualsReference(tp,null),"Spouse = null should exist");
         }
 
         [Test]
-        public void EqualityNotExist()
+        public void EqualityAndLessOrLarger()
         {
-            // int's
-            Assert.IsFalse(PropertyEqualsNumber(tp,falseInt),"Age should not exist");
+            Assert.IsTrue(PropertyLessThanNumber(tp,trueInt),"Age less than should exist");
+            Assert.IsTrue(PropertyLargerThanNumber(tp,trueInt),"Age larger than should exist");
             Assert.IsFalse(PropertyLessThanNumber(tp,smallInt),"Age less than should not exist");
             Assert.IsFalse(PropertyLargerThanNumber(tp,largeInt),"Age larger than should not exists");
-            // string's
-            Assert.IsFalse(PropertyEqualsString(tp,falseStr),"name should not exist");
-            // enum's
-            Assert.IsFalse(PropertyEqualsEnum(tp,falseEnum),"a nueter should not exist");
-            // OrElse
+        }
+
+        [Test]
+        public void OrElse()
+        {
+            Assert.IsTrue(StringOrElseNumber(tp,trueStr, falseInt),"Name(true) OR Age(false) should exist");
             Assert.IsFalse(StringOrElseNumber(tp,falseStr,falseInt),"Name(false) OR Age(false), should not exist");
-            // AndAlso
+        }
+
+        [Test]
+        public void AndAlso()
+        {
             Assert.IsFalse(StringAndAlsoNumber(tp,falseStr, trueInt),"Name(false) AND Age(true), should not exist");
-            // Reference
-            Assert.IsFalse(PropertyEqualsReference(tp,johnDoe),"John Doe should not be a Spouse");
+            Assert.IsTrue(StringAndAlsoNumber(tp,trueStr,trueInt),"Name(true) AND Age(true) should exist");
         }
 
         #endregion
@@ -210,32 +213,7 @@ namespace GenDB
             var v = from col in t
                     where col.Age == n
                     select col;
-            if(v.Count>0)
-                return true;
-            else
-                return false;
-        }
-
-        private bool PropertyLessThanNumber(Table<Person> t, int n)
-        {
-            var v = from col in t
-                    where col.Age < n
-                    select col;
-            if(v.Count>0)
-                return true;
-            else
-                return false;
-        }
-
-        private bool PropertyLargerThanNumber(Table<Person> t, int n)
-        {
-            var v = from col in t
-                    where col.Age > n
-                    select col;
-            if(v.Count>0)
-                return true;
-            else
-                return false;
+            return boolReturn(v.Count);
         }
 
         private bool PropertyNotEqualsNumber(Table<Person> t, int n)
@@ -243,10 +221,39 @@ namespace GenDB
             var v = from col in t
                     where col.Age != n
                     select col;
-            if(v.Count>0)
-                return true;
-            else
-                return false;
+            return boolReturn(v.Count);
+        }
+
+        private bool PropertyLessThanNumber(Table<Person> t, int n)
+        {
+            var v = from col in t
+                    where col.Age < n
+                    select col;
+            return boolReturn(v.Count);
+        }
+
+        private bool PropertyLessThanOrEqualsNumber(Table<Person> t, int n)
+        {
+            var v = from col in t
+                    where col.Age <= n
+                    select col;
+            return boolReturn(v.Count);
+        }
+
+        private bool PropertyLargerThanOrEqualsNumber(Table<Person> t, int n)
+        {
+            var v = from col in t
+                    where col.Age >= n
+                    select col;
+            return boolReturn(v.Count);
+        }
+
+        private bool PropertyLargerThanNumber(Table<Person> t, int n)
+        {
+            var v = from col in t
+                    where col.Age > n
+                    select col;
+            return boolReturn(v.Count);
         }
 
         private bool PropertyEqualsString(Table<Person> t, string s) 
@@ -254,10 +261,7 @@ namespace GenDB
             var v = from col in t
                     where col.Name == s
                     select col;
-            if(v.Count>0)
-                return true;
-            else
-                return false;
+            return boolReturn(v.Count);
         }
 
         private bool PropertyEqualsEnum(Table<Person> t, Sex e)
@@ -265,10 +269,7 @@ namespace GenDB
             var v = from col in t
                     where col.Sex == e
                     select col;
-            if(v.Count>0)
-                return true;
-            else
-                return false;
+            return boolReturn(v.Count);
         }
 
         private bool StringAndAlsoNumber(Table<Person> t, string s, int n)
@@ -276,10 +277,7 @@ namespace GenDB
             var v = from col in t
                     where col.Name == s && col.Age == n
                     select col;
-            if(v.Count>0)
-                return true;
-            else
-                return false;
+            return boolReturn(v.Count);
         }
 
         private bool StringOrElseNumber(Table<Person> t, string s, int n)
@@ -287,10 +285,7 @@ namespace GenDB
             var v = from col in t
                     where col.Name == s || col.Age == n
                     select col;
-            if(v.Count>0)
-                return true;
-            else
-                return false;
+            return boolReturn(v.Count);
         }
 
         private bool PropertyEqualsReference(Table<Person> t, Person p)
@@ -298,10 +293,13 @@ namespace GenDB
             var v = from col in t
                     where col.Spouse == p
                     select col;
-            if(v.Count>0)
-                return true;
-            else
-                return false;
+            return boolReturn(v.Count);
+        }
+
+        private bool boolReturn(int n)
+        {
+            if(n>0) return true;
+            else return false;
         }
 
         #endregion
