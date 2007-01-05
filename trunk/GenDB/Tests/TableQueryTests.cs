@@ -232,21 +232,21 @@ namespace GenDB
             return boolReturn(v.Count);
         }
 
-        private bool PropertyLessThanOrEqualsNumber(Table<Person> t, int n)
-        {
-            var v = from col in t
-                    where col.Age <= n
-                    select col;
-            return boolReturn(v.Count);
-        }
+        //private bool PropertyLessThanOrEqualsNumber(Table<Person> t, int n)
+        //{
+        //    var v = from col in t
+        //            where col.Age <= n
+        //            select col;
+        //    return boolReturn(v.Count);
+        //}
 
-        private bool PropertyLargerThanOrEqualsNumber(Table<Person> t, int n)
-        {
-            var v = from col in t
-                    where col.Age >= n
-                    select col;
-            return boolReturn(v.Count);
-        }
+        //private bool PropertyLargerThanOrEqualsNumber(Table<Person> t, int n)
+        //{
+        //    var v = from col in t
+        //            where col.Age >= n
+        //            select col;
+        //    return boolReturn(v.Count);
+        //}
 
         private bool PropertyLargerThanNumber(Table<Person> t, int n)
         {
