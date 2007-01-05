@@ -162,10 +162,65 @@ namespace GenDB.DB
         //Node
         public void VisitOPEquals(OP_Equals eq)
         {
-            eq.Left.AcceptVisitor(this);
-            wherePart.Append ('=');
-            eq.Right.AcceptVisitor (this);
+            bool leftIsNullReference=false;
+            bool rightIsNullReference=false;
+            if(eq.Left is VarReference )
+            {
+                VarReference lv = (VarReference) eq.Left;    
+                if(lv.Value.IsNullReference)
+                {
+                    leftIsNullReference = true;
+                }
+            }    
+            else if(eq.Right is VarReference)
+            {                                  
+                VarReference rv = (VarReference) eq.Right;
+                if(rv.Value.IsNullReference)
+                {
+                    rightIsNullReference=true;
+                }
+            }
+
+            if(!leftIsNullReference && !rightIsNullReference)
+            {
+                eq.Left.AcceptVisitor (this);
+                wherePart.Append ('=');
+                eq.Right.AcceptVisitor (this);
+            } 
+            else if(leftIsNullReference)
+            {
+                eq.Right.AcceptVisitor(this);
+                wherePart.Append("IS NULL");
+            } 
+            else if(rightIsNullReference)
+            {
+                eq.Left.AcceptVisitor(this);
+                wherePart.Append("IS NULL");
+            }
         }
+        
+        public void VisitOPNotEquals(OP_NotEquals neq)
+        {
+            //bool LeftIsNullReference=false;
+            //bool RightIsNullRefernce=false;
+            //if(neq.Left is VarReference)
+            //{
+            //    VarReference lv = (VarReference) 
+            //}
+
+
+            neq.Left.AcceptVisitor(this);
+            wherePart.Append (" <> ");
+            neq.Right.AcceptVisitor (this);
+        }
+        
+        public void VisitNotExpr(ExprNot expr)
+        {
+            wherePart.Append (" NOT ( ");
+            expr.Expression.AcceptVisitor(this);
+            wherePart.Append (") ");
+        }
+
 
         public void VisitOPLessThan(OP_LessThan lt)
         {
@@ -176,26 +231,12 @@ namespace GenDB.DB
 
         public void VisitOPGreaterThan(OP_GreaterThan gt)
         {
-
             gt.Left.AcceptVisitor(this);
             wherePart.Append ('>');
             gt.Right.AcceptVisitor (this);
         }
 
-        public void VisitOPNotEquals(OP_NotEquals neq)
-        {
 
-            neq.Left.AcceptVisitor(this);
-            wherePart.Append (" <> ");
-            neq.Right.AcceptVisitor (this);
-        }
-
-        public void VisitNotExpr(ExprNot expr)
-        {
-            wherePart.Append (" NOT ( ");
-            expr.Expression.AcceptVisitor(this);
-            wherePart.Append (") ");
-        }
 
         public void VisitAndExpr(ExprAnd expr)
         {
