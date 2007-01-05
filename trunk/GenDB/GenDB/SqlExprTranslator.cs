@@ -239,41 +239,47 @@ namespace GenDB
                     LambdaExpression le = (LambdaExpression) expr;
                     BinaryExpression be = (BinaryExpression) le.Body;
                     IExpression left, right;
-                    string typeName;
-
-                    // doing the left hand side
-                    typeName = be.Left.GetType().Name;
-                    if(typeName=="BinaryExpression")
+                    
+                    // doing the left hand side  
+                    if(be.Left is BinaryExpression)
                     {
                         BinaryExpression b_tmp = (BinaryExpression) be.Left;
                         left = VisitBinaryExpression(b_tmp);
                     }
-                    else if(typeName=="MethodCallExpression")
+                    else if(be.Left is MethodCallExpression)
                     {
                         MethodCallExpression m_tmp = (MethodCallExpression) be.Left;
                         left = VisitMethodCall(m_tmp);
                     }
                     else
-                        throw new Exception("Expression type unkown "+typeName);
+                        throw new Exception("Expression type unkown "+be.Left.ToString());
                    
                     // doing the right hand side
-                    typeName = be.Right.GetType().Name;
-                    if(typeName=="BinaryExpression")
+                    if(be.Right is BinaryExpression)
                     {
-                        BinaryExpression b_tmp = (BinaryExpression) be.Right;
-                        right = VisitBinaryExpression(b_tmp);
+                        right = VisitBinaryExpression((BinaryExpression) be.Right);
                     }
-                    else if(typeName=="MethodCallExpression")
+                    else if(be.Right is MethodCallExpression)
                     {
-                        MethodCallExpression m_tmp = (MethodCallExpression) be.Right;
-                        right = VisitMethodCall(m_tmp);
+                        right = VisitMethodCall((MethodCallExpression) be.Right);
                     }
                     else
-                        throw new Exception("Expression type unkown "+typeName);
+                        throw new Exception("Expression type unkown "+be.Right.ToString());
  
                     return new GenDB.ExprOr(left, right);
                 }
                 else if(mecstr.StartsWith("GE("))
+                {
+                    LambdaExpression le = (LambdaExpression) expr;
+                    BinaryExpression be = (BinaryExpression) le.Body;
+                    IExpression left, right;
+                    if(be.Left is MemberExpression)
+                    {
+                        throw new Exception("member");
+                    }
+                    throw new Exception("not implemented "+expr);
+                }
+                else if(mecstr.StartsWith("LE("))
                 {
                     throw new Exception("not implemented");
                 }
