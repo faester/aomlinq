@@ -386,7 +386,8 @@ namespace GenDB
 
         public IBOReference Value
         {
-            get { 
+            get 
+            { 
                 if (referencedObject == null || referencedObject.DBTag == null)
                 {
                     return new IBOReference(true);
