@@ -199,16 +199,14 @@ namespace GenDB
                 {
                     BinaryExpression be = (BinaryExpression) lambda.Body;
                     IExpression left, right;
-                    string typeName;
                     
                     // doing the left hand side
-                    typeName = be.Left.GetType().Name;
-                    if(be.Left.GetType().Name.ToString()=="BinaryExpression")
+                    if(be.Left is BinaryExpression)
                     {
                         BinaryExpression b_tmp = (BinaryExpression) be.Left;
                         left = VisitBinaryExpression(b_tmp);
                     }
-                    else if(typeName=="MethodCallExpression")
+                    else if(be.Left is MethodCallExpression)
                     {
                         MethodCallExpression m_tmp = (MethodCallExpression) be.Left;
                         left = VisitMethodCall(m_tmp);
@@ -217,19 +215,18 @@ namespace GenDB
                         throw new Exception("Expression type unknown "+be.Left.GetType().Name);
 
                     // doing the right hand side
-                    typeName = be.Right.GetType().Name;
-                    if(typeName=="BinaryExpression")
+                    if(be.Right is BinaryExpression)
                     {
                         BinaryExpression b_tmp = (BinaryExpression) be.Right;
                         right = VisitBinaryExpression(b_tmp);
                     } 
-                    else if(typeName=="MethodCallExpression")
+                    else if(be.Right is MethodCallExpression)
                     {
                         MethodCallExpression m_tmp = (MethodCallExpression) be.Right;
                         right = VisitMethodCall(m_tmp);
                     }
                     else 
-                        throw new Exception("Expression type unknown "+typeName);
+                        throw new Exception("Expression type unknown "+be.Right.ToString());
                     
                     return new GenDB.ExprAnd(left, right);
                 
@@ -285,6 +282,9 @@ namespace GenDB
                 }
                 else
                 {
+                    LambdaExpression le = (LambdaExpression) expr;
+                    BinaryExpression be = (BinaryExpression) le.Body;
+                    throw new Exception(""+expr);
                     throw new Exception("Can not translate method name " + mecstr);
                 }
             }
