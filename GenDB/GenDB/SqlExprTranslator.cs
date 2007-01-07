@@ -137,6 +137,8 @@ namespace GenDB
                 return new GenDB.OP_Equals (parArr[0], parArr[1]);
             else if(nodeType=="NE")
                 return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
+            else if(nodeType=="GE")
+                return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
             else
                 throw new Exception("NodeType unknown "+expr.NodeType.ToString());
         }
@@ -287,7 +289,25 @@ namespace GenDB
                 else if(mecstr.StartsWith("Not("))
                 {
                     UnaryExpression ue = (UnaryExpression)lambda.Body;
-                    return VisitExpr(ue);
+                    
+                    if(ue.Operand.NodeType.ToString() == "EQ")
+                        return VisitExpr(ue);
+                    else if(ue.Operand.NodeType.ToString() == "GE")
+                    {
+                        BinaryExpression operand = (BinaryExpression)ue.Operand;
+                        BinaryExpression be = MakeBinaryExpression(ExpressionType.LT, operand.Left, operand.Right);
+                        return VisitBinaryExpression(be);
+                    }
+                    else if(ue.Operand.NodeType.ToString() == "LE")
+                    {
+                        BinaryExpression operand = (BinaryExpression)ue.Operand;
+                        BinaryExpression be = MakeBinaryExpression(ExpressionType.GT, operand.Left, operand.Right);
+                        return VisitBinaryExpression(be);
+                    }
+                    else if(ue.Operand.NodeType.ToString() == "GT" || ue.Operand.NodeType.ToString() == "LT")
+                        return VisitExpr(ue);
+                    else
+                        throw new Exception("Unknown Operand.NodeType: "+ue.Operand.NodeType.ToString());
                 }
                 else
                 {
