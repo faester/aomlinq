@@ -277,7 +277,6 @@ namespace GenDB
                     BinaryExpression be = (BinaryExpression)lambda.Body;
                     UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.LT(be.Left,be.Right), expr.Type);
                     return VisitExpr(ue);
-                    //throw new Exception("not implemented "+expr);
                 }
                 else if(mecstr.StartsWith("LE("))
                 {
@@ -290,7 +289,7 @@ namespace GenDB
                 {
                     UnaryExpression ue = (UnaryExpression)lambda.Body;
                     
-                    if(ue.Operand.NodeType.ToString() == "EQ")
+                    if(ue.Operand.NodeType.ToString() == "EQ" || ue.Operand.NodeType.ToString() == "NE")
                         return VisitExpr(ue);
                     else if(ue.Operand.NodeType.ToString() == "GE")
                     {
