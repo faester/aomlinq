@@ -82,7 +82,7 @@ namespace GenDB
             }
             else if(be.Left is UnaryExpression)
             {
-                parArr[0] = VisitUnaryExpression((UnaryExpression)be.Left);
+                parArr[0] = VisitUnaryExpressionValue((UnaryExpression)be.Left);
             }
 
             // doing the right side
@@ -141,7 +141,12 @@ namespace GenDB
                 throw new Exception("NodeType unknown "+expr.NodeType.ToString());
         }
 
-        internal IValue VisitUnaryExpression(UnaryExpression ue)
+        internal IExpression VisitUnaryExpression(UnaryExpression ue)
+        {
+            throw new Exception("not implemented");
+        }
+
+        internal IValue VisitUnaryExpressionValue(UnaryExpression ue)
         {
             string exprType = ue.Operand.GetType().Name;
             if(exprType=="MemberExpression")
@@ -186,7 +191,7 @@ namespace GenDB
             {
                 LambdaExpression lambda = (LambdaExpression)expr;
                 string mecstr = lambda.Body.ToString();
-            
+
                 if (mecstr.StartsWith("op_Equality(") || mecstr.StartsWith("op_Inequality"))
                 {
                     return VisitMethodCall((MethodCallExpression) lambda.Body);                
@@ -233,8 +238,7 @@ namespace GenDB
                 }
                 else if(mecstr.StartsWith("OrElse("))
                 {
-                    LambdaExpression le = (LambdaExpression) expr;
-                    BinaryExpression be = (BinaryExpression) le.Body;
+                    BinaryExpression be = (BinaryExpression) lambda.Body;
                     IExpression left, right;
                     
                     // doing the left hand side  
@@ -267,8 +271,7 @@ namespace GenDB
                 }
                 else if(mecstr.StartsWith("GE("))
                 {
-                    LambdaExpression le = (LambdaExpression) expr;
-                    BinaryExpression be = (BinaryExpression) le.Body;
+                    BinaryExpression be = (BinaryExpression) lambda.Body;
                     IExpression left, right;
                     if(be.Left is MemberExpression)
                     {
@@ -280,11 +283,13 @@ namespace GenDB
                 {
                     throw new Exception("not implemented");
                 }
+                else if(mecstr.StartsWith("Not("))
+                {
+                    UnaryExpression ue = (UnaryExpression)lambda.Body;
+                    return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
+                }
                 else
                 {
-                    LambdaExpression le = (LambdaExpression) expr;
-                    BinaryExpression be = (BinaryExpression) le.Body;
-                    throw new Exception(""+expr);
                     throw new Exception("Can not translate method name " + mecstr);
                 }
             }
@@ -545,7 +550,6 @@ namespace GenDB
         internal IWhereable Visit(Expression exp)
         //internal Expression Visit(Expression exp)
         {
-
             if (exp == null)
             {
                 Console.WriteLine("Call to Visit: NodeType=null");
