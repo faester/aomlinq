@@ -182,7 +182,7 @@ namespace GenDB
         }
 
         [Test]
-        public void EqualityAndLessOrLarger()
+        public void EqualityLessOrLarger()
         {
             Assert.IsTrue(PropertyLessThanNumber(tp,trueInt),"Age less than should exist");
             Assert.IsTrue(PropertyLargerThanNumber(tp,trueInt),"Age larger than should exist");
@@ -207,8 +207,32 @@ namespace GenDB
         [Test]
         public void Not()
         {
-            Assert.IsTrue(NotExpression(tp,trueInt),"Age should exist");
-            Assert.IsFalse(NotExpression(tp, falseInt),"Age should not exist");
+            // GT
+            Assert.IsTrue(NotGTExpression(tp,trueInt),"Age should exist");
+            Assert.IsFalse(NotGTExpression(tp, falseInt),"Age should not exist");
+            // LT
+            Assert.IsTrue(NotLTExpression(tp,trueInt), "Age should exist");
+            Assert.IsFalse(NotLTExpression(tp,largeInt), "Age should not exist");
+            //GTorEQ
+            Assert.IsTrue(NotGTorEQ(tp,trueInt), "Age should exist");
+            Assert.IsFalse(NotGTorEQ(tp, falseInt), "Age should not exist");
+            //LTorEQ
+            Assert.IsTrue(NotLTorEQ(tp, trueInt), "Age should exist");
+            Assert.IsFalse(NotLTorEQ(tp, largeInt), "Age should not exist");
+        }
+
+        [Test]
+        public void LessOrEqual()
+        {
+            Assert.IsTrue(PropertyLessThanOrEqualsNumber(tp,trueInt),"Age should exist");
+            Assert.IsFalse(PropertyLessThanOrEqualsNumber(tp,falseInt),"Age should not exist");
+        }
+
+        [Test]
+        public void LargerOrEqual()
+        {
+            Assert.IsTrue(PropertyLargerThanOrEqualsNumber(tp,trueInt),"Age should exist");
+            Assert.IsFalse(PropertyLargerThanOrEqualsNumber(tp,largeInt),"Age should not exist");
         }
 
         #endregion
@@ -239,21 +263,21 @@ namespace GenDB
             return boolReturn(v.Count);
         }
 
-        //private bool PropertyLessThanOrEqualsNumber(Table<Person> t, int n)
-        //{
-        //    var v = from col in t
-        //            where col.Age <= n
-        //            select col;
-        //    return boolReturn(v.Count);
-        //}
+        private bool PropertyLessThanOrEqualsNumber(Table<Person> t, int n)
+        {
+            var v = from col in t
+                    where col.Age <= n
+                    select col;
+            return boolReturn(v.Count);
+        }
 
-        //private bool PropertyLargerThanOrEqualsNumber(Table<Person> t, int n)
-        //{
-        //    var v = from col in t
-        //            where col.Age >= n
-        //            select col;
-        //    return boolReturn(v.Count);
-        //}
+        private bool PropertyLargerThanOrEqualsNumber(Table<Person> t, int n)
+        {
+            var v = from col in t
+                    where col.Age >= n
+                    select col;
+            return boolReturn(v.Count);
+        }
 
         private bool PropertyLargerThanNumber(Table<Person> t, int n)
         {
@@ -303,10 +327,34 @@ namespace GenDB
             return boolReturn(v.Count);
         }
 
-        private bool NotExpression(Table<Person> t, int n)
+        private bool NotGTExpression(Table<Person> t, int n)
         {
             var v = from col in t
-                    where !(col.Age>n)
+                    where !(col.Age > n)
+                    select col;
+            return boolReturn(v.Count);
+        }
+
+        private bool NotLTExpression(Table<Person> t, int n)
+        {
+            var v = from col in t
+                    where !(col.Age < n)
+                    select col;
+            return boolReturn(v.Count);
+        }
+
+        private bool NotGTorEQ(Table<Person> t, int n)
+        {
+            var v = from col in t
+                    where !(col.Age >= n)
+                    select col;
+            return boolReturn(v.Count);
+        }
+
+        private bool NotLTorEQ(Table<Person> t, int n)
+        {
+            var v = from col in t
+                    where !(col.Age <= n)
                     select col;
             return boolReturn(v.Count);
         }
