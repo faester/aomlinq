@@ -71,6 +71,7 @@ namespace GenDB
                 get { return name; }
                 set { name = value; }
             }
+
             private Person spouse = null;
 
             public Person Spouse
@@ -131,10 +132,11 @@ namespace GenDB
             
             var es = from epp in tp
                      //where epp.Age >= 3
+                     where !(epp.Age>3)
                      //where epp.Name == "Navn 3"
                      //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                      //where epp.Name == "Navn 6" || epp.Age == 7
-                     where epp.Spouse == null
+                     //where epp.Spouse != null
                      //where epp.Age == tp.Max(ep => ep.Age)
                      select epp;
 

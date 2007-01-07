@@ -204,6 +204,13 @@ namespace GenDB
             Assert.IsTrue(StringAndAlsoNumber(tp,trueStr,trueInt),"Name(true) AND Age(true) should exist");
         }
 
+        [Test]
+        public void Not()
+        {
+            Assert.IsTrue(NotExpression(tp,trueInt),"Age should exist");
+            Assert.IsFalse(NotExpression(tp, falseInt),"Age should not exist");
+        }
+
         #endregion
 
         #region TestHelpers
@@ -292,6 +299,14 @@ namespace GenDB
         {
             var v = from col in t
                     where col.Spouse == p
+                    select col;
+            return boolReturn(v.Count);
+        }
+
+        private bool NotExpression(Table<Person> t, int n)
+        {
+            var v = from col in t
+                    where !(col.Age>n)
                     select col;
             return boolReturn(v.Count);
         }
