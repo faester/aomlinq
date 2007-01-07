@@ -207,18 +207,25 @@ namespace GenDB
         [Test]
         public void Not()
         {
-            // GT
+            // GT, number
             Assert.IsTrue(NotGTExpression(tp,trueInt),"Age should exist");
             Assert.IsFalse(NotGTExpression(tp, falseInt),"Age should not exist");
-            // LT
+            // LT, number
             Assert.IsTrue(NotLTExpression(tp,trueInt), "Age should exist");
             Assert.IsFalse(NotLTExpression(tp,largeInt), "Age should not exist");
-            //GTorEQ
+            //GTorEQ, number
             Assert.IsTrue(NotGTorEQ(tp,trueInt), "Age should exist");
             Assert.IsFalse(NotGTorEQ(tp, falseInt), "Age should not exist");
-            //LTorEQ
+            //LTorEQ, number
             Assert.IsTrue(NotLTorEQ(tp, trueInt), "Age should exist");
             Assert.IsFalse(NotLTorEQ(tp, largeInt), "Age should not exist");
+
+            // NotEq, reference
+            Assert.IsTrue(NotEqReference(tp,johnDoe),"Person should exist");
+            Assert.IsFalse(NotEqReference(tp,spouse),"Person shuld not exist");
+            // NotNe, reference
+            Assert.IsTrue(NotNeReference(tp,spouse),"Person should exist");
+            Assert.IsFalse(NotNeReference(tp,johnDoe),"Person should not exist");
         }
 
         [Test]
@@ -244,7 +251,7 @@ namespace GenDB
             var v = from col in t
                     where col.Age == n
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool PropertyNotEqualsNumber(Table<Person> t, int n)
@@ -252,7 +259,7 @@ namespace GenDB
             var v = from col in t
                     where col.Age != n
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool PropertyLessThanNumber(Table<Person> t, int n)
@@ -260,7 +267,7 @@ namespace GenDB
             var v = from col in t
                     where col.Age < n
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool PropertyLessThanOrEqualsNumber(Table<Person> t, int n)
@@ -268,7 +275,7 @@ namespace GenDB
             var v = from col in t
                     where col.Age <= n
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool PropertyLargerThanOrEqualsNumber(Table<Person> t, int n)
@@ -276,7 +283,7 @@ namespace GenDB
             var v = from col in t
                     where col.Age >= n
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool PropertyLargerThanNumber(Table<Person> t, int n)
@@ -284,7 +291,7 @@ namespace GenDB
             var v = from col in t
                     where col.Age > n
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool PropertyEqualsString(Table<Person> t, string s) 
@@ -292,7 +299,7 @@ namespace GenDB
             var v = from col in t
                     where col.Name == s
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool PropertyEqualsEnum(Table<Person> t, Sex e)
@@ -300,7 +307,7 @@ namespace GenDB
             var v = from col in t
                     where col.Sex == e
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool StringAndAlsoNumber(Table<Person> t, string s, int n)
@@ -308,7 +315,7 @@ namespace GenDB
             var v = from col in t
                     where col.Name == s && col.Age == n
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool StringOrElseNumber(Table<Person> t, string s, int n)
@@ -316,7 +323,7 @@ namespace GenDB
             var v = from col in t
                     where col.Name == s || col.Age == n
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool PropertyEqualsReference(Table<Person> t, Person p)
@@ -324,7 +331,7 @@ namespace GenDB
             var v = from col in t
                     where col.Spouse == p
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool NotGTExpression(Table<Person> t, int n)
@@ -332,7 +339,7 @@ namespace GenDB
             var v = from col in t
                     where !(col.Age > n)
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool NotLTExpression(Table<Person> t, int n)
@@ -340,7 +347,7 @@ namespace GenDB
             var v = from col in t
                     where !(col.Age < n)
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool NotGTorEQ(Table<Person> t, int n)
@@ -348,7 +355,7 @@ namespace GenDB
             var v = from col in t
                     where !(col.Age >= n)
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
         private bool NotLTorEQ(Table<Person> t, int n)
@@ -356,11 +363,28 @@ namespace GenDB
             var v = from col in t
                     where !(col.Age <= n)
                     select col;
-            return boolReturn(v.Count);
+            return HasAtLeastOne(v);
         }
 
-        private bool boolReturn(int n)
+        private bool NotEqReference(Table<Person> t, Person p)
         {
+            var v = from col in t
+                    where !(col.Spouse==p)
+                    select col;
+            return HasAtLeastOne(v);
+        }
+
+        private bool NotNeReference(Table<Person> t, Person p)
+        {
+            var v = from col in t
+                    where !(col.Spouse != p)
+                    select col;
+            return HasAtLeastOne(v);
+        }
+
+        private bool HasAtLeastOne(Table<Person> v)
+        {
+            int n = v.Count;
             if(n>0) return true;
             else return false;
         }
