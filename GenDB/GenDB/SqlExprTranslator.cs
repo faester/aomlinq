@@ -271,30 +271,36 @@ namespace GenDB
                 }
                 else if(mecstr.StartsWith("GE("))
                 {
-                    BinaryExpression be = (BinaryExpression) lambda.Body;
-                    IExpression left, right;
-                    if(be.Left is MemberExpression)
-                    {
-                        throw new Exception("member");
-                    }
-                    throw new Exception("not implemented "+expr);
+                    // = !(x < y)
+                    BinaryExpression be = (BinaryExpression)lambda.Body;
+                    UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.LT(be.Left,be.Right), expr.Type);
+                    return VisitExpr(ue);
+                    //throw new Exception("not implemented "+expr);
                 }
                 else if(mecstr.StartsWith("LE("))
                 {
-                    throw new Exception("not implemented");
+                    // = !(x > y) 
+                    BinaryExpression be = (BinaryExpression)lambda.Body;
+                    UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.GT(be.Left,be.Right), expr.Type);
+                    return VisitExpr(ue);
                 }
                 else if(mecstr.StartsWith("Not("))
                 {
                     UnaryExpression ue = (UnaryExpression)lambda.Body;
-                    return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
+                    return VisitExpr(ue);
                 }
                 else
                 {
                     throw new Exception("Can not translate method name " + mecstr);
                 }
             }
+            else if(expr.NodeType.ToString()=="Not")
+            {
+                UnaryExpression ue = (UnaryExpression) expr;
+                return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
+            }
             else 
-                throw new Exception("sd");
+                throw new Exception("unknown expression type: "+expr);
         }
 
         internal IWhereable VisitEqExpr(Expression exp)
