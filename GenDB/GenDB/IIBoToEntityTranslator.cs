@@ -7,6 +7,8 @@ namespace GenDB
 {
     internal interface IIBoToEntityTranslator
     {
+        IEntityType EntityType { get; }
+
         IBusinessObject Translate(IEntity e);
 
         IEntity Translate (IBusinessObject ibo);

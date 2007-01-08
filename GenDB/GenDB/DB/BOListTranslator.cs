@@ -9,17 +9,6 @@ using System.Reflection;
 
 namespace GenDB.DB
 {
-    //class OneElement<T>
-    //{
-    //    T theElement;
-
-    //    public T TheElement
-    //    {
-    //        get { return theElement; }
-    //        set { theElement = value; }
-    //    }
-
-    //}
 
     /// <summary>
     /// The list translator does not instantiate the collection it self. 
@@ -28,26 +17,47 @@ namespace GenDB.DB
     /// </summary>
     class BOListTranslator : IIBoToEntityTranslator
     {
-        Type typeOfBOList = typeof(BOList<>);
-        IEntityType genericBOListEntityType = null;
+        static Type typeOfBOList = typeof(BOList<>);
 
+        InstantiateObjectHandler instantiator;
 
-        //public void HowTheFuck()
-        //{
-        //    OneElement<t> e = new OneElement<t>();
+        IEntityType entityType;
+        Type clrType;
 
-        //    Type theType = typeof(int);
-        //    object o = typeOfBOList.MakeGenericType(theType);
-        //}
+        public IEntityType EntityType
+        {
+            get { return entityType; }
+        }
+
+        private BOListTranslator() { /* empty */ }
+
+        /// <summary>
+        /// If entityType is null, a new IEntityType instance will be created
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="entityType">entityType to use. If entityType is null, a new IEntityType instance will be created</param>
+        public BOListTranslator(Type t, IEntityType entityType)
+        {
+            this.clrType = t;
+            if (clrType.GetGenericTypeDefinition() != typeOfBOList)
+            {
+                throw new NotTranslatableException("Internal error. BOList translator was invoked on wrong type. (Should be BOList<>)", t);
+            }
+            if (entityType == null)
+            {
+                this.entityType = BOListEntityType();
+            }
+            else 
+            {
+                this.entityType = entityType;
+            }
+            instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
+        }
 
         public IBusinessObject Translate(IEntity ie)
         {
             IBusinessObject res = IBOCache.Get(ie.EntityPOID);
-            if (res != null)
-            {
-                return res;
-            }
-            else
+            if (res == null)
             {
                 IProperty elementTypeProperty = ie.EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
                 long elementEntityTypePOID = ie.GetPropertyValue(elementTypeProperty).LongValue;
@@ -55,28 +65,15 @@ namespace GenDB.DB
 
                 Type elementType = TypeSystem.GetClrType(elementEntityType);
 
-                return (IBusinessObject)typeOfBOList.MakeGenericType(elementType);
+                res = (IBusinessObject)instantiator();
+                DBTag.AssignDBTagTo(res, ie.EntityPOID);
             }
+            return res;
         }
 
         public IEntity Translate(IBusinessObject ibo)
         {
-            Type t = ibo.GetType();
-            if (t.GetGenericTypeDefinition() != typeOfBOList)
-            {
-                throw new NotTranslatableException("Internal error. BOList translator was invoked on wrong type. (Should be BOList<>)", ibo.GetType());
-            }
-            Type elementType = t.GetGenericArguments()[0];
-
-            if (!TypeSystem.IsTypeKnown (typeOfBOList))
-            {
-                genericBOListEntityType = BOListEntityType();
-                TypeSystem.RegisterType(genericBOListEntityType);
-            }
-            else if (genericBOListEntityType == null)
-            {
-                genericBOListEntityType = TypeSystem.GetEntityType(typeOfBOList);
-            }
+            Type elementType = clrType.GetGenericArguments()[0];
 
             if (!TypeSystem.IsTypeKnown (elementType))
             {
@@ -87,23 +84,23 @@ namespace GenDB.DB
 
             IEntity e = null;
 
-            //if (ibo.DBTag != null)
-            //{
-            //    e = Configuration.GenDB.GetEntity(ibo.DBTag.EntityPOID);
-            //}
-            //else
-            //{
             e = Configuration.GenDB.NewEntity();
-            IProperty elementTypeProperty = genericBOListEntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
+            IProperty elementTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
+            elementTypeProperty.MappingType = MappingType.REFERENCE;
             IPropertyValue pv = Configuration.GenDB.NewPropertyValue();
             pv.LongValue = elementEntityType.EntityTypePOID;
-            e.EntityType = genericBOListEntityType;
+            e.EntityType = entityType;
             pv.Property = elementTypeProperty;
             pv.Entity = e;
             e.StorePropertyValue(pv);
-            if (ibo.DBTag != null) { e.EntityPOID = ibo.DBTag.EntityPOID; }
-            else { DBTag.AssignDBTagTo(ibo, e.EntityPOID); }
-            //}
+            if (ibo.DBTag != null) 
+            { 
+                e.EntityPOID = ibo.DBTag.EntityPOID; 
+            }
+            else
+            { 
+                DBTag.AssignDBTagTo(ibo, e.EntityPOID); 
+            }
 
             return e;
         }
@@ -134,11 +131,10 @@ namespace GenDB.DB
        
         private IEntityType BOListEntityType()
         {
-            IEntityType res = Configuration.GenDB.NewEntityType(typeOfBOList.FullName);
+            IEntityType res = Configuration.GenDB.NewEntityType();
             res.IsList = true;
-            res.AssemblyDescription = typeOfBOList.Assembly.FullName;
-            
-            res.Name = typeOfBOList.FullName;
+            res.AssemblyDescription = clrType.Assembly.FullName;
+            res.Name = clrType.FullName;
 
             IPropertyType pt = TypeSystem.GetPropertyType(typeof(long).FullName);
             IProperty property = Configuration.GenDB.NewProperty();

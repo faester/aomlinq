@@ -41,14 +41,15 @@ namespace GenDB
 
         private void Set(int idx, T t)
         {
-            if (theList.Capacity < idx)
+            if (theList.Count <= idx)
             {
-                for (int i = theList.Capacity; i < idx; i++)
+                for (int i = theList.Count; i <= idx; i++)
                 {
                     theList.Add(default(T));
                 }
             }
-
+            
+            
             theList[idx] = t;
         }
 
@@ -69,7 +70,8 @@ namespace GenDB
 
                 foreach (IGenCollectionElement ce in Configuration.GenDB.AllElements(DBTag.EntityPOID))
                 {
-                    Set(ce.ElementIndex, (T)cnv.Translate(ce));
+                    T value = (T)cnv.Translate (ce);
+                    Set(ce.ElementIndex, value);
                 }
             }
         }
@@ -197,7 +199,7 @@ namespace GenDB
                 this.mt = mt;
             }
 
-            public object Translate(GenCollectionElement ce)
+            public object Translate(IGenCollectionElement ce)
             {
                 switch (mt)
                 {
