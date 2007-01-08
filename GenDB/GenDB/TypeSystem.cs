@@ -223,10 +223,17 @@ namespace GenDB
 
         public static IEntityType ConstructEntityType(Type t)
         {
-            if (t.IsGenericType) // TODO: Needs better checking
+            if (t.IsGenericType ) // TODO: Needs better checking
             {
-                IIBoToEntityTranslator trans = Translators.GetTranslator(t, null);
-                return trans.EntityType;
+                if (t.GetGenericTypeDefinition() == BOListTranslator.TypeOfBOList)
+                {
+                    IIBoToEntityTranslator trans = Translators.GetTranslator(t, null);
+                    return trans.EntityType;
+                }
+                else 
+                {
+                    throw new NotTranslatableException ("Don't know how to construct IEntityType for type", t);
+                }
             }
             else
             {
