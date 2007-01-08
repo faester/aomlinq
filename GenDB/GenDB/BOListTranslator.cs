@@ -108,15 +108,19 @@ namespace GenDB
             return e;
         }
 
-        public void SetValues(IBusinessObject ibo, IEntity ie)
-        {
-            throw new Exception("Not implemented.");
-        }
+        /// <summary>
+        /// No action. (Handled internally by the BOList it self)
+        /// </summary>
+        /// <param name="ie"></param>
+        /// <param name="ibo"></param>
+        public void SetValues(IBusinessObject ibo, IEntity ie) { /* empty */ }
 
-        public void SetValues(IEntity ie, IBusinessObject ibo)
-        {
-            throw new Exception("Not implemented.");
-        }
+        /// <summary>
+        /// No action. (Handled internally by the BOList it self)
+        /// </summary>
+        /// <param name="ie"></param>
+        /// <param name="ibo"></param>
+        public void SetValues(IEntity ie, IBusinessObject ibo) { /* empty */ }
 
         public void SaveToDB(IGenericDatabase db, IBusinessObject ibo)
         {
