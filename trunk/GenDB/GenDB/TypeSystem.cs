@@ -272,6 +272,7 @@ namespace GenDB
 
         public static MappingType FindMappingType(Type t)
         {
+            Console.WriteLine("Finding mapping type for {0}", t);
             if (t == null) { throw new NullReferenceException("Type t"); }
             if (t.IsEnum)
             {
