@@ -15,7 +15,7 @@ namespace GenDB
     {
         List<T> theList = new List<T>();
         bool isReadOnly;
-        bool isElementsRetrieved = false;
+        bool isListPopulated = false;
         MappingType mt;
 
         public BOList()
@@ -39,7 +39,7 @@ namespace GenDB
 
         private void RetrieveElements()
         {
-            isElementsRetrieved = true;
+            isListPopulated = true;
 
             /* 
              * Elements can only exist in the DB
@@ -70,61 +70,61 @@ namespace GenDB
         {
             get
             {
-                if (!isElementsRetrieved) { this.RetrieveElements(); }
+                if (!isListPopulated) { this.RetrieveElements(); }
                 return theList[idx];
             }
             set
             {
-                if (!isElementsRetrieved) { this.RetrieveElements(); }
+                if (!isListPopulated) { this.RetrieveElements(); }
                 theList[idx] = value;
             }
         }
 
         public int IndexOf(T t)
         {
-            if (!isElementsRetrieved) { this.RetrieveElements(); }
+            if (!isListPopulated) { this.RetrieveElements(); }
             return theList.IndexOf(t);
         }
 
         public void Insert(int idx, T item)
         {
-            if (!isElementsRetrieved) { this.RetrieveElements(); }
+            if (!isListPopulated) { this.RetrieveElements(); }
             theList.Insert(idx, item);
         }
 
         public void RemoveAt(int idx)
         {
-            if (!isElementsRetrieved) { this.RetrieveElements(); }
+            if (!isListPopulated) { this.RetrieveElements(); }
             theList.RemoveAt(idx);
         }
 
         public void Add(T item)
         {
-            if (!isElementsRetrieved) { this.RetrieveElements(); }
+            if (!isListPopulated) { this.RetrieveElements(); }
             theList.Add(item);
         }
 
         public void Clear()
         {
-            if (!isElementsRetrieved) { this.RetrieveElements(); }
+            if (!isListPopulated) { this.RetrieveElements(); }
             theList.Clear();
         }
 
         public bool Contains(T item)
         {
-            if (!isElementsRetrieved) { this.RetrieveElements(); }
+            if (!isListPopulated) { this.RetrieveElements(); }
             return theList.Contains(item);
         }
 
         public void CopyTo(T[] arr, int idx)
         {
-            if (!isElementsRetrieved) { this.RetrieveElements(); }
+            if (!isListPopulated) { this.RetrieveElements(); }
             theList.CopyTo(arr, idx);
         }
 
         public bool Remove(T item)
         {
-            if (!isElementsRetrieved) { this.RetrieveElements(); }
+            if (!isListPopulated) { this.RetrieveElements(); }
             return theList.Remove(item);
         }
 
@@ -132,14 +132,14 @@ namespace GenDB
         {
             get
             {
-                if (!isElementsRetrieved) { this.RetrieveElements(); }
+                if (!isListPopulated) { this.RetrieveElements(); }
                 return theList.Count;
             }
         }
 
         public System.Collections.Generic.IEnumerator<T> GetEnumerator()
         {
-            if (!isElementsRetrieved) { this.RetrieveElements(); }
+            if (!isListPopulated) { this.RetrieveElements(); }
             return theList.GetEnumerator();
         }
 
@@ -155,7 +155,7 @@ namespace GenDB
         /// </summary>
         public void SaveElementsToDB()
         {
-            if (!isElementsRetrieved)
+            if (!isListPopulated)
             {
                 return; //Since nothing has been loaded, nothing needs to be saved.
             } 
