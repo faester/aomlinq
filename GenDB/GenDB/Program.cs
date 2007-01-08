@@ -132,7 +132,7 @@ namespace GenDB
             
             var es = from epp in tp
                      //where epp.Age >= 3
-                     //where !(epp.Age <= 3)
+                     //where !(epp.Age <= 3) 
                      //where !(epp.Age == 2)
                      where !(epp.Name != "Navn 3")
                      //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
@@ -148,11 +148,6 @@ namespace GenDB
             }
             
             Console.WriteLine("Size of Table: {0}", es.Count);
-
-            //foreach(int n in es)
-            //{
-            //    Console.WriteLine(n);
-            //}
 
             Console.ReadLine();
         }
