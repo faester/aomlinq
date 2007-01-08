@@ -305,6 +305,10 @@ namespace GenDB
                     }
                     else if(ue.Operand.NodeType.ToString() == "GT" || ue.Operand.NodeType.ToString() == "LT")
                         return VisitExpr(ue);
+                    else if(ue.Operand.NodeType.ToString() == "MethodCall")
+                    {
+                        return new GenDB.ExprNot(VisitMethodCall((MethodCallExpression)ue.Operand));
+                    }
                     else
                         throw new Exception("Unknown Operand.NodeType: "+ue.Operand.NodeType.ToString());
                 }

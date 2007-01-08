@@ -220,6 +220,12 @@ namespace GenDB
             Assert.IsTrue(NotLTorEQ(tp, trueInt), "Age should exist");
             Assert.IsFalse(NotLTorEQ(tp, largeInt), "Age should not exist");
 
+            // NotEq, string
+            Assert.IsTrue(StringNotEquals(tp, trueStr),"Name should exist");
+            // NotNe, string
+            Assert.IsTrue(StringNotEqualsNot(tp, trueStr),"Name should exist");
+            Assert.IsFalse(StringNotEqualsNot(tp, falseStr), "Name should not exist");
+
             // NotEq, reference
             Assert.IsTrue(NotEqReference(tp,johnDoe),"Person should exist");
             Assert.IsFalse(NotEqReference(tp,spouse),"Person shuld not exist");
@@ -330,6 +336,22 @@ namespace GenDB
         {
             var v = from col in t
                     where col.Spouse == p
+                    select col;
+            return HasAtLeastOne(v);
+        }
+
+        private bool StringNotEquals(Table<Person> t, string s)
+        {
+            var v = from col in t
+                    where !(col.Name == s)
+                    select col;
+            return HasAtLeastOne(v);
+        }
+
+        private bool StringNotEqualsNot(Table<Person> t, string s)
+        {
+            var v = from col in t
+                    where !(col.Name != s)
                     select col;
             return HasAtLeastOne(v);
         }
