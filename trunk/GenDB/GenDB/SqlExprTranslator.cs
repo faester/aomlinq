@@ -26,47 +26,46 @@ namespace GenDB
         {
             ReadOnlyCollection<Expression> roc = mce.Parameters;
             IValue[] parArr= new IValue[2];
-
-            if(roc.Count==2) 
-            {   
-                if(roc[0].NodeType.ToString()=="MemberAccess")
-                {
-                    MemberExpression tmp = (MemberExpression)roc[0];                    
-                    Type t = tmp.Expression.Type;
-                    
-                    if(!TypeSystem.IsTypeKnown(t))
+            //throw new Exception("stop");
+ 
+            if(roc[0].NodeType.ToString()=="MemberAccess")
+            {
+                MemberExpression tmp = (MemberExpression)roc[0];                    
+                Type t = tmp.Expression.Type;
+                
+                if(!TypeSystem.IsTypeKnown(t))
                     TypeSystem.RegisterType (t);
-                            
-                    IEntityType et = TypeSystem.GetEntityType(t);
-                    string propstr = tmp.Member.Name;
-                    IProperty po = et.GetProperty(propstr);
+                        
+                IEntityType et = TypeSystem.GetEntityType(t);
+                string propstr = tmp.Member.Name;
+                IProperty po = et.GetProperty(propstr);
 
-                    parArr[0] = new CstProperty(po);
-                        
-                    switch(TypeSystem.FindMappingType(roc[1].Type))
-                    {
-                        case MappingType.STRING:
-                            parArr[1] = new CstString(roc[1].ToString().Trim('"'));
-                            break;
-                        default:
-                            throw new Exception("type not implemented "+TypeSystem.FindMappingType(roc[1].Type));
-                    }
-                        
-                    if(mce.Method.Name=="op_Equality")
-                        return new GenDB.OP_Equals (parArr[0], parArr[1]);
-                    else if(mce.Method.Name=="op_Inequality")
-                        return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
-                    else 
-                        throw new Exception("Method unknown "+mce.Method.Name);
-                }
-                else
+                parArr[0] = new CstProperty(po);
+                    
+                switch(TypeSystem.FindMappingType(roc[1].Type))
                 {
-                    throw new Exception("NodeType unknown");
+                    case MappingType.STRING:
+                        parArr[1] = new CstString(roc[1].ToString().Trim('"'));
+                        break;
+                    default:
+                        throw new Exception("type not implemented "+TypeSystem.FindMappingType(roc[1].Type));
                 }
+                    
+                if(mce.Method.Name=="op_Equality")
+                    return new GenDB.OP_Equals (parArr[0], parArr[1]);
+                else if(mce.Method.Name=="op_Inequality")
+                    return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
+                else 
+                    throw new Exception("Method unknown "+mce.Method.Name);
+            }
+            else if(roc[0].NodeType.ToString()=="Constant")
+            {
+              //  ConstantExpression ce
+                throw new Exception("not implemented");
             }
             else
             {
-                throw new Exception("Can not translate method with more than two parameters");
+                throw new Exception("NodeType unknown: "+roc[0].NodeType.ToString());
             }
         }
 
@@ -110,7 +109,7 @@ namespace GenDB
                     ib = (IBusinessObject) ce.Value;
                     parArr[1] = new VarReference(ib);
                 } 
-                catch(Exception e)
+                catch(Exception)
                 {
                     parArr[1] = CstIsFalse.Instance;
                 }
