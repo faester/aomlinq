@@ -114,7 +114,7 @@ namespace GenDB
             {
                 IEntityType et = ConstructEntityType(t);
                 RegisterType(et);
-                Configuration.GenDB.Save(et);
+                Configuration.GenDB.Save(et) ; //TODO: Is this needed?
                 etid2IEt[et.EntityTypePOID].InitTranslator();
             }
         }
@@ -174,7 +174,7 @@ namespace GenDB
         /// <summary>
         /// Returns the IEntityType given and all sub entity types.
         /// </summary>
-        /// <param name="iet"></param>
+        /// <param name="entityType"></param>
         /// <returns></returns>
         public static IEnumerable<IEntityType> GetEntityTypesInstanceOf(IEntityType iet)
         {
@@ -223,43 +223,51 @@ namespace GenDB
 
         public static IEntityType ConstructEntityType(Type t)
         {
-            IEntityType et = Configuration.GenDB.NewEntityType(t.FullName);
-
-            et.Name = t.FullName;
-            et.AssemblyDescription = t.Assembly.FullName;
-
-            PropertyInfo[] clrProperties = t.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance |
-                                        BindingFlags.Public);
-
-            foreach (PropertyInfo clrProperty in clrProperties)
+            if (t.IsGenericType) // TODO: Needs better checking
             {
-                Attribute volatileAttribute = Attribute.GetCustomAttribute(clrProperty, typeof(Volatile));
-                if (clrProperty.PropertyType != typeof(DBTag) && volatileAttribute == null)
-                {
-                    IProperty property = Configuration.GenDB.NewProperty();
-                    property.PropertyName = clrProperty.Name;
-                    property.PropertyType = GetPropertyType(clrProperty.PropertyType.FullName);
-                    property.MappingType = FindMappingType(clrProperty);
-                    property.EntityType = et;
-                    et.AddProperty(property);
-                }
+                IIBoToEntityTranslator trans = Translators.GetTranslator(t, null);
+                return trans.EntityType;
             }
-
-            Type superType = t.BaseType;
-            if (superType != null && superType != typeof(object))
+            else
             {
-                if (type2IEt.ContainsKey(superType))
+                IEntityType et = Configuration.GenDB.NewEntityType();
+
+                et.Name = t.FullName;
+                et.AssemblyDescription = t.Assembly.FullName;
+
+                PropertyInfo[] clrProperties = t.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance |
+                                            BindingFlags.Public);
+
+                foreach (PropertyInfo clrProperty in clrProperties)
                 {
-                    et.SuperEntityType = type2IEt[superType].Target;
+                    Attribute volatileAttribute = Attribute.GetCustomAttribute(clrProperty, typeof(Volatile));
+                    if (clrProperty.PropertyType != typeof(DBTag) && volatileAttribute == null)
+                    {
+                        IProperty property = Configuration.GenDB.NewProperty();
+                        property.PropertyName = clrProperty.Name;
+                        property.PropertyType = GetPropertyType(clrProperty.PropertyType.FullName);
+                        property.MappingType = FindMappingType(clrProperty);
+                        property.EntityType = et;
+                        et.AddProperty(property);
+                    }
                 }
-                else
+
+                Type superType = t.BaseType;
+                if (superType != null && superType != typeof(object))
                 {
-                    IEntityType set = ConstructEntityType(superType);
-                    RegisterType(set);
-                    et.SuperEntityType = set;
+                    if (type2IEt.ContainsKey(superType))
+                    {
+                        et.SuperEntityType = type2IEt[superType].Target;
+                    }
+                    else
+                    {
+                        IEntityType set = ConstructEntityType(superType);
+                        RegisterType(set);
+                        et.SuperEntityType = set;
+                    }
                 }
+                return et;
             }
-            return et;
         }
 
         public static MappingType FindMappingType(Type t)

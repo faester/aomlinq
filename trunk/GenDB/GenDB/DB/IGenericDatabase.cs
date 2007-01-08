@@ -226,7 +226,7 @@ namespace GenDB.DB
         /// (Should be called by the TypeSystem singleton only)
         /// </summary>
         /// <returns></returns>
-        IEntityType NewEntityType(string name);
+        IEntityType NewEntityType();
 
         IEntity NewEntity();
 

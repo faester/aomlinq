@@ -28,16 +28,22 @@ namespace GenDB
         class IBOTranslator : IIBoToEntityTranslator
         {
             IIBoToEntityTranslator superTranslator = null;
-            IEntityType iet;
+            IEntityType entityType;
+
             Type t;
             PropertyInfo[] fields;
             LinkedList<FieldConverter> fieldConverters = new LinkedList<FieldConverter>();
             InstantiateObjectHandler instantiator;
             private IBOTranslator() { /* empty */ }
 
+            public IEntityType EntityType
+            {
+                get { return entityType; }
+            }
+
             public IBOTranslator(Type t, IEntityType iet)
             {
-                this.iet = iet;
+                this.entityType = iet;
                 this.t = t;
                 Init();
             }
@@ -62,9 +68,9 @@ namespace GenDB
             /// </summary>
             private void InitSuperTranslator()
             {
-                if (iet.SuperEntityType != null)
+                if (entityType.SuperEntityType != null)
                 {
-                    superTranslator = TypeSystem.GetTranslator(iet.SuperEntityType.EntityTypePOID);
+                    superTranslator = TypeSystem.GetTranslator(entityType.SuperEntityType.EntityTypePOID);
                 }
             }
 
@@ -94,7 +100,7 @@ namespace GenDB
             private void InitPropertyTranslators()
             {
                 Dictionary<string, IProperty> properties =
-                    iet.GetAllProperties.ToDictionary((IProperty p) => p.PropertyName);
+                    entityType.GetAllProperties.ToDictionary((IProperty p) => p.PropertyName);
 
                 foreach (PropertyInfo clrProperty in fields)
                 {
@@ -176,7 +182,7 @@ namespace GenDB
                 { // No DBTag. Add it to cache/db, and assign tag
                     DBTag.AssignDBTagTo(ibo, res.EntityPOID);
                 }
-                res.EntityType = iet;
+                res.EntityType = entityType;
                 SetValues(ibo, res);
                 return res;
             }
@@ -184,9 +190,9 @@ namespace GenDB
             public void SetValues(IBusinessObject ibo, IEntity e)
             {
                 // Append fields defined at this entity type in the object hierarchy
-                if (iet.DeclaredProperties != null)
+                if (entityType.DeclaredProperties != null)
                 {
-                    foreach (IProperty property in iet.DeclaredProperties)
+                    foreach (IProperty property in entityType.DeclaredProperties)
                     {
                         IPropertyValue propertyValue = Configuration.GenDB.NewPropertyValue();
                         propertyValue.Entity = e;

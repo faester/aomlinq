@@ -81,7 +81,7 @@ namespace Tests
 
                 BOList<TestlistElement> lp = new BOList<TestlistElement>();
 
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     TestlistElement tle = new TestlistElement();
                     tle.I = i;

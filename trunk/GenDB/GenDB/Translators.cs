@@ -42,7 +42,7 @@ namespace GenDB
             {
                 if (t.GetGenericTypeDefinition() == bolistGeneric)
                 {
-                    return new BOListTranslator();
+                    return new BOListTranslator(t, et);
                 }
                 else
                 {

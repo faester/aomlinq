@@ -229,7 +229,7 @@ namespace GenDB.DB
         /// The type is not persisted until it is added to the database.
         /// </summary>
         /// <returns></returns>
-        public IEntityType NewEntityType(string name)
+        public IEntityType NewEntityType()
         {
             IEntityType res = new EntityType();
             res.EntityTypePOID = NextETID;
