@@ -27,7 +27,6 @@ namespace GenDB
             //throw new Exception("stop here to implement object.reference.property");
             ReadOnlyCollection<Expression> roc = mce.Parameters;
             IValue[] parArr= new IValue[2];
-            //throw new Exception("stop");
  
             if(roc[0].NodeType.ToString()=="MemberAccess")
             {
@@ -127,8 +126,6 @@ namespace GenDB
             }
             
             string nodeType = expr.NodeType.ToString();
-            //throw new Exception("STOP");
-
             if(nodeType=="GT")
                 return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
             else if(nodeType=="LT")
@@ -340,7 +337,7 @@ namespace GenDB
             //{
             //    return ExpressionVisitor.MakeMemberExpression(expression2, m.Member);
             //}
-            throw new Exception("STOP");
+            throw new Exception("not implemented");
             //return Visit(m);
         }
 
@@ -354,7 +351,7 @@ namespace GenDB
             IProperty po = et.GetProperty("Name");
             //Console.WriteLine("PropertyTypeName: {0}",po.PropertyType.Name);
             //return new CstProperty();
-            throw new Exception("STOP");
+            throw new Exception("not implemented");
         }
 
         #region MakeTreeMethods
