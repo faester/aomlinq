@@ -18,7 +18,7 @@ namespace GenDB
     /// </summary>
     class BOListTranslator : IIBoToEntityTranslator
     {
-        static Type typeOfBOList = typeof(BOList<>);
+        public static readonly Type TypeOfBOList = typeof(BOList<>);
 
         InstantiateObjectHandler instantiator;
         bool elementIsIBusinessObject = true;
@@ -41,7 +41,7 @@ namespace GenDB
         public BOListTranslator(Type t, IEntityType entityType)
         {
             this.clrType = t;
-            if (!clrType.IsGenericType || clrType.GetGenericTypeDefinition() != typeOfBOList)
+            if (!clrType.IsGenericType || clrType.GetGenericTypeDefinition() != TypeOfBOList)
             {
                 throw new NotTranslatableException("Internal error. BOList translator was invoked on wrong type. (Should be BOList<>)", t);
             }
@@ -121,7 +121,7 @@ namespace GenDB
         public void SaveToDB(IGenericDatabase db, IBusinessObject ibo)
         {
             Type t = ibo.GetType();
-            if (!ibo.GetType().IsGenericType || ibo.GetType().GetGenericTypeDefinition() != typeOfBOList)
+            if (!ibo.GetType().IsGenericType || ibo.GetType().GetGenericTypeDefinition() != TypeOfBOList)
             {
                 throw new NotTranslatableException("Internal error: BOListTranslator can not translate Type ", ibo.GetType());
             }
