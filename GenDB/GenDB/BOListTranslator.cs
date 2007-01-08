@@ -12,8 +12,8 @@ namespace GenDB
 {
 
     /// <summary>
-    /// The list translator does not instantiate the collection it self. 
-    /// This responsibility is left to the different collections.
+    /// The list translator does not populate the collection elements. 
+    /// This responsibility is left to the collections.
     /// TODO: Everything ;)
     /// </summary>
     class BOListTranslator : IIBoToEntityTranslator
