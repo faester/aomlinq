@@ -274,8 +274,6 @@ namespace GenDB.DB
             gt.Right.AcceptVisitor (this);
         }
 
-
-
         public void VisitAndExpr(ExprAnd expr)
         {
             wherePart.Append (" (");

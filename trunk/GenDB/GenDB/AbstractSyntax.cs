@@ -255,7 +255,7 @@ namespace GenDB
 
         internal IProperty Property
         {
-            get { return property; }
+            get { return property; }    
         }
 
         public CstProperty(IProperty property)

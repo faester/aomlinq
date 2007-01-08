@@ -24,6 +24,7 @@ namespace GenDB
 
         internal IExpression VisitMethodCall(MethodCallExpression mce)
         {
+            //throw new Exception("stop here to implement object.reference.property");
             ReadOnlyCollection<Expression> roc = mce.Parameters;
             IValue[] parArr= new IValue[2];
             //throw new Exception("stop");
