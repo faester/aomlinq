@@ -95,7 +95,6 @@ namespace GenDB
             this.expression = exprTranslator.Convert (expr);
             return this;
         }
-
         
         #endregion
     }
