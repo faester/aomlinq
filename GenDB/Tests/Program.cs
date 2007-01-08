@@ -79,6 +79,17 @@ namespace Tests
 
                 Table<BOList<TestlistElement>> tl = new Table<BOList<TestlistElement>>();
 
+                Table<BOList<int>> tbi = new Table<BOList<int>>();
+
+                BOList<int> bi = new BOList<int>();
+
+                for (int i = 10; i > 0; i--)
+                {
+                    bi.Add (i);
+                }
+
+                tbi.Add (bi);
+                
                 BOList<TestlistElement> lp = new BOList<TestlistElement>();
 
                 for (int i = 0; i < 5; i++)

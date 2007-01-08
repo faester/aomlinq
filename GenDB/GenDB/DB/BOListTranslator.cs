@@ -20,9 +20,10 @@ namespace GenDB.DB
         static Type typeOfBOList = typeof(BOList<>);
 
         InstantiateObjectHandler instantiator;
-
+        bool elementIsIBusinessObject = true;
         IEntityType entityType;
-        Type clrType;
+        Type clrType; // The Type of objects translatable by this translator (some BOList<> type)
+        Type elementType; // Type (typeof(T)) parameter of translatable BOList<T> entities.
 
         public IEntityType EntityType
         {
@@ -39,7 +40,7 @@ namespace GenDB.DB
         public BOListTranslator(Type t, IEntityType entityType)
         {
             this.clrType = t;
-            if (clrType.GetGenericTypeDefinition() != typeOfBOList)
+            if (!clrType.IsGenericType || clrType.GetGenericTypeDefinition() != typeOfBOList)
             {
                 throw new NotTranslatableException("Internal error. BOList translator was invoked on wrong type. (Should be BOList<>)", t);
             }
@@ -51,6 +52,8 @@ namespace GenDB.DB
             {
                 this.entityType = entityType;
             }
+            elementType = clrType.GetGenericArguments()[0];
+            elementIsIBusinessObject = elementType.GetInterface(typeof(IBusinessObject).FullName) != null;
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
         }
 
@@ -59,12 +62,10 @@ namespace GenDB.DB
             IBusinessObject res = IBOCache.Get(ie.EntityPOID);
             if (res == null)
             {
-                IProperty elementTypeProperty = ie.EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
-                long elementEntityTypePOID = ie.GetPropertyValue(elementTypeProperty).LongValue;
-                IEntityType elementEntityType = TypeSystem.GetEntityType (elementEntityTypePOID);
-
-                Type elementType = TypeSystem.GetClrType(elementEntityType);
-
+                //IProperty elementTypeProperty = ie.EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
+                //long elementEntityTypePOID = ie.GetPropertyValue(elementTypeProperty).LongValue;
+                //IEntityType elementEntityType = TypeSystem.GetEntityType (elementEntityTypePOID);
+                //Type elementType = TypeSystem.GetClrType(elementEntityType);
                 res = (IBusinessObject)instantiator();
                 DBTag.AssignDBTagTo(res, ie.EntityPOID);
             }
@@ -73,22 +74,23 @@ namespace GenDB.DB
 
         public IEntity Translate(IBusinessObject ibo)
         {
-            Type elementType = clrType.GetGenericArguments()[0];
-
-            if (!TypeSystem.IsTypeKnown (elementType))
+            // Move to initializer (test that the TypeSystem knows the element type, if element is of some reference type)
+            if (elementIsIBusinessObject && !TypeSystem.IsTypeKnown (elementType))
             {
                 TypeSystem.RegisterType (elementType);
             }
 
-            IEntityType elementEntityType = TypeSystem.GetEntityType(elementType);
-
+            //IEntityType elementEntityType = TypeSystem.GetEntityType(elementType);
             IEntity e = null;
-
             e = Configuration.GenDB.NewEntity();
+
+            // The mapping type for the elements are stored in this property. No other values are relevant.
             IProperty elementTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
             elementTypeProperty.MappingType = MappingType.REFERENCE;
+            
+            
             IPropertyValue pv = Configuration.GenDB.NewPropertyValue();
-            pv.LongValue = elementEntityType.EntityTypePOID;
+            //pv.LongValue = elementEntityType.EntityTypePOID;
             e.EntityType = entityType;
             pv.Property = elementTypeProperty;
             pv.Entity = e;
