@@ -6,7 +6,7 @@ using GenDB;
 
 namespace Tests
 {
-    class Person : AbstractBusinessObject
+    class TestPerson : AbstractBusinessObject
     {
         string name;
 
@@ -23,8 +23,15 @@ namespace Tests
             get { return age; }
             set { age = value; }
         }
-    }
 
+        TestPerson spouse;
+
+        internal TestPerson Spouse
+        {
+            get { return spouse; }
+            set { spouse = value; }
+        }
+    }
 
     [TestFixture]
     public class BOListTranslationTests

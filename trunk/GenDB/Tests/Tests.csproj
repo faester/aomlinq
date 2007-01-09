@@ -47,11 +47,13 @@
   <ItemGroup>
     <Compile Include="BOListTranslationTests.cs" />
     <Compile Include="ContainsAllPrimitiveTypes.cs" />
-    <Compile Include="GenDBTranslationTests.cs" />
+    <Compile Include="TableQueryTests2.cs" />
+    <Compile Include="NeverStoreThisClassToDB.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ObjectUtilitiesTests.cs" />
     <Compile Include="TableQueryTests.cs" />
+    <Compile Include="TableTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GenDB\GenDB.csproj">

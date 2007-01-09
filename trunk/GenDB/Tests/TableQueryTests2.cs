@@ -238,6 +238,32 @@ namespace Tests
 
             Assert.AreEqual (ELEMENTS_TO_STORE / 2 , count, "Incorrect number of elements returned.");
         }
+
+        [Test]
+        public void TestReferenceFieldPropertyFilter()
+        {
+            Table<TestPerson> ttp = new Table<TestPerson>();
+            ttp.Clear();
+            Configuration.SubmitChanges();
+
+            TestPerson tp = new TestPerson{Name = "TestPerson, Mr."};
+            TestPerson spouse = new TestPerson{Name = "TheSpouse"};
+            tp.Spouse = spouse;
+
+            ttp.Add (tp);
+            ttp.Add (spouse);
+
+            Configuration.SubmitChanges();
+            tp = null;
+            spouse = null;
+            GC.Collect();
+
+            int c = ttp.Count<TestPerson>((TestPerson p) => p.Spouse.Name == "TheSpouse");
+            Assert.IsTrue (c > 0, "Returned false negative.");
+            
+            c = ttp.Count<TestPerson>((TestPerson p) => p.Spouse.Name == "I hope to God this name does not exist. (I did .Clear(), so it should hold");
+            Assert.IsTrue (c == 0, "Returned false positive.");
+        }
     }
 }
 #endif 
