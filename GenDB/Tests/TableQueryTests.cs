@@ -1,4 +1,3 @@
-#if DEBUG
 #define RECREATE_DB
 using System;
 using System.Collections.Generic;
@@ -415,4 +414,3 @@ namespace GenDB
 
     }
 }
-#endif

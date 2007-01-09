@@ -1,4 +1,3 @@
-#if DEBUG
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -240,6 +239,32 @@ namespace Tests
         }
 
         [Test]
+        public void TestReferenceEqualsFilter()
+        {
+            ContainsAllPrimitiveTypes capt = new ContainsAllPrimitiveTypes();
+            capt.Str = "ego";
+
+            tableAllPrimitives.Add(capt);
+
+            Configuration.SubmitChanges();
+
+            var res = from capts in tableAllPrimitives
+                      where capts == capt
+                      select capts;
+
+            bool foundIt = false;
+
+            foreach(ContainsAllPrimitiveTypes tst in res)
+            {
+                if (foundIt) { Assert.Fail("Found more than one result."); }
+                Assert.IsTrue (object.ReferenceEquals (tst, capt));
+                foundIt = true;
+            }
+
+            Assert.IsTrue (foundIt, "Did not find the added value.");
+        }
+
+        [Test]
         public void TestReferenceFieldPropertyFilter()
         {
             Table<TestPerson> ttp = new Table<TestPerson>();
@@ -266,4 +291,3 @@ namespace Tests
         }
     }
 }
-#endif 

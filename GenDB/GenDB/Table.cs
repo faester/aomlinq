@@ -42,7 +42,17 @@ namespace GenDB
 
         public bool Contains(T e)
         {
-            throw new Exception("Not implemented");
+            if (e == null) { throw new NullReferenceException("Value can not be null.");}
+            if (e.DBTag == null) { return false; }
+            IWhereable where = new VarReference(e);
+
+            IBusinessObject tst = e;
+
+            foreach (IBusinessObject ibo in Configuration.GenDB.Where(where))
+            {
+                if (ibo == tst) { return true; }
+            }
+            return false;
         }
 
         public void CopyTo(T[] arr, int i)
