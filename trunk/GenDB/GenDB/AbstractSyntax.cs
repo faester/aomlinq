@@ -12,6 +12,7 @@ namespace GenDB
         void VisitCstString(CstString cs);
         void VisitCstBool(CstBool cb);
         void VisitCstLong(CstLong cl);
+        void VisitCstChar(CstChar ch);
         void VisitCstDouble(CstDouble cd);
         void VisitCstReference(VarReference cr);
         void VisitPropertyOfReferredObject(PropertyOfReferredObject pro);
@@ -307,6 +308,26 @@ namespace GenDB
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitCstString(this);
+        }
+    }
+
+    class CstChar : IStringvalue
+    {
+        char ch;
+
+        public char Ch
+        {
+            get { return ch; }
+        }
+
+        public CstChar (char ch)
+        {
+            this.ch = ch;
+        }
+
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitCstChar(this);
         }
     }
 
