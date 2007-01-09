@@ -167,8 +167,9 @@ namespace GenDB
             | BindingFlags.NonPublic
             );
 
-            ConstructorInfo cinf = t.GetConstructor(EMPTY_TYPE_ARRAY);
-            object clone = cinf.Invoke(null);
+            InstantiateObjectHandler inst = DynamicMethodCompiler.CreateInstantiateObjectHandler(t);
+            //ConstructorInfo cinf = t.GetConstructor(EMPTY_TYPE_ARRAY);
+            object clone = inst();
 
             foreach (FieldInfo f in fields)
             {
