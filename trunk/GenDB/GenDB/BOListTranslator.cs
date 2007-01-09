@@ -20,6 +20,8 @@ namespace GenDB
     {
         public static readonly Type TypeOfBOList = typeof(BOList<>);
 
+        static int deleteMe = 0;
+
         InstantiateObjectHandler instantiator;
         bool elementIsIBusinessObject = true;
         IEntityType entityType;
@@ -38,21 +40,18 @@ namespace GenDB
         /// </summary>
         /// <param name="t"></param>
         /// <param name="entityType">entityType to use. If entityType is null, a new IEntityType instance will be created</param>
-        public BOListTranslator(Type t, IEntityType entityType)
+        public BOListTranslator(Type t /* , IEntityType entityType */)
         {
             this.clrType = t;
             if (!clrType.IsGenericType || clrType.GetGenericTypeDefinition() != TypeOfBOList)
             {
                 throw new NotTranslatableException("Internal error. BOList translator was invoked on wrong type. (Should be BOList<>)", t);
             }
-            if (entityType == null)
-            {
-                this.entityType = BOListEntityType();
-            }
-            else 
-            {
-                this.entityType = entityType;
-            }
+            
+            this.entityType = BOListEntityType();
+            Console.Error.WriteLine("===============================================================");
+            Console.Error.WriteLine(deleteMe++ + ": " + entityType);
+            Console.Error.WriteLine("===============================================================");
             elementType = clrType.GetGenericArguments()[0];
             elementIsIBusinessObject = elementType.GetInterface(typeof(IBusinessObject).FullName) != null;
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
@@ -87,13 +86,17 @@ namespace GenDB
 
             // The mapping type for the elements are stored in this property. No other values are relevant.
             IProperty elementTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
-            elementTypeProperty.MappingType = MappingType.REFERENCE;
-            
-            
+            Console.Error.WriteLine(entityType);
+            if (elementIsIBusinessObject)
+            {
+                elementTypeProperty.MappingType = MappingType.REFERENCE;
+            }
+
             IPropertyValue pv = Configuration.GenDB.NewPropertyValue();
             //pv.LongValue = elementEntityType.EntityTypePOID;
             e.EntityType = entityType;
             pv.Property = elementTypeProperty;
+            pv.StringValue = elementType.FullName;
             pv.Entity = e;
             e.StorePropertyValue(pv);
             if (ibo.DBTag != null) 

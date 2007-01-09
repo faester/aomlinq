@@ -107,18 +107,21 @@ namespace GenDB
 
         #endregion
 
-        public Table() { /* empty */ }
+        public Table()
+        {
+            if (!TypeSystem.IsTypeKnown(typeof(T)))
+            {
+                TypeSystem.RegisterType(typeof(T));
+            }
+        }
 
         #region Query Expression 
 
         public Table<T> Where(Expression<Func<T, bool>> expr)
         {
-            Console.WriteLine("Table expression is " + expression);
             Table<T> res = new Table<T>();
             SqlExprTranslator exprTranslator = new SqlExprTranslator();
             res.expression = exprTranslator.Convert (expr);
-            Console.WriteLine("Table expression now " + expression);
-            Console.WriteLine ("Result table expression: " + res.expression);
             return res;
         }
 

@@ -136,5 +136,10 @@ namespace GenDB.DB
             get { return isList; }
             set { isList = value; }
         }
+
+        public override string ToString()
+        {
+            return "EntityType {Name='" + Name + "'}";
+        }
     }
 }

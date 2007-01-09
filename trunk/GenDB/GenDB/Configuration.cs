@@ -7,7 +7,15 @@ namespace GenDB
 {
     public static class Configuration
     {
-        private static int dbBatchSize = 500;
+        static Configuration()
+        {
+            if (!TypeSystem.IsTypeKnown (typeof(AbstractBusinessObject)))
+            {
+                TypeSystem.RegisterType(typeof(AbstractBusinessObject));
+            }
+        }
+
+        private static int dbBatchSize = 1;
 
         public static int DbBatchSize
         {
@@ -25,17 +33,22 @@ namespace GenDB
                     genDB = MsSql2005DB.Instance;
                     if (Configuration.RebuildDatabase)
                     {
+                        Console.WriteLine("Rebuilding db.");
                         if (genDB.DatabaseExists()){
                             genDB.DeleteDatabase();
                         }
                         genDB.CreateDatabase();
+                    }
+                    else
+                    {
+                        Console.WriteLine("NOT rebuilding db.");
                     }
                 }
                 return genDB; 
             }
         }
 
-        private static bool rebuildDatabase = false;
+        private static bool rebuildDatabase = true;
 
         public static bool RebuildDatabase
         {

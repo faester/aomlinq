@@ -270,11 +270,11 @@ namespace GenDB.DB
                 while (reader.Read())
                 {
                     IPropertyType tmp = new PropertyType();
-                    long ptid = long.Parse(reader[1].ToString());
                     string name = (string)reader[0];
                     short mapping = (short)reader[2];
                     MappingType mpt = (MappingType)Enum.ToObject(typeof(MappingType), mapping);
                     tmp.MappedType = mpt;
+                    long ptid = long.Parse(reader[1].ToString());
                     tmp.PropertyTypePOID = ptid;
                     tmp.Name = name;
                     tmp.ExistsInDatabase = true;
@@ -427,8 +427,6 @@ namespace GenDB.DB
             entityInsertCount++;
             string deleteString = " DELETE FROM Entity WHERE EntityPOID IN (" + mswsb.WhereStr + ") ";
 
-            Console.Error.WriteLine(deleteString);
-            
             sbEntityInserts.Append (deleteString);
         }
 
@@ -437,7 +435,8 @@ namespace GenDB.DB
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
             mswsb.Visit(expression);
             string whereStr = mswsb.WhereStr;
-
+            Console.WriteLine("MsSql2005DB.Where modtog: " + expression); 
+            Console.WriteLine("Blev oversat til:   " + whereStr);
             using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
             {
                 cnn.Open();
@@ -952,6 +951,7 @@ namespace GenDB.DB
                     if (insertCommand != "")
                     {
                         cmd.CommandText = insertCommand;
+                        //Console.WriteLine(insertCommand);
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -960,6 +960,7 @@ namespace GenDB.DB
                     if (insertCommand != "")
                     {
                         cmd.CommandText = insertCommand;
+                        //Console.WriteLine(insertCommand);
                         cmd.ExecuteNonQuery();
                     }
                 }

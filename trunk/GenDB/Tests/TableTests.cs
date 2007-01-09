@@ -6,7 +6,7 @@ using GenDB;
 using System.Query;
 using System.Expressions;
 
-namespace Tests
+namespace TableTests
 {
     [TestFixture]
     public class TableTests

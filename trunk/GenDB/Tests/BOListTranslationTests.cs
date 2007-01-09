@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 using GenDB;
+using TableTests;
 
-namespace Tests
+namespace BOListTests
 {
     [TestFixture]
     public class BOListTranslationTests

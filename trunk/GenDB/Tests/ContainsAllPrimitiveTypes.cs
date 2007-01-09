@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB;
 
-namespace Tests
+namespace TableTests
 {
     /// <summary>
     /// Used for testing: Contains all types, that are considered primitive
     /// by the generic database.
     /// </summary>
-    class ContainsAllPrimitiveTypes : AbstractBusinessObject
+    public class ContainsAllPrimitiveTypes : AbstractBusinessObject
     {
         bool boo;
 
