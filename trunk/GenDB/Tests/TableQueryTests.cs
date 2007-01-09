@@ -157,9 +157,9 @@ namespace GenDB
         }
 
         #endregion
-
+        
         #region Tests
-
+  
         [Test]
         public void Equality()
         {
