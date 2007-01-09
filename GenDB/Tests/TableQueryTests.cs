@@ -5,13 +5,11 @@ using System.Text;
 using NUnit.Framework;
 using System.Query;
 using System.Xml.XLinq;
-using System.Data.DLinq;
-using System.Data.SqlClient;
 using System.Expressions;
+using GenDB;
 
-namespace GenDB
+namespace TableTests
 {
-
     [TestFixture]
     public class TestTableQuery
     {
@@ -107,6 +105,8 @@ namespace GenDB
             Configuration.RebuildDatabase = true;
             int objCount = 10;
             tp = new Table<Person>();
+            tp.Clear();
+            Configuration.SubmitChanges();
 
             for (short i = 0; i < objCount; i++)
             {
@@ -397,7 +397,7 @@ namespace GenDB
 
         private bool NotNeReference(Table<Person> t, Person p)
         {
-            var v = from col in t
+            var v = from col in t  
                     where !(col.Spouse != p)
                     select col;
             return HasAtLeastOne(v);

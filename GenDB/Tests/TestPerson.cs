@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB;
 
-namespace Tests
+namespace TableTests
 {
-    class TestPerson : AbstractBusinessObject
+    public class TestPerson : AbstractBusinessObject
     {
         string name;
 

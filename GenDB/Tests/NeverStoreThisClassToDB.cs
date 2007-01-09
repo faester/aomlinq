@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB;
 
-namespace Tests
+namespace TableTests
 {
     /// <summary>
     /// This class is used to test for correct database 

@@ -5,7 +5,7 @@ using GenDB;
 using NUnit.Framework;
 using System.Query;
 
-namespace Tests
+namespace TableTests
 {
     [TestFixture]
     public class TableQueryTests2

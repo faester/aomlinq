@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
+using GenDB;
 
-namespace GenDB
+namespace Tests
 {
     [TestFixture]
     public class TestObjectUtilities
