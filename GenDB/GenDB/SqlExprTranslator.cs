@@ -330,11 +330,15 @@ namespace GenDB
                     }
                     else if(ue.Operand.NodeType.ToString() == "MemberAccess")
                     {
-                       
-                        return VisitMemberAccess((MemberExpression)ue.Operand);
+                        return VisitBooleanMember((MemberExpression)ue.Operand, false);
                     }
                     else
                         throw new Exception("Unknown Operand.NodeType: "+ue.Operand.NodeType.ToString());
+                }
+                else if(lambda.Body is MemberExpression)
+                {
+                    MemberExpression me = (MemberExpression)lambda.Body;
+                    return VisitBooleanMember(me, true);
                 }
                 else
                 {
@@ -356,26 +360,18 @@ namespace GenDB
             return VisitExpr(exp);
             throw new Exception("not implemented");
         }
-        
-        //internal IExpression VisitMemberAccess(MemberExpression m)
-        //{ 
-        //    Expression expression2 = (Expression)Visit(m.Expression);
-        //    if (expression2 != m.Expression)
-        //    {
-        //        return MakeMemberExpression(expression2, m.Member);
-        //    }
-        //    throw new Exception("not implemented");
-        //    return Visit(m);
-        //}
-
-        internal IExpression VisitMemberAccess(MemberExpression me)
+      
+        internal IExpression VisitBooleanMember(MemberExpression me, bool equality)
         {
             ParameterExpression pe = (ParameterExpression)me.Expression;
             string name = me.Member.Name;
 
             IValue[] parArr = new IValue[2];
             parArr[0] = VisitMemberExpression(me);
-            parArr[1] = new GenDB.CstBool(false);
+            if(equality)
+                parArr[1] = new GenDB.CstBool(true);
+            else
+                parArr[1] = new GenDB.CstBool(false);
 
             IExpression ie = new GenDB.OP_NotEquals(parArr[0],parArr[1]);
             
@@ -721,7 +717,7 @@ namespace GenDB
                     //    return this.VisitListInit((ListInitExpression)exp);
                     //}
                 case ExpressionType.MemberAccess:
-                    return VisitMemberAccess((MemberExpression)exp);
+                    //return VisitMemberAccess((MemberExpression)exp);
                     //{
                     //    return this.VisitMemberAccess((MemberExpression)exp);
                     //}

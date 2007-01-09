@@ -154,7 +154,7 @@ namespace GenDB
 
             var es = from epp in tp
                      
-                where epp.Age == 3
+               // where epp.Age == 3
                 //where !(epp.Age <= 3) 
                 //where !(epp.Name != "Navn 3")
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
@@ -164,7 +164,7 @@ namespace GenDB
                 //where epp.Spouse == null
                      //where !(epp.Letter != 'c')
                      //where epp.Birth == t
-                     where epp.Alive == true
+                     where epp.Alive
                      select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
             
@@ -174,9 +174,7 @@ namespace GenDB
             }
 
             Console.WriteLine("Size of Table: {0}", es.Count);
-            
-
-
+          
             Console.ReadLine();
         }
     }
