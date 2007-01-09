@@ -54,6 +54,7 @@
     <Compile Include="ObjectUtilitiesTests.cs" />
     <Compile Include="TableQueryTests.cs" />
     <Compile Include="TableTests.cs" />
+    <Compile Include="TestPerson.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GenDB\GenDB.csproj">
