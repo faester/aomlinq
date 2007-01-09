@@ -313,6 +313,12 @@ namespace GenDB.DB
         void CommitTypeChanges();
         void RollbackTypeTransaction();
         void RollbackTransaction();
+
+        /// <summary>
+        /// Deletes all matching entities from database. 
+        /// </summary>
+        /// <param name="w"></param>
+        void WhereClear(IWhereable w);
     }
 
     interface IGenCollectionElement

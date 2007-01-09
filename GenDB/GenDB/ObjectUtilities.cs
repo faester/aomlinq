@@ -227,7 +227,8 @@ namespace GenDB
                 {
                     object va = f.GetValue(a);
                     object vb = f.GetValue(b);
-
+                    if (va == null ^ vb == null) { return false; }
+                    if (va == null && vb == null) { return true; }
                     if (fieldType.IsPrimitive)
                     {
                         if (!va.Equals(vb)) { return false; }
