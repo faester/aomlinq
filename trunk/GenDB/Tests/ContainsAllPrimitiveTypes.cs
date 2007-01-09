@@ -66,5 +66,13 @@ namespace Tests
             get { return lng; }
             set { lng = value; }
         }
+
+        int integer;
+
+        public int Integer
+        {
+            get { return integer; }
+            set { integer = value; }
+        }
     }
 }
