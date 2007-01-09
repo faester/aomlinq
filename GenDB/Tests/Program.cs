@@ -70,7 +70,7 @@ namespace Tests
             try
             {
 #endif
-            //Configuration.RebuildDatabase = false;
+            Configuration.RebuildDatabase = true;
 
             Console.WriteLine("Her....");
 
