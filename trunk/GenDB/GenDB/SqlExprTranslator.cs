@@ -175,6 +175,11 @@ namespace GenDB
                 MemberExpression me = (MemberExpression)ue.Operand;
                 return VisitMemberExpression(me);
             }
+            else if(ue.Operand is ParameterExpression)
+            {
+                return new CstThis();
+            }
+
             //else if(ue.Operand is ConstantExpression)
             //{
             //    ConstantExpression ce = (ConstantExpression) ue.Operand;
@@ -387,18 +392,23 @@ namespace GenDB
             return new GenDB.ExprNot(ie);
         }
 
-        internal IWhereable VisitParameter(ParameterExpression p)
-        {
-            Type t = p.Type;
+        internal Expression VisitParameter(ParameterExpression p)
+		{
+			return p;
+		}
+
+        //internal IWhereable VisitParameter(ParameterExpression p)
+        //{
+        //    Type t = p.Type;
             
-            IEntityType et = TypeSystem.GetEntityType(t);
+        //    IEntityType et = TypeSystem.GetEntityType(t);
             
-            Console.WriteLine("EntityType: {0}", et.Name);
-            IProperty po = et.GetProperty("Name");
-            //Console.WriteLine("PropertyTypeName: {0}",po.PropertyType.Name);
-            //return new CstProperty();
-            throw new Exception("not implemented");
-        }
+        //    Console.WriteLine("EntityType: {0}", et.Name);
+        //    IProperty po = et.GetProperty("Name");
+        //    //Console.WriteLine("PropertyTypeName: {0}",po.PropertyType.Name);
+        //    //return new CstProperty();
+        //    throw new Exception("not implemented");
+        //}
 
         #region MakeTreeMethods
 
@@ -751,7 +761,8 @@ namespace GenDB
                     //    return this.VisitNewArray((NewArrayExpression)exp);
                     //}
                 case ExpressionType.Parameter:
-                    return VisitParameter((ParameterExpression) exp);
+                    throw new Exception("not implemented");
+                    //return VisitParameter((ParameterExpression) exp);
                     //Console.Write("");
                     
                     //{
