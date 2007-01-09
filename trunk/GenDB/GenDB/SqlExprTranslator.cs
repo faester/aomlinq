@@ -374,7 +374,7 @@ namespace GenDB
 
             IValue[] parArr = new IValue[2];
             parArr[0] = VisitMemberExpression(me);
-            parArr[1] = new GenDB.CstBool(true);
+            parArr[1] = new GenDB.CstBool(false);
 
             IExpression ie = new GenDB.OP_NotEquals(parArr[0],parArr[1]);
             
