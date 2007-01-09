@@ -9,7 +9,7 @@ using System.Query;
 namespace Tests
 {
     [TestFixture]
-    public class GenDBTranslationTests
+    public class TableQueryTests2
     {
         private const int ELEMENTS_TO_STORE = 100;
         Table<ContainsAllPrimitiveTypes> tableAllPrimitives = null; 
@@ -50,14 +50,14 @@ namespace Tests
                 // collected, to ensure later database retrieval 
                 // without regards to the cached copies.
                 ContainsAllPrimitiveTypes capt = new ContainsAllPrimitiveTypes();
-                capt.Boo = (i % 2) == 0;
-                capt.Lng = i % 2;
-                capt.Integer = i % 2;
-                capt.Str = i % 2 == 0 ? "1" : "2";
-                capt.Ch = i % 2 == 0 ? '1' : '2';
-                capt.Dt = i % 2 == 0 ? new DateTime(0) : new DateTime(1);
-                capt.Fl = i % 2;
-                capt.Dbl = i % 2;
+                capt.Boo = (i % 2) == 0; // Has test
+                capt.Lng = i % 2; // Has test
+                capt.Integer = i % 2; // Has test
+                capt.Str = i % 2 == 0 ? "1" : "0"; // Has test
+                capt.Ch = i % 2 == 0 ? '1' : '0';  // Has test
+                capt.Dt = i % 2 == 0 ? new DateTime(0) : new DateTime(1); // Has test
+                capt.Fl = i % 2; // Has test
+                capt.Dbl = i % 2; // Has test
                 tableAllPrimitives.Add (capt);
             }
         }
@@ -88,7 +88,7 @@ namespace Tests
             {
                 count++;
             }
-            Assert.AreEqual(count, ELEMENTS_TO_STORE, "Returned unexpected number of results");
+            Assert.AreEqual(ELEMENTS_TO_STORE, count, "Returned unexpected number of results");
         }
 
         [Test]
@@ -105,24 +105,127 @@ namespace Tests
                 Assert.IsTrue (x.Boo, "Filter error: All Boo values should be true.");
             }
 
-            Assert.AreEqual (count, ELEMENTS_TO_STORE / 2, "Incorrect number of elements returned.");
+            Assert.AreEqual (ELEMENTS_TO_STORE / 2, count, "Incorrect number of elements returned.");
         }
 
         [Test]
         public void TestIntFilter()
         {
             var xs = from capts in tableAllPrimitives
-                     where capts.Boo
+                     where capts.Integer == 0
                      select capts;
 
             int count = 0;
             foreach(var x in xs)
             {
                 count++;
-                Assert.IsTrue (x.Boo, "Filter error: All Boo values should be true.");
+                Assert.IsTrue (x.Integer == 0, "Filter error: All int values should be zero.");
             }
 
-            Assert.AreEqual (count, ELEMENTS_TO_STORE / 2, "Incorrect number of elements returned.");
+            Assert.AreEqual (ELEMENTS_TO_STORE / 2, count, "Incorrect number of elements returned.");
+        }
+
+        [Test]
+        public void TestLongFilter()
+        {
+            var xs = from capts in tableAllPrimitives
+                     where capts.Lng == 0
+                     select capts;
+
+            int count = 0;
+            foreach(var x in xs)
+            {
+                count++;
+                Assert.IsTrue (x.Lng == 0, "Filter error: All Lng values should be zero.");
+            }
+
+            Assert.AreEqual (ELEMENTS_TO_STORE / 2, count, "Incorrect number of elements returned.");
+        }
+
+        [Test]
+        public void TestStrFilter()
+        {
+            var xs = from capts in tableAllPrimitives
+                     where capts.Str == "0"
+                     select capts;
+
+            int count = 0;
+            foreach(var x in xs)
+            {
+                count++;
+                Assert.IsTrue (x.Str == "0", "Filter error: All Str values should be \"0\".");
+            }
+
+            Assert.AreEqual (ELEMENTS_TO_STORE / 2, count, "Incorrect number of elements returned.");
+        }
+
+        [Test]
+        public void TestDateTimeFilter()
+        {
+            DateTime filter = new DateTime(0);
+            var xs = from capts in tableAllPrimitives
+                     where capts.Dt == filter
+                     select capts;
+
+            int count = 0;
+            foreach(var x in xs)
+            {
+                count++;
+                Assert.IsTrue (x.Dt == filter, "Filter error: All Dt values should be " + filter + ".");
+            }
+
+            Assert.AreEqual (ELEMENTS_TO_STORE / 2 , count, "Incorrect number of elements returned.");
+        }
+
+        [Test]
+        public void TestDoubleFilter()
+        {
+            var xs = from capts in tableAllPrimitives
+                     where capts.Dbl == 0
+                     select capts;
+
+            int count = 0;
+            foreach(var x in xs)
+            {
+                count++;
+                Assert.IsTrue (x.Dbl == 0, "Filter error: All Dbl values should be 0.");
+            }
+
+            Assert.AreEqual (ELEMENTS_TO_STORE / 2 , count, "Incorrect number of elements returned.");
+        }
+
+        [Test]
+        public void TestFloatFilter()
+        {
+            var xs = from capts in tableAllPrimitives
+                     where capts.Fl == 0
+                     select capts;
+
+            int count = 0;
+            foreach(var x in xs)
+            {
+                count++;
+                Assert.IsTrue (x.Fl == 0, "Filter error: All Fl values should be 0.");
+            }
+
+            Assert.AreEqual (ELEMENTS_TO_STORE / 2 , count, "Incorrect number of elements returned.");
+        }
+
+        [Test]
+        public void TestCharFilter()
+        {
+            var xs = from capts in tableAllPrimitives
+                     where capts.Ch == '0'
+                     select capts;
+
+            int count = 0;
+            foreach(var x in xs)
+            {
+                count++;
+                Assert.IsTrue (x.Ch == '0', "Filter error: All Fl values should be 0.");
+            }
+
+            Assert.AreEqual (ELEMENTS_TO_STORE / 2 , count, "Incorrect number of elements returned.");
         }
     }
 }
