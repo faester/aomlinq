@@ -100,6 +100,13 @@ namespace GenDB
                 get {return birth;}
                 set {birth = value;}
             }
+
+            bool alive;
+            public bool Alive
+            {
+                get {return alive;}
+                set{alive = value;}
+            }
         }
 
         public class Student : Person { 
@@ -136,18 +143,18 @@ namespace GenDB
 
             DateTime t = DateTime.Now;
 
-            Person s_p = new Person{ Name = "SpousePerson", Letter = 'c', Birth = t};
+            Person s_p = new Person{ Name = "SpousePerson", Letter = 'c', Birth = t, Alive=true};
             s_p.Age = 99;
             tp.Add (s_p);
 
-            Person p_p = new Person {Name = "NormalPerson", Spouse=s_p, Age=121};
+            Person p_p = new Person {Name = "NormalPerson", Spouse=s_p, Age=121, Alive=true};
             tp.Add (p_p);
 
             IBOCache.FlushToDB();
 
             var es = from epp in tp
                      
-                //where epp.Age >= 3
+                //where epp.Age == 3
                 //where !(epp.Age <= 3) 
                 //where !(epp.Age == 2)
                 //where !(epp.Name != "Navn 3")
@@ -156,8 +163,9 @@ namespace GenDB
                 // where !(epp.Spouse != null)
                 //where epp.Spouse.Name == "SpousePerson"
                 //where epp.Spouse == null
-                     //where epp.Letter == 'c'
-                     where epp.Birth == t
+                     //where !(epp.Letter != 'c')
+                     //where epp.Birth == t
+                     where epp.Alive == true
                      select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
                 //select new {TestAggregate = tp.Sum(v => v.Age)};

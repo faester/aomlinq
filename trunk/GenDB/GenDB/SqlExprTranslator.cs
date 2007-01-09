@@ -87,7 +87,6 @@ namespace GenDB
             {
                 parArr[0] = VisitUnaryExpressionValue((UnaryExpression)be.Left);
             }
-
             // doing the right side
             if(be.Right.ToString()=="null")
                 parArr[1] = new VarReference(null);
@@ -96,7 +95,20 @@ namespace GenDB
                 switch(TypeSystem.FindMappingType(expr.Type))
                 {
                 case MappingType.BOOL:
-                    parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
+                    if(be.Right.Type.Name == "Int32" || be.Right.Type.Name == "Int64")
+                    {
+                        parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
+                    }
+                    else if(be.Right.Type.Name == "Boolean")
+                    {
+                        ConstantExpression ce = (ConstantExpression)be.Right;
+                        parArr[1] = new GenDB.CstBool((bool)ce.Value);
+                    }
+                    else
+                    {
+                        throw new Exception("stop");
+                    }
+                        //throw new Exception("stop");
                     break;
 
                 default:
@@ -135,7 +147,10 @@ namespace GenDB
             else if(nodeType=="LT")
                 return new GenDB.OP_LessThan(parArr[0], parArr[1]);
             else if(nodeType=="EQ")
+            {
+                //throw new Exception("stop");
                 return new GenDB.OP_Equals (parArr[0], parArr[1]);
+            }
             else if(nodeType=="NE")
                 return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
             else if(nodeType=="GE")
@@ -202,6 +217,7 @@ namespace GenDB
                 }
                 else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT(") || mecstr.StartsWith("NE("))
                 {
+                    //throw new Exception("stop");
                     return VisitBinaryExpression((BinaryExpression) lambda.Body);
                 }
                 else if(mecstr.StartsWith("AndAlso("))
@@ -311,6 +327,11 @@ namespace GenDB
                     {
                         return new GenDB.ExprNot(VisitMethodCall((MethodCallExpression)ue.Operand));
                     }
+                    else if(ue.Operand.NodeType.ToString() == "MemberAccess")
+                    {
+                       
+                        return VisitMemberAccess((MemberExpression)ue.Operand);
+                    }
                     else
                         throw new Exception("Unknown Operand.NodeType: "+ue.Operand.NodeType.ToString());
                 }
@@ -335,15 +356,30 @@ namespace GenDB
             throw new Exception("not implemented");
         }
         
-        internal IWhereable VisitMemberAccess(MemberExpression m)
-        { 
-            Expression expression2 = (Expression)Visit(m.Expression);
-            //if (expression2 != m.Expression)
-            //{
-            //    return ExpressionVisitor.MakeMemberExpression(expression2, m.Member);
-            //}
-            throw new Exception("not implemented");
-            //return Visit(m);
+        //internal IExpression VisitMemberAccess(MemberExpression m)
+        //{ 
+        //    Expression expression2 = (Expression)Visit(m.Expression);
+        //    if (expression2 != m.Expression)
+        //    {
+        //        return MakeMemberExpression(expression2, m.Member);
+        //    }
+        //    throw new Exception("not implemented");
+        //    return Visit(m);
+        //}
+
+        internal IExpression VisitMemberAccess(MemberExpression me)
+        {
+            ParameterExpression pe = (ParameterExpression)me.Expression;
+            string name = me.Member.Name;
+
+            IValue[] parArr = new IValue[2];
+            parArr[0] = VisitMemberExpression(me);
+            parArr[1] = new GenDB.CstBool(true);
+
+            IExpression ie = new GenDB.OP_NotEquals(parArr[0],parArr[1]);
+            
+            return new GenDB.ExprNot(ie);
+            //throw new Exception("stop");
         }
 
         internal IWhereable VisitParameter(ParameterExpression p)
@@ -685,7 +721,6 @@ namespace GenDB
                     //    return this.VisitListInit((ListInitExpression)exp);
                     //}
                 case ExpressionType.MemberAccess:
-                    Console.Write("");
                     return VisitMemberAccess((MemberExpression)exp);
                     //{
                     //    return this.VisitMemberAccess((MemberExpression)exp);
