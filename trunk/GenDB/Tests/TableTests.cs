@@ -11,6 +11,8 @@ namespace Tests
     [TestFixture]
     public class TableTests
     {
+        Table<TestPerson> tpt = null;
+
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
@@ -26,6 +28,26 @@ namespace Tests
                 Console.Error.WriteLine("Database must be rebuild prior to calling these tests.");
                 throw e;
             }
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            tpt = new Table<TestPerson>();
+
+            tpt.Clear();
+            Configuration.SubmitChanges();
+
+            tpt.Add (new TestPerson {Name = "Per"});
+            tpt.Add (new TestPerson {Name = "Per"});
+            tpt.Add (new TestPerson {Name = "Per"});
+            tpt.Add (new TestPerson {Name = "Per"});
+            tpt.Add (new TestPerson {Name = "Poul"});
+            tpt.Add (new TestPerson {Name = "Konrad"});
+            tpt.Add (new TestPerson {Name = "Jørgen"});
+            tpt.Add (new TestPerson {Name = "Svend"});
+
+            Configuration.SubmitChanges();
         }
 
         [Test]
@@ -58,22 +80,6 @@ namespace Tests
         [Test]
         public void TestCount()
         {
-            Table<TestPerson> tpt = new Table<TestPerson>();
-
-            tpt.Clear();
-            Configuration.SubmitChanges();
-
-            tpt.Add (new TestPerson {Name = "Per"});
-            tpt.Add (new TestPerson {Name = "Per"});
-            tpt.Add (new TestPerson {Name = "Per"});
-            tpt.Add (new TestPerson {Name = "Per"});
-            tpt.Add (new TestPerson {Name = "Poul"});
-            tpt.Add (new TestPerson {Name = "Konrad"});
-            tpt.Add (new TestPerson {Name = "Jørgen"});
-            tpt.Add (new TestPerson {Name = "Svend"});
-
-            Configuration.SubmitChanges();
-
             int c = tpt.Count<TestPerson>((TestPerson p) => p.Name == "Per");
             Assert.AreEqual (4, c, "Error in filtered result.");
 
@@ -86,5 +92,13 @@ namespace Tests
             c = tpt.Count;
             Assert.AreEqual (8, c, "Error in unfiltered result.");
         }
+
+        [Test]
+        public void TestRemove()
+        {
+
+
+        }
+
     }
 }

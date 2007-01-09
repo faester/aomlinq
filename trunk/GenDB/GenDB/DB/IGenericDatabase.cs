@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GenDB.DB
 {
-    public enum MappingType { BOOL, DATETIME, DOUBLE, LONG, STRING, REFERENCE, CHAR };
+    public enum MappingType { BOOL, DATETIME, DOUBLE, LONG, STRING, REFERENCE };
 
     /// <summary>
     /// Representation of DB reference to another
@@ -185,8 +185,6 @@ namespace GenDB.DB
 
         DateTime DateTimeValue { get; set; }
 
-        char CharValue { get; set; }
-
         bool BoolValue { get; set; }
 
         IBOReference RefValue { get; set; }
@@ -336,8 +334,6 @@ namespace GenDB.DB
         double DoubleValue { get; set; }
 
         DateTime DateTimeValue { get; set; }
-
-        char CharValue { get; set; }
 
         bool BoolValue { get; set; }
 

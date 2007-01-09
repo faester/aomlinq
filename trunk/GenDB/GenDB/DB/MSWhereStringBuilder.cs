@@ -94,8 +94,6 @@ namespace GenDB.DB
             {
                 case MappingType.BOOL: 
                     wherePart.Append(pvName + ".BoolValue "); break;
-                case MappingType.CHAR: 
-                    wherePart.Append(pvName + ".CharValue "); break;
                 case MappingType.DATETIME: 
                     wherePart.Append(pvName + ".LongValue "); break;
                 case MappingType.DOUBLE: 
@@ -118,6 +116,15 @@ namespace GenDB.DB
         {
             wherePart.Append ('\'');
             wherePart.Append (cs.Value);
+            wherePart.Append ('\'');
+            wherePart.Append (' ');
+        }
+        
+        //Leaf
+        public void VisitCstChar(CstChar cs)
+        {
+            wherePart.Append ('\'');
+            wherePart.Append (cs.Ch);
             wherePart.Append ('\'');
             wherePart.Append (' ');
         }

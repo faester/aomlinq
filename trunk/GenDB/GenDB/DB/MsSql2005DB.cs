@@ -448,9 +448,8 @@ namespace GenDB.DB
                     "    LongValue, " + // 2
                     "    BoolValue, " + // 3x
                     "    StringValue, " + // 4
-                    "    CharValue, " + // 5
-                    "    DoubleValue, " + // 6
-                    "    e.EntityPOID " + // 7
+                    "    DoubleValue, " + // 5
+                    "    e.EntityPOID " + // 6
                     " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
                     " WHERE e.EntityPOID IN (" + whereStr + " )" +
                     " ORDER BY e.EntityTypePOID, e.EntityPOID"
@@ -474,8 +473,8 @@ namespace GenDB.DB
 
                 while (reader.Read())
                 {
-                    entityTypePOID = long.Parse(reader[0].ToString());
-                    entityPOID = long.Parse(reader[7].ToString());
+                    entityTypePOID = Convert.ToInt64(reader[0]);
+                    entityPOID = Convert.ToInt64(reader[6]);
                     if (entityTypePOID != oldEntityTypePOID || firstPass)
                     {
                         currentType = TypeSystem.GetEntityType(entityTypePOID);
@@ -507,7 +506,7 @@ namespace GenDB.DB
                         {
                             case MappingType.BOOL: pv.BoolValue = bool.Parse(reader[3].ToString()); break;
                             case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
-                            case MappingType.DOUBLE: pv.DoubleValue = Convert.ToDouble(reader[6]); break;
+                            case MappingType.DOUBLE: pv.DoubleValue = Convert.ToDouble(reader[5]); break;
                             case MappingType.LONG: pv.LongValue = long.Parse(reader[2].ToString()); break;
                             case MappingType.REFERENCE: if (reader[2] == DBNull.Value)
                                 {
@@ -519,7 +518,6 @@ namespace GenDB.DB
                                     break;
                                 }
                             case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
-                            case MappingType.CHAR: pv.CharValue = Convert.ToChar(reader[5]); break;
                             default: throw new Exception("Could not translate the property value.");
                         } // switch
                     } // if
@@ -544,9 +542,8 @@ namespace GenDB.DB
                     "    LongValue, " + // 2
                     "    BoolValue, " + // 3
                     "    StringValue, " + // 4
-                    "    CharValue, " + // 5
-                    "    DoubleValue, " + // 6
-                    "    e.EntityPOID " + // 7
+                    "    DoubleValue, " + // 5
+                    "    e.EntityPOID " + // 6
                     " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
                     " ORDER BY e.EntityTypePOID, e.EntityPOID"
                     );
@@ -564,8 +561,8 @@ namespace GenDB.DB
 
                 while (reader.Read())
                 {
-                    entityTypePOID = long.Parse(reader[0].ToString());
-                    entityPOID = long.Parse(reader[7].ToString());
+                    entityTypePOID = Convert.ToInt64(reader[0]);
+                    entityPOID = Convert.ToInt64(reader[6]);
                     if (entityTypePOID != oldEntityTypePOID || firstPass)
                     {
                         currentType = TypeSystem.GetEntityType(entityTypePOID);
@@ -596,7 +593,7 @@ namespace GenDB.DB
                         {
                             case MappingType.BOOL: pv.BoolValue = bool.Parse(reader[3].ToString()); break;
                             case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
-                            case MappingType.DOUBLE: pv.DoubleValue = Convert.ToDouble(reader[6]); break;
+                            case MappingType.DOUBLE: pv.DoubleValue = Convert.ToDouble(reader[5]); break;
                             case MappingType.LONG: pv.LongValue = long.Parse(reader[2].ToString()); break;
                             case MappingType.REFERENCE: if (reader[2] == DBNull.Value)
                                 {
@@ -608,7 +605,6 @@ namespace GenDB.DB
                                     break;
                                 }
                             case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
-                            case MappingType.CHAR: pv.CharValue = Convert.ToChar(reader[5]); break;
                             default: throw new Exception("Could not translate the property value.");
                         } // switch
                     } // if
@@ -666,7 +662,7 @@ namespace GenDB.DB
             using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
             {
                 cnn.Open();
-                string sqlStr = "SELECT ElementID, LongValue, BoolValue, StringValue, DoubleValue, CharValue FROM " + TB_COLLECTION_ELEMENT_NAME + " WHERE EntityPOID = " + collectionEntityPOID.ToString();
+                string sqlStr = "SELECT ElementID, LongValue, BoolValue, StringValue, DoubleValue FROM " + TB_COLLECTION_ELEMENT_NAME + " WHERE EntityPOID = " + collectionEntityPOID.ToString();
                 SqlCommand cmd = new SqlCommand(sqlStr, cnn);
 
                 SqlDataReader reader = cmd.ExecuteReader();
@@ -679,9 +675,6 @@ namespace GenDB.DB
                     {
                         case MappingType.BOOL:
                             element.BoolValue = (bool)reader[2];
-                            break;
-                        case MappingType.CHAR:
-                            element.CharValue = (char)reader[5]; 
                             break;
                         case MappingType.DATETIME:
                             element.DateTimeValue = new DateTime ((long)reader[1]);
@@ -772,8 +765,6 @@ namespace GenDB.DB
                     break;
             }
             sb.Append(",'")
-            .Append(ce.CharValue)
-            .Append("','")
             .Append(SqlSanitizeString(ce.StringValue))
             .Append("',")
             .Append (ce.BoolValue)
@@ -838,10 +829,7 @@ namespace GenDB.DB
             {
                 sbPropertyValueInserts.Append(longValue);
             }
-
-            sbPropertyValueInserts.Append(",'")
-                       .Append(pv.CharValue.ToString())
-                       .Append("',") ;
+            sbPropertyValueInserts.Append(',');
             if (stringValue == null)
             {
                 sbPropertyValueInserts.Append(" null ");
@@ -1173,8 +1161,7 @@ namespace GenDB.DB
                 + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
                 + " BoolValue BIT, "
                 + " StringValue VARCHAR(MAX), "
-                + " DoubleValue FLOAT, "
-                + " CharValue CHAR(1))"
+                + " DoubleValue FLOAT) "
                 );
             tCC.AddLast("CREATE TABLE "
                 + TB_COLLECTION_ELEMENT_NAME + " ( "
@@ -1183,8 +1170,7 @@ namespace GenDB.DB
                 + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
                 + " BoolValue BIT, "
                 + " StringValue VARCHAR(MAX), "
-                + " DoubleValue FLOAT, "
-                + " CharValue CHAR(1))"
+                + " DoubleValue FLOAT) "
                 );
 
             tCC.AddLast("CREATE TABLE "
@@ -1194,8 +1180,7 @@ namespace GenDB.DB
                 + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
                 + " BoolValue BIT, "
                 + " StringValue VARCHAR(MAX), "
-                + " DoubleValue FLOAT, "
-                + " CharValue CHAR(1))"
+                + " DoubleValue FLOAT) "
                 );
 
             tCC.AddLast("ALTER TABLE " + TB_PROPERTYVALUE_NAME + " ADD PRIMARY KEY (PropertyPOID, EntityPOID)");
@@ -1227,7 +1212,6 @@ namespace GenDB.DB
                                         "	@EntityPOID AS INT, " +
                                         "	@PropertyPOID AS INT," +
                                         "	@LongValue AS BIGINT," +
-                                        "	@CharValue AS CHAR(1)," +
                                         "	@StringValue AS VARCHAR(max)," +
                                         "	@BoolValue AS BIT, " +
                                         "   @DoubleValue AS FLOAT " +
@@ -1236,7 +1220,6 @@ namespace GenDB.DB
                                         "	BEGIN " +
                                         "		UPDATE PropertyValue SET " +
                                         "			LongValue = @LongValue," +
-                                        "			CharValue = @CharValue," +
                                         "			StringValue = @StringValue ," +
                                         "			BoolValue = @BoolValue, " +
                                         "			DoubleValue = @DoubleValue " +
@@ -1246,8 +1229,8 @@ namespace GenDB.DB
                                         "	ELSE" +
                                         "	BEGIN" +
                                         "		INSERT INTO " +
-                                        "		PropertyValue (EntityPOID, PropertyPOID, LongValue, CharValue , StringValue , BoolValue, DoubleValue)" +
-                                        "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @CharValue,	@StringValue, @BoolValue, @DoubleValue)" +
+                                        "		PropertyValue (EntityPOID, PropertyPOID, LongValue, StringValue , BoolValue, DoubleValue)" +
+                                        "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @StringValue, @BoolValue, @DoubleValue)" +
                                         "	END";
 
             string sp_SET_COLLECTION_ELEMENT
@@ -1255,7 +1238,6 @@ namespace GenDB.DB
                                         "	@EntityPOID AS INT, " +
                                         "	@ElementID AS INT," +
                                         "	@LongValue AS BIGINT," +
-                                        "	@CharValue AS CHAR(1)," +
                                         "	@StringValue AS VARCHAR(max)," +
                                         "	@BoolValue AS BIT, " +
                                         "   @DoubleValue AS FLOAT " +
@@ -1264,7 +1246,6 @@ namespace GenDB.DB
                                         "	BEGIN " +
                                         "		UPDATE " + TB_COLLECTION_ELEMENT_NAME + " SET " +
                                         "			LongValue = @LongValue," +
-                                        "			CharValue = @CharValue," +
                                         "			StringValue = @StringValue ," +
                                         "			BoolValue = @BoolValue, " +
                                         "			DoubleValue = @DoubleValue " +
@@ -1274,8 +1255,8 @@ namespace GenDB.DB
                                         "	ELSE" +
                                         "	BEGIN" +
                                         "		INSERT INTO " + TB_COLLECTION_ELEMENT_NAME +
-                                        "		(EntityPOID, ElementID, LongValue, CharValue , StringValue , BoolValue, DoubleValue)" +
-                                        "		VALUES (@EntityPOID, @ElementID, @LongValue, @CharValue,	@StringValue, @BoolValue, @DoubleValue)" +
+                                        "		(EntityPOID, ElementID, LongValue, StringValue , BoolValue, DoubleValue)" +
+                                        "		VALUES (@EntityPOID, @ElementID, @LongValue, @StringValue, @BoolValue, @DoubleValue)" +
                                         "	END";
 
             string sp_SET_COLLECTION_KEY
@@ -1283,7 +1264,6 @@ namespace GenDB.DB
                             "	@EntityPOID AS INT, " +
                             "	@KeyID AS INT," +
                             "	@LongValue AS BIGINT," +
-                            "	@CharValue AS CHAR(1)," +
                             "	@StringValue AS VARCHAR(max)," +
                             "	@BoolValue AS BIT, " +
                             "   @DoubleValue AS FLOAT " +
@@ -1292,7 +1272,6 @@ namespace GenDB.DB
                             "	BEGIN " +
                             "		UPDATE " + TB_COLLECTION_KEY_NAME + " SET " +
                             "			LongValue = @LongValue," +
-                            "			CharValue = @CharValue," +
                             "			StringValue = @StringValue ," +
                             "			BoolValue = @BoolValue, " +
                             "			DoubleValue = @DoubleValue " +
@@ -1302,8 +1281,8 @@ namespace GenDB.DB
                             "	ELSE" +
                             "	BEGIN" +
                             "		INSERT INTO " + TB_COLLECTION_KEY_NAME +
-                            "		(EntityPOID, KeyID, LongValue, CharValue , StringValue , BoolValue, DoubleValue)" +
-                            "		VALUES (@EntityPOID, @KeyID, @LongValue, @CharValue,	@StringValue, @BoolValue, @DoubleValue)" +
+                            "		(EntityPOID, KeyID, LongValue, StringValue , BoolValue, DoubleValue)" +
+                            "		VALUES (@EntityPOID, @KeyID, @LongValue, @StringValue, @BoolValue, @DoubleValue)" +
                             "	END";
 
             ExecuteNonQueries(new string[] { sp_UP_INS_ENTITY, sp_SET_PROPERTYVALUE, sp_SET_COLLECTION_ELEMENT, sp_SET_COLLECTION_KEY });
