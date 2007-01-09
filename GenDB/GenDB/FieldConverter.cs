@@ -102,7 +102,7 @@ namespace GenDB
             else if (fi.PropertyType == typeof(char))
             {
                 return delegate(IEntity ie) {  //
-                    return ie.GetPropertyValue(prop).CharValue; 
+                    return Convert.ToChar(ie.GetPropertyValue(prop).LongValue);
                 };
             }
             else if (fi.PropertyType == typeof(float))
@@ -186,10 +186,6 @@ namespace GenDB
                     return delegate(IEntity e, object value)
                     {
                         e.GetPropertyValue(p).StringValue = Convert.ToString(value);
-                    };
-                case MappingType.CHAR: return 
-                    delegate(IEntity e, object value) { 
-                        e.GetPropertyValue(p).CharValue = Convert.ToChar (value);
                     };
                 default:
                     throw new Exception("Unknown MappingType in DelegateTranslator, CreateSetter: " + p.MappingType);

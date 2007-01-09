@@ -300,7 +300,7 @@ namespace GenDB
                 }
                 else if (t == typeof(char))
                 {
-                    return MappingType.CHAR;
+                    return MappingType.LONG;
                 }
                 else if (t == typeof(float) || t == typeof(double))
                 {

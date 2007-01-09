@@ -18,7 +18,6 @@ namespace GenDB
             switch (mt)
             {
                 case MappingType.BOOL: return ce.BoolValue;
-                case MappingType.CHAR: return ce.CharValue;
                 case MappingType.DATETIME: return ce.DateTimeValue;
                 case MappingType.DOUBLE: return ce.DoubleValue;
                 case MappingType.REFERENCE: return GetObject(ce.RefValue);
@@ -50,9 +49,6 @@ namespace GenDB
             {
                 case MappingType.BOOL:
                     res.BoolValue = Convert.ToBoolean(o);
-                    break;
-                case MappingType.CHAR:
-                    res.CharValue = Convert.ToChar(o);
                     break;
                 case MappingType.DATETIME:
                     res.DateTimeValue = Convert.ToDateTime(o);
