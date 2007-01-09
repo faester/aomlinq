@@ -12,8 +12,13 @@ namespace GenDB
 
     public class Table<T> : ICollection<T>, IEnumerable<T>
         where T : IBusinessObject
-    {   
+    {
         IWhereable expression = new ExprInstanceOf(typeof(T));
+
+        internal IWhereable Expression
+        {
+            get { return expression; }
+        }
 
         #region ICollection members
 
@@ -108,11 +113,20 @@ namespace GenDB
 
         public Table<T> Where(Expression<Func<T, bool>> expr)
         {
+            Console.WriteLine("Table expression is " + expression);
+            Table<T> res = new Table<T>();
             SqlExprTranslator exprTranslator = new SqlExprTranslator();
-            this.expression = exprTranslator.Convert (expr);
-            return this;
+            res.expression = exprTranslator.Convert (expr);
+            Console.WriteLine("Table expression now " + expression);
+            Console.WriteLine ("Result table expression: " + res.expression);
+            return res;
         }
-        
+
         #endregion
+
+        public override string ToString()
+        {
+            return "Table<" + typeof(T).ToString() + "> with condition " + expression;
+        }
     }
 }

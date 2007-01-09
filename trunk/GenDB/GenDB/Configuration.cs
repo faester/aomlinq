@@ -7,7 +7,7 @@ namespace GenDB
 {
     public static class Configuration
     {
-        private static int dbBatchSize = 100;
+        private static int dbBatchSize = 500;
 
         public static int DbBatchSize
         {

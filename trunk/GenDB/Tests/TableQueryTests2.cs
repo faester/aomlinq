@@ -10,7 +10,7 @@ namespace Tests
     [TestFixture]
     public class TableQueryTests2
     {
-        private const int ELEMENTS_TO_STORE = 100;
+        private const int ELEMENTS_TO_STORE = 40;
         Table<ContainsAllPrimitiveTypes> tableAllPrimitives = null;
 
         [TestFixtureSetUp]
@@ -44,6 +44,7 @@ namespace Tests
             // Try to empty the cache, or at least ensure, 
             // that something is actually retrieved later on.
             System.GC.Collect();
+            Console.WriteLine("TEST Initialized...");
         }
 
         private void InitTableAllPrimitives()
@@ -52,6 +53,7 @@ namespace Tests
             GC.Collect();
             tableAllPrimitives = new Table<ContainsAllPrimitiveTypes>();
             tableAllPrimitives.Clear();
+            Configuration.SubmitChanges();
 
             for (int i = 0; i < ELEMENTS_TO_STORE; i++)
             {
@@ -75,12 +77,11 @@ namespace Tests
         [TearDown]
         public void TearDown()
         {
-            Table<ContainsAllPrimitiveTypes> t_capt = new Table<ContainsAllPrimitiveTypes>();
-            Configuration.SubmitChanges();
-            System.GC.Collect();
-            Configuration.SubmitChanges();
-            t_capt.Clear();
-            Configuration.SubmitChanges();
+            //Table<ContainsAllPrimitiveTypes> t_capt = new Table<ContainsAllPrimitiveTypes>();
+            //t_capt.Clear();
+            //System.GC.Collect();
+            //Configuration.SubmitChanges();
+            //Configuration.SubmitChanges();
         }
 
         [Test]
@@ -138,9 +139,26 @@ namespace Tests
         [Test]
         public void TestLongFilter()
         {
+            
+            Console.Error.WriteLine ("***********************************************************");
+            Console.Error.WriteLine ("****** TEST LONG FILTER ***********************************");
+            Console.Error.WriteLine ("***********************************************************");
+            
+            Console.WriteLine ("***********************************************************");
+            Console.WriteLine ("****** TEST LONG FILTER ***********************************");
+            Console.WriteLine ("***********************************************************");
+            Console.WriteLine(Configuration.DbBatchSize);
+            Console.WriteLine (tableAllPrimitives);
+            Console.WriteLine ("Elements in unfiltered table: " + tableAllPrimitives.Count);
+
             var xs = from capts in tableAllPrimitives
                      where capts.Lng == 0
                      select capts;
+
+            Console.WriteLine (xs);
+            Console.WriteLine(xs.Count);
+            Console.WriteLine ("Elements in unfiltered table: " + tableAllPrimitives.Count);
+            Console.WriteLine ("UNFILTERED: " + tableAllPrimitives);
 
             int count = 0;
             foreach(var x in xs)
@@ -149,6 +167,14 @@ namespace Tests
                 Assert.IsTrue (x.Lng == 0, "Filter error: All Lng values should be zero.");
             }
 
+            Console.WriteLine ("Elements in unfiltered table: " + tableAllPrimitives.Count);
+            Console.WriteLine ("***********************************************************");
+            Console.WriteLine ("****** TEST LONG FILTER END *******************************");
+            Console.WriteLine ("***********************************************************");
+
+            Console.Error.WriteLine ("***********************************************************");
+            Console.Error.WriteLine ("****** TEST LONG FILTER END *******************************");
+            Console.Error.WriteLine ("***********************************************************");
             Assert.AreEqual (ELEMENTS_TO_STORE / 2, count, "Incorrect number of elements returned.");
         }
 
@@ -225,14 +251,14 @@ namespace Tests
         public void TestCharFilter()
         {
             var xs = from capts in tableAllPrimitives
-                     where capts.Ch == '0'
+                     where capts.Ch == '1'
                      select capts;
 
             int count = 0;
             foreach(var x in xs)
             {
                 count++;
-                Assert.IsTrue (x.Ch == '0', "Filter error: All Fl values should be 0.");
+                Assert.IsTrue (x.Ch == '1', "Filter error: All Fl values should be 0.");
             }
 
             Assert.AreEqual (ELEMENTS_TO_STORE / 2 , count, "Incorrect number of elements returned.");

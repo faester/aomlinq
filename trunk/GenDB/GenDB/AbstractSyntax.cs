@@ -216,6 +216,11 @@ namespace GenDB
         {
             visitor.VisitOPEquals(this);
         }
+
+        public override string ToString()
+        {
+            return "OP_Equals(" + Left.ToString() + ","  + Right.ToString() + ")";
+        }
     }
 
     class OP_LessThan : BinaryOperator, IBoolOperator
@@ -267,6 +272,11 @@ namespace GenDB
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitNumericalProperty(this);
+        }
+
+        public override string ToString()
+        {
+            return "CstProperty(" + (property != null ? property.ToString() : "null") + ")";
         }
     }
 
