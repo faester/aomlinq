@@ -35,6 +35,12 @@ namespace GenDB.DB
             }
         }
 
+        // Leaf
+        public void VisitCstThis(CstThis cstThis)
+        {
+            wherePart.Append (" EntityPOID ");
+        }
+
         public void Reset()
         {
             selectPart = new StringBuilder("SELECT DISTINCT e.EntityPOID FROM Entity e");
