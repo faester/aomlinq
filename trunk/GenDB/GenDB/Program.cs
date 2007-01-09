@@ -165,7 +165,7 @@ namespace GenDB
                 //where epp.Spouse == null
                      //where !(epp.Letter != 'c')
                      //where epp.Birth == t
-                     where epp.Alive == true
+                     where epp.Alive
                      select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
                 //select new {TestAggregate = tp.Sum(v => v.Age)};

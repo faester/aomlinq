@@ -24,7 +24,6 @@ namespace GenDB
 
         internal IExpression VisitMethodCall(MethodCallExpression mce)
         {
-            //throw new Exception("stop here to implement object.reference.property");
             ReadOnlyCollection<Expression> roc = mce.Parameters;
             IValue[] parArr= new IValue[2];
  
@@ -95,20 +94,15 @@ namespace GenDB
                 switch(TypeSystem.FindMappingType(expr.Type))
                 {
                 case MappingType.BOOL:
-                    if(be.Right.Type.Name == "Int32" || be.Right.Type.Name == "Int64")
-                    {
-                        parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
-                    }
-                    else if(be.Right.Type.Name == "Boolean")
+                    if(be.Right.Type.Name == "Boolean")
                     {
                         ConstantExpression ce = (ConstantExpression)be.Right;
                         parArr[1] = new GenDB.CstBool((bool)ce.Value);
                     }
                     else
                     {
-                        throw new Exception("stop");
+                        parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
                     }
-                        //throw new Exception("stop");
                     break;
 
                 default:
@@ -148,7 +142,6 @@ namespace GenDB
                 return new GenDB.OP_LessThan(parArr[0], parArr[1]);
             else if(nodeType=="EQ")
             {
-                //throw new Exception("stop");
                 return new GenDB.OP_Equals (parArr[0], parArr[1]);
             }
             else if(nodeType=="NE")
@@ -205,7 +198,6 @@ namespace GenDB
         
         public IExpression VisitExpr(Expression expr)
         {
-            //throw new Exception("stop");
             if(expr.NodeType.ToString()=="Lambda")
             {
                 LambdaExpression lambda = (LambdaExpression)expr;
@@ -217,7 +209,6 @@ namespace GenDB
                 }
                 else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT(") || mecstr.StartsWith("NE("))
                 {
-                    //throw new Exception("stop");
                     return VisitBinaryExpression((BinaryExpression) lambda.Body);
                 }
                 else if(mecstr.StartsWith("AndAlso("))
@@ -379,7 +370,6 @@ namespace GenDB
             IExpression ie = new GenDB.OP_NotEquals(parArr[0],parArr[1]);
             
             return new GenDB.ExprNot(ie);
-            //throw new Exception("stop");
         }
 
         internal IWhereable VisitParameter(ParameterExpression p)
