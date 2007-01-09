@@ -6,8 +6,33 @@ using System.Collections;
 
 namespace GenDB
 {
+
+    public static class BOListFactory
+    {
+        public static BOList<T> BOListRef<T>() 
+            where T : IBusinessObject
+        {
+            return new BOList<T>();
+        }
+
+        public static BOList<int> BOListInt() { return new BOList<int>(); }
+        public static BOList<string> BOListString() { return new BOList<string>(); }
+        public static BOList<DateTime> BOListDateTime() { return new BOList<DateTime>(); }
+        public static BOList<long> BOListLong() { return new BOList<long>(); }
+        public static BOList<bool> BOListBool() { return new BOList<bool>(); }
+        public static BOList<char> BOListChar() { return new BOList<char>(); }
+        public static BOList<double> BOListDouble() { return new BOList<double>(); }
+        public static BOList<float> BOListFloat() { return new BOList<float>(); }
+    }
+
     /// <summary>
-    /// BOList has identical functionality to a regular list, but can be stored in the generic db system.
+    /// BOList has identical functionality to a regular list, but 
+    /// can be stored in the generic db system. This type can not 
+    /// be instantiated, since there are no restrictions on the 
+    /// parameters, and the GenDB system only supports storage of 
+    /// reference types, if they implement IBusinessObject.
+    /// 
+    /// To create instances, use the BOListFactory
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public sealed class BOList<T> : AbstractBusinessObject, IList<T>, IDBSaveableCollection
@@ -17,7 +42,11 @@ namespace GenDB
         bool isListPopulated = false;
         MappingType mt;
 
-        public BOList()
+        /// <summary>
+        /// Hide constructor to prevent instantiation 
+        /// of unrestricted type parameter.
+        /// </summary>
+        internal BOList()
         {
             mt = TypeSystem.FindMappingType (typeof(T));
         }
