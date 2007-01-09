@@ -169,24 +169,24 @@ namespace GenDB
 
         internal IValue VisitUnaryExpressionValue(UnaryExpression ue)
         {
-            string exprType = ue.Operand.GetType().Name;
-            if(exprType=="MemberExpression")
+            //string exprType = ue.Operand.GetType().Name;
+            if(ue.Operand is MemberExpression)
             {
                 MemberExpression me = (MemberExpression)ue.Operand;
                 return VisitMemberExpression(me);
             }
-            else if(exprType=="ConstantExpression")
-            {
-                ConstantExpression ce = (ConstantExpression) ue.Operand;
-                Type t = ce.Type;
+            //else if(ue.Operand is ConstantExpression)
+            //{
+            //    ConstantExpression ce = (ConstantExpression) ue.Operand;
+            //    Type t = ce.Type;
 
-                if(!TypeSystem.IsTypeKnown(t))
-                    TypeSystem.RegisterType(t);
+            //    if(!TypeSystem.IsTypeKnown(t))
+            //        TypeSystem.RegisterType(t);
 
-                IEntityType et = TypeSystem.GetEntityType(t);
+            //    IEntityType et = TypeSystem.GetEntityType(t);
                 
-                throw new Exception("not implemented: "+ue.Operand.GetType().Name);
-            }
+            //    throw new Exception("not implemented: "+ue.Operand.GetType().Name);
+            //}
             else
             {
                 throw new Exception("Unknown type: "+ue.Operand.GetType().Name);
@@ -338,7 +338,16 @@ namespace GenDB
                 else if(lambda.Body is MemberExpression)
                 {
                     MemberExpression me = (MemberExpression)lambda.Body;
-                    return VisitBooleanMember(me, true);
+                    switch(TypeSystem.FindMappingType(me.Type))
+                    {
+                        case MappingType.BOOL:
+                            return VisitBooleanMember(me, true);
+                            break;
+
+                        default:
+                            throw new Exception("MappingType not implemented: "+TypeSystem.FindMappingType(me.Type));
+                    }
+                    
                 }
                 else
                 {
