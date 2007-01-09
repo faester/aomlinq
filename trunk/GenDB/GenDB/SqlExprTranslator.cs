@@ -94,20 +94,30 @@ namespace GenDB
                 switch(TypeSystem.FindMappingType(expr.Type))
                 {
                 case MappingType.BOOL:
-                    if(be.Right.Type.Name == "Boolean")
+                    switch(TypeSystem.FindMappingType(be.Right.Type))
                     {
-                        ConstantExpression ce = (ConstantExpression)be.Right;
-                        parArr[1] = new GenDB.CstBool((bool)ce.Value);
+                        case MappingType.BOOL:
+                            ConstantExpression ce = (ConstantExpression)be.Right;
+                            parArr[1] = new GenDB.CstBool((bool)ce.Value);
+                            break;
+
+                        case MappingType.LONG:
+                            parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
+                            break;
+
+                        case MappingType.DOUBLE:
+                            parArr[1] = new CstDouble(System.Convert.ToDouble(be.Right.ToString()));
+                            break;
+
+                        default:
+                            throw new Exception("Unknown MappingType: "+TypeSystem.FindMappingType(be.Right.Type));
                     }
-                    else
-                    {
-                        parArr[1] = new CstLong(System.Convert.ToInt64(be.Right.ToString()));
-                    }
-                    break;
+                        break;
 
                 default:
                     throw new Exception("type not implemented "+expr.Type);
                 }
+                
             }
             else if(be.Right is UnaryExpression)
             {
