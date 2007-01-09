@@ -154,27 +154,19 @@ namespace GenDB
 
             var es = from epp in tp
                      
-                //where epp.Age == 3
+                where epp.Age == 3
                 //where !(epp.Age <= 3) 
-                //where !(epp.Age == 2)
                 //where !(epp.Name != "Navn 3")
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                 //where epp.Name == "Navn 6" || epp.Age == 7
-                // where !(epp.Spouse != null)
+                 //where epp.Spouse == null
                 //where epp.Spouse.Name == "SpousePerson"
                 //where epp.Spouse == null
                      //where !(epp.Letter != 'c')
                      //where epp.Birth == t
-                     where epp.Alive
+                     where epp.Alive == true
                      select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
-                //select new {TestAggregate = tp.Sum(v => v.Age)};
-                //select new {TestAggregate = tp.Max(v => v.Age)};
-                //select new {TestAggregate = tp.Min(v => v.Age)};
-
-            //double averageAge = es.Average(v => v.Age);
-                 
-           
             
             foreach(Person p in es)
             {
