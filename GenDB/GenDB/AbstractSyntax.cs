@@ -8,6 +8,7 @@ namespace GenDB
     interface IAbsSyntaxVisitor
     {
         void Visit(IWhereable clause);
+        void VisitCstThis(CstThis cstThis);
         void VisitNumericalProperty(CstProperty vp);
         void VisitCstString(CstString cs);
         void VisitCstBool(CstBool cb);
@@ -64,6 +65,14 @@ namespace GenDB
     /// String values. More restricted comparison options than numerical.
     /// </summary>
     interface IStringvalue : IConstant {}
+
+    class CstThis : IValue
+    {
+        public void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitCstThis(this);
+        }
+    }
 
     class CstIsTrue : IValue
     {
