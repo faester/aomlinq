@@ -12,12 +12,23 @@ namespace Tests
     public class TableQueryTests2
     {
         private const int ELEMENTS_TO_STORE = 100;
-        Table<ContainsAllPrimitiveTypes> tableAllPrimitives = null; 
+        Table<ContainsAllPrimitiveTypes> tableAllPrimitives = null;
 
         [TestFixtureSetUp]
         public void FixtureSetUp()
         {
-            //Assert.IsTrue(Configuration.RebuildDatabase, "Database must be rebuild for these tests to be accurate.");
+            try
+            {
+                if (!Configuration.RebuildDatabase)
+                {
+                    Configuration.RebuildDatabase = true;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine("Database must be rebuild prior to calling these tests.");
+                throw e;
+            }
         }
 
         [TestFixtureTearDown]
