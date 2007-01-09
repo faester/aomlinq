@@ -19,11 +19,13 @@ namespace GenDB
 
         public void Add(T ibo)
         {
-            if (!TypeSystem.IsTypeKnown(ibo.GetType()))
+            if (ibo == null) { throw new NullReferenceException("Value can not be null."); }
+            Type t = ibo.GetType();
+            if (!TypeSystem.IsTypeKnown(t))
             {
-               TypeSystem.RegisterType(ibo.GetType());
+               TypeSystem.RegisterType(t);
             }
-            IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
+            IIBoToEntityTranslator trans = TypeSystem.GetTranslator(t);
             IEntity e = trans.Translate(ibo);
             Configuration.GenDB.Save(e);
         }
