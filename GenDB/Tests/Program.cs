@@ -70,93 +70,109 @@ namespace Tests
             try
             {
 #endif
-                Configuration.RebuildDatabase = false;
+            Configuration.RebuildDatabase = false;
 
-                Console.WriteLine("Her....");
+            Console.WriteLine("Her....");
 
-                Configuration.DbBatchSize = 2000;
-                long objcount = 1;
+            Configuration.DbBatchSize = 2000;
+            long objcount = 1;
 
-                Table<BOList<TestlistElement>> tl = new Table<BOList<TestlistElement>>();
+            Table<BOList<TestlistElement>> tl = new Table<BOList<TestlistElement>>();
 
-                Table<BOList<int>> tbi = new Table<BOList<int>>();
+            Table<BOList<int>> tbi = new Table<BOList<int>>();
 
-                BOList<int> bi = new BOList<int>();
+            BOList<int> bi = new BOList<int>();
 
-                for (int i = 10; i > 0; i--)
+            for (int i = 10; i > 0; i--)
+            {
+                bi.Add(i);
+            }
+
+            tbi.Add(bi);
+
+
+            foreach(BOList<int> bli in tbi)
+            {
+                Console.WriteLine("New BOList<int>:");
+                bool first = true;
+                foreach(int i in bli)
                 {
-                    bi.Add (i);
-                }
-
-                tbi.Add (bi);
-                
-                BOList<TestlistElement> lp = new BOList<TestlistElement>();
-
-                for (int i = 0; i < 5; i++)
-                {
-                    TestlistElement tle = new TestlistElement();
-                    tle.I = i;
-                    lp.Add(tle);
-                }
-
-                tl.Add(lp);
-
-                Configuration.SubmitChanges();
-
-                foreach (BOList<TestlistElement> list in tl)
-                {
-                    foreach (TestlistElement le in list)
-                    {
-                        ObjectUtilities.PrintOut(le);
+                    if (first) { 
+                        Console.Write(", ");
+                        first = false;
                     }
+                    Console.Write(i);
                 }
+                Console.WriteLine();
+            }
 
-                Table<Person> tp = new Table<Person>();
+            BOList<TestlistElement> lp = new BOList<TestlistElement>();
 
-                DateTime then = DateTime.Now;
+            for (int i = 0; i < 5; i++)
+            {
+                TestlistElement tle = new TestlistElement();
+                tle.I = i;
+                lp.Add(tle);
+            }
 
-                Person lastPerson = null;
+            tl.Add(lp);
 
-                for (int i = 0; i < objcount; i++)
+            Configuration.SubmitChanges();
+
+            foreach (BOList<TestlistElement> list in tl)
+            {
+                foreach (TestlistElement le in list)
                 {
-                    Person p = new Person();
-                    Student s = new Student();
-
-                    s.Name = "Student '" + i.ToString();
-                    s.Avg = (double)i / objcount;
-                    s.Spouse = p;
-
-                    p.Name = "Navn " + i;
-                    p.Age = i;
-
-                    tp.Add(p);
-                    tp.Add(s);
-                    lastPerson = p;
+                    ObjectUtilities.PrintOut(le);
                 }
+            }
 
-                Configuration.SubmitChanges();
+            Table<Person> tp = new Table<Person>();
 
-                TimeSpan dur = DateTime.Now - then;
-                objcount *= 2;
-                Console.WriteLine("Insertion of {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
-                then = DateTime.Now;
-                objcount = 0;
-                foreach (Person ibo in tp)
+            DateTime then = DateTime.Now;
+
+            Person lastPerson = null;
+
+            for (int i = 0; i < objcount; i++)
+            {
+                Person p = new Person();
+                Student s = new Student();
+
+                s.Name = "Student '" + i.ToString();
+                s.Avg = (double)i / objcount;
+                s.Spouse = p;
+
+                p.Name = "Navn " + i;
+                p.Age = i;
+
+                tp.Add(p);
+                tp.Add(s);
+                lastPerson = p;
+            }
+
+            Configuration.SubmitChanges();
+
+            TimeSpan dur = DateTime.Now - then;
+            objcount *= 2;
+            Console.WriteLine("Insertion of {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
+            then = DateTime.Now;
+            objcount = 0;
+            foreach (Person ibo in tp)
+            {
+                objcount++;
+                if (objcount % 500 == 0)
                 {
-                    objcount++;
-                    if (objcount % 500 == 0)
-                    {
-                        ibo.Age = (ibo.Age + 1) * 2;
-                    }
-                    //ObjectUtilities.PrintOut(ibo);
+                    ibo.Age = (ibo.Age + 1) * 2;
                 }
-                Configuration.SubmitChanges();
-                dur = DateTime.Now - then;
-                Console.WriteLine("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
-                Console.WriteLine("Indeholder nu {0} objekter", tp.Count);
+                //ObjectUtilities.PrintOut(ibo);
+            }
+            Configuration.SubmitChanges();
+            dur = DateTime.Now - then;
+            Console.WriteLine("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
+            Console.WriteLine("Indeholder nu {0} objekter", tp.Count);
 
-                Person[] ps = new Person[tp.Count];
-                tp.CopyTo(ps, 0);
+            Person[] ps = new Person[tp.Count];
+            tp.CopyTo(ps, 0);
 #if DEBUG
             }
             catch (NotTranslatableException ex)

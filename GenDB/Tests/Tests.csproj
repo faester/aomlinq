@@ -45,6 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BOListTranslationTests.cs" />
+    <Compile Include="ContainsAllPrimitiveTypes.cs" />
+    <Compile Include="GenDBTranslationTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ObjectUtilitiesTests.cs" />
