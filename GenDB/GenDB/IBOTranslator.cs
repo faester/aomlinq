@@ -173,6 +173,7 @@ namespace GenDB
             public IEntity Translate(IBusinessObject ibo)
             {
                 IEntity res = Configuration.GenDB.NewEntity();
+
                 // Drop the db-created EntityPOID if DBTag is set.
                 if (ibo.DBTag != null)
                 {
