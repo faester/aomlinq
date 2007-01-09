@@ -51,7 +51,6 @@ namespace GenDB
                 set { others = value; }
             }
 
-            [Volatile]
             public Sex Sex
             {
                 get { return sex; }
@@ -82,11 +81,24 @@ namespace GenDB
             }
 
             int age;
-            [Volatile]
             public int Age
             {
                 get { return age; }
                 set { age = value; }
+            }
+
+            char letter;
+            public char Letter
+            {
+                get {return letter;}
+                set {letter = value;}
+            }
+
+            DateTime birth;
+            public DateTime Birth
+            {
+                get {return birth;}
+                set {birth = value;}
             }
         }
 
@@ -122,7 +134,9 @@ namespace GenDB
                 tp.Add (p);
             }
 
-            Person s_p = new Person{ Name = "SpousePerson"};
+            DateTime t = DateTime.Now;
+
+            Person s_p = new Person{ Name = "SpousePerson", Letter = 'c', Birth = t};
             s_p.Age = 99;
             tp.Add (s_p);
 
@@ -140,8 +154,10 @@ namespace GenDB
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                 //where epp.Name == "Navn 6" || epp.Age == 7
                 // where !(epp.Spouse != null)
-                where epp.Spouse.Name == "SpousePerson"
+                //where epp.Spouse.Name == "SpousePerson"
                 //where epp.Spouse == null
+                     //where epp.Letter == 'c'
+                     where epp.Birth == t
                      select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
                 //select new {TestAggregate = tp.Sum(v => v.Age)};
@@ -157,7 +173,7 @@ namespace GenDB
                 ObjectUtilities.PrintOut (p);
             }
 
-            //Console.WriteLine("Size of Table: {0}, TestAggregate: {1}", es.Count(), es.ElementAt(0).TestAggregate);
+            Console.WriteLine("Size of Table: {0}", es.Count);
             
 
 
