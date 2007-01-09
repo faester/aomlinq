@@ -9,6 +9,24 @@ namespace GenDB
     [TestFixture]
     public class TestObjectUtilities
     {
+        [TestFixtureSetUp]
+        public void TestFixtureSetUp()
+        {
+            try
+            {
+                if (!Configuration.RebuildDatabase)
+                {
+                    Configuration.RebuildDatabase = true;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(Configuration.RebuildDatabase);
+                Console.Error.WriteLine("Database must be rebuild prior to calling these tests.");
+                throw e;
+            }
+        }
+
         class EqulityTestPrimitives
         {
             public int i = 0;
@@ -106,7 +124,7 @@ namespace GenDB
         {
             et1.TheString = "Per";
             et2.TheString = "Poul";
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality (et1, et2));
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(et1, et2));
         }
 
         [Test]
@@ -114,30 +132,72 @@ namespace GenDB
         {
             et1.I = 312;
             et2.I = 231;
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality (et1, et2));
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(et1, et2));
         }
 
         [Test]
         public void TestFalsePositivesObject()
         {
             et1.TheObject = new Object();
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality (et1, et2));
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(et1, et2));
             et2.TheObject = new Object();
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality (et1, et2));
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(et1, et2));
         }
 
         [Test]
         public void TestFalsePositivesDifferentTypes()
         {
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality (et1, "string"));
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(et1, "string"));
+        }
+
+        [Test]
+        public void TestCompareBOList()
+        {
+            BOList<int> boOrig = new BOList<int>();
+            BOList<int> boSame = new BOList<int>();
+            BOList<int> boOther = new BOList<int>();
+
+            for (int i = 0; i < 10; i++)
+            {
+                boOrig.Add(i);
+                boSame.Add(i);
+                boOther.Add(i * 29);
+            }
+
+            Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boOrig), "BOList compare to self returned false.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BOList compare to other with same contents returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boOther), "BOList compare to completely different BOList returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, new BOList<object>()), "BOList compare to something else returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, null), "BOList compare to null returned true.");
+        }
+
+        [Test]
+        public void TestCompareBODictionaries()
+        {
+            BODictionary<int, int> boOrig = new BODictionary<int, int>();
+            BODictionary<int, int> boSame = new BODictionary<int, int> ();
+            BODictionary<int, int>  boOther = new BODictionary<int, int> ();
+
+            for (int i = 0; i < 10; i++)
+            {
+                boOrig.Add(i, i * 2);
+                boSame.Add(i, i * 2);
+                boOther.Add(i * 29, -1);
+            }
+
+            Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boOrig), "BODictionary compare to self returned false.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BODictionary compare to other with same contents returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boOther), "BODictionary compare to completely different BODictionary returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, new BOList<object>()), "BODictionary compare to something else returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, null), "BODictionary compare to null returned true.");
         }
 
         [Test]
         public void TestHandlesNull()
         {
-            Assert.IsTrue(ObjectUtilities.TestFieldEquality (null, null), "null == null should return true");
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality ("string", null), "Comparing something to null should return false. (null as second param)");
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality (null, "string") ,"Comparing something to null should return false. (null as first param)");
+            Assert.IsTrue(ObjectUtilities.TestFieldEquality(null, null), "null == null should return true");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality("string", null), "Comparing something to null should return false. (null as second param)");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(null, "string"), "Comparing something to null should return false. (null as first param)");
         }
     }
 }

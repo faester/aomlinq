@@ -40,10 +40,10 @@ namespace Tests
         [Test]
         public void TestContains()
         {
-            Table<Person> tpt = new Table<Person>();
-            Person p1 = new Person();
-            Person p2 = new Person();
-            Person p3 = new Person();
+            Table<TestPerson> tpt = new Table<TestPerson>();
+            TestPerson p1 = new TestPerson();
+            TestPerson p2 = new TestPerson();
+            TestPerson p3 = new TestPerson();
 
             tpt.Add (p1);
             tpt.Add (p2);
@@ -52,34 +52,35 @@ namespace Tests
 
             Assert.IsTrue (tpt.Contains(p1), "Wrong result. False negative");
             Assert.IsFalse (tpt.Contains(p3), "Wrong result. False positive");
+            Assert.IsFalse (tpt.Contains (null), "Wrong result. DB should never return null values. (Or perhabs it should...)");
         }
 
         [Test]
         public void TestCount()
         {
-            Table<Person> tpt = new Table<Person>();
+            Table<TestPerson> tpt = new Table<TestPerson>();
 
             tpt.Clear();
             Configuration.SubmitChanges();
 
-            tpt.Add (new Person {Name = "Per"});
-            tpt.Add (new Person {Name = "Per"});
-            tpt.Add (new Person {Name = "Per"});
-            tpt.Add (new Person {Name = "Per"});
-            tpt.Add (new Person {Name = "Poul"});
-            tpt.Add (new Person {Name = "Konrad"});
-            tpt.Add (new Person {Name = "Jørgen"});
-            tpt.Add (new Person {Name = "Svend"});
+            tpt.Add (new TestPerson {Name = "Per"});
+            tpt.Add (new TestPerson {Name = "Per"});
+            tpt.Add (new TestPerson {Name = "Per"});
+            tpt.Add (new TestPerson {Name = "Per"});
+            tpt.Add (new TestPerson {Name = "Poul"});
+            tpt.Add (new TestPerson {Name = "Konrad"});
+            tpt.Add (new TestPerson {Name = "Jørgen"});
+            tpt.Add (new TestPerson {Name = "Svend"});
 
             Configuration.SubmitChanges();
 
-            int c = tpt.Count<Person>((Person p) => p.Name == "Per");
+            int c = tpt.Count<TestPerson>((TestPerson p) => p.Name == "Per");
             Assert.AreEqual (4, c, "Error in filtered result.");
 
-            c = tpt.Count<Person>((Person p) => p.Name == "Poul");
+            c = tpt.Count<TestPerson>((TestPerson p) => p.Name == "Poul");
             Assert.AreEqual (1, c, "Error in filtered result.");
 
-            c = tpt.Count<Person>((Person p) => p.Name == "I do not exist");
+            c = tpt.Count<TestPerson>((TestPerson p) => p.Name == "I do not exist");
             Assert.AreEqual (0, c, "Error in filtered result.");
 
             c = tpt.Count;

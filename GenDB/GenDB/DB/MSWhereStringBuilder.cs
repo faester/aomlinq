@@ -64,7 +64,14 @@ namespace GenDB.DB
 
             entityTypePoids.Append (")");
 
-            wherePart.Append (entityTypePoids);
+            if (notFirst) // Test that type was known.
+            {
+                wherePart.Append(entityTypePoids);
+            }
+            else
+            {
+                wherePart.Append("(0 = 1)");
+            }
         }
 
         //Leaf
