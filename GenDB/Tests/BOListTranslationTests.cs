@@ -43,7 +43,7 @@ namespace Tests
 
             for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
             {
-                BOList<ContainsAllPrimitiveTypes> bolist = new BOList<ContainsAllPrimitiveTypes>();
+                BOList<ContainsAllPrimitiveTypes> bolist = BOListFactory.BOListRef<ContainsAllPrimitiveTypes>();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
                     bolist.Add(new ContainsAllPrimitiveTypes { Integer = j });
@@ -74,7 +74,7 @@ namespace Tests
 
             for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
             {
-                BOList<int> bolist = new BOList<int>();
+                BOList<int> bolist = BOListFactory.BOListInt();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
                     bolist.Add(j);
@@ -96,22 +96,19 @@ namespace Tests
             Assert.AreEqual(ELEMENTS_TO_INSERT, listCount, "Wrong number of lists returned.");
         }
 
-        /// <summary>
-        /// Does not perform testing of value of inserted objects.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void TestBOListOfT<T>()
+        [Test]
+        public void TestBOListOfString()
         {
-            Table<BOList<T>> table = new Table<BOList<T>>();
+            Table<BOList<string>> table = new Table<BOList<string>>();
             table.Clear();
             Configuration.SubmitChanges();
 
             for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
             {
-                BOList<T> bolist = new BOList<T>();
+                BOList<string> bolist = BOListFactory.BOListString();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
-                    bolist.Add(default(T));
+                    bolist.Add(j.ToString());
                 }
                 table.Add (bolist);
             }
@@ -119,27 +116,17 @@ namespace Tests
             GC.Collect();
 
             int listCount = 0;
-            foreach(BOList<T> bolist in table)
+            foreach(BOList<string> bolist in table)
             {
                 listCount++;
                 for (int i = 0; i < LIST_LENGTH; i++)
                 {
-                    T t = bolist[i];
+                    string s = bolist[i];
+                    Assert.AreEqual(i.ToString(), s, "Wrong value returned.");
                 }
             }
             Assert.AreEqual(ELEMENTS_TO_INSERT, listCount, "Wrong number of lists returned.");
         }
 
-        [Test]
-        public void TestListOfString()
-        {
-            TestBOListOfT<string>();
-        }
-
-        [Test]
-        public void TestListOfDateTime()
-        {
-            TestBOListOfT<DateTime>();
-        }
     }
 }

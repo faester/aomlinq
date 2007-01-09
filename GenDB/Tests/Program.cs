@@ -81,7 +81,7 @@ namespace Tests
 
             Table<BOList<int>> tbi = new Table<BOList<int>>();
 
-            BOList<int> bi = new BOList<int>();
+            BOList<int> bi = BOListFactory.BOListInt();
 
             for (int i = 10; i > 0; i--)
             {
@@ -106,7 +106,7 @@ namespace Tests
                 Console.WriteLine();
             }
 
-            BOList<TestlistElement> lp = new BOList<TestlistElement>();
+            BOList<TestlistElement> lp = BOListFactory.BOListRef<TestlistElement>();
 
             for (int i = 0; i < 5; i++)
             {
