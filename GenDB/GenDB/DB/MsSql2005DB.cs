@@ -425,10 +425,11 @@ namespace GenDB.DB
 
             if (entityInsertCount >= Configuration.DbBatchSize) { EntityInsertStringBuilderToLL(); }
             entityInsertCount++;
+            string deleteString = " DELETE FROM Entity WHERE EntityPOID IN (" + mswsb.WhereStr + ") ";
 
-            sbEntityInserts.Append ("DELETE FROM Entity WHERE EntityPOID IN (");
-            sbEntityInserts.Append (mswsb.WhereStr);
-            sbEntityInserts.Append (')');
+            Console.Error.WriteLine(deleteString);
+            
+            sbEntityInserts.Append (deleteString);
         }
 
         public IEnumerable<IEntity> Where(IWhereable expression)
