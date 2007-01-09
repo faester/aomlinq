@@ -418,6 +418,19 @@ namespace GenDB.DB
             return res;
         }
 
+        public void WhereClear(IWhereable expression)
+        {
+            MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
+            mswsb.Visit (expression);
+
+            if (entityInsertCount >= Configuration.DbBatchSize) { EntityInsertStringBuilderToLL(); }
+            entityInsertCount++;
+
+            sbEntityInserts.Append ("DELETE FROM Entity WHERE EntityPOID IN (");
+            sbEntityInserts.Append (mswsb.WhereStr);
+            sbEntityInserts.Append (')');
+        }
+
         public IEnumerable<IEntity> Where(IWhereable expression)
         {
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder();

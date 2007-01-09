@@ -28,9 +28,14 @@ namespace GenDB
             Configuration.GenDB.Save(e);
         }
 
+        /// <summary>
+        /// Will clear all elements from database, that matches this tables current
+        /// where expression. (For regularly instantiated objects this means all 
+        /// entities of type T or a subclass of this type.)
+        /// </summary>
         public void Clear()
         {
-            throw new Exception("Not implemented");
+            Configuration.GenDB.WhereClear(expression);
         }
 
         public bool Contains(T e)

@@ -41,7 +41,7 @@ namespace GenDB
         {
             get { return rebuildDatabase; }
             set { 
-                if (genDB != null) { throw new Exception("Request for DB rebuild must be set before the DB is accessed for the first time."); }
+                if (genDB != null && value != rebuildDatabase) { throw new Exception("Request for DB rebuild must be set before the DB is accessed for the first time."); }
                 rebuildDatabase = value;
             }
         }

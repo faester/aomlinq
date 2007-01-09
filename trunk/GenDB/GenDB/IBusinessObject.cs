@@ -22,23 +22,5 @@ namespace GenDB
     {
         void SaveElementsToDB();
     }
-  
 
-    ///// <summary>
-    ///// Gem typerne for K og V som properties på objektet og giv disse faste 
-    ///// navne i TypeSystem
-    ///// TODO: BODictionary
-    ///// </summary>
-    ///// <typeparam name="K"></typeparam>
-    ///// <typeparam name="V"></typeparam>
-    //public class BODictionary<K, V> : AbstractBusinessObject, IDictionary<K, V>, IDBSaveableCollection
-    //{
-    //    DBTag dbtag;
-
-    //    public DBTag DBTag
-    //    {
-    //        get { return dbtag; }
-    //        set { dbtag = value; }
-    //    }
-    //}
 }
