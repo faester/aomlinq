@@ -730,15 +730,6 @@ namespace GenDB.DB
 
         public void Save(IGenCollectionElement ce, long collectionEntityPOID, MappingType mt)
         {
-            //  = "CREATE PROCEDURE sp_SET_COLLECTION_ELEMENT " +
-            //"	@EntityPOID AS INT, " +
-            //"	@ElementID AS INT," +
-            //"	@LongValue AS BIGINT," +
-            //"	@CharValue AS CHAR(1)," +
-            //"	@StringValue AS VARCHAR(max)," +
-            //"	@BoolValue AS BIT, " +
-            //"   @DoubleValue AS FLOAT " +
-
             StringBuilder sb = new StringBuilder(" exec sp_SET_COLLECTION_ELEMENT ");
             sb.Append(collectionEntityPOID)
             .Append(',')
@@ -763,11 +754,21 @@ namespace GenDB.DB
                 case MappingType.DATETIME:
                     sb.Append(ce.DateTimeValue.Ticks);
                     break;
+                default: 
+                    sb.Append("null"); 
+                    break;
             }
+            if (ce.StringValue == null)
+            {
+                sb.Append (",null,");
+            }
+            else
+            {
             sb.Append(",'")
             .Append(SqlSanitizeString(ce.StringValue))
-            .Append("',")
-            .Append (ce.BoolValue)
+            .Append("',");
+            }
+            sb.Append (ce.BoolValue)
             .Append (',')
             .Append(ce.DoubleValue);
 
