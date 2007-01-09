@@ -43,7 +43,7 @@ namespace GenDB
 
         public IGenCollectionElement Translate(object o)
         {
-            if (o == null) { return null; }
+            //if (o == null) { return null; }
             IGenCollectionElement res = new GenCollectionElement();
             switch (mt)
             {
