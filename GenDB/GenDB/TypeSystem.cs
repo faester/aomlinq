@@ -206,6 +206,10 @@ namespace GenDB
         /// <returns></returns>
         public static IEnumerable<IEntityType> GetEntityTypesInstanceOf(Type t)
         {
+            if (!IsTypeKnown(t)) 
+            { // Ensure that the type is known. TODO: Consider just returning empty set.
+                RegisterType(t);
+            }
             return GetEntityTypesInstanceOf(type2IEt[t].Target);
         }
 
