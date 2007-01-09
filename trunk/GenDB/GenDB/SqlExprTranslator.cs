@@ -10,7 +10,7 @@ using GenDB.DB;
 namespace GenDB
 {
     // internal class fra System.Query.dll, sakset via reflector
-
+    
     internal class SqlExprTranslator
     {
         internal SqlExprTranslator()
@@ -46,6 +46,10 @@ namespace GenDB
                 {
                     case MappingType.STRING:
                         parArr[1] = new CstString(roc[1].ToString().Trim('"'));
+                        break;
+                    case MappingType.DATETIME:
+                        ConstantExpression ce = (ConstantExpression)roc[1];
+                        parArr[1] = new CstDateTime((DateTime)ce.Value);
                         break;
                     default:
                         throw new Exception("type not implemented "+TypeSystem.FindMappingType(roc[1].Type));
@@ -186,6 +190,7 @@ namespace GenDB
         
         public IExpression VisitExpr(Expression expr)
         {
+            //throw new Exception("stop");
             if(expr.NodeType.ToString()=="Lambda")
             {
                 LambdaExpression lambda = (LambdaExpression)expr;
