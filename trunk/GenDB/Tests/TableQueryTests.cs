@@ -50,7 +50,7 @@ namespace GenDB
                 set { car = value; }
             }
 
-            BOList<Person> others = new BOList<Person>();
+            BOList<Person> others = BOListFactory.BOListRef<Person>();
             [Volatile]
             public BOList<Person> Others
             {

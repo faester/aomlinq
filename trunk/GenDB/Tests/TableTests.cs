@@ -74,7 +74,14 @@ namespace Tests
 
             Assert.IsTrue (tpt.Contains(p1), "Wrong result. False negative");
             Assert.IsFalse (tpt.Contains(p3), "Wrong result. False positive");
-            Assert.IsFalse (tpt.Contains (null), "Wrong result. DB should never return null values. (Or perhabs it should...)");
+            Assert.IsFalse (tpt.Contains (null), "Wrong result. ");
+        }
+
+        [Test, ExpectedException(typeof(NullReferenceException))]
+        public void TestInsertNull()
+        {
+            Table<TestPerson> tpt = new Table<TestPerson>();
+            tpt.Add(null);
         }
 
         [Test]
