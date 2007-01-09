@@ -152,20 +152,19 @@ namespace GenDB
 
             IBOCache.FlushToDB();
 
-            var es = from epp in tp
-                     
-               // where epp.Age == 3
+            var es = from epp in tp     
+                // where epp.Age == 3
                 //where !(epp.Age <= 3) 
                 //where !(epp.Name != "Navn 3")
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                 //where epp.Name == "Navn 6" || epp.Age == 7
-                 //where epp.Spouse == null
+                //where epp.Spouse == s_p
                 //where epp.Spouse.Name == "SpousePerson"
-                //where epp.Spouse == null
-                     //where !(epp.Letter != 'c')
-                     //where epp.Birth == t
-                     where epp.Alive
-                     select epp;
+                //where !(epp.Letter != 'c')
+                //where epp.Birth == t
+                //where epp.Alive
+                where epp == p_p
+                select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
             
             foreach(Person p in es)
@@ -174,7 +173,7 @@ namespace GenDB
             }
 
             Console.WriteLine("Size of Table: {0}", es.Count);
-          
+
             Console.ReadLine();
         }
     }
