@@ -134,11 +134,11 @@ namespace GenDB.DB
         {
             if (cb.Value )
             {
-                wherePart.Append ('0');
+                wherePart.Append ('1');
             }
             else
             {
-                wherePart.Append ('1');
+                wherePart.Append ('0');
             }
         }
 
@@ -194,7 +194,6 @@ namespace GenDB.DB
                     rightIsNullReference=true;
                 }
             }
-
             if(!leftIsNullReference && !rightIsNullReference)
             {
                 eq.Left.AcceptVisitor (this);
