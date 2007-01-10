@@ -243,12 +243,6 @@ namespace GenDB.DB
 
         IEntity GetEntity(long entityPOID);
 
-        IPropertyType GetPropertyType(long propertyTypePOID);
-        IPropertyType GetPropertyType(string name);
-
-        IProperty GetProperty(long propertyPOID);
-        IProperty GetProperty(IEntityType entityType, IPropertyType propertyType);
-
         /// <summary>
         /// Clears all elements stored for the 
         /// collection with the given collectionEntityPOID
@@ -282,15 +276,6 @@ namespace GenDB.DB
         IEnumerable<IEntity> Where(IWhereable expression);
 
         int Count(IWhereable expression);
-
-        /// <summary>
-        /// Will return all persisted elements of the given
-        /// IEntityType or one of its subclasses ordered by 
-        /// their EntityType. (The ordering happens to ease
-        /// later translation to business objects.)
-        /// </summary>
-        /// <returns></returns>
-        IEnumerable<IEntity> GetAllEntitiesOfType(IEntityType type);
 
         /// <summary>
         /// Assumes that all neccessary IProperty, IEntityType and IPropertyType 

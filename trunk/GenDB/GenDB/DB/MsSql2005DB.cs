@@ -429,8 +429,7 @@ namespace GenDB.DB
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
             mswsb.Visit(expression);
             string whereStr = mswsb.WhereStr;
-            Console.WriteLine("MsSql2005DB.Where modtog: " + expression); 
-            Console.WriteLine("Blev oversat til:   " + whereStr);
+
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
@@ -487,7 +486,7 @@ namespace GenDB.DB
                         {
                             IPropertyValue pv = new PropertyValue();
                             pv.Property = prop;
-                            pv.Entity = result; // TODO: Check if this is needed. Consider removing from interface of PropertyValue
+                            pv.Entity = result; 
                             result.StorePropertyValue(pv);
                         } // foreach
                     } // if
@@ -526,121 +525,10 @@ namespace GenDB.DB
         public IEnumerable<IEntity> GetAllEntities()
         {
             return Where(CstIsTrue.Instance);
-
-            //using (SqlConnection cnn = new SqlConnection(DataContext.ConnectStringWithDBName))
-            //{
-            //    cnn.Open();
-
-            //    SqlCommand cmd = new SqlCommand(
-            //        "SELECT " +
-            //        "    e.EntityTypePOID, " + // 0
-            //        "    PropertyPOID, " + // 1
-            //        "    LongValue, " + // 2
-            //        "    BoolValue, " + // 3
-            //        "    StringValue, " + // 4
-            //        "    DoubleValue, " + // 5
-            //        "    e.EntityPOID " + // 6
-            //        " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
-            //        " ORDER BY e.EntityTypePOID, e.EntityPOID"
-            //        );
-            //    cmd.Connection = cnn;
-            //    SqlDataReader reader = cmd.ExecuteReader();
-
-            //    IEntity result = null;
-            //    IEntityType currentType = null;
-            //    long propertyPOID = 0;
-            //    long entityTypePOID = 0;
-            //    long oldEntityTypePOID = entityTypePOID + 1; // Must be different
-            //    long entityPOID = 0;
-            //    long oldEntityPOID = entityPOID + 1; // Must be different
-            //    bool firstPass = true;
-
-            //    while (reader.Read())
-            //    {
-            //        entityTypePOID = Convert.ToInt64(reader[0]);
-            //        entityPOID = Convert.ToInt64(reader[6]);
-            //        if (entityTypePOID != oldEntityTypePOID || firstPass)
-            //        {
-            //            currentType = TypeSystem.GetEntityType(entityTypePOID);
-            //            oldEntityTypePOID = entityTypePOID;
-            //        } // if
-            //        if (entityPOID != oldEntityPOID || firstPass)
-            //        {
-            //            if (result != null) { yield return result; }
-            //            result = new Entity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
-            //            result.EntityType = currentType;
-
-            //            oldEntityPOID = entityPOID;
-
-            //            foreach (IProperty prop in result.EntityType.GetAllProperties)
-            //            {
-            //                IPropertyValue pv = new PropertyValue();
-            //                pv.Property = prop;
-            //                pv.Entity = result; // TODO: Check if this is needed. Consider removing from interface of PropertyValue
-            //                result.StorePropertyValue(pv);
-            //            } // foreach
-            //        } // if
-            //        if (reader[1] != DBNull.Value) // Does any properties exist?
-            //        {
-            //            propertyPOID = long.Parse(reader[1].ToString());
-            //            IProperty p = result.EntityType.GetProperty(propertyPOID);
-            //            IPropertyValue pv = result.GetPropertyValue(p);
-            //            switch (p.MappingType)
-            //            {
-            //                case MappingType.BOOL: pv.BoolValue = bool.Parse(reader[3].ToString()); break;
-            //                case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
-            //                case MappingType.DOUBLE: pv.DoubleValue = Convert.ToDouble(reader[5]); break;
-            //                case MappingType.LONG: pv.LongValue = long.Parse(reader[2].ToString()); break;
-            //                case MappingType.REFERENCE: if (reader[2] == DBNull.Value)
-            //                    {
-            //                        pv.RefValue = new IBOReference(false); break;
-            //                    }
-            //                    else
-            //                    {
-            //                        pv.RefValue = new IBOReference(long.Parse(reader[2].ToString()));
-            //                        break;
-            //                    }
-            //                case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
-            //                default: throw new Exception("Could not translate the property value.");
-            //            } // switch
-            //        } // if
-            //        firstPass = false;
-            //    } // while
-
-            //    if (!reader.IsClosed) { reader.Close(); }
-            //    if (result != null) { yield return result; }
-            //}
-        }
-
-        public IEnumerable<IEntity> GetAllEntitiesOfType(IEntityType type)
-        {
-            // TODO
-            throw new Exception("Not implemented.");
-        }
-
-        public IPropertyType GetPropertyType(long propertyTypePOID)
-        {
-            throw new Exception("Not implemented");
-        }
-
-        public IPropertyType GetPropertyType(string name)
-        {
-            throw new Exception("Not implemented");
-        }
-
-        public IProperty GetProperty(long propertyPOID)
-        {
-            throw new Exception("Not implemented");
-        }
-
-        public IProperty GetProperty(IEntityType entityType, IPropertyType propertyType)
-        {
-            throw new Exception("Not implemented");
         }
 
         public IEnumerable<IGenCollectionElement> AllElements(long collectionEntityPOID)
         {
-            //TODO:
             /*
              * The collection is generic, so all elements must 
              * share the same MappingType. 

@@ -72,13 +72,6 @@ namespace GenDB.DB
             }
         }
 
-        /// <summary>
-        /// TODO: Might be better to store all properties in each 
-        /// EntityType to avoid nested look up and thus increase 
-        /// performance. 
-        /// </summary>
-        /// <param name="propertyPOID"></param>
-        /// <returns></returns>
         public IProperty GetProperty(long propertyPOID)
         {
             IProperty result;
