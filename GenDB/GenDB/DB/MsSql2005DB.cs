@@ -408,7 +408,7 @@ namespace GenDB.DB
             return res;
         }
 
-        public bool WhereClear(IWhereable expression)
+        public bool ClearWhere(IWhereable expression)
         {
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
             mswsb.Visit (expression);
@@ -520,11 +520,6 @@ namespace GenDB.DB
                 if (!reader.IsClosed) { reader.Close(); }
                 if (result != null) { yield return result; }
             }
-        }
-
-        public IEnumerable<IEntity> GetAllEntities()
-        {
-            return Where(CstIsTrue.Instance);
         }
 
         public IEnumerable<IGenCollectionElement> AllElements(long collectionEntityPOID)

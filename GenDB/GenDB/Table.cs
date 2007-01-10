@@ -77,7 +77,7 @@ namespace GenDB
             {
                 iboCache.Remove(ie.EntityPOID);
             }
-            db.WhereClear(expression);
+            db.ClearWhere(expression);
         }
 
 
@@ -126,7 +126,7 @@ namespace GenDB
             if (e == null) { return false;}
             if (e.DBTag == null) { return false; }
             IWhereable where = new OP_Equals(new VarReference(e), new CstThis());
-            return db.WhereClear(where);
+            return db.ClearWhere(where);
         }
 
         public int Count
