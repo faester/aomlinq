@@ -16,7 +16,6 @@ namespace GenDB.DB
         public MappingType MappingType
         {
             get { return PropertyType.MappedType; }
-            set { PropertyType.MappedType = value; }
         }
 
 
