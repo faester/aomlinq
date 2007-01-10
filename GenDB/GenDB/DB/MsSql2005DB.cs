@@ -313,7 +313,6 @@ namespace GenDB.DB
                     tmp.PropertyName = name;
                     tmp.EntityType = entityTypes[etid];
                     tmp.PropertyType = propertyTypes[tid];
-                    tmp.MappingType = tmp.PropertyType.MappedType;
                     tmp.ExistsInDatabase = true;
                     res.Add(pid, tmp);
                 }

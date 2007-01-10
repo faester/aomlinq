@@ -159,7 +159,7 @@ namespace GenDB.DB
     interface IProperty
     {
         //TODO: Bør flyttes til PropertyType.... (Eller bevares i sin nuværende form, hvor der blot indvirkes et kald på PropertyType)
-        MappingType MappingType { get; set; }
+        MappingType MappingType { get; /* set; */ }
         IPropertyType PropertyType { get; set; }
         IEntityType EntityType { get; set; }
         long PropertyPOID { get; set; }

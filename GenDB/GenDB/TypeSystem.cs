@@ -46,6 +46,7 @@ namespace GenDB
         {
             foreach (IEntityType ets in Configuration.GenDB.GetAllEntityTypes())
             {
+                Console.Error.WriteLine("Retrieved type: " + ets);
                 RegisterType(ets);
             }
 
@@ -71,6 +72,14 @@ namespace GenDB
         /// <param name="et"></param>
         internal static void RegisterType(IEntityType et)
         {
+            Console.Error.WriteLine("----------------------------------------");
+            Console.Error.WriteLine("TypeSystem registrering type " + et);
+            Console.Error.WriteLine ("Known translators prior to registration is: ");
+            foreach(IETCacheElement cccce in etid2IEt.Values )
+            {
+                Console.Error.WriteLine(cccce.Translator);
+            }
+
             if (etid2IEt.ContainsKey(et.EntityTypePOID))
             {
                 return;
@@ -256,8 +265,8 @@ namespace GenDB
                     {
                         IProperty property = Configuration.GenDB.NewProperty();
                         property.PropertyName = clrProperty.Name;
-                        property.PropertyType = GetPropertyType(clrProperty.PropertyType.FullName);
-                        property.MappingType = FindMappingType(clrProperty);
+                        property.PropertyType = GetPropertyType(clrProperty.PropertyType);
+                        // property.MappingType = FindMappingType(clrProperty);
                         property.EntityType = et;
                         et.AddProperty(property);
                     }
@@ -353,17 +362,18 @@ namespace GenDB
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static IPropertyType GetPropertyType(string name)
+        public static IPropertyType GetPropertyType(Type t)
         {
             IPropertyType res;
-            if (ptName2pt.TryGetValue(name, out res))
+            if (ptName2pt.TryGetValue(t.FullName, out res))
             {
                 return res;
             }
             else
             {
                 res = Configuration.GenDB.NewPropertyType();
-                res.Name = name;
+                res.Name = t.FullName;
+                res.MappedType = FindMappingType(t);
                 ptName2pt.Add(res.Name, res);
                 ptid2pt.Add(res.PropertyTypePOID, res);
             }
