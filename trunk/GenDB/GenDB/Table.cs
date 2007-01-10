@@ -10,7 +10,7 @@ namespace GenDB
 {
     // IQueryable<T>,
 
-    public class Table<T> : ICollection<T>, IEnumerable<T>
+    public class Table<T> :  ICollection<T>, IEnumerable<T>
         where T : IBusinessObject
     {
         IWhereable expression = new ExprInstanceOf(typeof(T));
@@ -39,23 +39,30 @@ namespace GenDB
         /// Will clear all elements from database, that matches this tables current
         /// where expression. (For regularly instantiated objects this means all 
         /// entities of type T or a subclass of this type.)
+        /// <br>
+        /// Elements are also removed from the cache to ensure that they will not 
+        /// be accidentally added later on. This slows down the operation, since 
+        /// it is neccessary run the where-query twice. 
+        /// </br>  
         /// </summary>
         public void Clear()
         {
+            foreach (IEntity ie in Configuration.GenDB.Where (expression))
+            {
+                IBOCache.Remove(ie.EntityPOID);
+            }
             Configuration.GenDB.WhereClear(expression);
         }
 
         public bool Contains(T e)
         {
-            if (e == null) { throw new NullReferenceException("Value can not be null.");}
+            if (e == null) { return false;}
             if (e.DBTag == null) { return false; }
-            IWhereable where = new VarReference(e);
+            IWhereable where = new OP_Equals(new VarReference(e), new CstThis());
 
-            IBusinessObject tst = e;
-
-            foreach (IBusinessObject ibo in Configuration.GenDB.Where(where))
+            foreach (IEntity ibo in Configuration.GenDB.Where(where))
             {
-                if (ibo == tst) { return true; }
+                return true;
             }
             return false;
         }
@@ -72,7 +79,12 @@ namespace GenDB
 
         public bool Remove(T e)
         {
-            throw new Exception("Not implemented");
+            throw new Exception("Databasen tester ikke, om der bliver fjernet objekter.");
+            if (e == null) { return false;}
+            if (e.DBTag == null) { return false; }
+            IWhereable where = new OP_Equals(new VarReference(e), new CstThis());
+            Configuration.GenDB.WhereClear(where);
+            return true;
         }
 
         public int Count
