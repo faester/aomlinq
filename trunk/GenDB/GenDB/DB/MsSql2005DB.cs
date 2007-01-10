@@ -898,22 +898,32 @@ namespace GenDB.DB
             using (SqlConnection cnn =  new SqlConnection(Configuration.ConnectStringWithDBName))
             {
                 cnn.Open();
-                cmd.Connection = cnn;
-                if (sbEntityTypeInserts.Length != 0)
-                {
-                    cmd.CommandText = sbEntityTypeInserts.ToString();
-                    cmd.ExecuteNonQuery();
+                SqlTransaction transaction = cnn.BeginTransaction();
+                try {
+                    cmd.Connection = cnn;
+                    cmd.Transaction = transaction;
+                    if (sbEntityTypeInserts.Length != 0)
+                    {
+                        cmd.CommandText = sbEntityTypeInserts.ToString();
+                        cmd.ExecuteNonQuery();
+                    }
+                    if (sbPropertyTypeInserts.Length != 0)
+                    {
+                        cmd.CommandText = sbPropertyTypeInserts.ToString();
+                        cmd.ExecuteNonQuery();
+                    }
+                    if (sbPropertyInserts.Length != 0)
+                    {
+                        cmd.CommandText = sbPropertyInserts.ToString();
+                        cmd.ExecuteNonQuery();
+                    }
                 }
-                if (sbPropertyTypeInserts.Length != 0)
+                catch(SqlException e)
                 {
-                    cmd.CommandText = sbPropertyTypeInserts.ToString();
-                    cmd.ExecuteNonQuery();
+                    transaction.Rollback();
+                    throw e;
                 }
-                if (sbPropertyInserts.Length != 0)
-                {
-                    cmd.CommandText = sbPropertyInserts.ToString();
-                    cmd.ExecuteNonQuery();
-                }
+                transaction.Commit();
             }
             ClearInsertStringBuilders();
         }
@@ -947,28 +957,35 @@ namespace GenDB.DB
             {
                 cnn.Open();
                 cmd.Connection = cnn;
-                cmd.Transaction = cnn.BeginTransaction();
-
-                foreach (string insertCommand in llEntityInserts)
+                SqlTransaction transaction = cnn.BeginTransaction();
+                cmd.Transaction = transaction;
+                try
                 {
-                    if (insertCommand != "")
+                    foreach (string insertCommand in llEntityInserts)
                     {
-                        cmd.CommandText = insertCommand;
-                        //Console.WriteLine(insertCommand);
-                        cmd.ExecuteNonQuery();
+                        if (insertCommand != "")
+                        {
+                            cmd.CommandText = insertCommand;
+                            //Console.WriteLine(insertCommand);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    foreach (string insertCommand in llPropertyValueInserts)
+                    {
+                        if (insertCommand != "")
+                        {
+                            cmd.CommandText = insertCommand;
+                            //Console.WriteLine(insertCommand);
+                            cmd.ExecuteNonQuery();
+                        }
                     }
                 }
-                foreach (string insertCommand in llPropertyValueInserts)
+                catch(SqlException e)
                 {
-                    if (insertCommand != "")
-                    {
-                        cmd.CommandText = insertCommand;
-                        //Console.WriteLine(insertCommand);
-                        cmd.ExecuteNonQuery();
-                    }
+                    transaction.Rollback();
+                    throw e;
                 }
-
-                cmd.Transaction.Commit();
+                transaction.Commit();
             }
 
             ClearValueInsertStringBuilders();
@@ -984,20 +1001,28 @@ namespace GenDB.DB
             {
                 cnn.Open();
                 cmd.Connection = cnn;
-                cmd.Transaction = cnn.BeginTransaction();
+                SqlTransaction transaction = cnn.BeginTransaction();
+                cmd.Transaction = transaction;
 
-                foreach (string insCmd in llSetKeyInserts)
+                try
                 {
-                    cmd.CommandText = insCmd;
-                    cmd.ExecuteNonQuery();
-                }
+                    foreach (string insCmd in llSetKeyInserts)
+                    {
+                        cmd.CommandText = insCmd;
+                        cmd.ExecuteNonQuery();
+                    }
 
-                foreach (string insCmd in llCollectionElementInserts)
+                    foreach (string insCmd in llCollectionElementInserts)
+                    {
+                        cmd.CommandText = insCmd;
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                catch (SqlException e)
                 {
-                    cmd.CommandText = insCmd;
-                    cmd.ExecuteNonQuery();
+                    transaction.Rollback();
+                    throw e;
                 }
-
                 cmd.Transaction.Commit();
             }
             ClearCollectionCommands();
