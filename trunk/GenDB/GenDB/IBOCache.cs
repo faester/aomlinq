@@ -245,17 +245,14 @@ namespace GenDB
             }
         }
 
+        /// <summary>
+        /// Adds object to the cache and assigns a DBTag 
+        /// at the same time.
+        /// </summary>
+        /// <param name="ibo"></param>
+        /// <param name="entityPOID"></param>
         internal void Add(IBusinessObject ibo, long entityPOID)
         {
-#if DEBUG
-            //TODO: Bør kun testes hvis DEBUG-flag er sat, da ansvaret varetages af oversættere.
-            if (ibo.DBTag != null) { throw new Exception("Object has already had its DBTag set."); }
-            if (uncommittedObjects.Contains (entityPOID))
-            {
-                throw new Exception("IBusinessObject already added.");
-            }
-#endif
-
             DBTag dbTag = new DBTag(this, entityPOID);
             ibo.DBTag = dbTag;
 
