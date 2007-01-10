@@ -12,6 +12,7 @@ namespace TableTests
     public class TableTests
     {
         Table<TestPerson> tpt = null;
+        TestPerson personToRemove = new TestPerson { Name = "I am the one to remove." };
 
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
@@ -46,6 +47,7 @@ namespace TableTests
             tpt.Add (new TestPerson {Name = "Konrad"});
             tpt.Add (new TestPerson {Name = "Jørgen"});
             tpt.Add (new TestPerson {Name = "Svend"});
+            tpt.Add (personToRemove);
 
             Configuration.SubmitChanges();
         }
@@ -97,15 +99,18 @@ namespace TableTests
             Assert.AreEqual (0, c, "Error in filtered result.");
 
             c = tpt.Count;
-            Assert.AreEqual (8, c, "Error in unfiltered result.");
+            Assert.AreEqual (9, c, "Error in unfiltered result.");
         }
 
         [Test]
         public void TestRemove()
         {
+            Assert.IsTrue(tpt.Remove(personToRemove), "Database reported, that it didn't remove person");
+            Assert.IsFalse(tpt.Remove(new TestPerson{Name = "This person does not exist in db"}), "Table falsely returned, that it did remove unknown person.");
 
+            Configuration.SubmitChanges();
 
+            Assert.IsFalse (tpt.Contains(personToRemove), "Table still contained removed person after remove was comitted.");
         }
-
     }
 }
