@@ -53,49 +53,42 @@ namespace GenDB
         }
     }
 
-   
-    internal static class IBOCache
-    {
-        static long retrieved = 0;
 
-        public static long Retrieved
+    internal class IBOCache
+    {
+        long retrieved = 0;
+
+        DataContext dataContext;
+
+        public long Retrieved
         {
-            get { return IBOCache.retrieved; }
+            get { return retrieved; }
         }
 
-        static IBOCache() { /* empty */ }
+        internal IBOCache(DataContext dataContext)
+        {
+            this.dataContext = dataContext;
+        }
 
         /// <summary>
         /// Stores objects with weak references to allow garbage collection of 
         /// the cached objects.
         /// </summary>
-        static Dictionary<long, CacheElement> committedObjects = new Dictionary<long, CacheElement>();
+        Dictionary<long, CacheElement> committedObjects = new Dictionary<long, CacheElement>();
 
         ///// <summary>
         ///// Stores regular object references. The object must not be gc'ed before 
         ///// it has been written to persistent storage.
         ///// </summary>
-        static Dictionary<long, IBusinessObject> uncommittedObjects = new Dictionary<long, IBusinessObject>();
+        Dictionary<long, IBusinessObject> uncommittedObjects = new Dictionary<long, IBusinessObject>();
 
-        /// <summary>
-        /// Adds the given obj to the cache. The DBTag element
-        /// must be set prior to calling this method.
-        /// </summary>
-        /// <param name="obj"></param>
-        public static void Add(IBusinessObject obj)
-        {
-            if (obj.DBTag == null) { throw new NullReferenceException("DBTag of obj not set"); }
-            uncommittedObjects[obj.DBTag.EntityPOID] = obj;
-        }
-
-
-        private static void AddToCommitted(IBusinessObject obj)
+        private void AddToCommitted(IBusinessObject obj)
         {
             CacheElement wr = new CacheElement(obj);
             committedObjects[obj.DBTag.EntityPOID] = wr;
         }
-        
-        public static int Count
+
+        public int Count
         {
             get { return committedObjects.Count; }
         }
@@ -107,7 +100,7 @@ namespace GenDB
         /// NullReferenceException is thrown.
         /// </summary>
         /// <param name="id"></param>
-        public static IBusinessObject Get(DBTag id)
+        public IBusinessObject Get(DBTag id)
         {
             if (id == null) { throw new NullReferenceException("id"); }
             return Get(id.EntityPOID);
@@ -120,7 +113,7 @@ namespace GenDB
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static IBusinessObject Get(long id)
+        public IBusinessObject Get(long id)
         {
             CacheElement wr;
             IBusinessObject result;
@@ -148,11 +141,11 @@ namespace GenDB
         /// are set to point to the WeakReference's targets, to suppress garbage
         /// collection until next commit.
         /// </summary>
-        private static void TryGC()
+        private void TryGC()
         {
 #if DEBUG
             Console.WriteLine("Committed objects contains {0} elements", committedObjects.Count);
-#endif 
+#endif
             foreach (CacheElement ce in committedObjects.Values)
             {
                 ce.Original = null;
@@ -170,7 +163,7 @@ namespace GenDB
 #endif
         }
 
-        public static void FlushToDB()
+        public void FlushToDB()
         {
 #if DEBUG
             Console.WriteLine("DEBUG INFORMATION FROM IBOCache.FlushToDB():");
@@ -203,40 +196,32 @@ namespace GenDB
             stp.Reset();
             stp.Start();
 #endif
-            Configuration.GenDB.CommitChanges();
+            dataContext.GenDB.CommitChanges();
 #if DEBUG
             stp.Stop();
             Console.WriteLine("\tConfiguration.GenDB.CommitChanges took: {0}", stp.Elapsed);
 #endif
         }
 
-        private static void CommitUncommitted()
+        private void CommitUncommitted()
         {
             while (uncommittedObjects.Count > 0)
             {
                 Dictionary<long, IBusinessObject> tmpUncomitted = uncommittedObjects;
 
-                // Make a new uncomitted collection to allow translators to add objects to the cache.
+                // Make a new uncomitted collection to allow clrtype2translator to add objects to the cache.
                 uncommittedObjects = new Dictionary<long, IBusinessObject>();
 
                 foreach (IBusinessObject ibo in tmpUncomitted.Values)
                 {
-                    IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
-                    trans.SaveToDB(Configuration.GenDB, ibo);
+                    IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
+                    trans.SaveToDB(dataContext.GenDB, ibo);
                     AddToCommitted(ibo);
                 }
             }
         }
 
-        //private static void AddToUncomitted(Dictionary<long, IBusinessObject> coll)
-        //{
-        //    foreach (IBusinessObject ibo in coll.Values)
-        //    {
-        //        AddToCommitted(ibo);
-        //    }
-        //}
-
-        private static void CommitChangedCommitted()
+        private void CommitChangedCommitted()
         {
             foreach (CacheElement ce in committedObjects.Values)
             {
@@ -245,10 +230,10 @@ namespace GenDB
                     if (ce.IsAlive)
                     {
                         IBusinessObject ibo = ce.Target;
-                        IIBoToEntityTranslator trans = TypeSystem.GetTranslator(ibo.GetType());
-                        trans.SaveToDB  (Configuration.GenDB, ibo);
+                        IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
+                        trans.SaveToDB(dataContext.GenDB, ibo);
                         //IEntity e = trans.Translate(ibo);
-                        //Configuration.GenDB.Save(e);
+                        //DataContext.GenDB.Save(e);
                         ce.ClearDirtyBit();
                     }
                     else
@@ -260,6 +245,23 @@ namespace GenDB
             }
         }
 
+        internal void Add(IBusinessObject ibo, long entityPOID)
+        {
+#if DEBUG
+            //TODO: Bør kun testes hvis DEBUG-flag er sat, da ansvaret varetages af oversættere.
+            if (ibo.DBTag != null) { throw new Exception("Object has already had its DBTag set."); }
+            if (uncommittedObjects.Contains (entityPOID))
+            {
+                throw new Exception("IBusinessObject already added.");
+            }
+#endif
+
+            DBTag dbTag = new DBTag(this, entityPOID);
+            ibo.DBTag = dbTag;
+
+            uncommittedObjects.Add(entityPOID, ibo);
+        }
+
         /// <summary>
         /// Removes the object identified 
         /// by the id from the cache. If object is 
@@ -268,7 +270,7 @@ namespace GenDB
         /// the DBTag destructor)
         /// </summary>
         /// <param name="id"></param>
-        internal static void Remove(long id)
+        internal void Remove(long id)
         {
             //TODO: Need to make some kind of commit possible here.
             committedObjects.Remove(id);

@@ -16,21 +16,23 @@ namespace GenDB
     /// index klassehierarkiet. Det er trods alt ikke afgørende for at undersøge, om man 
     /// kan få skidtet til at performe effektivt.
     /// </summary>
-    static class TypeSystem
+    class TypeSystem
     {
         internal const string COLLECTION_ELEMENT_TYPE_PROPERTY_NAME = "++ElementType"; // prefixed with ++ which is not legal in a C# property name
         internal const string COLLECTION_KEY_PROPERTY_NAME = "++KeyType";      // to avoid clashes with existing properties.
 
-        private static Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement>();
-        private static Dictionary<string, IETCacheElement> name2IEt = new Dictionary<string, IETCacheElement>();
-        private static Dictionary<Type, IETCacheElement> type2IEt = new Dictionary<Type, IETCacheElement>();
+        private  Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement>();
+        private  Dictionary<string, IETCacheElement> name2IEt = new Dictionary<string, IETCacheElement>();
+        private  Dictionary<Type, IETCacheElement> type2IEt = new Dictionary<Type, IETCacheElement>();
 
-        private static Dictionary<long, IPropertyType> ptid2pt = new Dictionary<long, IPropertyType>();
-        private static Dictionary<string, IPropertyType> ptName2pt = new Dictionary<string, IPropertyType>();
+        private  Dictionary<long, IPropertyType> ptid2pt = new Dictionary<long, IPropertyType>();
+        private  Dictionary<string, IPropertyType> ptName2pt = new Dictionary<string, IPropertyType>();
 
-        static TypeSystem()
+        private DataContext dataContext;
+
+        internal TypeSystem(DataContext dataContext)
         {
-            Init();
+            this.dataContext = dataContext;
         }
 
         /// <summary>
@@ -42,24 +44,20 @@ namespace GenDB
         /// og persisting entity types, property types and
         /// properties.
         /// </summary>
-        private static void Init()
+        internal void Init()
         {
-            foreach (IEntityType ets in Configuration.GenDB.GetAllEntityTypes())
+            foreach (IEntityType ets in dataContext.GenDB.GetAllEntityTypes())
             {
                 Console.Error.WriteLine("Retrieved type: " + ets);
                 RegisterType(ets);
             }
 
-            foreach (IPropertyType pt in Configuration.GenDB.GetAllPropertyTypes())
+            foreach (IPropertyType pt in dataContext.GenDB.GetAllPropertyTypes())
             {
                 ptid2pt.Add(pt.PropertyTypePOID, pt);
                 ptName2pt.Add(pt.Name, pt);
             }
 
-            foreach (IETCacheElement ce in etid2IEt.Values)
-            {
-                ce.InitTranslator();
-            }
 #if DEBUG
             Console.WriteLine("Type system init done.");
 #endif
@@ -70,19 +68,11 @@ namespace GenDB
         /// and adds it to the database.
         /// </summary>
         /// <param name="et"></param>
-        internal static void RegisterType(IEntityType et)
+        internal void RegisterType(IEntityType et)
         {
-            Console.Error.WriteLine("----------------------------------------");
-            Console.Error.WriteLine("TypeSystem registrering type " + et);
-            Console.Error.WriteLine ("Known translators prior to registration is: ");
-            foreach(IETCacheElement cccce in etid2IEt.Values )
-            {
-                Console.Error.WriteLine(cccce.Translator);
-            }
-
             if (etid2IEt.ContainsKey(et.EntityTypePOID))
             {
-                return;
+                throw new Exception("Type already registered. (" + et.ToString() + ")");
             }
             if (et.SuperEntityType != null && !etid2IEt.ContainsKey(et.SuperEntityType.EntityTypePOID))
             {
@@ -98,17 +88,16 @@ namespace GenDB
             name2IEt.Add(et.Name, ce);
             type2IEt.Add(ce.ClrType, ce);
             
-            //// We need the type to appear to be known prior to instantiating the 
-            //// translator. Otherwise recursive data structures migth cause infinite loop.
-            //ce.InitTranslator();
-
             // Register et at its supertype, if one is present
             if (et.SuperEntityType != null)
             {
                 etid2IEt[et.SuperEntityType.EntityTypePOID].AddSubType(et);
             }
-            Configuration.GenDB.Save(et);
-            Configuration.GenDB.CommitTypeChanges();
+            dataContext.GenDB.Save(et);
+            dataContext.GenDB.CommitTypeChanges();
+            Console.Error.WriteLine("About to create translator for " + ce.ClrType);
+            dataContext.Translators.RegisterTranslator(ce.ClrType, ce.Target.EntityTypePOID);
+            Console.Error.WriteLine("Created translator for " + ce.ClrType);
         }
 
         /// <summary>
@@ -117,15 +106,15 @@ namespace GenDB
         /// to the DB.
         /// </summary>
         /// <param name="t"></param>
-        internal static void RegisterType(Type t)
+        internal  void RegisterType(Type t)
         {
-            if (!type2IEt.ContainsKey(t))
+            if (type2IEt.ContainsKey(t))
             {
-                IEntityType et = ConstructEntityType(t);
-                RegisterType(et);
-                Configuration.GenDB.Save(et) ; //TODO: Is this needed?
-                etid2IEt[et.EntityTypePOID].InitTranslator();
+                throw new Exception("Type already registered. (" + t.ToString() + ")");
             }
+            IEntityType et = ConstructEntityType(t);
+            RegisterType(et);
+            dataContext.GenDB.Save(et); //TODO: Is this needed?
         }
 
         /// <summary>
@@ -136,12 +125,12 @@ namespace GenDB
         /// </summary>
         /// <param name="entityTypePOID"></param>
         /// <returns></returns>
-        public static IEntityType GetEntityType(long entityTypePOID)
+        public  IEntityType GetEntityType(long entityTypePOID)
         {
             return etid2IEt[entityTypePOID].Target;
         }
 
-        public static Type GetClrType(IEntityType et)
+        public  Type GetClrType(IEntityType et)
         {
             return etid2IEt[et.EntityTypePOID].ClrType;
         }
@@ -160,22 +149,12 @@ namespace GenDB
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        internal static IEntityType GetEntityType(Type t)
+        internal  IEntityType GetEntityType(Type t)
         {
             return type2IEt[t].Target;
         }
 
-        internal static IIBoToEntityTranslator GetTranslator(Type t)
-        {
-            return type2IEt[t].Translator;
-        }
-
-        internal static IIBoToEntityTranslator GetTranslator(long entityTypePOID)
-        {
-            return etid2IEt[entityTypePOID].Translator;
-        }
-
-        internal static bool IsTypeKnown(Type t)
+        internal bool IsTypeKnown(Type t)
         {
             return type2IEt.ContainsKey(t);
         }
@@ -185,7 +164,7 @@ namespace GenDB
         /// </summary>
         /// <param name="entityType"></param>
         /// <returns></returns>
-        public static IEnumerable<IEntityType> GetEntityTypesInstanceOf(IEntityType iet)
+        public  IEnumerable<IEntityType> GetEntityTypesInstanceOf(IEntityType iet)
         {
             // List for storing the result
             LinkedList<IEntityType> result = new LinkedList<IEntityType>();
@@ -213,7 +192,7 @@ namespace GenDB
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static IEnumerable<IEntityType> GetEntityTypesInstanceOf(Type t)
+        public  IEnumerable<IEntityType> GetEntityTypesInstanceOf(Type t)
         {
             if (!IsTypeKnown(t)) 
             { // Ensure that the type is known. 
@@ -229,19 +208,20 @@ namespace GenDB
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static IEnumerable<IEntityType> GetEntityTypesInstanceOf(long entityTypePOID)
+        public  IEnumerable<IEntityType> GetEntityTypesInstanceOf(long entityTypePOID)
         {
             return GetEntityTypesInstanceOf(etid2IEt[entityTypePOID].Target);
         }
 
-        public static IEntityType ConstructEntityType(Type t)
+        public  IEntityType ConstructEntityType(Type t)
         {
             if (t.IsGenericType ) // TODO: Needs better checking
             {
                 if (t.GetGenericTypeDefinition() == BOListTranslator.TypeOfBOList)
                 {
-                    IIBoToEntityTranslator trans = Translators.GetTranslator(t, null);
-                    return trans.EntityType;
+                    throw new Exception("Can not construct EntityType for BOLists");
+                    //IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(t);
+                    //return trans.EntityType;
                 }
                 else 
                 {
@@ -250,7 +230,7 @@ namespace GenDB
             }
             else
             {
-                IEntityType et = Configuration.GenDB.NewEntityType();
+                IEntityType et = dataContext.GenDB.NewEntityType();
 
                 et.Name = t.FullName;
                 et.AssemblyDescription = t.Assembly.FullName;
@@ -263,7 +243,7 @@ namespace GenDB
                     Attribute volatileAttribute = Attribute.GetCustomAttribute(clrProperty, typeof(Volatile));
                     if (clrProperty.PropertyType != typeof(DBTag) && volatileAttribute == null)
                     {
-                        IProperty property = Configuration.GenDB.NewProperty();
+                        IProperty property = dataContext.GenDB.NewProperty();
                         property.PropertyName = clrProperty.Name;
                         property.PropertyType = GetPropertyType(clrProperty.PropertyType);
                         // property.MappingType = FindMappingType(clrProperty);
@@ -290,7 +270,7 @@ namespace GenDB
             }
         }
 
-        public static MappingType FindMappingType(Type t)
+        public MappingType FindMappingType(Type t)
         {
             if (t == null) { throw new NullReferenceException("Type t"); }
             if (t.IsEnum)
@@ -342,7 +322,7 @@ namespace GenDB
             }
         }
 
-        public static MappingType FindMappingType(PropertyInfo clrProperty)
+        public MappingType FindMappingType(PropertyInfo clrProperty)
         {
             Type t = clrProperty.PropertyType;
             try
@@ -362,7 +342,7 @@ namespace GenDB
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static IPropertyType GetPropertyType(Type t)
+        public IPropertyType GetPropertyType(Type t)
         {
             IPropertyType res;
             if (ptName2pt.TryGetValue(t.FullName, out res))
@@ -371,7 +351,7 @@ namespace GenDB
             }
             else
             {
-                res = Configuration.GenDB.NewPropertyType();
+                res = dataContext.GenDB.NewPropertyType();
                 res.Name = t.FullName;
                 res.MappedType = FindMappingType(t);
                 ptName2pt.Add(res.Name, res);

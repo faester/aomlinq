@@ -14,9 +14,11 @@ namespace GenDB
         GetHandler gh;
         Type clrType;
         PropertyInfo fi;
+        DataContext dataContext;
 
-        public FieldConverter(Type t, PropertyInfo fi, IProperty property)
+        public FieldConverter(Type t, PropertyInfo fi, IProperty property, DataContext dataContext)
         {
+            this.dataContext = dataContext;
             this.fi = fi;
             clrType = t;
             sh = DynamicMethodCompiler.CreateSetHandler(t, fi);
@@ -54,12 +56,12 @@ namespace GenDB
                     IBOReference entityRef = (IBOReference)(ie.GetPropertyValue(prop).RefValue);
                     if (!entityRef.IsNullReference)
                     {
-                        IBusinessObject res = IBOCache.Get(entityRef.EntityPOID);
+                        IBusinessObject res = dataContext.IBOCache.Get(entityRef.EntityPOID);
                         if (res == null)
                         {
-                            IEntity e = Configuration.GenDB.GetEntity(entityRef.EntityPOID);
-                            //IIBoToEntityTranslator trans = TypeSystem.GetTranslator(clrType);
-                            IIBoToEntityTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
+                            IEntity e = dataContext.GenDB.GetEntity(entityRef.EntityPOID);
+                            //IIBoToEntityTranslator trans = TypeSystem.RegisterTranslator(clrType);
+                            IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(e.EntityType.EntityTypePOID);
                             res = trans.Translate(e);
                         }
                         return res;
@@ -171,8 +173,8 @@ namespace GenDB
                         IBusinessObject ibo = (IBusinessObject)value;
                         if (ibo.DBTag == null)
                         {
-                            IEntity refered = Configuration.GenDB.NewEntity();
-                            DBTag.AssignDBTagTo(ibo, refered.EntityPOID);
+                            IEntity refered = dataContext.GenDB.NewEntity();
+                            dataContext.IBOCache.Add(ibo, refered.EntityPOID);
                             IBOReference reference = new IBOReference (ibo.DBTag.EntityPOID);
                             e.GetPropertyValue(p).RefValue = reference;
                         }

@@ -55,7 +55,7 @@
     <Compile Include="BODictionary.cs" />
     <Compile Include="BOList.cs" />
     <Compile Include="CollectionElementConverter.cs" />
-    <Compile Include="Configuration.cs" />
+    <Compile Include="DataContext.cs" />
     <Compile Include="DBTag.cs" />
     <Compile Include="BOListTranslator.cs" />
     <Compile Include="DB\Entity.cs" />

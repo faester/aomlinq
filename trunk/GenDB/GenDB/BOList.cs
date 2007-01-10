@@ -7,22 +7,50 @@ using System.Collections;
 namespace GenDB
 {
 
-    public static class BOListFactory
+    public class BOListFactory
     {
-        public static BOList<T> BOListRef<T>() 
-            where T : IBusinessObject
+        TypeSystem typeSystem;
+        MappingType intMapping;
+        MappingType longMapping;
+        MappingType dtMapping;
+        MappingType charMapping;
+        MappingType boolMapping;
+        MappingType strMapping;
+        MappingType doubleMapping;
+        MappingType floatMapping;
+
+        internal BOListFactory(TypeSystem tsys)
         {
-            return new BOList<T>();
+            typeSystem = tsys;
+            Init();
         }
 
-        public static BOList<int> BOListInt() { return new BOList<int>(); }
-        public static BOList<string> BOListString() { return new BOList<string>(); }
-        public static BOList<DateTime> BOListDateTime() { return new BOList<DateTime>(); }
-        public static BOList<long> BOListLong() { return new BOList<long>(); }
-        public static BOList<bool> BOListBool() { return new BOList<bool>(); }
-        public static BOList<char> BOListChar() { return new BOList<char>(); }
-        public static BOList<double> BOListDouble() { return new BOList<double>(); }
-        public static BOList<float> BOListFloat() { return new BOList<float>(); }
+        void Init()
+        {
+            intMapping = typeSystem.FindMappingType(typeof(int));
+            longMapping = typeSystem.FindMappingType(typeof(long));
+            dtMapping = typeSystem.FindMappingType(typeof(DateTime));
+            charMapping = typeSystem.FindMappingType(typeof(char));
+            boolMapping = typeSystem.FindMappingType(typeof(bool));
+            strMapping = typeSystem.FindMappingType(typeof(string));
+            doubleMapping = typeSystem.FindMappingType(typeof(double));
+            floatMapping = typeSystem.FindMappingType(typeof(float));
+        }
+
+        public BOList<T> BOListRef<T>()
+            where T : IBusinessObject
+        {
+            return new BOList<T>(MappingType.REFERENCE, typeSystem);
+        }
+
+        public BOList<int> BOListInt() { return new BOList<int>(intMapping, typeSystem); }
+        public BOList<string> BOListString() { return new BOList<string>(strMapping, typeSystem); }
+        public BOList<DateTime> BOListDateTime() { return new BOList<DateTime>(dtMapping, typeSystem); }
+        public BOList<long> BOListLong() { return new BOList<long>(longMapping, typeSystem); }
+        public BOList<bool> BOListBool() { return new BOList<bool>(boolMapping, typeSystem); }
+        public BOList<char> BOListChar() { return new BOList<char>(charMapping, typeSystem); }
+        public BOList<double> BOListDouble() { return new BOList<double>(doubleMapping, typeSystem); }
+        public BOList<float> BOListFloat() { return new BOList<float>(floatMapping, typeSystem); }
     }
 
     /// <summary>
@@ -41,14 +69,16 @@ namespace GenDB
         bool isReadOnly;
         bool isListPopulated = false;
         MappingType mt;
+        TypeSystem typeSystem;
 
         /// <summary>
         /// Hide constructor to prevent instantiation 
         /// of unrestricted type parameter.
         /// </summary>
-        internal BOList()
+        internal BOList(MappingType mappingType, TypeSystem typeSystem)
         {
-            mt = TypeSystem.FindMappingType (typeof(T));
+            this.typeSystem = typeSystem;
+            mt = mappingType;
         }
 
         private void Set(int idx, T t)
@@ -78,9 +108,9 @@ namespace GenDB
 
             if (DBTag != null)
             {
-                CollectionElementConverter cnv = new CollectionElementConverter(mt);
+                CollectionElementConverter cnv = new CollectionElementConverter(mt, DataContext.Instance);
                 
-                foreach (IGenCollectionElement ce in Configuration.GenDB.AllElements(DBTag.EntityPOID))
+                foreach (IGenCollectionElement ce in DataContext.Instance.GenDB.AllElements(DBTag.EntityPOID))
                 {
                     T value = (T)cnv.Translate (ce);
                     Set(ce.ElementIndex, value);
@@ -188,11 +218,11 @@ namespace GenDB
                 return; //Since nothing has been loaded, nothing needs to be saved.
             } 
 
-            GenDB.DB.IGenericDatabase db = Configuration.GenDB;
+            GenDB.DB.IGenericDatabase db = DataContext.Instance.GenDB;
             long thisPOID = this.DBTag.EntityPOID;
             db.ClearCollection(thisPOID);
 
-            CollectionElementConverter cnv = new CollectionElementConverter(mt);
+            CollectionElementConverter cnv = new CollectionElementConverter(mt, DataContext.Instance);
 
             Type elementType = typeof(T);
 

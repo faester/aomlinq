@@ -13,19 +13,19 @@ namespace TableTests
     {
         Table<TestPerson> tpt = null;
         TestPerson personToRemove = new TestPerson { Name = "I am the one to remove." };
-
+        DataContext dataContext = DataContext.Instance;
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
             try {
-                if(!Configuration.RebuildDatabase)
+                if(!dataContext.RebuildDatabase)
                 {
-                    Configuration.RebuildDatabase = true;
+                    dataContext.RebuildDatabase = true;
                 }
             }
             catch(Exception e)
             {
-                Console.Error.WriteLine (Configuration.RebuildDatabase);
+                Console.Error.WriteLine (dataContext.RebuildDatabase);
                 Console.Error.WriteLine("Database must be rebuild prior to calling these tests.");
                 throw e;
             }
@@ -34,10 +34,10 @@ namespace TableTests
         [SetUp]
         public void SetUp()
         {
-            tpt = new Table<TestPerson>();
+            tpt = dataContext.CreateTable<TestPerson>();
 
             tpt.Clear();
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             tpt.Add (new TestPerson {Name = "Per"});
             tpt.Add (new TestPerson {Name = "Per"});
@@ -49,22 +49,22 @@ namespace TableTests
             tpt.Add (new TestPerson {Name = "Svend"});
             tpt.Add (personToRemove);
 
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
         }
 
         [Test]
         public void TestClearOnUnknownType()
         {
-            Table<NeverStoreThisClassToDB> tNeverStore = new Table<NeverStoreThisClassToDB>();
+            Table<NeverStoreThisClassToDB> tNeverStore = dataContext.CreateTable<NeverStoreThisClassToDB>();
             tNeverStore.Clear();
-            Table<ContainsAllPrimitiveTypes> tapt = new Table<ContainsAllPrimitiveTypes>();
+            Table<ContainsAllPrimitiveTypes> tapt = dataContext.CreateTable<ContainsAllPrimitiveTypes>();
             tapt.Clear();
         }
 
         [Test]
         public void TestContains()
         {
-            Table<TestPerson> tpt = new Table<TestPerson>();
+            Table<TestPerson> tpt = dataContext.CreateTable<TestPerson>();
             TestPerson p1 = new TestPerson();
             TestPerson p2 = new TestPerson();
             TestPerson p3 = new TestPerson();
@@ -72,7 +72,7 @@ namespace TableTests
             tpt.Add (p1);
             tpt.Add (p2);
 
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             Assert.IsTrue (tpt.Contains(p1), "Wrong result. False negative");
             Assert.IsFalse (tpt.Contains(p3), "Wrong result. False positive");
@@ -82,7 +82,7 @@ namespace TableTests
         [Test, ExpectedException(typeof(NullReferenceException))]
         public void TestInsertNull()
         {
-            Table<TestPerson> tpt = new Table<TestPerson>();
+            Table<TestPerson> tpt = dataContext.CreateTable<TestPerson>();
             tpt.Add(null);
         }
 
@@ -108,7 +108,7 @@ namespace TableTests
             Assert.IsTrue(tpt.Remove(personToRemove), "Database reported, that it didn't remove person");
             Assert.IsFalse(tpt.Remove(new TestPerson{Name = "This person does not exist in db"}), "Table falsely returned, that it did remove unknown person.");
 
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             Assert.IsFalse (tpt.Contains(personToRemove), "Table still contained removed person after remove was comitted.");
         }

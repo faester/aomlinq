@@ -13,8 +13,11 @@ namespace GenDB
     
     internal class SqlExprTranslator
     {
-        internal SqlExprTranslator()
+        TypeSystem typeSystem; 
+
+        internal SqlExprTranslator(TypeSystem typeSystem)
         {
+            this.typeSystem = typeSystem;
         }
 
         public IWhereable Convert(Expression expr)
@@ -32,16 +35,16 @@ namespace GenDB
                 MemberExpression tmp = (MemberExpression)roc[0];                    
                 Type t = tmp.Expression.Type;
                 
-                if(!TypeSystem.IsTypeKnown(t))
-                    TypeSystem.RegisterType (t);
+                if(!typeSystem.IsTypeKnown(t))
+                    typeSystem.RegisterType (t);
                         
-                IEntityType et = TypeSystem.GetEntityType(t);
+                IEntityType et = typeSystem.GetEntityType(t);
                 string propstr = tmp.Member.Name;
                 IProperty po = et.GetProperty(propstr);
 
                 parArr[0] = new CstProperty(po);
                     
-                switch(TypeSystem.FindMappingType(roc[1].Type))
+                switch(typeSystem.FindMappingType(roc[1].Type))
                 {
                     case MappingType.STRING:
                         parArr[1] = new CstString(roc[1].ToString().Trim('"'));
@@ -51,7 +54,7 @@ namespace GenDB
                         parArr[1] = new CstDateTime((DateTime)ce.Value);
                         break;
                     default:
-                        throw new Exception("type not implemented "+TypeSystem.FindMappingType(roc[1].Type));
+                        throw new Exception("type not implemented "+typeSystem.FindMappingType(roc[1].Type));
                 }
                     
                 if(mce.Method.Name=="op_Equality")
@@ -91,10 +94,10 @@ namespace GenDB
                 parArr[1] = new VarReference(null);
             else if(be.Right is ConstantExpression)
             {
-                switch(TypeSystem.FindMappingType(expr.Type))
+                switch(typeSystem.FindMappingType(expr.Type))
                 {
                 case MappingType.BOOL:
-                    switch(TypeSystem.FindMappingType(be.Right.Type))
+                    switch(typeSystem.FindMappingType(be.Right.Type))
                     {
                         case MappingType.BOOL:
                             ConstantExpression ce = (ConstantExpression)be.Right;
@@ -110,7 +113,7 @@ namespace GenDB
                             break;
 
                         default:
-                            throw new Exception("Unknown MappingType: "+TypeSystem.FindMappingType(be.Right.Type));
+                            throw new Exception("Unknown MappingType: "+typeSystem.FindMappingType(be.Right.Type));
                     }
                         break;
 
@@ -196,10 +199,10 @@ namespace GenDB
         {
             Type t = me.Expression.Type;
 
-            if(!TypeSystem.IsTypeKnown(t))
-                TypeSystem.RegisterType(t);
+            if(!typeSystem.IsTypeKnown(t))
+                typeSystem.RegisterType(t);
 
-            IEntityType et = TypeSystem.GetEntityType(t);
+            IEntityType et = typeSystem.GetEntityType(t);
             string propstr = me.Member.Name;
             IProperty po = et.GetProperty(propstr);
             return new CstProperty(po);
@@ -331,14 +334,14 @@ namespace GenDB
                 else if(lambda.Body is MemberExpression)
                 {
                     MemberExpression me = (MemberExpression)lambda.Body;
-                    switch(TypeSystem.FindMappingType(me.Type))
+                    switch(typeSystem.FindMappingType(me.Type))
                     {
                         case MappingType.BOOL:
                             return VisitBooleanMember(me, true);
                             break;
 
                         default:
-                            throw new Exception("MappingType not implemented: "+TypeSystem.FindMappingType(me.Type));
+                            throw new Exception("MappingType not implemented: "+typeSystem.FindMappingType(me.Type));
                     }   
                 }
                 else

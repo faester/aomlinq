@@ -8,8 +8,11 @@ namespace GenDB
     internal class CollectionElementConverter
     {
         MappingType mt;
-        public CollectionElementConverter(MappingType mt)
+        DataContext dataContext;
+
+        public CollectionElementConverter(MappingType mt, DataContext dataContext)
         {
+            this.dataContext = dataContext;
             this.mt = mt;
         }
 
@@ -32,12 +35,12 @@ namespace GenDB
         {
             if (reference.IsNullReference) { return null; }
 
-            IBusinessObject ibo = IBOCache.Get(reference.EntityPOID);
+            IBusinessObject ibo = dataContext.IBOCache.Get(reference.EntityPOID);
             if (ibo != null) { return ibo; }
 
-            IEntity e = Configuration.GenDB.GetEntity(reference.EntityPOID);
+            IEntity e = dataContext.GenDB.GetEntity(reference.EntityPOID);
 
-            IIBoToEntityTranslator trans = TypeSystem.GetTranslator(e.EntityType.EntityTypePOID);
+            IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(e.EntityType.EntityTypePOID);
             return trans.Translate(e);
         }
 
@@ -77,8 +80,8 @@ namespace GenDB
             IBusinessObject ibo = (IBusinessObject)o;
             if (ibo.DBTag == null)
             {
-                IEntity e = Configuration.GenDB.NewEntity();
-                DBTag.AssignDBTagTo(ibo, e.EntityPOID);
+                IEntity e = dataContext.GenDB.NewEntity();
+                dataContext.IBOCache.Add(ibo, e.EntityPOID);
             }
             return new IBOReference(ibo.DBTag.EntityPOID);
         }

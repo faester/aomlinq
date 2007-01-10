@@ -70,18 +70,20 @@ namespace Tests
             try
             {
 #endif
-            Configuration.RebuildDatabase = true;
+            DataContext dataContext = DataContext.Instance;
+
+            dataContext.RebuildDatabase = true;
 
             Console.WriteLine("Her....");
 
-            Configuration.DbBatchSize = 2000;
+            dataContext.DbBatchSize = 2000;
             long objcount = 1;
 
-            Table<BOList<TestlistElement>> tl = new Table<BOList<TestlistElement>>();
+            Table<BOList<TestlistElement>> tl = dataContext.CreateTable<BOList<TestlistElement>>();
 
-            Table<BOList<int>> tbi = new Table<BOList<int>>();
+            Table<BOList<int>> tbi = dataContext.CreateTable<BOList<int>>();
 
-            BOList<int> bi = BOListFactory.BOListInt();
+            BOList<int> bi = dataContext.BolistFactory.BOListInt();
 
             for (int i = 10; i > 0; i--)
             {
@@ -106,7 +108,7 @@ namespace Tests
                 Console.WriteLine();
             }
 
-            BOList<TestlistElement> lp = BOListFactory.BOListRef<TestlistElement>();
+            BOList<TestlistElement> lp = dataContext.BolistFactory.BOListRef<TestlistElement>();
 
             for (int i = 0; i < 5; i++)
             {
@@ -117,7 +119,7 @@ namespace Tests
 
             tl.Add(lp);
 
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             foreach (BOList<TestlistElement> list in tl)
             {
@@ -127,7 +129,7 @@ namespace Tests
                 }
             }
 
-            Table<Person> tp = new Table<Person>();
+            Table<Person> tp = dataContext.CreateTable<Person>();
 
             DateTime then = DateTime.Now;
 
@@ -150,7 +152,7 @@ namespace Tests
                 lastPerson = p;
             }
 
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             TimeSpan dur = DateTime.Now - then;
             objcount *= 2;
@@ -166,7 +168,7 @@ namespace Tests
                 }
                 //ObjectUtilities.PrintOut(ibo);
             }
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
             dur = DateTime.Now - then;
             Console.WriteLine("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
             Console.WriteLine("Indeholder nu {0} objekter", tp.Count);

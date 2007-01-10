@@ -21,6 +21,7 @@ namespace GenDB.DB
             return s.Replace("'", "''");
         }
 
+        DataContext dataContext;
         long nextETID = 0;
         bool nextIDsInitialized = false;
         public long NextETID
@@ -82,14 +83,13 @@ namespace GenDB.DB
         }
         
         #region CONSTS
-        /* ADO.NET opretholder en connection pool. 
-         * Dette forudsætter at forbindelser åbnes 
-         * og lukkes hver gang de bruges.
+        /* ADO.NET opretholder en connection pool. Dette forudsætter at forbindelser 
+         * åbnes og lukkes hver gang de bruges.
          * http://msdn2.microsoft.com/en-us/library/8xx3tyca.aspx
          * 
-         * Kan også indsættes index using(){} statement
+         * Kan også indsættes i using(){} statement
          * 
-         * Connection string fungerer index denne forbindelse som nøgle.
+         * Connection string fungerer i denne forbindelse som nøgle.
          */
 
         const string TB_ENTITY_NAME = "Entity";
@@ -101,18 +101,9 @@ namespace GenDB.DB
         const string TB_COLLECTION_KEY_NAME = "CollectionKey";
         #endregion
 
-        #region Singleton
-        static MsSql2005DB instance = new MsSql2005DB();
-
-        public static MsSql2005DB Instance
+        internal MsSql2005DB(DataContext dataContext)
         {
-            get { return new MsSql2005DB(); }
-        }
-        #endregion
-
-        private MsSql2005DB()
-        {
-            //InitNextIDs();
+            this.dataContext = dataContext;
         }
 
         #region fields
@@ -149,13 +140,13 @@ namespace GenDB.DB
         public void CreateDatabase()
         {
             Console.WriteLine("Creating database.");
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
             {
                 cnn.Open();
                 try
                 {
                     SqlCommand cmd = new SqlCommand("CREATE DATABASE "
-                        + Configuration.DatabaseName
+                        + dataContext.DatabaseName
                         + " COLLATE Danish_Norwegian_CS_AS"
                         , cnn);
                     cmd.ExecuteNonQuery();
@@ -178,11 +169,11 @@ namespace GenDB.DB
         public bool DatabaseExists()
         {
             Console.WriteLine("Checking if database exists.");
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
             {
                 cnn.Open();
 
-                SqlCommand cmd = new SqlCommand("USE " + Configuration.DatabaseName, cnn);
+                SqlCommand cmd = new SqlCommand("USE " + dataContext.DatabaseName, cnn);
                 try
                 {
                     cmd.ExecuteNonQuery();
@@ -204,11 +195,11 @@ namespace GenDB.DB
         /// </summary>
         public void DeleteDatabase()
         {
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithoutDBName))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
             {
                 cnn.Open();
 
-                SqlCommand cmd = new SqlCommand("DROP DATABASE " + Configuration.DatabaseName, cnn);
+                SqlCommand cmd = new SqlCommand("DROP DATABASE " + dataContext.DatabaseName, cnn);
                 cmd.ExecuteNonQuery();
 
                 cnn.Close();
@@ -262,7 +253,7 @@ namespace GenDB.DB
         {
             LinkedList<IPropertyType> res = new LinkedList<IPropertyType>();
 
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand("SELECT Name, PropertyTypePOID, MappingType FROM " + TB_PROPERTYTYPE_NAME, cnn);
@@ -297,7 +288,7 @@ namespace GenDB.DB
             )
         {
             Dictionary<long, IProperty> res = new Dictionary<long, IProperty>();
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand("SELECT PropertyName, PropertyPOID, PropertyTypePOID, EntityTypePOID FROM " + TB_PROPERTY_NAME, cnn);
@@ -327,7 +318,7 @@ namespace GenDB.DB
         private Dictionary<long, IEntityType> RawEntityTypes()
         {
             Dictionary<long, IEntityType> res = new Dictionary<long, IEntityType>();
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand(
@@ -400,13 +391,13 @@ namespace GenDB.DB
 
         public int Count(IWhereable expression)
         {
-            MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
+            MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
             mswsb.Visit(expression);
             string whereStr = mswsb.WhereStr;
             
             int res = 0;
 
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
 
@@ -419,12 +410,12 @@ namespace GenDB.DB
 
         public bool WhereClear(IWhereable expression)
         {
-            MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
+            MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
             mswsb.Visit (expression);
 
             bool willRemove = this.Count (expression) > 0;
 
-            if (entityInsertCount >= Configuration.DbBatchSize) { EntityInsertStringBuilderToLL(); }
+            if (entityInsertCount >= dataContext.DbBatchSize) { EntityInsertStringBuilderToLL(); }
             entityInsertCount++;
             string deleteString = " DELETE FROM Entity WHERE EntityPOID IN (" + mswsb.WhereStr + ") ";
 
@@ -435,12 +426,12 @@ namespace GenDB.DB
 
         public IEnumerable<IEntity> Where(IWhereable expression)
         {
-            MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
+            MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
             mswsb.Visit(expression);
             string whereStr = mswsb.WhereStr;
             Console.WriteLine("MsSql2005DB.Where modtog: " + expression); 
             Console.WriteLine("Blev oversat til:   " + whereStr);
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
 
@@ -480,7 +471,7 @@ namespace GenDB.DB
                     entityPOID = Convert.ToInt64(reader[6]);
                     if (entityTypePOID != oldEntityTypePOID || firstPass)
                     {
-                        currentType = TypeSystem.GetEntityType(entityTypePOID);
+                        currentType = dataContext.TypeSystem.GetEntityType(entityTypePOID);
                         oldEntityTypePOID = entityTypePOID;
                     } // if
                     if (entityPOID != oldEntityPOID || firstPass)
@@ -534,89 +525,91 @@ namespace GenDB.DB
 
         public IEnumerable<IEntity> GetAllEntities()
         {
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
-            {
-                cnn.Open();
+            return Where(CstIsTrue.Instance);
 
-                SqlCommand cmd = new SqlCommand(
-                    "SELECT " +
-                    "    e.EntityTypePOID, " + // 0
-                    "    PropertyPOID, " + // 1
-                    "    LongValue, " + // 2
-                    "    BoolValue, " + // 3
-                    "    StringValue, " + // 4
-                    "    DoubleValue, " + // 5
-                    "    e.EntityPOID " + // 6
-                    " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
-                    " ORDER BY e.EntityTypePOID, e.EntityPOID"
-                    );
-                cmd.Connection = cnn;
-                SqlDataReader reader = cmd.ExecuteReader();
+            //using (SqlConnection cnn = new SqlConnection(DataContext.ConnectStringWithDBName))
+            //{
+            //    cnn.Open();
 
-                IEntity result = null;
-                IEntityType currentType = null;
-                long propertyPOID = 0;
-                long entityTypePOID = 0;
-                long oldEntityTypePOID = entityTypePOID + 1; // Must be different
-                long entityPOID = 0;
-                long oldEntityPOID = entityPOID + 1; // Must be different
-                bool firstPass = true;
+            //    SqlCommand cmd = new SqlCommand(
+            //        "SELECT " +
+            //        "    e.EntityTypePOID, " + // 0
+            //        "    PropertyPOID, " + // 1
+            //        "    LongValue, " + // 2
+            //        "    BoolValue, " + // 3
+            //        "    StringValue, " + // 4
+            //        "    DoubleValue, " + // 5
+            //        "    e.EntityPOID " + // 6
+            //        " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
+            //        " ORDER BY e.EntityTypePOID, e.EntityPOID"
+            //        );
+            //    cmd.Connection = cnn;
+            //    SqlDataReader reader = cmd.ExecuteReader();
 
-                while (reader.Read())
-                {
-                    entityTypePOID = Convert.ToInt64(reader[0]);
-                    entityPOID = Convert.ToInt64(reader[6]);
-                    if (entityTypePOID != oldEntityTypePOID || firstPass)
-                    {
-                        currentType = TypeSystem.GetEntityType(entityTypePOID);
-                        oldEntityTypePOID = entityTypePOID;
-                    } // if
-                    if (entityPOID != oldEntityPOID || firstPass)
-                    {
-                        if (result != null) { yield return result; }
-                        result = new Entity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
-                        result.EntityType = currentType;
+            //    IEntity result = null;
+            //    IEntityType currentType = null;
+            //    long propertyPOID = 0;
+            //    long entityTypePOID = 0;
+            //    long oldEntityTypePOID = entityTypePOID + 1; // Must be different
+            //    long entityPOID = 0;
+            //    long oldEntityPOID = entityPOID + 1; // Must be different
+            //    bool firstPass = true;
 
-                        oldEntityPOID = entityPOID;
+            //    while (reader.Read())
+            //    {
+            //        entityTypePOID = Convert.ToInt64(reader[0]);
+            //        entityPOID = Convert.ToInt64(reader[6]);
+            //        if (entityTypePOID != oldEntityTypePOID || firstPass)
+            //        {
+            //            currentType = TypeSystem.GetEntityType(entityTypePOID);
+            //            oldEntityTypePOID = entityTypePOID;
+            //        } // if
+            //        if (entityPOID != oldEntityPOID || firstPass)
+            //        {
+            //            if (result != null) { yield return result; }
+            //            result = new Entity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
+            //            result.EntityType = currentType;
 
-                        foreach (IProperty prop in result.EntityType.GetAllProperties)
-                        {
-                            IPropertyValue pv = new PropertyValue();
-                            pv.Property = prop;
-                            pv.Entity = result; // TODO: Check if this is needed. Consider removing from interface of PropertyValue
-                            result.StorePropertyValue(pv);
-                        } // foreach
-                    } // if
-                    if (reader[1] != DBNull.Value) // Does any properties exist?
-                    {
-                        propertyPOID = long.Parse(reader[1].ToString());
-                        IProperty p = result.EntityType.GetProperty(propertyPOID);
-                        IPropertyValue pv = result.GetPropertyValue(p);
-                        switch (p.MappingType)
-                        {
-                            case MappingType.BOOL: pv.BoolValue = bool.Parse(reader[3].ToString()); break;
-                            case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
-                            case MappingType.DOUBLE: pv.DoubleValue = Convert.ToDouble(reader[5]); break;
-                            case MappingType.LONG: pv.LongValue = long.Parse(reader[2].ToString()); break;
-                            case MappingType.REFERENCE: if (reader[2] == DBNull.Value)
-                                {
-                                    pv.RefValue = new IBOReference(false); break;
-                                }
-                                else
-                                {
-                                    pv.RefValue = new IBOReference(long.Parse(reader[2].ToString()));
-                                    break;
-                                }
-                            case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
-                            default: throw new Exception("Could not translate the property value.");
-                        } // switch
-                    } // if
-                    firstPass = false;
-                } // while
+            //            oldEntityPOID = entityPOID;
 
-                if (!reader.IsClosed) { reader.Close(); }
-                if (result != null) { yield return result; }
-            }
+            //            foreach (IProperty prop in result.EntityType.GetAllProperties)
+            //            {
+            //                IPropertyValue pv = new PropertyValue();
+            //                pv.Property = prop;
+            //                pv.Entity = result; // TODO: Check if this is needed. Consider removing from interface of PropertyValue
+            //                result.StorePropertyValue(pv);
+            //            } // foreach
+            //        } // if
+            //        if (reader[1] != DBNull.Value) // Does any properties exist?
+            //        {
+            //            propertyPOID = long.Parse(reader[1].ToString());
+            //            IProperty p = result.EntityType.GetProperty(propertyPOID);
+            //            IPropertyValue pv = result.GetPropertyValue(p);
+            //            switch (p.MappingType)
+            //            {
+            //                case MappingType.BOOL: pv.BoolValue = bool.Parse(reader[3].ToString()); break;
+            //                case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
+            //                case MappingType.DOUBLE: pv.DoubleValue = Convert.ToDouble(reader[5]); break;
+            //                case MappingType.LONG: pv.LongValue = long.Parse(reader[2].ToString()); break;
+            //                case MappingType.REFERENCE: if (reader[2] == DBNull.Value)
+            //                    {
+            //                        pv.RefValue = new IBOReference(false); break;
+            //                    }
+            //                    else
+            //                    {
+            //                        pv.RefValue = new IBOReference(long.Parse(reader[2].ToString()));
+            //                        break;
+            //                    }
+            //                case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
+            //                default: throw new Exception("Could not translate the property value.");
+            //            } // switch
+            //        } // if
+            //        firstPass = false;
+            //    } // while
+
+            //    if (!reader.IsClosed) { reader.Close(); }
+            //    if (result != null) { yield return result; }
+            //}
         }
 
         public IEnumerable<IEntity> GetAllEntitiesOfType(IEntityType type)
@@ -662,7 +655,7 @@ namespace GenDB.DB
 
             LinkedList<IGenCollectionElement> res = new LinkedList<IGenCollectionElement>();
 
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
                 string sqlStr = "SELECT ElementID, LongValue, BoolValue, StringValue, DoubleValue FROM " + TB_COLLECTION_ELEMENT_NAME + " WHERE EntityPOID = " + collectionEntityPOID.ToString();
@@ -781,7 +774,7 @@ namespace GenDB.DB
 
         private void InternalEntitySave(IEntity entity)
         {
-            if (entityInsertCount > Configuration.DbBatchSize)
+            if (entityInsertCount > dataContext.DbBatchSize)
             {
                 EntityInsertStringBuilderToLL();
             }
@@ -795,7 +788,7 @@ namespace GenDB.DB
 
         private void SavePropertyValue(IPropertyValue pv)
         {
-            if (propertyValueInsertCount > Configuration.DbBatchSize)
+            if (propertyValueInsertCount > dataContext.DbBatchSize)
             {
                 PropertyValueStringBuilderToLL();
             }
@@ -895,7 +888,7 @@ namespace GenDB.DB
         public void CommitTypeChanges()
         {
             SqlCommand cmd = new SqlCommand();
-            using (SqlConnection cnn =  new SqlConnection(Configuration.ConnectStringWithDBName))
+            using (SqlConnection cnn =  new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
                 SqlTransaction transaction = cnn.BeginTransaction();
@@ -953,7 +946,7 @@ namespace GenDB.DB
 
             SqlCommand cmd = new SqlCommand();
 
-            using (SqlConnection cnn =  new SqlConnection(Configuration.ConnectStringWithDBName))
+            using (SqlConnection cnn =  new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
                 cmd.Connection = cnn;
@@ -997,7 +990,7 @@ namespace GenDB.DB
             if (collectionKeyOperationCount > 0) { CollectionKeyStringBuilderToLL(); }
             SqlCommand cmd = new SqlCommand();
 
-            using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
                 cmd.Connection = cnn;
@@ -1040,7 +1033,7 @@ namespace GenDB.DB
 
         private void ClearCollectionElements(long collectionEntityPOID)
         {
-            if (collectionElementOperationCount > Configuration.DbBatchSize)
+            if (collectionElementOperationCount > dataContext.DbBatchSize)
             {
                 CollectionElementStringBuilderToLL();
             }
@@ -1053,7 +1046,7 @@ namespace GenDB.DB
 
         private void ClearCollectionKeys(long collectionEntityPOID)
         {
-            if (collectionKeyOperationCount > Configuration.DbBatchSize)
+            if (collectionKeyOperationCount > dataContext.DbBatchSize)
             {
                 CollectionKeyStringBuilderToLL();
             }
@@ -1068,7 +1061,7 @@ namespace GenDB.DB
         {
             if (DatabaseExists())
             {
-                using (SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName))
+                using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
                 {
                     cnn.Open();
                     SqlCommand cmd = new SqlCommand();
@@ -1325,7 +1318,7 @@ namespace GenDB.DB
         /// <param name="cmdStrings"></param>
         private void ExecuteNonQueries(IEnumerable<string> cmdStrings)
         {
-            SqlConnection cnn = new SqlConnection(Configuration.ConnectStringWithDBName);
+            SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName);
             cnn.Open();
 
             SqlCommand cmd = new SqlCommand();

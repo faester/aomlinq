@@ -24,6 +24,8 @@ namespace TableTests
         private Sex trueEnum, falseEnum;
         private Person spouse, johnDoe;
 
+        DataContext dataContext = DataContext.Instance;
+
         public class Car : AbstractBusinessObject
         {
             string brand = "Volvo";
@@ -45,14 +47,6 @@ namespace TableTests
             {
                 get { return car; }
                 set { car = value; }
-            }
-
-            BOList<Person> others = BOListFactory.BOListRef<Person>();
-            [Volatile]
-            public BOList<Person> Others
-            {
-                get { return others; }
-                set { others = value; }
             }
 
             public Sex Sex
@@ -102,11 +96,11 @@ namespace TableTests
         [TestFixtureSetUp]
         public void Initialize()
         {
-            Configuration.RebuildDatabase = true;
+            dataContext.RebuildDatabase = true;
             int objCount = 10;
-            tp = new Table<Person>();
+            tp = dataContext.CreateTable<Person>();
             tp.Clear();
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             for (short i = 0; i < objCount; i++)
             {
@@ -126,7 +120,7 @@ namespace TableTests
 
             tp.Add (new Person {Name = "NormalPerson", Spouse=spouse, Age=1});
             
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             trueStr = "Navn 3";
             falseStr = "Jeppe på Bjerget";

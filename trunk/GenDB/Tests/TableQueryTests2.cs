@@ -12,15 +12,16 @@ namespace TableTests
     {
         private const int ELEMENTS_TO_STORE = 40;
         Table<ContainsAllPrimitiveTypes> tableAllPrimitives = null;
+        DataContext dataContext = DataContext.Instance;
 
         [TestFixtureSetUp]
         public void FixtureSetUp()
         {
             try
             {
-                if (!Configuration.RebuildDatabase)
+                if (!dataContext.RebuildDatabase)
                 {
-                    Configuration.RebuildDatabase = true;
+                    dataContext.RebuildDatabase = true;
                 }
             }
             catch (Exception e)
@@ -40,20 +41,19 @@ namespace TableTests
         public void TestSetup()
         {
             InitTableAllPrimitives();
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
             // Try to empty the cache, or at least ensure, 
             // that something is actually retrieved later on.
             System.GC.Collect();
-            Console.WriteLine("TEST Initialized...");
         }
 
         private void InitTableAllPrimitives()
         {
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
             GC.Collect();
-            tableAllPrimitives = new Table<ContainsAllPrimitiveTypes>();
+            tableAllPrimitives = dataContext.CreateTable<ContainsAllPrimitiveTypes>();
             tableAllPrimitives.Clear();
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             for (int i = 0; i < ELEMENTS_TO_STORE; i++)
             {
@@ -80,8 +80,8 @@ namespace TableTests
             //Table<ContainsAllPrimitiveTypes> t_capt = new Table<ContainsAllPrimitiveTypes>();
             //t_capt.Clear();
             //System.GC.Collect();
-            //Configuration.SubmitChanges();
-            //Configuration.SubmitChanges();
+            //dataContext.SubmitChanges();
+            //dataContext.SubmitChanges();
         }
 
         [Test]
@@ -147,7 +147,7 @@ namespace TableTests
             Console.WriteLine ("***********************************************************");
             Console.WriteLine ("****** TEST LONG FILTER ***********************************");
             Console.WriteLine ("***********************************************************");
-            Console.WriteLine(Configuration.DbBatchSize);
+            Console.WriteLine(dataContext.DbBatchSize);
             Console.WriteLine (tableAllPrimitives);
             Console.WriteLine ("Elements in unfiltered table: " + tableAllPrimitives.Count);
 
@@ -272,7 +272,7 @@ namespace TableTests
 
             tableAllPrimitives.Add(capt);
 
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             var res = from capts in tableAllPrimitives
                       where capts == capt
@@ -293,9 +293,9 @@ namespace TableTests
         [Test]
         public void TestReferenceFieldPropertyFilter()
         {
-            Table<TestPerson> ttp = new Table<TestPerson>();
+            Table<TestPerson> ttp = dataContext.CreateTable<TestPerson>();
             ttp.Clear();
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             TestPerson tp = new TestPerson{Name = "TestPerson, Mr."};
             TestPerson spouse = new TestPerson{Name = "TheSpouse"};
@@ -304,7 +304,7 @@ namespace TableTests
             ttp.Add (tp);
             ttp.Add (spouse);
 
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
             tp = null;
             spouse = null;
             GC.Collect();
