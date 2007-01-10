@@ -9,7 +9,7 @@ using GenDB.DB;
 namespace GenDB.DB
 {
     /*
-     * Der skrives i "batches", hvilket simpelt hen er implementeret ved at 
+     * Der skrives index "batches", hvilket simpelt hen er implementeret ved at 
      * sende meget lange tekststrenge med adskillige SQL-kommandoer til 
      * serveren på en gang. 
      */
@@ -87,9 +87,9 @@ namespace GenDB.DB
          * og lukkes hver gang de bruges.
          * http://msdn2.microsoft.com/en-us/library/8xx3tyca.aspx
          * 
-         * Kan også indsættes i using(){} statement
+         * Kan også indsættes index using(){} statement
          * 
-         * Connection string fungerer i denne forbindelse som nøgle.
+         * Connection string fungerer index denne forbindelse som nøgle.
          */
 
         const string TB_ENTITY_NAME = "Entity";
@@ -417,16 +417,20 @@ namespace GenDB.DB
             return res;
         }
 
-        public void WhereClear(IWhereable expression)
+        public bool WhereClear(IWhereable expression)
         {
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder();
             mswsb.Visit (expression);
+
+            bool willRemove = this.Count (expression) > 0;
 
             if (entityInsertCount >= Configuration.DbBatchSize) { EntityInsertStringBuilderToLL(); }
             entityInsertCount++;
             string deleteString = " DELETE FROM Entity WHERE EntityPOID IN (" + mswsb.WhereStr + ") ";
 
             sbEntityInserts.Append (deleteString);
+
+            return willRemove;
         }
 
         public IEnumerable<IEntity> Where(IWhereable expression)
