@@ -154,7 +154,7 @@ namespace GenDB
 
             var es = from epp in tp     
                 // where epp.Age == 3
-                //where !(epp.Age <= 3) 
+                where !(epp.Age <= 9)
                 //where !(epp.Name != "Navn 3")
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                 //where epp.Name == "Navn 6" || epp.Age == 7
@@ -163,7 +163,7 @@ namespace GenDB
                 //where !(epp.Letter != 'c')
                 //where epp.Birth == t
                 //where epp.Alive
-                where epp == p_p
+                //where epp == p_p
                 select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
             
