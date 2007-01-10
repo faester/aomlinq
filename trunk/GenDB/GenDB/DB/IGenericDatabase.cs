@@ -265,14 +265,6 @@ namespace GenDB.DB
         /// <param name="entityType"></param>
         void Save(IEntityType entityType);
 
-        /// <summary>
-        /// Will return all persisted elements ordered by 
-        /// their EntityType. (The ordering happens to ease
-        /// later translation to business objects.)
-        /// </summary>
-        /// <returns></returns>
-        IEnumerable<IEntity> GetAllEntities();
-
         IEnumerable<IEntity> Where(IWhereable expression);
 
         int Count(IWhereable expression);
@@ -300,7 +292,7 @@ namespace GenDB.DB
         /// Deletes all matching entities from database. 
         /// </summary>
         /// <param name="w"></param>
-        bool WhereClear(IWhereable w);
+        bool ClearWhere(IWhereable w);
     }
 
     interface IGenCollectionElement
