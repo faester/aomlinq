@@ -38,13 +38,6 @@ namespace GenDB
             pvs(e, gh(ibo));
         }
 
-        /// <summary>
-        /// TODO: Change the GetHandler etc to use primitives and objects.
-        /// (Should be GetLongHandler etc..)
-        /// </summary>
-        /// <param name="clrProperty"></param>
-        /// <param name="prop"></param>
-        /// <returns></returns>
         private PropertyValueGetter CreateGetter(PropertyInfo fi, IProperty prop)
         {
             if ((fi.PropertyType.IsByRef || fi.PropertyType.IsClass) 

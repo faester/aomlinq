@@ -80,11 +80,6 @@ namespace GenDB
             typeSystem = new TypeSystem (this);
             typeSystem.Init();
             iboCache = new IBOCache(this);
-            //TODO: Kan dette ikke udelades?
-            //if (!TypeSystem.IsTypeKnown (typeof(AbstractBusinessObject)))
-            //{
-            //    TypeSystem.RegisterType(typeof(AbstractBusinessObject));
-            //}
             bolistFactory = new BOListFactory(TypeSystem);
         }
 

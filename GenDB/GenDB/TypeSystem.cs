@@ -66,6 +66,8 @@ namespace GenDB
         /// <summary>
         /// Registers inheritance structure of the given type
         /// and adds it to the database.
+        /// 
+        /// Stores IEntityType to DB
         /// </summary>
         /// <param name="et"></param>
         internal void RegisterType(IEntityType et)
@@ -114,7 +116,6 @@ namespace GenDB
             }
             IEntityType et = ConstructEntityType(t);
             RegisterType(et);
-            dataContext.GenDB.Save(et); //TODO: Is this needed?
         }
 
         /// <summary>
