@@ -54,6 +54,13 @@ namespace GenDB
             Configuration.GenDB.WhereClear(expression);
         }
 
+
+        /// <summary>
+        /// Returns true, if the element given exists in the database.
+        /// Equality is resolved solely on the EntityPOID of the objects.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
         public bool Contains(T e)
         {
             if (e == null) { return false;}
@@ -67,24 +74,33 @@ namespace GenDB
             return false;
         }
 
-        public void CopyTo(T[] arr, int i)
+        /// <summary>
+        /// Copies all persisted elements contained 
+        /// in the table to the array given starting 
+        /// from at position index in the array.
+        /// </summary>
+        /// <param name="arr">Target array for elements</param>
+        /// <param name="index">Starting position in array</param>
+        public void CopyTo(T[] arr, int index)
         {
-            int idx = i;
-
             foreach(T t in this)
             {
-                arr[idx++] = t;
+                arr[index++] = t;
             }
         }
 
+        /// <summary>
+        /// Removes element 'e' from database if it exists. 
+        /// Returns true, if element exists, false otherwise. 
+        /// </summary>
+        /// <param name="e">Element to remove.</param>
+        /// <returns></returns>
         public bool Remove(T e)
         {
-            throw new Exception("Databasen tester ikke, om der bliver fjernet objekter.");
             if (e == null) { return false;}
             if (e.DBTag == null) { return false; }
             IWhereable where = new OP_Equals(new VarReference(e), new CstThis());
-            Configuration.GenDB.WhereClear(where);
-            return true;
+            return Configuration.GenDB.WhereClear(where);
         }
 
         public int Count
