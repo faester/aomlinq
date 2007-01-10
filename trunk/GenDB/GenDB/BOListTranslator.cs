@@ -20,8 +20,6 @@ namespace GenDB
     {
         public static readonly Type TypeOfBOList = typeof(BOList<>);
 
-        static int deleteMe = 0;
-
         InstantiateObjectHandler instantiator;
         bool elementIsIBusinessObject = true;
         IEntityType entityType;
@@ -40,8 +38,20 @@ namespace GenDB
         /// </summary>
         /// <param name="t"></param>
         /// <param name="entityType">entityType to use. If entityType is null, a new IEntityType instance will be created</param>
-        public BOListTranslator(Type t /* , IEntityType entityType */)
+        public BOListTranslator(Type t  /* , IEntityType entityType */)
         {
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("******************************");
+            Console.Error.WriteLine("                              ");
             this.clrType = t;
             if (!clrType.IsGenericType || clrType.GetGenericTypeDefinition() != TypeOfBOList)
             {
@@ -49,12 +59,14 @@ namespace GenDB
             }
             
             this.entityType = BOListEntityType();
-            Console.Error.WriteLine("===============================================================");
-            Console.Error.WriteLine(deleteMe++ + ": " + entityType);
-            Console.Error.WriteLine("===============================================================");
             elementType = clrType.GetGenericArguments()[0];
             elementIsIBusinessObject = elementType.GetInterface(typeof(IBusinessObject).FullName) != null;
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
+
+            if (elementIsIBusinessObject  && !TypeSystem.IsTypeKnown (elementType))
+            {
+                TypeSystem.RegisterType(elementType);
+            }
         }
 
         public IBusinessObject Translate(IEntity ie)
@@ -86,12 +98,7 @@ namespace GenDB
 
             // The mapping type for the elements are stored in this property. No other values are relevant.
             IProperty elementTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
-            Console.Error.WriteLine(entityType);
-            if (elementIsIBusinessObject)
-            {
-                elementTypeProperty.MappingType = MappingType.REFERENCE;
-            }
-
+            
             IPropertyValue pv = Configuration.GenDB.NewPropertyValue();
             //pv.LongValue = elementEntityType.EntityTypePOID;
             e.EntityType = entityType;
@@ -146,12 +153,11 @@ namespace GenDB
             res.AssemblyDescription = clrType.Assembly.FullName;
             res.Name = clrType.FullName;
 
-            IPropertyType pt = TypeSystem.GetPropertyType(typeof(long).FullName);
+            IPropertyType pt = TypeSystem.GetPropertyType(typeof(long));
             IProperty property = Configuration.GenDB.NewProperty();
             property.EntityType = res;
             property.PropertyName = TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME;
             property.PropertyType = pt;
-            property.MappingType = MappingType.LONG;
             res.AddProperty (property);
             return res;
         }
