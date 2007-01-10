@@ -8,7 +8,7 @@ namespace GenDB
 {
     /// <summary>
     /// Gem typerne for K og V som properties på objektet og giv disse faste 
-    /// navne i TypeSystem
+    /// navne index TypeSystem
     /// TODO: BODictionary
     /// </summary>
     /// <typeparam name="K"></typeparam>
