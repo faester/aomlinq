@@ -124,7 +124,7 @@ namespace GenDB
                 return delegate (IEntity ie)
                 {
                     // Oversætter til array indeholdende alle mulige værdier for den pågældende enum.
-                    // Dernæst vælges værdien gemt i Long-feltet i den pågældende PropertyValue record.
+                    // Dernæst vælges værdien gemt index Long-feltet index den pågældende PropertyValue record.
                     System.Collections.IList vals =  (System.Collections.IList) Enum.GetValues(fi.PropertyType);
                     return vals[(int)ie.GetPropertyValue(prop).LongValue];
                     //return Enum.GetValues (fi.PropertyType). ((int)ie.GetPropertyValue(prop).LongValue);
