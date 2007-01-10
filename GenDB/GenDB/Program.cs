@@ -42,15 +42,6 @@ namespace GenDB
                 set { car = value; }
             }
 
-            
-            BOList<Person> others = new BOList<Person>();
-            [Volatile]
-            public BOList<Person> Others
-            {
-                get { return others; }
-                set { others = value; }
-            }
-
             public Sex Sex
             {
                 get { return sex; }
@@ -124,11 +115,14 @@ namespace GenDB
 
         public static void Main(string[] args)
         {
-            Configuration.RebuildDatabase = true;
+            DataContext dcontext = DataContext.Instance;
+            dcontext.RebuildDatabase = true;
+            //dcontext.Init();
+            dcontext.RebuildDatabase = true;
 
             int objCount = 10;
 
-            Table<Person> tp = new Table<Person>();
+            Table<Person> tp = dcontext.CreateTable<Person>();
 
             for (short i = 0; i < objCount; i++)
             {
@@ -150,8 +144,8 @@ namespace GenDB
             Person p_p = new Person {Name = "NormalPerson", Spouse=s_p, Age=121, Alive=true};
             tp.Add (p_p);
 
-            IBOCache.FlushToDB();
-
+            //IBOCache.FlushToDB();
+            dcontext.SubmitChanges();
             var es = from epp in tp     
                 // where epp.Age == 3
                 where !(epp.Age <= 9)

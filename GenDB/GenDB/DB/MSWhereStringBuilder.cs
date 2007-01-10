@@ -11,9 +11,13 @@ namespace GenDB.DB
         StringBuilder wherePart = null;
         StringBuilder joinPart = null;
         int currentPropertyNumber = 0;
+        TypeSystem typeSystem = null;
 
-        public MSWhereStringBuilder()
+        private MSWhereStringBuilder() { /* empty */ }
+
+        public MSWhereStringBuilder(TypeSystem typeSystem)
         {
+            this.typeSystem = typeSystem;
             Reset();
         }
 
@@ -55,7 +59,7 @@ namespace GenDB.DB
 
         public void VisitInstanceOf(ExprInstanceOf instanceOf)
         {
-            IEnumerable<IEntityType> types = TypeSystem.GetEntityTypesInstanceOf(instanceOf.ClrType);
+            IEnumerable<IEntityType> types = typeSystem.GetEntityTypesInstanceOf(instanceOf.ClrType);
             bool notFirst = false;
 
             StringBuilder entityTypePoids = new StringBuilder("e.EntityTypePOID IN (");

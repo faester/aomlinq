@@ -9,12 +9,6 @@ namespace GenDB
     {
         IEntityType entityType;
         Type clrType;
-        IIBoToEntityTranslator translator;
-
-        public IIBoToEntityTranslator Translator
-        {
-            get { return translator; }
-        }
 
         public Type ClrType
         {
@@ -39,11 +33,6 @@ namespace GenDB
             directSubTypes.Add(iet);
         }
 
-        public void InitTranslator()
-        {
-            translator = Translators.GetTranslator(clrType, entityType);
-        }
-
         public IETCacheElement(IEntityType iet, Type t)
         {
             this.clrType = t;
@@ -52,7 +41,7 @@ namespace GenDB
 
         public override string ToString()
         {
-            return GetType().FullName + "{ clr type = " + this.ClrType + ", IEntityType " + this.Target + ", Translator = " + this.Translator + " }";
+            return GetType().FullName + "{ clr type = " + this.ClrType + ", IEntityType " + this.Target + " }";
         }
     }
 }

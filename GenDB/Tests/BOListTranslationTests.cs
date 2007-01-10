@@ -13,16 +13,19 @@ namespace BOListTests
         const int ELEMENTS_TO_INSERT = 3;
         const int LIST_LENGTH = 4;
 
+        DataContext dataContext = DataContext.Instance;
+
         [TestFixtureSetUp]
         public void InitDB()
         {
-            try {
-            if (!Configuration.RebuildDatabase)
+            try
             {
-                Configuration.RebuildDatabase = true;
+                if (!dataContext.RebuildDatabase)
+                {
+                    dataContext.RebuildDatabase = true;
+                }
             }
-            }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("Configuration.RebuildDatabase should be set to true prior to running the tests.");
                 throw e;
@@ -30,37 +33,37 @@ namespace BOListTests
         }
 
         [TestFixtureTearDown]
-        public void TearDown() 
-        { 
-            /* empty */ 
+        public void TearDown()
+        {
+            /* empty */
         }
 
         [Test]
         public void TestBOListOfContainsAllPrimitives()
         {
-            Table<BOList<ContainsAllPrimitiveTypes>> table = new Table<BOList<ContainsAllPrimitiveTypes>>();
+            Table<BOList<ContainsAllPrimitiveTypes>> table = dataContext.CreateTable<BOList<ContainsAllPrimitiveTypes>>();
             table.Clear();
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
             {
-                BOList<ContainsAllPrimitiveTypes> bolist = BOListFactory.BOListRef<ContainsAllPrimitiveTypes>();
+                BOList<ContainsAllPrimitiveTypes> bolist = dataContext.BolistFactory.BOListRef<ContainsAllPrimitiveTypes>();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
                     bolist.Add(new ContainsAllPrimitiveTypes { Integer = j });
                 }
-                table.Add (bolist);
+                table.Add(bolist);
             }
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
             GC.Collect();
 
             int listCount = 0;
-            foreach(BOList<ContainsAllPrimitiveTypes> blca in table)
+            foreach (BOList<ContainsAllPrimitiveTypes> blca in table)
             {
                 listCount++;
                 for (int i = 0; i < LIST_LENGTH; i++)
                 {
-                    Assert.AreEqual(i, blca[i].Integer , "Element number " + i + " had wrong Integer value.");
+                    Assert.AreEqual(i, blca[i].Integer, "Element number " + i + " had wrong Integer value.");
                 }
             }
             Assert.AreEqual(ELEMENTS_TO_INSERT, listCount, "Wrong number of lists returned.");
@@ -69,24 +72,24 @@ namespace BOListTests
         [Test]
         public void TestBOListOfInt()
         {
-            Table<BOList<int>> table = new Table<BOList<int>>();
+            Table<BOList<int>> table = dataContext.CreateTable<BOList<int>>();
             table.Clear();
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
             {
-                BOList<int> bolist = BOListFactory.BOListInt();
+                BOList<int> bolist = dataContext.BolistFactory.BOListInt();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
                     bolist.Add(j);
                 }
-                table.Add (bolist);
+                table.Add(bolist);
             }
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
             GC.Collect();
 
             int listCount = 0;
-            foreach(BOList<int> bolist in table)
+            foreach (BOList<int> bolist in table)
             {
                 listCount++;
                 for (int i = 0; i < LIST_LENGTH; i++)
@@ -100,24 +103,24 @@ namespace BOListTests
         [Test]
         public void TestBOListOfString()
         {
-            Table<BOList<string>> table = new Table<BOList<string>>();
+            Table<BOList<string>> table = dataContext.CreateTable<BOList<string>>();
             table.Clear();
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
 
             for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
             {
-                BOList<string> bolist = BOListFactory.BOListString();
+                BOList<string> bolist = dataContext.BolistFactory.BOListString();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
                     bolist.Add(j.ToString());
                 }
-                table.Add (bolist);
+                table.Add(bolist);
             }
-            Configuration.SubmitChanges();
+            dataContext.SubmitChanges();
             GC.Collect();
 
             int listCount = 0;
-            foreach(BOList<string> bolist in table)
+            foreach (BOList<string> bolist in table)
             {
                 listCount++;
                 for (int i = 0; i < LIST_LENGTH; i++)

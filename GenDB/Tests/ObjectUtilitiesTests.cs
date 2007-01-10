@@ -9,19 +9,21 @@ namespace Tests
     [TestFixture]
     public class TestObjectUtilities
     {
+        DataContext dataContext = DataContext.Instance;
+
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
             try
             {
-                if (!Configuration.RebuildDatabase)
+                if (!dataContext.RebuildDatabase)
                 {
-                    Configuration.RebuildDatabase = true;
+                    dataContext.RebuildDatabase = true;
                 }
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine(Configuration.RebuildDatabase);
+                Console.Error.WriteLine(dataContext.RebuildDatabase);
                 Console.Error.WriteLine("Database must be rebuild prior to calling these tests.");
                 throw e;
             }
@@ -153,9 +155,10 @@ namespace Tests
         [Test]
         public void TestCompareBOList()
         {
-            BOList<int> boOrig = BOListFactory.BOListInt();
-            BOList<int> boSame = BOListFactory.BOListInt();
-            BOList<int> boOther = BOListFactory.BOListInt();
+            BOListFactory blf = dataContext.BolistFactory;
+            BOList<int> boOrig = blf.BOListInt();
+            BOList<int> boSame = blf.BOListInt();
+            BOList<int> boOther = blf.BOListInt();
 
             for (int i = 0; i < 10; i++)
             {
@@ -167,7 +170,7 @@ namespace Tests
             Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boOrig), "BOList compare to self returned false.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BOList compare to other with same contents returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boOther), "BOList compare to completely different BOList returned true.");
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, BOListFactory.BOListLong()), "BOList compare to something else returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, blf.BOListLong()), "BOList compare to something else returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, null), "BOList compare to null returned true.");
         }
 
@@ -188,7 +191,7 @@ namespace Tests
             Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boOrig), "BODictionary compare to self returned false.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BODictionary compare to other with same contents returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boOther), "BODictionary compare to completely different BODictionary returned true.");
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, BOListFactory.BOListLong()), "BODictionary compare to something else returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, new TableTests.TestPerson()), "BODictionary compare to something else returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, null), "BODictionary compare to null returned true.");
         }
 

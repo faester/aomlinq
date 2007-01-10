@@ -6,28 +6,66 @@ using System.Query;
 
 namespace GenDB
 {
-    static partial class Translators
+    class TranslatorSet
     {
         static Type bolistGeneric = typeof(GenDB.BOList<>);
 
-        static Dictionary<Type, IIBoToEntityTranslator> translators = new Dictionary<Type, IIBoToEntityTranslator>();
+        Dictionary<Type, IIBoToEntityTranslator> clrtype2translator = new Dictionary<Type, IIBoToEntityTranslator>();
+        Dictionary<long, IIBoToEntityTranslator> etPOID2translator = new Dictionary<long, IIBoToEntityTranslator>();
+        DataContext dataContext = null;
+
+        internal TranslatorSet(DataContext dataContext)
+        {
+            if (dataContext == null) { throw new NullReferenceException("typeSystem"); }
+            this.dataContext = dataContext;
+        }
 
         /// <summary>
         /// Returns a translator appropriate for type T.
-        /// Property descriptions must be stored in the given IEntityType element.
         /// </summary>
         /// <param name="t"></param>
-        /// <param name="et"></param>
         /// <returns></returns>
-        public static IIBoToEntityTranslator GetTranslator(Type t, IEntityType et)
+        internal void RegisterTranslator(Type t, long entityTypePOID)
         {
-            if (!translators.ContainsKey(t)) 
+      
+#if DEBUG
+            //TODO: Should be checked in DEBUG mode only.
+            if (clrtype2translator.ContainsKey(t)) 
             { 
-                translators[t] = CreateTranslator(t, et);
+                throw new Exception("Translator for type " + t + " already created.");
             };
-            return translators[t];
+            
+            if (etPOID2translator.ContainsKey(entityTypePOID))
+            { 
+                throw new Exception("Translator for entityPOID " + entityTypePOID + " already created.");
+            };
+#endif
+            IIBoToEntityTranslator translator = CreateTranslator(t);
+            clrtype2translator[t] = translator;
+            etPOID2translator[entityTypePOID]  = translator;
         }
 
+        internal IIBoToEntityTranslator GetTranslator(Type t)
+        {
+            try {
+                return clrtype2translator[t];
+            }
+            catch(KeyNotFoundException)
+            {
+                throw new UnknownTranslatorException("Can not find translator for type " + t);
+            }
+        }
+
+        internal IIBoToEntityTranslator GetTranslator(long entityTypePOID)
+        {
+            try {
+                return etPOID2translator[entityTypePOID];
+            }
+            catch(KeyNotFoundException)
+            {
+                throw new UnknownTranslatorException("Can not find translator for entitytypePOID " + entityTypePOID);
+            }
+        }
 
         /// <summary>
         /// Creates translator for the given type and performs translatability checking 
@@ -36,13 +74,13 @@ namespace GenDB
         /// <param name="t"></param>
         /// <param name="et"></param>
         /// <returns></returns>
-        private static IIBoToEntityTranslator CreateTranslator(Type t, IEntityType et)
+        private IIBoToEntityTranslator CreateTranslator(Type t)
         {
             if (t.IsGenericType)
             {
                 if (t.GetGenericTypeDefinition() == bolistGeneric)
                 {
-                    return new BOListTranslator(t);
+                    return new BOListTranslator(t, dataContext);
                 }
                 else
                 {
@@ -51,8 +89,14 @@ namespace GenDB
             }
             else
             {
-                return new IBOTranslator(t, et);
+                IEntityType et = dataContext.TypeSystem.GetEntityType(t);
+                return new IBOTranslator(t, et, dataContext);
             }
+        }
+
+        internal class UnknownTranslatorException : Exception 
+        {
+            public UnknownTranslatorException(string msg) : base(msg) { }
         }
     }
 }

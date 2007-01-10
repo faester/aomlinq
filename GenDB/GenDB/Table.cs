@@ -14,6 +14,32 @@ namespace GenDB
         where T : IBusinessObject
     {
         IWhereable expression = new ExprInstanceOf(typeof(T));
+        IGenericDatabase db = null;
+        TranslatorSet translators = null;
+        TypeSystem typeSystem;
+        IBOCache iboCache;
+
+        #region Constructors
+        private Table() { /* empty */ }
+
+        internal Table(IGenericDatabase db, TranslatorSet translators, TypeSystem typeSystem, IBOCache iboCache)
+        {
+            if (db == null) { throw new NullReferenceException ("db"); }
+            if (translators == null) { throw new NullReferenceException("translators"); }
+            if (typeSystem == null) { throw new NullReferenceException("typeSystem"); }
+            if (iboCache == null) { throw new NullReferenceException("iboCache"); }
+
+            this.db = db;
+            this.translators = translators;
+            this.typeSystem = typeSystem;
+            this.iboCache = iboCache;
+
+            if (!typeSystem.IsTypeKnown(typeof(T)))
+            {
+                typeSystem.RegisterType(typeof(T));
+            }
+        }
+        #endregion
 
         internal IWhereable Expression
         {
@@ -26,13 +52,13 @@ namespace GenDB
         {
             if (ibo == null) { throw new NullReferenceException("Value can not be null."); }
             Type t = ibo.GetType();
-            if (!TypeSystem.IsTypeKnown(t))
+            if (!typeSystem.IsTypeKnown(t))
             {
-               TypeSystem.RegisterType(t);
+               typeSystem.RegisterType(t);
             }
-            IIBoToEntityTranslator trans = TypeSystem.GetTranslator(t);
+            IIBoToEntityTranslator trans = translators.GetTranslator(t);
             IEntity e = trans.Translate(ibo);
-            Configuration.GenDB.Save(e);
+            db.Save(e);
         }
 
         /// <summary>
@@ -47,11 +73,11 @@ namespace GenDB
         /// </summary>
         public void Clear()
         {
-            foreach (IEntity ie in Configuration.GenDB.Where (expression))
+            foreach (IEntity ie in db.Where (expression))
             {
-                IBOCache.Remove(ie.EntityPOID);
+                iboCache.Remove(ie.EntityPOID);
             }
-            Configuration.GenDB.WhereClear(expression);
+            db.WhereClear(expression);
         }
 
 
@@ -67,7 +93,7 @@ namespace GenDB
             if (e.DBTag == null) { return false; }
             IWhereable where = new OP_Equals(new VarReference(e), new CstThis());
 
-            foreach (IEntity ibo in Configuration.GenDB.Where(where))
+            foreach (IEntity ibo in db.Where(where))
             {
                 return true;
             }
@@ -100,12 +126,12 @@ namespace GenDB
             if (e == null) { return false;}
             if (e.DBTag == null) { return false; }
             IWhereable where = new OP_Equals(new VarReference(e), new CstThis());
-            return Configuration.GenDB.WhereClear(where);
+            return db.WhereClear(where);
         }
 
         public int Count
         {
-            get { return Configuration.GenDB.Count(expression); }
+            get { return db.Count(expression); }
         }
 
         public bool IsReadOnly
@@ -117,11 +143,11 @@ namespace GenDB
         {
             IEntityType lastType = null;
             IIBoToEntityTranslator translator = null;
-            foreach (IEntity e in Configuration.GenDB.Where(expression))
+            foreach (IEntity e in db.Where(expression))
             {
                 if (lastType != e.EntityType)
                 {
-                    translator = TypeSystem.GetTranslator (e.EntityType.EntityTypePOID);
+                    translator = translators.GetTranslator (e.EntityType.EntityTypePOID);
                 }
                 IBusinessObject ibo = translator.Translate (e);
                 yield return (T)ibo;
@@ -135,20 +161,18 @@ namespace GenDB
 
         #endregion
 
-        public Table()
-        {
-            if (!TypeSystem.IsTypeKnown(typeof(T)))
-            {
-                TypeSystem.RegisterType(typeof(T));
-            }
-        }
-
         #region Query Expression 
 
         public Table<T> Where(Expression<Func<T, bool>> expr)
         {
             Table<T> res = new Table<T>();
-            SqlExprTranslator exprTranslator = new SqlExprTranslator();
+            
+            res.translators = this.translators ;
+            res.typeSystem = this.typeSystem ;
+            res.db = this.db;
+            res.iboCache = this.iboCache;
+
+            SqlExprTranslator exprTranslator = new SqlExprTranslator(typeSystem);
             res.expression = exprTranslator.Convert (expr);
             return res;
         }
