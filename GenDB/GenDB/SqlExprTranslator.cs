@@ -19,7 +19,7 @@ namespace GenDB
 
         public IWhereable Convert(Expression expr)
         {
-            return Visit(expr);
+            return VisitExpr(expr);
         }
 
         internal IExpression VisitMethodCall(MethodCallExpression mce)
@@ -169,7 +169,6 @@ namespace GenDB
 
         internal IValue VisitUnaryExpressionValue(UnaryExpression ue)
         {
-            //string exprType = ue.Operand.GetType().Name;
             if(ue.Operand is MemberExpression)
             {
                 MemberExpression me = (MemberExpression)ue.Operand;
@@ -351,8 +350,7 @@ namespace GenDB
 
                         default:
                             throw new Exception("MappingType not implemented: "+TypeSystem.FindMappingType(me.Type));
-                    }
-                    
+                    }   
                 }
                 else
                 {
@@ -368,12 +366,12 @@ namespace GenDB
                 throw new Exception("unknown expression type: "+expr);
         }
 
-        internal IWhereable VisitEqExpr(Expression exp)
-        {
+        //internal IWhereable VisitEqExpr(Expression exp)
+        //{
             
-            return VisitExpr(exp);
-            throw new Exception("not implemented");
-        }
+        //    return VisitExpr(exp);
+        //    throw new Exception("not implemented");
+        //}
       
         internal IExpression VisitBooleanMember(MemberExpression me, bool equality)
         {
@@ -387,28 +385,9 @@ namespace GenDB
             else
                 parArr[1] = new GenDB.CstBool(false);
 
-            IExpression ie = new GenDB.OP_NotEquals(parArr[0],parArr[1]);
-            
+            IExpression ie = new GenDB.OP_NotEquals(parArr[0],parArr[1]);            
             return new GenDB.ExprNot(ie);
         }
-
-        internal Expression VisitParameter(ParameterExpression p)
-		{
-			return p;
-		}
-
-        //internal IWhereable VisitParameter(ParameterExpression p)
-        //{
-        //    Type t = p.Type;
-            
-        //    IEntityType et = TypeSystem.GetEntityType(t);
-            
-        //    Console.WriteLine("EntityType: {0}", et.Name);
-        //    IProperty po = et.GetProperty("Name");
-        //    //Console.WriteLine("PropertyTypeName: {0}",po.PropertyType.Name);
-        //    //return new CstProperty();
-        //    throw new Exception("not implemented");
-        //}
 
         #region MakeTreeMethods
 
@@ -626,7 +605,6 @@ namespace GenDB
             throw new Exception("Cannot translate " + e.ToString());
         }
 
-
         #region VisitNodeMethods
 
         internal IWhereable Visit(Expression exp)
@@ -637,59 +615,39 @@ namespace GenDB
                 Console.WriteLine("Call to Visit: NodeType=null");
                 return null;
             }
-            Console.WriteLine("Call to Visit: {0}",exp.NodeType);
-
+            
             switch (exp.NodeType)
             {
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                 case ExpressionType.And:
-                        ExceptionThrower (exp);
-                        break;
                 case ExpressionType.AndAlso:
-                    // do stuff
-                    throw new Exception("AndAlso Exception");
-                    //return new ExprAnd( TranslateAndAlso(), TranslateAndAlso());
                 case ExpressionType.BitwiseAnd:
                 case ExpressionType.BitwiseOr:
                 case ExpressionType.BitwiseXor:
                 case ExpressionType.Coalesce:
                 case ExpressionType.Divide:
-                    ExceptionThrower(exp);
-                        break;
                 case ExpressionType.EQ:
-                    // do stuff
-                    VisitEqExpr((BinaryExpression)exp);
-                    //VisitLambdaExpr((LambdaExpression)exp);
-                    throw new Exception("EQ Exception");
+                    //VisitEqExpr((BinaryExpression)exp);
+                    //break;
+
                 case ExpressionType.GT:
-                    // do stuff
-                    throw new Exception("GT Exception");
                 case ExpressionType.GE:
                 case ExpressionType.Index:
+                    throw new Exception("not implemented");
                 case ExpressionType.LE:
+                    throw new Exception("LE not implemented");
                 case ExpressionType.LShift:
-                    ExceptionThrower(exp);
-                    break;
                 case ExpressionType.LT:
-                    // do stuff
-                    throw new Exception("LT Exception");
                 case ExpressionType.Modulo:
                 case ExpressionType.Multiply:
                 case ExpressionType.MultiplyChecked:
                 case ExpressionType.NE:
                 case ExpressionType.Or:
-                    ExceptionThrower(exp);
-                    break;
                 case ExpressionType.OrElse:
-                    // do stuff
-                    throw new Exception("OrElse Exception");
                 case ExpressionType.RShift:
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
-                    //{
-                    //    return this.VisitBinary((BinaryExpression)exp);
-                    //}
                 case ExpressionType.As:
                 case ExpressionType.BitwiseNot:
                 case ExpressionType.Cast:
@@ -699,75 +657,27 @@ namespace GenDB
                 case ExpressionType.Negate:
                 case ExpressionType.Not:
                 case ExpressionType.Quote:
-                    //{
-                    //    return this.VisitUnary((UnaryExpression)exp);
-                    //}
                 case ExpressionType.Conditional:
-                    //{
-                    //    return this.VisitConditional((ConditionalExpression)exp);
-                    //}
                 case ExpressionType.Constant:
-                    //{
-                    //    return this.VisitConstant((ConstantExpression)exp);
-                    //}
                 case ExpressionType.Funclet:
-                    //{
-                    //    return this.VisitFunclet((FuncletExpression)exp);
-                    //}
                 case ExpressionType.Invoke:
-                    //{
-                    //    return this.VisitInvocation((InvocationExpression)exp);
-                    //}
                 case ExpressionType.Is:
+                    throw new Exception("not implemented");
                     ExceptionThrower(exp);
-                    break;
-                    //{
-                    //    return this.VisitTypeIs((TypeBinaryExpression)exp);
-                    //}
+                    
                 case ExpressionType.Lambda:
                     return VisitExpr(exp);
-                    //{
-                    //    return this.VisitLambda((LambdaExpression)exp);
-                    //}
+
                 case ExpressionType.ListInit:
-                    ExceptionThrower(exp);
-                    break;
-                    //{
-                    //    return this.VisitListInit((ListInitExpression)exp);
-                    //}
                 case ExpressionType.MemberAccess:
-                    //return VisitMemberAccess((MemberExpression)exp);
-                    //{
-                    //    return this.VisitMemberAccess((MemberExpression)exp);
-                    //}
                 case ExpressionType.MemberInit:
-                    //{
-                    //    return this.VisitMemberInit((MemberInitExpression)exp);
-                    //}
                 case ExpressionType.MethodCall:
                 case ExpressionType.MethodCallVirtual:
-                    throw new Exception("not implemented");
-                    //return VisitMethodCallExpr((MethodCallExpression)exp);
-                    //{
-                    //    return this.VisitMethodCall((MethodCallExpression)exp);
-                    //}
                 case ExpressionType.New:
-                    //{
-                    //    return this.VisitNew((NewExpression)exp);
-                    //}
                 case ExpressionType.NewArrayInit:
                 case ExpressionType.NewArrayBounds:
-                    //{
-                    //    return this.VisitNewArray((NewArrayExpression)exp);
-                    //}
-                case ExpressionType.Parameter:
                     throw new Exception("not implemented");
-                    //return VisitParameter((ParameterExpression) exp);
-                    //Console.Write("");
-                    
-                    //{
-                    //    return this.VisitParameter((ParameterExpression)exp);
-                    //}
+                
             }
             throw new InvalidOperationException(string.Format("Unhandled Expression Type: {0}", exp.NodeType));
         }
