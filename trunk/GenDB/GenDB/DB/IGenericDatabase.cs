@@ -158,8 +158,7 @@ namespace GenDB.DB
 
     interface IProperty
     {
-        //TODO: Bør flyttes til PropertyType.... (Eller bevares i sin nuværende form, hvor der blot indvirkes et kald på PropertyType)
-        MappingType MappingType { get; /* set; */ }
+        MappingType MappingType { get; }
         IPropertyType PropertyType { get; set; }
         IEntityType EntityType { get; set; }
         long PropertyPOID { get; set; }
@@ -316,7 +315,7 @@ namespace GenDB.DB
         /// Deletes all matching entities from database. 
         /// </summary>
         /// <param name="w"></param>
-        void WhereClear(IWhereable w);
+        bool WhereClear(IWhereable w);
     }
 
     interface IGenCollectionElement
