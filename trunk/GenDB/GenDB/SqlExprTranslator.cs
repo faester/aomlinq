@@ -147,17 +147,25 @@ namespace GenDB
             
             string nodeType = expr.NodeType.ToString();
             if(nodeType=="GT")
+            {
                 return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
+            }
             else if(nodeType=="LT")
+            {
                 return new GenDB.OP_LessThan(parArr[0], parArr[1]);
+            }
             else if(nodeType=="EQ")
             {
                 return new GenDB.OP_Equals (parArr[0], parArr[1]);
             }
             else if(nodeType=="NE")
+            {
                 return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
+            }
             else if(nodeType=="GE")
+            {
                 return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
+            }
             else
                 throw new Exception("NodeType unknown "+expr.NodeType.ToString());
         }
@@ -178,19 +186,6 @@ namespace GenDB
             {
                 return new CstThis();
             }
-
-            //else if(ue.Operand is ConstantExpression)
-            //{
-            //    ConstantExpression ce = (ConstantExpression) ue.Operand;
-            //    Type t = ce.Type;
-
-            //    if(!TypeSystem.IsTypeKnown(t))
-            //        TypeSystem.RegisterType(t);
-
-            //    IEntityType et = TypeSystem.GetEntityType(t);
-                
-            //    throw new Exception("not implemented: "+ue.Operand.GetType().Name);
-            //}
             else
             {
                 throw new Exception("Unknown type: "+ue.Operand.GetType().Name);
@@ -295,39 +290,33 @@ namespace GenDB
                     return new GenDB.ExprOr(left, right);
                 }
                 else if(mecstr.StartsWith("GE("))
-                {
-                    // = !(x < y)
-                    BinaryExpression be = (BinaryExpression)lambda.Body;
-                    UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.LT(be.Left,be.Right), expr.Type);
-                    return VisitExpr(ue);
+                { // = !(x < y)
+                    return DecomposeQueryGE(expr);
                 }
                 else if(mecstr.StartsWith("LE("))
-                {
-                    // = !(x > y) 
-                    BinaryExpression be = (BinaryExpression)lambda.Body;
-                    UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.GT(be.Left,be.Right), expr.Type);
-                    return VisitExpr(ue);
+                { // = !(x > y) 
+                    return DecomposeQueryLE(expr);
                 }
                 else if(mecstr.StartsWith("Not("))
                 {
                     UnaryExpression ue = (UnaryExpression)lambda.Body;
                     
                     if(ue.Operand.NodeType.ToString() == "EQ" || ue.Operand.NodeType.ToString() == "NE")
+                    {
                         return VisitExpr(ue);
+                    }
                     else if(ue.Operand.NodeType.ToString() == "GE")
                     {
-                        BinaryExpression operand = (BinaryExpression)ue.Operand;
-                        BinaryExpression be = MakeBinaryExpression(ExpressionType.LT, operand.Left, operand.Right);
-                        return VisitBinaryExpression(be);
+                        return DecomposeQueryGE(ue);
                     }
                     else if(ue.Operand.NodeType.ToString() == "LE")
                     {
-                        BinaryExpression operand = (BinaryExpression)ue.Operand;
-                        BinaryExpression be = MakeBinaryExpression(ExpressionType.GT, operand.Left, operand.Right);
-                        return VisitBinaryExpression(be);
+                        return DecomposeQueryLE(ue);
                     }
                     else if(ue.Operand.NodeType.ToString() == "GT" || ue.Operand.NodeType.ToString() == "LT")
+                    {
                         return VisitExpr(ue);
+                    }
                     else if(ue.Operand.NodeType.ToString() == "MethodCall")
                     {
                         return new GenDB.ExprNot(VisitMethodCall((MethodCallExpression)ue.Operand));
@@ -366,12 +355,35 @@ namespace GenDB
                 throw new Exception("unknown expression type: "+expr);
         }
 
-        //internal IWhereable VisitEqExpr(Expression exp)
-        //{
-            
-        //    return VisitExpr(exp);
-        //    throw new Exception("not implemented");
-        //}
+        internal IExpression DecomposeQueryLE(Expression expr)
+        {
+            LambdaExpression lambda = (LambdaExpression) expr;
+            BinaryExpression be = (BinaryExpression)lambda.Body;
+            UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.GT(be.Left,be.Right), expr.Type);
+            return VisitExpr(ue);
+        }
+
+        internal IExpression DecomposeQueryLE(UnaryExpression ue)
+        {
+            BinaryExpression operand = (BinaryExpression)ue.Operand;
+            BinaryExpression be = MakeBinaryExpression(ExpressionType.GT, operand.Left, operand.Right);
+            return VisitBinaryExpression(be);
+        }
+
+        internal IExpression DecomposeQueryGE(Expression expr)
+        {
+            LambdaExpression lambda = (LambdaExpression) expr;
+            BinaryExpression be = (BinaryExpression)lambda.Body;
+            UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.LT(be.Left,be.Right), expr.Type);
+            return VisitExpr(ue);
+        }
+
+        internal IExpression DecomposeQueryGE(UnaryExpression ue)
+        {
+            BinaryExpression operand = (BinaryExpression)ue.Operand;
+            BinaryExpression be = MakeBinaryExpression(ExpressionType.LT, operand.Left, operand.Right);
+            return VisitBinaryExpression(be);
+        }
       
         internal IExpression VisitBooleanMember(MemberExpression me, bool equality)
         {
@@ -607,80 +619,80 @@ namespace GenDB
 
         #region VisitNodeMethods
 
-        internal IWhereable Visit(Expression exp)
-        //internal Expression Visit(Expression exp)
-        {
-            if (exp == null)
-            {
-                Console.WriteLine("Call to Visit: NodeType=null");
-                return null;
-            }
+        //internal IWhereable Visit(Expression exp)
+        ////internal Expression Visit(Expression exp)
+        //{
+        //    if (exp == null)
+        //    {
+        //        Console.WriteLine("Call to Visit: NodeType=null");
+        //        return null;
+        //    }
             
-            switch (exp.NodeType)
-            {
-                case ExpressionType.Add:
-                case ExpressionType.AddChecked:
-                case ExpressionType.And:
-                case ExpressionType.AndAlso:
-                case ExpressionType.BitwiseAnd:
-                case ExpressionType.BitwiseOr:
-                case ExpressionType.BitwiseXor:
-                case ExpressionType.Coalesce:
-                case ExpressionType.Divide:
-                case ExpressionType.EQ:
-                    //VisitEqExpr((BinaryExpression)exp);
-                    //break;
+        //    switch (exp.NodeType)
+        //    {
+        //        case ExpressionType.Add:
+        //        case ExpressionType.AddChecked:
+        //        case ExpressionType.And:
+        //        case ExpressionType.AndAlso:
+        //        case ExpressionType.BitwiseAnd:
+        //        case ExpressionType.BitwiseOr:
+        //        case ExpressionType.BitwiseXor:
+        //        case ExpressionType.Coalesce:
+        //        case ExpressionType.Divide:
+        //        case ExpressionType.EQ:
+        //            //VisitEqExpr((BinaryExpression)exp);
+        //            //break;
 
-                case ExpressionType.GT:
-                case ExpressionType.GE:
-                case ExpressionType.Index:
-                    throw new Exception("not implemented");
-                case ExpressionType.LE:
-                    throw new Exception("LE not implemented");
-                case ExpressionType.LShift:
-                case ExpressionType.LT:
-                case ExpressionType.Modulo:
-                case ExpressionType.Multiply:
-                case ExpressionType.MultiplyChecked:
-                case ExpressionType.NE:
-                case ExpressionType.Or:
-                case ExpressionType.OrElse:
-                case ExpressionType.RShift:
-                case ExpressionType.Subtract:
-                case ExpressionType.SubtractChecked:
-                case ExpressionType.As:
-                case ExpressionType.BitwiseNot:
-                case ExpressionType.Cast:
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                case ExpressionType.Len:
-                case ExpressionType.Negate:
-                case ExpressionType.Not:
-                case ExpressionType.Quote:
-                case ExpressionType.Conditional:
-                case ExpressionType.Constant:
-                case ExpressionType.Funclet:
-                case ExpressionType.Invoke:
-                case ExpressionType.Is:
-                    throw new Exception("not implemented");
-                    ExceptionThrower(exp);
+        //        case ExpressionType.GT:
+        //        case ExpressionType.GE:
+        //        case ExpressionType.Index:
+        //            throw new Exception("not implemented");
+        //        case ExpressionType.LE:
+        //            throw new Exception("LE not implemented");
+        //        case ExpressionType.LShift:
+        //        case ExpressionType.LT:
+        //        case ExpressionType.Modulo:
+        //        case ExpressionType.Multiply:
+        //        case ExpressionType.MultiplyChecked:
+        //        case ExpressionType.NE:
+        //        case ExpressionType.Or:
+        //        case ExpressionType.OrElse:
+        //        case ExpressionType.RShift:
+        //        case ExpressionType.Subtract:
+        //        case ExpressionType.SubtractChecked:
+        //        case ExpressionType.As:
+        //        case ExpressionType.BitwiseNot:
+        //        case ExpressionType.Cast:
+        //        case ExpressionType.Convert:
+        //        case ExpressionType.ConvertChecked:
+        //        case ExpressionType.Len:
+        //        case ExpressionType.Negate:
+        //        case ExpressionType.Not:
+        //        case ExpressionType.Quote:
+        //        case ExpressionType.Conditional:
+        //        case ExpressionType.Constant:
+        //        case ExpressionType.Funclet:
+        //        case ExpressionType.Invoke:
+        //        case ExpressionType.Is:
+        //            throw new Exception("not implemented");
+        //            ExceptionThrower(exp);
                     
-                case ExpressionType.Lambda:
-                    return VisitExpr(exp);
+        //        case ExpressionType.Lambda:
+        //            return VisitExpr(exp);
 
-                case ExpressionType.ListInit:
-                case ExpressionType.MemberAccess:
-                case ExpressionType.MemberInit:
-                case ExpressionType.MethodCall:
-                case ExpressionType.MethodCallVirtual:
-                case ExpressionType.New:
-                case ExpressionType.NewArrayInit:
-                case ExpressionType.NewArrayBounds:
-                    throw new Exception("not implemented");
+        //        case ExpressionType.ListInit:
+        //        case ExpressionType.MemberAccess:
+        //        case ExpressionType.MemberInit:
+        //        case ExpressionType.MethodCall:
+        //        case ExpressionType.MethodCallVirtual:
+        //        case ExpressionType.New:
+        //        case ExpressionType.NewArrayInit:
+        //        case ExpressionType.NewArrayBounds:
+        //            throw new Exception("not implemented");
                 
-            }
-            throw new InvalidOperationException(string.Format("Unhandled Expression Type: {0}", exp.NodeType));
-        }
+        //    }
+        //    throw new InvalidOperationException(string.Format("Unhandled Expression Type: {0}", exp.NodeType));
+        //}
         #endregion
 
     }
