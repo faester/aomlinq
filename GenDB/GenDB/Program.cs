@@ -153,7 +153,7 @@ namespace GenDB
             for (short i = 0; i < objCount; i++)
             {
                 Car c = new Car();
-                c.Brand += i.ToString();
+                c.Brand = (i - 1).ToString();
                 Person p = new Person{ Name = "Navn " + i };
                 p.Car = c;
                 if (i % 2 == 0) { p.Sex = Sex.FEMALE; }
@@ -189,7 +189,7 @@ namespace GenDB
                 //where !(epp.Letter != 'c')
                 //where epp.Birth == t
                 //where epp.Alive
-                where epp.Spouse.Name == "SpousePerson"
+                where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7"
 
                 //where epp.Car.Brand == "Volvo"
                 //where epp.Car.Motor.HorsePower == "400"
