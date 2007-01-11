@@ -25,25 +25,67 @@ namespace GenDB
             return VisitExpr(expr);
         }
 
+        internal int GetNumParamFromMember(MemberExpression me)
+        {
+            string analyseThis = me.ToString();
+            int c=0;
+            for(int i=0; i<analyseThis.Length;i++)
+            {
+                if(analyseThis.ElementAt(i)=='.')
+                    c++;
+            }
+            return c;
+        }
+
+        internal Type[] GetDotTypesFromMember(MemberExpression me, int size, Type[] ta)
+        {
+            if(size>1)
+            {
+                Expression exp;
+                MemberExpression mexpr;
+                exp = me.Expression;
+                for(int i=ta.Length-1;i>0;i--)
+                {
+                    Expression exp2;
+                    if(exp.NodeType.ToString() == "MemberAccess")
+                    {
+                        exp2 = ((MemberExpression)exp).Expression;
+                    }
+                    else if(exp.NodeType.ToString() == "Parameter")
+                    {
+                        exp2 = (Expression)exp;
+                    } 
+                    else
+                    {
+                        throw new Exception("Unknown NodeType: "+exp.NodeType.ToString());
+                    }
+          
+                    if(!typeSystem.IsTypeKnown(exp2.Type))
+                        typeSystem.RegisterType(exp2.Type);
+                    
+                    ta[i-1]=exp2.Type;
+                    
+                    if(i>1)
+                    {
+                        MemberExpression m2 = (MemberExpression)exp2;
+                        Expression ex3 = m2.Expression;
+                        exp=ex3;
+                    }
+                }
+            }
+            return ta;
+        }
+
         internal IExpression VisitMethodCall(MethodCallExpression mce)
         {
             ReadOnlyCollection<Expression> roc = mce.Parameters;
             IValue[] parArr= new IValue[2];
  
-            if(roc[0].NodeType.ToString()=="MemberAccess")
+            if(roc[0] is MemberExpression)
             {
-                MemberExpression tmp = (MemberExpression)roc[0];                    
-                Type t = tmp.Expression.Type;
+                MemberExpression tmp = (MemberExpression)roc[0];  
+                parArr[0] = VisitMemberExpression(tmp);
                 
-                if(!typeSystem.IsTypeKnown(t))
-                    typeSystem.RegisterType (t);
-                        
-                IEntityType et = typeSystem.GetEntityType(t);
-                string propstr = tmp.Member.Name;
-                IProperty po = et.GetProperty(propstr);
-
-                parArr[0] = new CstProperty(po);
-                    
                 switch(typeSystem.FindMappingType(roc[1].Type))
                 {
                     case MappingType.STRING:
@@ -53,8 +95,17 @@ namespace GenDB
                         ConstantExpression ce = (ConstantExpression)roc[1];
                         parArr[1] = new CstDateTime((DateTime)ce.Value);
                         break;
+                    case MappingType.BOOL:
+                        throw new Exception("MappingType.BOOL not implemented");
+                        break;
+                    case MappingType.LONG:
+                        throw new Exception("MappingType.LONG not implemented");
+                        break;
+                    case MappingType.REFERENCE:
+                        throw new Exception("MappingType.REFERENCE not implemented");
+                        break;
                     default:
-                        throw new Exception("type not implemented "+typeSystem.FindMappingType(roc[1].Type));
+                        throw new Exception("Unknown type "+typeSystem.FindMappingType(roc[1].Type));
                 }
                     
                 if(mce.Method.Name=="op_Equality")
@@ -63,11 +114,6 @@ namespace GenDB
                     return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
                 else 
                     throw new Exception("Method unknown "+mce.Method.Name);
-            }
-            else if(roc[0].NodeType.ToString()=="Constant")
-            {
-              //  ConstantExpression ce
-                throw new Exception("not implemented");
             }
             else
             {
@@ -197,10 +243,17 @@ namespace GenDB
 
         internal IValue VisitMemberExpression(MemberExpression me)
         {
-            Type t = me.Expression.Type;
+            // REFLECTED TYPES
+            int iPar = GetNumParamFromMember(me);
+            Type[] typeArrTmp = new Type[iPar];
+            Type[] typeArr = GetDotTypesFromMember(me, iPar, typeArrTmp); 
 
+            // LAST TYPE IN FOODCHAIN
+            Type t = me.Expression.Type;
             if(!typeSystem.IsTypeKnown(t))
                 typeSystem.RegisterType(t);
+
+            typeArr[typeArr.Length-1] = t;
 
             IEntityType et = typeSystem.GetEntityType(t);
             string propstr = me.Member.Name;
