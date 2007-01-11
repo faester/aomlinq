@@ -28,7 +28,9 @@ namespace GenDB
 
         internal int CommittedObjectsSize
         {
-            get { return committedObjects.Count; }
+            get { 
+                return committedObjects.Count;
+            }
         }
 
         internal int UnCommittedObjectsSize
@@ -150,14 +152,6 @@ namespace GenDB
 #if DEBUG
             stp.Stop();
             Console.WriteLine("\tCommitChangedComitted took: {0}", stp.Elapsed);
-
-            stp.Reset();
-            stp.Start();
-#endif
-            //AddToUncomitted();
-#if DEBUG
-            stp.Stop();
-            Console.WriteLine("\tMoveCommittedToUncommitted took: {0}", stp.Elapsed);
 
             stp.Reset();
             stp.Start();

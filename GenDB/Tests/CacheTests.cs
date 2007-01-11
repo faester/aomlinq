@@ -91,12 +91,15 @@ namespace CacheTests
         [Test]
         public void Test4CacheEmptied2()
         {
+            table.Clear();
+            dt.SubmitChanges();
+            CacheTestObject hvp = null;
             for (int i = 0; i < 10; i++)
             {
-                CacheTestObject hvp = new CacheTestObject();
+                hvp = new CacheTestObject();
                 table.Add (hvp);
             }
-            GC.Collect();
+            hvp = null;
             dt.SubmitChanges();
 
             Assert.AreEqual(0, dt.UnCommittedObjectsSize, "Uncommitted objects still contained values");

@@ -140,23 +140,24 @@ namespace Tests
         {
             int volSetValue = 10;
             int persistedSetvalue = 11;
-
+            HasVolatileProperty hvp = null;
             for (int i = 0; i < 10; i++)
             {
-                HasVolatileProperty hvp = new HasVolatileProperty();
+                hvp = new HasVolatileProperty();
                 hvp.Vol = volSetValue;
                 hvp.Persisted = persistedSetvalue;
                 tableOfHasVolatileProperty.Add (hvp);
             }
+            hvp = null;
             GC.Collect();
             dc.SubmitChanges();
 
             Console.WriteLine("Cache size (Uncommitted = {0}, Comitted = {1})", dc.UnCommittedObjectsSize, dc.CommittedObjectsSize);
 
-            foreach(HasVolatileProperty hvp in tableOfHasVolatileProperty)
+            foreach(HasVolatileProperty hvpr in tableOfHasVolatileProperty)
             {
-                Assert.AreNotEqual( volSetValue, hvp.Vol, "Vol property was persisted.");
-                Assert.AreEqual(persistedSetvalue, hvp.Persisted, "Persisted property was not persisted.");
+                Assert.AreNotEqual( volSetValue, hvpr.Vol, "Vol property was persisted.");
+                Assert.AreEqual(persistedSetvalue, hvpr.Persisted, "Persisted property was not persisted.");
             }
         }
     }
