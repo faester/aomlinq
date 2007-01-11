@@ -160,6 +160,7 @@ namespace GenDB.DB
             CreateTables();
             CreateIndexes();
             CreateSProcs();
+            CreateFunctions();
         }
 
         /// <summary>
@@ -1193,6 +1194,52 @@ namespace GenDB.DB
                             "	END";
 
             ExecuteNonQueries(new string[] { sp_UP_INS_ENTITY, sp_SET_PROPERTYVALUE, sp_SET_COLLECTION_ELEMENT, sp_SET_COLLECTION_KEY });
+        }
+
+        private void CreateFunctions()
+        {
+            string cmdStr =
+                " USE generic" +
+                " GO" +
+                " SET ANSI_NULLS ON" +
+                " GO" +
+                " SET QUOTED_IDENTIFIER ON" +
+                " GO " +
+                " CREATE FUNCTION dbo.fn_lookup_EntityPOID" +
+                " (	" +
+                "	-- Add the parameters for the function here" +
+                "	@bep int, " +
+                "	@ls varchar(8000)" +
+                " )" +
+                " RETURNS BIGINT" +
+                " AS" +
+                " BEGIN" +
+                "	DECLARE @res AS BIGINT" +
+                "	DECLARE @idx AS BIGINT" +
+                "	DECLARE @nbep AS BIGINT" +
+                "	DECLARE @propertyPOID AS BIGINT" +
+
+                "	SET @idx = CHARINDEX('.', @ls)  " +
+                "	SET @propertyPOID = CAST (SUBSTRING(@ls, 1, @idx - 1) AS BIGINT)" +
+                "	SELECT @nbep = LongValue FROM PropertyValue WHERE PropertyPOID = @propertyPOID AND EntityPOID = @bep" +
+                "	IF @nbep IS NULL " +
+                "		SET @res = NULL" +
+                "	ELSE" +
+                "		IF @ls LIKE '%.%.%' " +
+                "		BEGIN" +
+                "			DECLARE @nls AS VARCHAR(8000)" +
+                "			SET @nls = SUBSTRING(@ls, @idx + 1, LEN(@ls) - (@idx))" +
+                "			RETURN dbo.fn_lookup_EntityPOID(@nbep, @nls)" +
+                "			SET @res = dbo.fn_lookup_EntityPOID(@nbep, @nls)" +
+                "		END" +
+                "		ELSE" +
+                "		BEGIN" +
+                "			SET @res = @nbep" +
+                "		END" +
+                "		RETURN @res" +
+                "END ";
+
+            ExecuteNonQueries(new string[] { cmdStr });
         }
 
         /// <summary>
