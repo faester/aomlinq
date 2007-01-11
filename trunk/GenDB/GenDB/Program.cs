@@ -182,7 +182,7 @@ namespace GenDB
                 //where !(epp.Letter != 'c')
                 //where epp.Birth == t
                 //where epp.Alive
-                where epp.Name == "SpousePerson"
+                where epp.Spouse.Name == "SpousePerson"
                 //where epp.Car.Brand == "Volvo"
                 //where epp.Car.Motor.HorsePower == "400"
                 //where epp.Car.Motor.Valve == 6
