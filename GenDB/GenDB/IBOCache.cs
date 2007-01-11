@@ -9,50 +9,6 @@ using System.Diagnostics;
 
 namespace GenDB
 {
-    internal sealed class CacheElement
-    {
-        WeakReference wr;
-        long entityPOID;
-        IBusinessObject clone;
-        IBusinessObject original;
-
-        public IBusinessObject Original
-        {
-            get { return original; }
-            set { original = value; }
-        }
-
-        private CacheElement() { /* empty */ }
-
-        public CacheElement(IBusinessObject target)
-        {
-            original = target;
-            wr = new WeakReference(target);
-            clone = (IBusinessObject)ObjectUtilities.MakeClone(target);
-            entityPOID = target.DBTag.EntityPOID;
-        }
-
-        public bool IsAlive
-        {
-            get { return wr.IsAlive; }
-        }
-
-        public bool IsDirty
-        {
-            get { return !ObjectUtilities.TestFieldEquality(wr.Target, clone); }
-        }
-
-        public IBusinessObject Target
-        {
-            get { return (IBusinessObject)wr.Target; }
-        }
-
-        public void ClearDirtyBit()
-        {
-            clone = (IBusinessObject)ObjectUtilities.MakeClone(wr.Target);
-        }
-    }
-
 
     internal class IBOCache
     {
@@ -74,7 +30,7 @@ namespace GenDB
         /// Stores objects with weak references to allow garbage collection of 
         /// the cached objects.
         /// </summary>
-        Dictionary<long, CacheElement> committedObjects = new Dictionary<long, CacheElement>();
+        Dictionary<long, IBOCacheElement> committedObjects = new Dictionary<long, IBOCacheElement>();
 
         ///// <summary>
         ///// Stores regular object references. The object must not be gc'ed before 
@@ -84,7 +40,7 @@ namespace GenDB
 
         private void AddToCommitted(IBusinessObject obj)
         {
-            CacheElement wr = new CacheElement(obj);
+            IBOCacheElement wr = new IBOCacheElement(obj);
             committedObjects[obj.DBTag.EntityPOID] = wr;
         }
 
@@ -115,7 +71,7 @@ namespace GenDB
         /// <returns></returns>
         public IBusinessObject Get(long id)
         {
-            CacheElement wr;
+            IBOCacheElement wr;
             IBusinessObject result;
             if (!committedObjects.TryGetValue(id, out wr))
             {
@@ -146,12 +102,12 @@ namespace GenDB
 #if DEBUG
             Console.WriteLine("Committed objects contains {0} elements", committedObjects.Count);
 #endif
-            foreach (CacheElement ce in committedObjects.Values)
+            foreach (IBOCacheElement ce in committedObjects.Values)
             {
                 ce.Original = null;
             }
             GC.Collect();
-            foreach (CacheElement ce in committedObjects.Values)
+            foreach (IBOCacheElement ce in committedObjects.Values)
             {
                 if (ce.IsAlive)
                 {
@@ -172,7 +128,6 @@ namespace GenDB
             stp.Start();
 #endif
             CommitChangedCommitted();
-            TryGC();
 #if DEBUG
             stp.Stop();
             Console.WriteLine("\tCommitUncomitted took: {0}", stp.Elapsed);
@@ -181,6 +136,7 @@ namespace GenDB
             stp.Start();
 #endif
             CommitUncommitted();
+            TryGC();
 #if DEBUG
             stp.Stop();
             Console.WriteLine("\tCommitChangedComitted took: {0}", stp.Elapsed);
@@ -223,7 +179,7 @@ namespace GenDB
 
         private void CommitChangedCommitted()
         {
-            foreach (CacheElement ce in committedObjects.Values)
+            foreach (IBOCacheElement ce in committedObjects.Values)
             {
                 if (ce.IsDirty)
                 {
