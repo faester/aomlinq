@@ -25,7 +25,7 @@ namespace TableTests
 
         TestPerson spouse;
 
-        internal TestPerson Spouse
+        public TestPerson Spouse
         {
             get { return spouse; }
             set { spouse = value; }

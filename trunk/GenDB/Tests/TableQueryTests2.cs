@@ -4,6 +4,7 @@ using System.Text;
 using GenDB;
 using NUnit.Framework;
 using System.Query;
+using System.Expressions;
 
 namespace TableTests
 {
@@ -291,29 +292,85 @@ namespace TableTests
         }
 
         [Test]
-        public void TestReferenceFieldPropertyFilter()
+        public void TestReferenceFieldPropertyFilter2()
         {
             Table<TestPerson> ttp = dataContext.CreateTable<TestPerson>();
             ttp.Clear();
             dataContext.SubmitChanges();
 
-            TestPerson tp = new TestPerson{Name = "TestPerson, Mr."};
-            TestPerson spouse = new TestPerson{Name = "TheSpouse"};
-            tp.Spouse = spouse;
+            TestPerson lastPerson = null;
 
-            ttp.Add (tp);
-            ttp.Add (spouse);
+            for(int i =0; i < 10; i++)
+            {
+                TestPerson tp = new TestPerson();
+                tp.Name = "Name" + i.ToString();
+                tp.Spouse = lastPerson;
+                lastPerson = tp;
+                ttp.Add (tp);
+            }
+
+            lastPerson = null;
 
             dataContext.SubmitChanges();
-            tp = null;
-            spouse = null;
-            GC.Collect();
 
-            int c = ttp.Count<TestPerson>((TestPerson p) => p.Spouse.Name == "TheSpouse");
-            Assert.IsTrue (c > 0, "Returned false negative.");
-            
-            c = ttp.Count<TestPerson>((TestPerson p) => p.Spouse.Name == "I hope to God this name does not exist. (I did .Clear(), so it should hold");
-            Assert.IsTrue (c == 0, "Returned false positive.");
+
+            var qs = from persons in ttp
+                     where persons.Spouse.Spouse.Name != "Name1" && persons.Name != "Name1" && persons.Spouse.Name != "Name1"
+                     select persons;
+
+            foreach (var person in qs)
+            {
+                TestPerson spouse = person.Spouse;
+                TestPerson spouseSpouse = spouse == null ? null : spouse.Spouse;
+
+                string spouseName = spouse != null ? spouse.Name : "N/A (No Spouse)";
+                string spouseSpouseName = spouseSpouse != null ? spouseSpouse.Name : "N/A (No Spouse)";
+
+                Console.WriteLine("Person.Name = '{0}', Person.Spouse.Name = {1},  Person.Spouse.Spouse.Name = {2}", person.Name, spouseName, spouseSpouseName);
+                Assert.AreNotEqual("Name1", person.Name, "Person name was ALL WRONG!");
+                Assert.AreNotEqual("Name1", spouseName, "Spouse name was ALL WRONG!");
+                Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
+            }
+        }
+
+        [Test]
+        public void TestReferenceFieldPropertyFilter1()
+        {
+            Table<TestPerson> ttp = dataContext.CreateTable<TestPerson>();
+            ttp.Clear();
+            dataContext.SubmitChanges();
+
+            TestPerson lastPerson = null;
+
+            for(int i =0; i < 10; i++)
+            {
+                TestPerson tp = new TestPerson();
+                tp.Name = "Name" + i.ToString();
+                tp.Spouse = lastPerson;
+                lastPerson = tp;
+                ttp.Add (tp);
+            }
+
+            lastPerson = null;
+
+            dataContext.SubmitChanges();
+
+
+            var qs = from persons in ttp
+                     where persons.Spouse.Spouse.Name != "Name1"
+                     select persons;
+
+            foreach (var person in qs)
+            {
+                TestPerson spouse = person.Spouse;
+                TestPerson spouseSpouse = spouse == null ? null : spouse.Spouse;
+
+                string spouseName = spouse != null ? spouse.Name : "N/A (No Spouse)";
+                string spouseSpouseName = spouseSpouse != null ? spouseSpouse.Name : "N/A (No Spouse)";
+
+                Console.WriteLine("Person.Name = '{0}', Person.Spouse.Name = {1},  Person.Spouse.Spouse.Name = {2}", person.Name, spouseName, spouseSpouseName);
+                Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
+            }
         }
     }
 }
