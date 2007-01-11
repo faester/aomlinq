@@ -26,6 +26,16 @@ namespace GenDB
             this.dataContext = dataContext;
         }
 
+        internal int CommittedObjectsSize
+        {
+            get { return committedObjects.Count; }
+        }
+
+        internal int UnCommittedObjectsSize
+        {
+            get { return uncommittedObjects.Count; }
+        }
+
         /// <summary>
         /// Stores objects with weak references to allow garbage collection of 
         /// the cached objects.
