@@ -87,7 +87,6 @@ namespace GenDB.DB
         //Leaf
         public void VisitNumericalProperty(CstProperty vp)
         {
-
             string pvName = "pv" + currentPropertyNumber;
             selectPart.Append (", PropertyValue " + pvName);
             IProperty p = vp.Property;
@@ -186,7 +185,52 @@ namespace GenDB.DB
         //Leaf
         public void VisitNestedReference(NestedReference pro)
         {
-            throw new Exception("Not implemented");
+            IProperty p = null;
+            StringBuilder erefSb = new StringBuilder("'");
+            NestedReference currentNRef = pro;
+            while (currentNRef.InnerReference != null)
+            {
+                erefSb.Append (currentNRef.CstProperty.Property.PropertyPOID);
+                erefSb.Append ('.');
+                currentNRef = currentNRef.InnerReference;
+            }
+            erefSb.Append ("00000");
+            erefSb.Append ("'");
+            p = currentNRef.CstProperty.Property;
+            string pvName = "pv" + currentPropertyNumber;
+            selectPart.Append (", PropertyValue " + pvName);
+            
+            if (currentPropertyNumber > 0)
+            {
+                joinPart.Append(" AND ");
+            }
+            joinPart.Append(pvName );
+            joinPart.Append(".EntityPOID = dbo.fn_lookup_EntityPOID(e.EntityPOID, ");
+            joinPart.Append(erefSb);
+            joinPart.Append (") AND ");
+            joinPart.Append(pvName);
+            joinPart.Append(".PropertyPOID = ");
+            joinPart.Append(p.PropertyPOID);
+            switch (p.MappingType )
+            {
+                case MappingType.BOOL: 
+                    wherePart.Append(pvName + ".BoolValue "); break;
+                case MappingType.DATETIME: 
+                    wherePart.Append(pvName + ".LongValue "); break;
+                case MappingType.DOUBLE: 
+                    wherePart.Append(pvName + ".DoubleValue "); break;
+                case MappingType.LONG: 
+                    wherePart.Append(pvName + ".LongValue "); break;
+                case MappingType.REFERENCE: 
+                    wherePart.Append(pvName + ".LongValue "); break;
+                case MappingType.STRING: 
+                    wherePart.Append(pvName + ".StringValue "); break;
+                default:
+                    throw new Exception("Unknown property mapping.");
+            }
+            wherePart.Append (' ');
+
+            currentPropertyNumber++;
         }
 
         //Node
