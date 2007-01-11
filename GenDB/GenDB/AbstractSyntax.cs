@@ -16,7 +16,7 @@ namespace GenDB
         void VisitCstChar(CstChar ch);
         void VisitCstDouble(CstDouble cd);
         void VisitCstReference(VarReference cr);
-        void VisitPropertyOfReferredObject(PropertyOfReferredObject pro);
+        void VisitPropertyOfReferredObject(NestedReference pro);
         void VisitOPEquals(OP_Equals eq);
         void VisitOPLessThan(OP_LessThan lt);
         void VisitOPGreaterThan(OP_GreaterThan gt);
@@ -463,32 +463,30 @@ namespace GenDB
     }
 
     /// <summary>
+    /// Benyttes når en betingelse indeholder værdier af referencefelters
+    /// properties. Eksempelvis Person.Spouse.Father.Name
     /// 
+    /// Dette skal omskrives til en NestedReferenced(new NestedReference(new NestedReference(new NestedReference(null, propertyPOIDofName), propertyPoidOfFather), propertyPOIDOfSpouse)))
     /// </summary>
-    class PropertyOfReferredObject : IWhereable, IValue
+    class NestedReference : IWhereable, IValue
     {
-        VarReference referredObject;
+        NestedReference innerReference;
+        long propertyPOID;
 
-        internal VarReference ReferredObject
+        public long PropertyPOID
         {
-            get { return referredObject; }
-            set { referredObject = value; }
+            get { return propertyPOID; }
         }
 
-        IConstant referencedField;
-
-        internal IConstant ReferencedField
+        internal NestedReference InnerReference
         {
-            get { return referencedField; }
-            set { referencedField = value; }
+            get { return innerReference; }
         }
 
-        public PropertyOfReferredObject (VarReference referredObject, IConstant referencedField)
+        public NestedReference (NestedReference inner, long propertyPOID)
         {
-            if (referredObject == null) { throw new NullReferenceException("referredObject"); }
-            if (referredObject == null) { throw new NullReferenceException("referredObject"); }
-            this.referencedField = referencedField;
-            this.referredObject = referredObject;
+            innerReference = inner;
+            this.propertyPOID = propertyPOID;
         }
 
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
