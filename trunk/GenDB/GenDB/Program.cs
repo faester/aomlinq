@@ -38,12 +38,19 @@ namespace GenDB
         public class Car : AbstractBusinessObject
         {
             string brand = "Volvo";
+             bool sunroof = false;
             Motor motor = new Motor();
 
             public string Brand
             {
                 get { return brand; }
                 set { brand = value; }
+            }
+
+            public bool Sunroof
+            {
+                get{return sunroof;}
+                set{sunroof=value;}
             }
 
             public Motor Motor
@@ -177,15 +184,17 @@ namespace GenDB
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                 //where epp.Name == "Navn 6" || epp.Age == 7
                 //where epp.Spouse == s_p
-                  //where epp.Car.Brand == "Volvo"
+                 //where epp.Car.Brand == "Volvo"
                 //where epp.Name == "SpousePerson"
                 //where !(epp.Letter != 'c')
                 //where epp.Birth == t
                 //where epp.Alive
                 where epp.Spouse.Name == "SpousePerson"
+
                 //where epp.Car.Brand == "Volvo"
                 //where epp.Car.Motor.HorsePower == "400"
                 //where epp.Car.Motor.Valve == 6
+                //where epp.Car.Sunroof == false
                 select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
 
