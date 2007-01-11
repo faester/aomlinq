@@ -36,42 +36,17 @@ namespace GenDB
             }
             return c;
         }
-
-        internal NestedReference RecursiveRef(MemberExpression me, NestedReference nref)
-        {
-            NestedReference tmpRef;
-
-            if(me.NodeType.ToString()=="MemberAccess")
-            {
-                Type t = me.Expression.Type;
-                if(!typeSystem.IsTypeKnown(t))
-                    typeSystem.RegisterType(t);
-
-                IEntityType et = typeSystem.GetEntityType(t);
-                string pstr = me.Member.Name;
-                IProperty po = et.GetProperty(pstr);
-
-                //nref = tmpRef; 
-                tmpRef = new NestedReference(RecursiveRef((MemberExpression)me.Expression,nref), new CstProperty(po));
-                
-            }
-            
-            return nref;
-        }
         
         internal NestedReference GetNestedRefs(MemberExpression me, int size)
         {
             MemberExpression mTmp;
             NestedReference nref=null;
             NestedReference nTmp=null;
-
             if(size>1)
             {
-
                 for(int i=0; i<size; i++)
                 {
                     mTmp=me;
-                    
                     Type type = mTmp.Expression.Type;
                     if(!typeSystem.IsTypeKnown(type))
                         typeSystem.RegisterType(type);
@@ -82,54 +57,9 @@ namespace GenDB
                     nTmp = nref;
                     if(mTmp.Expression.NodeType.ToString() == "MemberAccess")
                         me = (MemberExpression)mTmp.Expression;
-    
                 }
-            }
-            
+            }            
             return nref;
-        }
-
-        internal Type[] GetDotTypesFromMember(MemberExpression me, int size, Type[] ta)
-        {
-            if(size>1)
-            {
-                
-                Expression exp;
-                MemberExpression mexpr;
-                exp = me.Expression;
-                for(int i=ta.Length-1;i>0;i--)
-                {
-                    Expression exp2;
-                    if(exp.NodeType.ToString() == "MemberAccess")
-                    {
-                        exp2 = ((MemberExpression)exp).Expression;
-                    }
-                    else if(exp.NodeType.ToString() == "Parameter")
-                    {
-                        exp2 = (Expression)exp;
-                    } 
-                    else
-                    {
-                        throw new Exception("Unknown NodeType: "+exp.NodeType.ToString());
-                    }
-          
-                    Type t = exp2.Type;
-                    if(!typeSystem.IsTypeKnown(t))
-                        typeSystem.RegisterType(t);
-                    
-                    ta[i-1]=t;
-                    
-                    if(i>1)
-                    {
-                        MemberExpression m2 = (MemberExpression)exp2;
-                        Expression ex3 = m2.Expression;
-                        exp=ex3;
-                    }
-                }
-
-
-            }
-            return ta;
         }
 
         internal IExpression VisitMethodCall(MethodCallExpression mce)
@@ -238,7 +168,6 @@ namespace GenDB
                 {
                     parArr[1] = CstIsFalse.Instance;
                 }
-                //parArr[1] = VisitUnaryExpression((UnaryExpression)be.Right);
             }
             else if(be.Right is MethodCallExpression)
             {
@@ -301,17 +230,13 @@ namespace GenDB
         {
             // REFLECTED TYPES
             int iPar = GetNumParamFromMember(me);
-            Type[] typeArrTmp = new Type[iPar];
-            Type[] typeArr = GetDotTypesFromMember(me, iPar, typeArrTmp); 
-
+            
             // LAST TYPE IN FOODCHAIN
             Type t = me.Expression.Type;
             if(!typeSystem.IsTypeKnown(t))
                 typeSystem.RegisterType(t);
-
-            typeArr[typeArr.Length-1] = t;
-
-            if(typeArr.Length>1)
+ 
+            if(iPar>1)
             {
                 return GetNestedRefs(me,iPar);
             }
@@ -322,17 +247,7 @@ namespace GenDB
                 IProperty po = et.GetProperty(propstr);
                 return new CstProperty(po);
             }
-   
         }
-
-        //internal CstProperty getNestedChain(Type[] ta)
-        //{
-        //    foreach(Type t in ta)
-        //    {
-        //        IEntityType et = typeSystem.GetEntityType(t);
-        //        IProperty po et.GetProperty()
-        //    }
-        //}
         
         public IExpression VisitExpr(Expression expr)
         {
