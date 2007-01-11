@@ -37,10 +37,63 @@ namespace GenDB
             return c;
         }
 
+        internal NestedReference RecursiveRef(MemberExpression me, NestedReference nref)
+        {
+            NestedReference tmpRef;
+
+            if(me.NodeType.ToString()=="MemberAccess")
+            {
+                Type t = me.Expression.Type;
+                if(!typeSystem.IsTypeKnown(t))
+                    typeSystem.RegisterType(t);
+
+                IEntityType et = typeSystem.GetEntityType(t);
+                string pstr = me.Member.Name;
+                IProperty po = et.GetProperty(pstr);
+
+                //nref = tmpRef; 
+                tmpRef = new NestedReference(RecursiveRef((MemberExpression)me.Expression,nref), new CstProperty(po));
+                
+            }
+            
+            return nref;
+        }
+        
+        internal NestedReference GetNestedRefs(MemberExpression me, int size)
+        {
+            MemberExpression mTmp;
+            NestedReference nref=null;
+            NestedReference nTmp=null;
+
+            if(size>1)
+            {
+
+                for(int i=0; i<size; i++)
+                {
+                    mTmp=me;
+                    
+                    Type type = mTmp.Expression.Type;
+                    if(!typeSystem.IsTypeKnown(type))
+                        typeSystem.RegisterType(type);
+
+                    IEntityType et = typeSystem.GetEntityType(type);
+                    IProperty prop = et.GetProperty(mTmp.Member.Name);
+                    nref = new NestedReference(nTmp,new CstProperty(prop));
+                    nTmp = nref;
+                    if(mTmp.Expression.NodeType.ToString() == "MemberAccess")
+                        me = (MemberExpression)mTmp.Expression;
+    
+                }
+            }
+            
+            return nref;
+        }
+
         internal Type[] GetDotTypesFromMember(MemberExpression me, int size, Type[] ta)
         {
             if(size>1)
             {
+                
                 Expression exp;
                 MemberExpression mexpr;
                 exp = me.Expression;
@@ -60,10 +113,11 @@ namespace GenDB
                         throw new Exception("Unknown NodeType: "+exp.NodeType.ToString());
                     }
           
-                    if(!typeSystem.IsTypeKnown(exp2.Type))
-                        typeSystem.RegisterType(exp2.Type);
+                    Type t = exp2.Type;
+                    if(!typeSystem.IsTypeKnown(t))
+                        typeSystem.RegisterType(t);
                     
-                    ta[i-1]=exp2.Type;
+                    ta[i-1]=t;
                     
                     if(i>1)
                     {
@@ -72,6 +126,8 @@ namespace GenDB
                         exp=ex3;
                     }
                 }
+
+
             }
             return ta;
         }
@@ -255,11 +311,28 @@ namespace GenDB
 
             typeArr[typeArr.Length-1] = t;
 
-            IEntityType et = typeSystem.GetEntityType(t);
-            string propstr = me.Member.Name;
-            IProperty po = et.GetProperty(propstr);
-            return new CstProperty(po);
+            if(typeArr.Length>1)
+            {
+                return GetNestedRefs(me,iPar);
+            }
+            else
+            {
+                IEntityType et = typeSystem.GetEntityType(t);
+                string propstr = me.Member.Name;
+                IProperty po = et.GetProperty(propstr);
+                return new CstProperty(po);
+            }
+   
         }
+
+        //internal CstProperty getNestedChain(Type[] ta)
+        //{
+        //    foreach(Type t in ta)
+        //    {
+        //        IEntityType et = typeSystem.GetEntityType(t);
+        //        IProperty po et.GetProperty()
+        //    }
+        //}
         
         public IExpression VisitExpr(Expression expr)
         {
