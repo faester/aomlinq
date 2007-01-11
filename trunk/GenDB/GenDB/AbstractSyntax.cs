@@ -29,6 +29,7 @@ namespace GenDB
         void VisitInstanceOf(ExprInstanceOf instanceOf);
         void VisitCstIsTrue(CstIsTrue valueIsTrue);
         void VisitCstIsFalse(CstIsFalse valueIsFalse);
+        void VisitNotSqlTranslatable(CstNotTranslatable nts);
     }
 
     interface IWhereable
@@ -66,6 +67,7 @@ namespace GenDB
     /// </summary>
     interface IStringvalue : IConstant {}
 
+
     class CstThis : IValue
     {
         public void AcceptVisitor (IAbsSyntaxVisitor visitor)
@@ -73,6 +75,16 @@ namespace GenDB
             visitor.VisitCstThis(this);
         }
     }
+    
+    class CstNotTranslatable : IWhereable
+    {
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitNotSqlTranslatable(this);
+        }
+    }
+
+
 
     class CstIsTrue : IValue
     {
