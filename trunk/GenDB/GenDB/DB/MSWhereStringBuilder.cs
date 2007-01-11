@@ -184,7 +184,7 @@ namespace GenDB.DB
         }
 
         //Leaf
-        public void VisitPropertyOfReferredObject(PropertyOfReferredObject pro)
+        public void VisitPropertyOfReferredObject(NestedReference pro)
         {
             throw new Exception("Not implemented");
         }
