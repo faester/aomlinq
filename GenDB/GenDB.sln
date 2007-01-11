@@ -6,6 +6,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{BD87ED43-B228-47DE-9679-F097E47E0381}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{12D77379-ABC2-400E-8683-477E8DC8DAE4}"
+	ProjectSection(SolutionItems) = preProject
+		fn_lookup_EntityPOID.txt = fn_lookup_EntityPOID.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
