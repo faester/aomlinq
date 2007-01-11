@@ -88,10 +88,10 @@ namespace GenDB.DB
         IEnumerable<IProperty> GetAllProperties { get; }
 
         /// <summary>
-        /// Returns the property with the given propertyPOID if such a 
-        /// property is associated with this IEntityType or one of its 
+        /// Returns the cstProperty with the given propertyPOID if such a 
+        /// cstProperty is associated with this IEntityType or one of its 
         /// super types. It is the responsibility of the caller to 
-        /// ensure that a property with given ID actually exists. The 
+        /// ensure that a cstProperty with given ID actually exists. The 
         /// behaviour is unspecified if this precondition is violated.
         /// </summary>
         /// <param name="propertyPOID"></param>
@@ -101,7 +101,7 @@ namespace GenDB.DB
         /// <summary>
         /// Returns the IProperty with the name given if present
         /// in this IEntityType. Properties of subtypes will not 
-        /// be returned. Null is returned if a matching property 
+        /// be returned. Null is returned if a matching cstProperty 
         /// could not be found.
         /// </summary>
         /// <param name="PropertyName"></param>
@@ -109,9 +109,9 @@ namespace GenDB.DB
         IProperty GetProperty(string propertyName);
 
         /// <summary>
-        /// Adds a property to the entity type.
+        /// Adds a cstProperty to the entity type.
         /// </summary>
-        /// <param name="property"></param>
+        /// <param name="cstProperty"></param>
         void AddProperty(IProperty property);
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace GenDB.DB
         bool DatabaseExists();
 
         /// <summary>
-        /// Returns all persistent property types. 
+        /// Returns all persistent cstProperty types. 
         /// </summary>
         /// <returns></returns>
         IEnumerable<IPropertyType> GetAllPropertyTypes();
@@ -260,7 +260,7 @@ namespace GenDB.DB
 
         /// <summary>
         /// Saves the entityType as well as any unsaved 
-        /// super types, properties and property types.
+        /// super types, properties and cstProperty types.
         /// </summary>
         /// <param name="entityType"></param>
         void Save(IEntityType entityType);

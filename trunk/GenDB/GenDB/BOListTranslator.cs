@@ -78,7 +78,7 @@ namespace GenDB
             IEntity e = null;
             e = dataContext.GenDB.NewEntity();
 
-            // The mapping type for the elements are stored in this property. No other values are relevant.
+            // The mapping type for the elements are stored in this cstProperty. No other values are relevant.
             IProperty elementTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
             
             IPropertyValue pv = dataContext.GenDB.NewPropertyValue();

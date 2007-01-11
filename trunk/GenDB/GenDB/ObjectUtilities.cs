@@ -187,7 +187,7 @@ namespace GenDB
         /// <summary>
         /// Tests if fields of object a equals fields of object b.
         /// The test returns true if typeof(a) == typeof(b) and 
-        /// all primitive fields have same property. Fields of reference
+        /// all primitive fields have same cstProperty. Fields of reference
         /// type must by ReferenceEquals for the method to return
         /// true. Note that fields with attribute [Volatile] are 
         /// not tested, since the method is ment to be used when 

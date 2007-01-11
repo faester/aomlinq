@@ -272,9 +272,9 @@ namespace GenDB
     }
 
     /// <summary>
-    /// Contains a reference to a property property.
+    /// Contains a reference to a cstProperty cstProperty.
     /// 
-    /// Find property: TypeSystem.GetEntityType(obj.GetType()).GetProperty
+    /// Find cstProperty: TypeSystem.GetEntityType(obj.GetType()).GetProperty
     /// </summary>
     class CstProperty : INumerical
     {
@@ -434,12 +434,15 @@ namespace GenDB
         /// TODO: What are the consequences of this references 
         /// as regards the garbage collection?
         /// </summary>
-        IBusinessObject referencedObject = null;
+        WeakReference reference = null;
+        //IBusinessObject referencedObject = null;
 
         public IBOReference Value
         {
             get 
-            { 
+            {
+                if (reference == null) { return new IBOReference(true); }
+                IBusinessObject referencedObject = !reference.IsAlive ? null : (IBusinessObject)reference.Target;
                 if (referencedObject == null || referencedObject.DBTag == null)
                 {
                     return new IBOReference(true);
@@ -453,7 +456,11 @@ namespace GenDB
 
         public VarReference(IBusinessObject referencedObject)
         {
-            this.referencedObject = referencedObject;
+            if (referencedObject != null)
+            {
+                this.reference = new WeakReference(referencedObject);
+            }
+            //this.referencedObject = referencedObject;
         }
 
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
@@ -471,11 +478,11 @@ namespace GenDB
     class NestedReference : IWhereable, IValue
     {
         NestedReference innerReference;
-        long propertyPOID;
+        CstProperty cstProperty;
 
-        public long PropertyPOID
+        internal CstProperty CstProperty
         {
-            get { return propertyPOID; }
+            get { return cstProperty; }
         }
 
         internal NestedReference InnerReference
@@ -483,10 +490,10 @@ namespace GenDB
             get { return innerReference; }
         }
 
-        public NestedReference (NestedReference inner, long propertyPOID)
+        public NestedReference (NestedReference inner, CstProperty cstProperty)
         {
             innerReference = inner;
-            this.propertyPOID = propertyPOID;
+            this.cstProperty = cstProperty;
         }
 
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
