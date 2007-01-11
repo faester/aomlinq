@@ -1199,18 +1199,11 @@ namespace GenDB.DB
         private void CreateFunctions()
         {
             string cmdStr =
-                " USE generic" +
-                " GO" +
-                " SET ANSI_NULLS ON" +
-                " GO" +
-                " SET QUOTED_IDENTIFIER ON" +
-                " GO " +
-                " CREATE FUNCTION dbo.fn_lookup_EntityPOID" +
+                " CREATE FUNCTION dbo.fn_lookup_EntityPOID " +
                 " (	" +
-                "	-- Add the parameters for the function here" +
                 "	@bep int, " +
                 "	@ls varchar(8000)" +
-                " )" +
+                " ) " +
                 " RETURNS BIGINT" +
                 " AS" +
                 " BEGIN" +
@@ -1237,7 +1230,7 @@ namespace GenDB.DB
                 "			SET @res = @nbep" +
                 "		END" +
                 "		RETURN @res" +
-                "END ";
+                " END ";
 
             ExecuteNonQueries(new string[] { cmdStr });
         }
