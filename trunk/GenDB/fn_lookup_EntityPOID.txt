@@ -1,20 +1,11 @@
-USE generic
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE FUNCTION dbo.fn_lookup_EntityPOID
 (	
-	-- Add the parameters for the function here
 	@bep int, 
 	@ls varchar(8000)
 )
 RETURNS BIGINT
 AS
 BEGIN
-	-- Add the SELECT statement with parameter references her
-	-- SELECT (CASE WHEN 1 = 1 THEN SELECT 1 ELSE SELECT 2	END) AS myVal
 	DECLARE @res AS BIGINT
 	DECLARE @idx AS BIGINT
 	DECLARE @nbep AS BIGINT
@@ -39,7 +30,4 @@ BEGIN
 		END
 		
 		RETURN @res
-	
 END
-GO
-USE master
