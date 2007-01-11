@@ -14,38 +14,37 @@ namespace TableTests
         private const int ELEMENTS_TO_STORE = 40;
         Table<ContainsAllPrimitiveTypes> tableAllPrimitives = null;
         DataContext dataContext = DataContext.Instance;
-
-        [TestFixtureSetUp]
-        public void FixtureSetUp()
-        {
-            try
-            {
-                if (!dataContext.RebuildDatabase)
-                {
-                    dataContext.RebuildDatabase = true;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine("Database must be rebuild prior to calling these tests.");
-                throw e;
-            }
-        }
+        Table<TestPerson> ttp ;
 
         [TestFixtureTearDown]
         public void FixtureTearDown()
         {
             tableAllPrimitives = null;
+            ttp = null;
         }
 
         [SetUp]
         public void TestSetup()
         {
             InitTableAllPrimitives();
+            InitTableOfPersons();
             dataContext.SubmitChanges();
-            // Try to empty the cache, or at least ensure, 
-            // that something is actually retrieved later on.
-            System.GC.Collect();
+        }
+
+        public void InitTableOfPersons()
+        {
+            ttp = dataContext.CreateTable<TestPerson>();
+            TestPerson lastPerson = null;
+
+            for (int i = 0; i < 10; i++)
+            {
+                TestPerson tp = new TestPerson();
+                tp.Name = "Name" + i.ToString();
+                tp.Age = i;
+                tp.Spouse = lastPerson;
+                lastPerson = tp;
+                ttp.Add(tp);
+            }
         }
 
         private void InitTableAllPrimitives()
@@ -78,11 +77,11 @@ namespace TableTests
         [TearDown]
         public void TearDown()
         {
-            //Table<ContainsAllPrimitiveTypes> t_capt = new Table<ContainsAllPrimitiveTypes>();
-            //t_capt.Clear();
-            //System.GC.Collect();
-            //dataContext.SubmitChanges();
-            //dataContext.SubmitChanges();
+            tableAllPrimitives.Clear();
+            ttp.Clear();
+            dataContext.SubmitChanges();
+            tableAllPrimitives = null;
+            ttp = null;
         }
 
         [Test]
@@ -140,26 +139,9 @@ namespace TableTests
         [Test]
         public void TestLongFilter()
         {
-            
-            Console.Error.WriteLine ("***********************************************************");
-            Console.Error.WriteLine ("****** TEST LONG FILTER ***********************************");
-            Console.Error.WriteLine ("***********************************************************");
-            
-            Console.WriteLine ("***********************************************************");
-            Console.WriteLine ("****** TEST LONG FILTER ***********************************");
-            Console.WriteLine ("***********************************************************");
-            Console.WriteLine(dataContext.DbBatchSize);
-            Console.WriteLine (tableAllPrimitives);
-            Console.WriteLine ("Elements in unfiltered table: " + tableAllPrimitives.Count);
-
             var xs = from capts in tableAllPrimitives
                      where capts.Lng == 0
                      select capts;
-
-            Console.WriteLine (xs);
-            Console.WriteLine(xs.Count);
-            Console.WriteLine ("Elements in unfiltered table: " + tableAllPrimitives.Count);
-            Console.WriteLine ("UNFILTERED: " + tableAllPrimitives);
 
             int count = 0;
             foreach(var x in xs)
@@ -167,15 +149,6 @@ namespace TableTests
                 count++;
                 Assert.IsTrue (x.Lng == 0, "Filter error: All Lng values should be zero.");
             }
-
-            Console.WriteLine ("Elements in unfiltered table: " + tableAllPrimitives.Count);
-            Console.WriteLine ("***********************************************************");
-            Console.WriteLine ("****** TEST LONG FILTER END *******************************");
-            Console.WriteLine ("***********************************************************");
-
-            Console.Error.WriteLine ("***********************************************************");
-            Console.Error.WriteLine ("****** TEST LONG FILTER END *******************************");
-            Console.Error.WriteLine ("***********************************************************");
             Assert.AreEqual (ELEMENTS_TO_STORE / 2, count, "Incorrect number of elements returned.");
         }
 
@@ -292,24 +265,50 @@ namespace TableTests
         }
 
         [Test]
+        public void TestReferenceFieldPropertyFilter1()
+        {
+            var qs = from persons in ttp
+                     where persons.Spouse.Spouse.Name != "Name1"
+                     select persons;
+
+            foreach (var person in qs)
+            {
+                TestPerson spouse = person.Spouse;
+                TestPerson spouseSpouse = spouse == null ? null : spouse.Spouse;
+
+                string spouseName = spouse != null ? spouse.Name : "N/A (No Spouse)";
+                string spouseSpouseName = spouseSpouse != null ? spouseSpouse.Name : "N/A (No Spouse)";
+
+                Console.WriteLine("Person.Name = '{0}', Person.Spouse.Name = {1},  Person.Spouse.Spouse.Name = {2}", person.Name, spouseName, spouseSpouseName);
+                Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
+            }
+        }
+ 
+        [Test]
         public void TestReferenceFieldPropertyFilter2()
         {
-            Table<TestPerson> ttp = dataContext.CreateTable<TestPerson>();
-            ttp.Clear();
-            dataContext.SubmitChanges();
+            var qs = from persons in ttp
+                     where persons.Spouse.Spouse.Name != "Name1" && persons.Spouse.Age > 3
+                     select persons;
 
-            TestPerson lastPerson = null;
-
-            for(int i =0; i < 10; i++)
+            foreach (var person in qs)
             {
-                TestPerson tp = new TestPerson();
-                tp.Name = "Name" + i.ToString();
-                tp.Spouse = lastPerson;
-                lastPerson = tp;
-                ttp.Add (tp);
-            }
+                TestPerson spouse = person.Spouse;
+                TestPerson spouseSpouse = spouse == null ? null : spouse.Spouse;
 
-            lastPerson = null;
+                string spouseName = spouse != null ? spouse.Name : "N/A (No Spouse)";
+                string spouseSpouseName = spouseSpouse != null ? spouseSpouse.Name : "N/A (No Spouse)";
+                int spouseAge = spouse != null ? spouse.Age : int.MaxValue;
+                Console.WriteLine("Person.Name = '{0}', Person.Spouse.Name = {1},  Person.Spouse.Spouse.Name = {2}", person.Name, spouseName, spouseSpouseName);
+                Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
+                Assert.IsTrue(spouseAge > 3, "Spouse age was wrong");
+            }
+        }
+
+        [Test]
+        public void TestReferenceFieldPropertyFilter3()
+        {
+            TestPerson lastPerson = null;
 
             dataContext.SubmitChanges();
 
@@ -329,46 +328,6 @@ namespace TableTests
                 Console.WriteLine("Person.Name = '{0}', Person.Spouse.Name = {1},  Person.Spouse.Spouse.Name = {2}", person.Name, spouseName, spouseSpouseName);
                 Assert.AreNotEqual("Name1", person.Name, "Person name was ALL WRONG!");
                 Assert.AreNotEqual("Name1", spouseName, "Spouse name was ALL WRONG!");
-                Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
-            }
-        }
-
-        [Test]
-        public void TestReferenceFieldPropertyFilter1()
-        {
-            Table<TestPerson> ttp = dataContext.CreateTable<TestPerson>();
-            ttp.Clear();
-            dataContext.SubmitChanges();
-
-            TestPerson lastPerson = null;
-
-            for(int i =0; i < 10; i++)
-            {
-                TestPerson tp = new TestPerson();
-                tp.Name = "Name" + i.ToString();
-                tp.Spouse = lastPerson;
-                lastPerson = tp;
-                ttp.Add (tp);
-            }
-
-            lastPerson = null;
-
-            dataContext.SubmitChanges();
-
-
-            var qs = from persons in ttp
-                     where persons.Spouse.Spouse.Name != "Name1"
-                     select persons;
-
-            foreach (var person in qs)
-            {
-                TestPerson spouse = person.Spouse;
-                TestPerson spouseSpouse = spouse == null ? null : spouse.Spouse;
-
-                string spouseName = spouse != null ? spouse.Name : "N/A (No Spouse)";
-                string spouseSpouseName = spouseSpouse != null ? spouseSpouse.Name : "N/A (No Spouse)";
-
-                Console.WriteLine("Person.Name = '{0}', Person.Spouse.Name = {1},  Person.Spouse.Spouse.Name = {2}", person.Name, spouseName, spouseSpouseName);
                 Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
             }
         }
