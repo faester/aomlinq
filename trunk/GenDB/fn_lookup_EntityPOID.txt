@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER FUNCTION dbo.fn_lookup_EntityPOID
+CREATE FUNCTION dbo.fn_lookup_EntityPOID
 (	
 	-- Add the parameters for the function here
 	@bep int, 
