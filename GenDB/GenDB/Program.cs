@@ -17,14 +17,39 @@ namespace GenDB
     {
         static int nextID = 0;
 
+        public class Motor : AbstractBusinessObject
+        {
+            string horsePower = "400";
+            int valve = 6;
+            
+            public string HorsePower
+            {
+                get{return horsePower;}
+                set{horsePower=value;}
+            }
+
+            public int Valve
+            {
+                get{return valve;}
+                set{valve=value;}
+            }
+        }
+
         public class Car : AbstractBusinessObject
         {
             string brand = "Volvo";
+            Motor motor = new Motor();
 
             public string Brand
             {
                 get { return brand; }
                 set { brand = value; }
+            }
+
+            public Motor Motor
+            {
+                get{return motor;}
+                set{motor = value;}
             }
         }
 
@@ -136,8 +161,9 @@ namespace GenDB
             }
 
             DateTime t = DateTime.Now;
+            Car cc = new Car();
 
-            Person s_p = new Person{ Name = "SpousePerson", Letter = 'c', Birth = t, Alive=true};
+            Person s_p = new Person{ Name = "SpousePerson", Letter = 'c', Birth = t, Alive=true, Car = cc};
             s_p.Age = 99;
             tp.Add (s_p);
 
@@ -148,18 +174,23 @@ namespace GenDB
             dcontext.SubmitChanges();
             var es = from epp in tp     
                 // where epp.Age == 3
-                where !(epp.Age <= 9)
+                //where !(epp.Age <= 9)
                 //where !(epp.Name != "Navn 3")
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                 //where epp.Name == "Navn 6" || epp.Age == 7
                 //where epp.Spouse == s_p
-                //where epp.Spouse.Name == "SpousePerson"
+                  //where epp.Car.Brand == "Volvo"
+                //where epp.Name == "SpousePerson"
                 //where !(epp.Letter != 'c')
                 //where epp.Birth == t
                 //where epp.Alive
-                //where epp == p_p
+                where epp.Name == "SpousePerson"
+                //where epp.Car.Brand == "Volvo"
+                //where epp.Car.Motor.HorsePower == "400"
+                //where epp.Car.Motor.Valve == 6
                 select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
+
             
             foreach(Person p in es)
             {
