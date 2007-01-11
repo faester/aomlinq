@@ -88,5 +88,19 @@ namespace CacheTests
             Assert.AreEqual(0, dt.UnCommittedObjectsSize, "Cache still contained uncommitted objects. " + msg);
         }
 
+        [Test]
+        public void Test4CacheEmptied2()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                CacheTestObject hvp = new CacheTestObject();
+                table.Add (hvp);
+            }
+            GC.Collect();
+            dt.SubmitChanges();
+
+            Assert.AreEqual(0, dt.UnCommittedObjectsSize, "Uncommitted objects still contained values");
+            Assert.AreEqual(0, dt.CommittedObjectsSize, "Committed objects still contained values");
+        }
     }
 }

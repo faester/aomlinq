@@ -14,7 +14,7 @@ namespace Tests
     /// or are of some primitive type, are of type string or of type DateTime.
     /// 
     /// If properties are public, they must have both a public setter and a public getter
-    /// to be translatable. If the property should not be translated/persisted, it should 
+    /// to be translatable. If the cstProperty should not be translated/persisted, it should 
     /// be decorated with the attribute [Volatile].
     /// 
     /// If something non-translatable is attempted to be translated, an exception will
@@ -150,6 +150,8 @@ namespace Tests
             }
             GC.Collect();
             dc.SubmitChanges();
+
+            Console.WriteLine("Cache size (Uncommitted = {0}, Comitted = {1})", dc.UnCommittedObjectsSize, dc.CommittedObjectsSize);
 
             foreach(HasVolatileProperty hvp in tableOfHasVolatileProperty)
             {
