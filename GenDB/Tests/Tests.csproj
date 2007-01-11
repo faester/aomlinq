@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BOListTranslationTests.cs" />
+    <Compile Include="CacheTests.cs" />
     <Compile Include="ContainsAllPrimitiveTypes.cs" />
     <Compile Include="TableQueryTests2.cs" />
     <Compile Include="NeverStoreThisClassToDB.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="TableQueryTests.cs" />
     <Compile Include="TableTests.cs" />
     <Compile Include="TestPerson.cs" />
+    <Compile Include="TranslationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GenDB\GenDB.csproj">

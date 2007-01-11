@@ -114,7 +114,7 @@ namespace Tests
         }
 
         [Test]
-        public void CanTranslatePureIBus()
+        public void CanTranslatePureIBOs()
         {
             for (int i = 0; i < 10; i++)
             {

@@ -66,7 +66,6 @@ namespace CacheTests
                 cto.Name = "NAMECHANGE";
             }
             keepInstances.Clear();
-            GC.Collect();
             dt.SubmitChanges();
         }
 
@@ -79,5 +78,15 @@ namespace CacheTests
             }
             Assert.AreEqual(instancesToCreate, table.Count);
         }
+
+        [Test]
+        public void Test3CacheEmptied()
+        {
+            dt.SubmitChanges();
+            string msg = "(Failures here might indicate, that some other test is keeping a reference to objects. Check that this is not the case.";
+            Assert.AreEqual(0, dt.CommittedObjectsSize, "Cache still contained committed objects. " + msg);
+            Assert.AreEqual(0, dt.UnCommittedObjectsSize, "Cache still contained uncommitted objects. " + msg);
+        }
+
     }
 }

@@ -130,5 +130,21 @@ namespace GenDB
         {
             iboCache.FlushToDB();
         }
+
+        /// <summary>
+        /// Number of objects watched by the cache.
+        /// </summary>
+        public long CommittedObjectsSize
+        {
+            get { return iboCache.CommittedObjectsSize; }
+        }
+
+        /// <summary>
+        /// Number of uncomitted objects in cache.
+        /// </summary>
+        public long UnCommittedObjectsSize
+        {
+            get { return iboCache.UnCommittedObjectsSize; }
+        }
     }
 }
