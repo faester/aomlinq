@@ -87,4 +87,8 @@
     <Compile Include="VolatileAnnotation.cs" />
   </ItemGroup>
   <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>
