@@ -16,7 +16,7 @@ namespace GenDB
         void VisitCstChar(CstChar ch);
         void VisitCstDouble(CstDouble cd);
         void VisitCstReference(VarReference cr);
-        void VisitPropertyOfReferredObject(NestedReference pro);
+        void VisitNestedReference(NestedReference pro);
         void VisitOPEquals(OP_Equals eq);
         void VisitOPLessThan(OP_LessThan lt);
         void VisitOPGreaterThan(OP_GreaterThan gt);
@@ -491,7 +491,7 @@ namespace GenDB
 
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
-            visitor.VisitPropertyOfReferredObject(this);
+            visitor.VisitNestedReference(this);
         }
     }
 
