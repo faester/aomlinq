@@ -18,7 +18,7 @@ namespace GenDB
     /// </summary>
     class TypeSystem
     {
-        internal const string COLLECTION_ELEMENT_TYPE_PROPERTY_NAME = "++ElementType"; // prefixed with ++ which is not legal in a C# property name
+        internal const string COLLECTION_ELEMENT_TYPE_PROPERTY_NAME = "++ElementType"; // prefixed with ++ which is not legal in a C# cstProperty name
         internal const string COLLECTION_KEY_PROPERTY_NAME = "++KeyType";      // to avoid clashes with existing properties.
 
         private  Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement>();
@@ -41,7 +41,7 @@ namespace GenDB
         /// 
         /// New EntityTypes must be created through
         /// this typesystem instance which will take care
-        /// og persisting entity types, property types and
+        /// og persisting entity types, cstProperty types and
         /// properties.
         /// </summary>
         internal void Init()
@@ -247,7 +247,7 @@ namespace GenDB
                         IProperty property = dataContext.GenDB.NewProperty();
                         property.PropertyName = clrProperty.Name;
                         property.PropertyType = GetPropertyType(clrProperty.PropertyType);
-                        // property.MappingType = FindMappingType(clrProperty);
+                        // cstProperty.MappingType = FindMappingType(clrProperty);
                         property.EntityType = et;
                         et.AddProperty(property);
                     }

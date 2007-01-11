@@ -84,10 +84,10 @@ namespace GenDB.DB
         }
 
         /// <summary>
-        /// Adds property to this entity type. 
+        /// Adds cstProperty to this entity type. 
         /// Insertion of duplicates are not checked.
         /// </summary>
-        /// <param name="property"></param>
+        /// <param name="cstProperty"></param>
         public void AddProperty(IProperty property)
         {
             if (properties == null) { properties = new Dictionary<long, IProperty>(); }
