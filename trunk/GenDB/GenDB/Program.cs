@@ -73,13 +73,6 @@ namespace GenDB
                 set { sex = value; }
             }
 
-            //int[] arr = new int[30];
-
-            //public int[] Arr
-            //{
-            //    get { return arr; }
-            //    set { arr = value; }
-            //}
             private string name = null;
 
             public string Name
@@ -148,6 +141,7 @@ namespace GenDB
             int objCount = 10;
 
             Table<Person> tp = dcontext.CreateTable<Person>();
+            Person lastPerson = null;
 
             for (short i = 0; i < objCount; i++)
             {
@@ -157,8 +151,12 @@ namespace GenDB
                 p.Car = c;
                 if (i % 2 == 0) { p.Sex = Sex.FEMALE; }
                 p.Age = i;
+                p.Spouse = lastPerson;
                 tp.Add (p);
+                lastPerson = p;
             }
+
+            lastPerson = null;
 
             DateTime t = DateTime.Now;
             Car cc = new Car();
