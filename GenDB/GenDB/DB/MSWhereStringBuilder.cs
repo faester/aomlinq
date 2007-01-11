@@ -139,6 +139,12 @@ namespace GenDB.DB
             wherePart.Append (' ');
         }
 
+        //Leaf 
+        public void VisitNotSqlTranslatable(CstNotTranslatable cn)
+        {
+            throw new Exception("IWhereable expression contained nodes that was not SQL-translatable.");
+        }
+
         //Leaf
         public void VisitCstBool(CstBool cb)
         {
