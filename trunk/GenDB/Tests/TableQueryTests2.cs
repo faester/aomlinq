@@ -331,5 +331,23 @@ namespace TableTests
                 Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
             }
         }
+
+        [Test]
+        public void TestLessThan()
+        {
+            var es = from epp in ttp     
+                where epp.Name == "Name2" && epp.Age < 9
+                select epp;
+
+            bool foundSome = false;
+            foreach (TestPerson tp in es)
+            {
+                foundSome = true;
+                Console.WriteLine(tp.Age + " " + tp.Name);
+                Assert.IsTrue (tp.Age < 9 && tp.Name == "Name2", "Wrong result produced.");
+            }
+
+            Assert.IsTrue (foundSome, "No results produced. Test that test has meaningful condition.");
+        }
     }
 }
