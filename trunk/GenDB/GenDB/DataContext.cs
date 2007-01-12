@@ -81,7 +81,7 @@ namespace GenDB
             typeSystem.Init();
             IBOCache.Init (this);
             iboCache = IBOCache.Instance;
-            bolistFactory = new BOListFactory(TypeSystem);
+            bolistFactory = new BOListFactory();
         }
 
         private int dbBatchSize = 1;

@@ -8,7 +8,7 @@ using GenDB.DB;
 
 namespace GenDB
 {
-    public interface IBusinessObject
+    public interface IBusinessObject 
     {
         /// <summary>
         /// NB: The DBTag is essential to the persistence 

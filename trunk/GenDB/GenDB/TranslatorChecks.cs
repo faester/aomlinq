@@ -12,6 +12,10 @@ namespace GenDB
 
         public static void CheckIBusinessObjectTranslatability(Type t)
         {
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == BOListTranslator.TypeOfBOList) { return; }
+
+            ConstructorInfo cnf = t.GetConstructor (new Type[0]);
+
             CheckObjectTypeTranslateability(t);
             PropertyInfo[] propsToCheck = t.GetProperties(BindingFlags.Instance | BindingFlags.Public);
             CheckPropertyTranslatability(propsToCheck);

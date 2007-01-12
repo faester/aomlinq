@@ -131,18 +131,21 @@ namespace GenDB
 #if DEBUG
             Console.WriteLine("Committed objects contains {0} elements", committedObjects.Count);
 #endif
-            foreach (IBOCacheElement ce in committedObjects.Values)
+            IEnumerable<IBOCacheElement> ll = committedObjects.Values;
+            foreach (IBOCacheElement ce in ll)
             {
                 ce.Original = null;
             }
             GC.Collect();
-            foreach (IBOCacheElement ce in committedObjects.Values)
+            foreach (IBOCacheElement ce in ll)
             {
                 if (ce.IsAlive)
                 {
                     ce.Original = ce.Target;
                 }
             }
+            ll = null;
+
 #if DEBUG
             Console.WriteLine("Committed objects now contains {0} elements", committedObjects.Count);
 #endif
@@ -209,7 +212,7 @@ namespace GenDB
                         IBusinessObject ibo = ce.Target;
                         IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
                         trans.SaveToDB(dataContext.GenDB, ibo);
-                        //IEntity e = trans.Translate(ibo);
+                        //IEntity e = trans.PickCorrectElement(ibo);
                         //DataContext.GenDB.Save(e);
                         ce.ClearDirtyBit();
                     }

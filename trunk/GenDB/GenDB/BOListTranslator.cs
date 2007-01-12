@@ -38,7 +38,7 @@ namespace GenDB
         /// If entityType is null, a new IEntityType instance will be created
         /// </summary>
         /// <param name="t"></param>
-        public BOListTranslator(Type t, DataContext dataContext)
+        public BOListTranslator(Type t, DataContext dataContext, IEntityType bolistEntityType)
         {
             this.clrType = t;
             if (!clrType.IsGenericType || clrType.GetGenericTypeDefinition() != TypeOfBOList)
@@ -46,11 +46,12 @@ namespace GenDB
                 throw new NotTranslatableException("Internal error. BOList translator was invoked on wrong type. (Should be BOList<>)", t);
             }
             this.dataContext = dataContext;
-            this.entityType = BOListEntityType();
+            this.entityType = bolistEntityType;
             elementType = clrType.GetGenericArguments()[0];
             elementIsIBusinessObject = elementType.GetInterface(typeof(IBusinessObject).FullName) != null;
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
-
+            bolistEntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).PropertyType.MappedType = 
+                dataContext.TypeSystem.FindMappingType(elementType);
             if (elementIsIBusinessObject  && ! dataContext.TypeSystem.IsTypeKnown (elementType))
             {
                 dataContext.TypeSystem.RegisterType(elementType);
@@ -127,21 +128,6 @@ namespace GenDB
             IDBSaveableCollection saveable = (IDBSaveableCollection)ibo;
             saveable.SaveElementsToDB();
         }
-       
-        private IEntityType BOListEntityType()
-        {
-            IEntityType res = dataContext.GenDB.NewEntityType();
-            res.IsList = true;
-            res.AssemblyDescription = clrType.Assembly.FullName;
-            res.Name = clrType.FullName;
 
-            IPropertyType pt = dataContext.TypeSystem.GetPropertyType(typeof(long));
-            IProperty property = dataContext.GenDB.NewProperty();
-            property.EntityType = res;
-            property.PropertyName = TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME;
-            property.PropertyType = pt;
-            res.AddProperty (property);
-            return res;
-        }
     }
 }

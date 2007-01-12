@@ -25,7 +25,7 @@ namespace GenDB
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        internal void RegisterTranslator(Type t, long entityTypePOID)
+        internal void RegisterTranslator(Type t, IEntityType iet)
         {
       
 #if DEBUG
@@ -40,9 +40,9 @@ namespace GenDB
                 throw new Exception("Translator for entityPOID " + entityTypePOID + " already created.");
             };
 #endif
-            IIBoToEntityTranslator translator = CreateTranslator(t);
+            IIBoToEntityTranslator translator = CreateTranslator(t, iet);
             clrtype2translator[t] = translator;
-            etPOID2translator[entityTypePOID]  = translator;
+            etPOID2translator[iet.EntityTypePOID]  = translator;
         }
 
         internal IIBoToEntityTranslator GetTranslator(Type t)
@@ -74,13 +74,18 @@ namespace GenDB
         /// <param name="t"></param>
         /// <param name="et"></param>
         /// <returns></returns>
-        private IIBoToEntityTranslator CreateTranslator(Type t)
+        private IIBoToEntityTranslator CreateTranslator(Type t, IEntityType iet)
         {
             if (t.IsGenericType)
             {
                 if (t.GetGenericTypeDefinition() == bolistGeneric)
                 {
-                    return new BOListTranslator(t, dataContext);
+                    /*
+                     * Ved depersistering skal der ses på om IsList er sat. 
+                     * I så fald skal elementtypen hentes fra property. (Problem: Den burde vel være "statisk".)
+                     * 
+                     */
+                    return new BOListTranslator(t, dataContext, iet);
                 }
                 else
                 {
@@ -89,8 +94,7 @@ namespace GenDB
             }
             else
             {
-                IEntityType et = dataContext.TypeSystem.GetEntityType(t);
-                return new IBOTranslator(t, et, dataContext);
+                return new IBOTranslator(t, iet, dataContext);
             }
         }
 
