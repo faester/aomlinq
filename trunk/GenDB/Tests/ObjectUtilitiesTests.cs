@@ -9,11 +9,16 @@ namespace Tests
     [TestFixture]
     public class TestObjectUtilities
     {
-        DataContext dataContext = DataContext.Instance;
+        DataContext dataContext = null;
+        EqualityTest et1 = null;
+        EqualityTest et2 = null;
+        EqulityTestPrimitives etp1 = null;
+        EqulityTestPrimitives etp2 = null;
 
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
+            dataContext = DataContext.Instance;
             try
             {
                 if (!dataContext.RebuildDatabase)
@@ -23,10 +28,19 @@ namespace Tests
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine(dataContext.RebuildDatabase);
                 Console.Error.WriteLine("Database must be rebuild prior to calling these tests.");
                 throw e;
             }
+        }
+
+        [TestFixtureTearDown]
+        public void TestFixtureTearDown()
+        {
+            dataContext = null;
+            et1 = null;
+            et2 = null;
+            etp1 = null;
+            etp2 = null;
         }
 
         class EqulityTestPrimitives
@@ -60,11 +74,6 @@ namespace Tests
                 set { theString = value; }
             }
         }
-
-        EqualityTest et1 = null;
-        EqualityTest et2 = null;
-        EqulityTestPrimitives etp1 = null;
-        EqulityTestPrimitives etp2 = null;
 
         [SetUp]
         public void TestEquality()
@@ -172,6 +181,11 @@ namespace Tests
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boOther), "BOList compare to completely different BOList returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, blf.BOListLong()), "BOList compare to something else returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, null), "BOList compare to null returned true.");
+
+            blf = null;
+            boOrig = null;
+            boSame = null; 
+            boOther = null;
         }
 
         [Test]
