@@ -170,7 +170,7 @@ namespace GenDB
             res.typeSystem = this.typeSystem ;
             res.db = this.db;
             res.iboCache = this.iboCache;
-
+            
             SqlExprTranslator exprTranslator = new SqlExprTranslator(typeSystem);
             res.expression = new ExprAnd( exprTranslator.Convert (expr), this.expression);
             return res;

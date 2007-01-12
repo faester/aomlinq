@@ -76,7 +76,7 @@ namespace GenDB
         }
     }
     
-    class CstNotTranslatable : IWhereable
+    class CstNotTranslatable : IExpression
     {
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
