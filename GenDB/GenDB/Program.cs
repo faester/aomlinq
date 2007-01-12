@@ -96,6 +96,11 @@ namespace GenDB
                 set { spouse = value; }
             }
 
+            public DateTime DaysLeft()
+            {
+                return DateTime.Now;
+            }
+
             int age;
             public int Age
             {
@@ -188,9 +193,10 @@ namespace GenDB
                 //where epp.Name == "SpousePerson"
                 //where !(epp.Letter != 'c')
                 //where epp.Birth == t
-                //where epp.Alive
+                where epp.Alive
                 //where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7" || epp.Name == "Navn 1" || epp.Age == 3
-                where epp.Spouse.Age < 99 && epp.Age == 3
+                //where epp.Spouse.Age == 3 || epp.Spouse.Age == 4
+                //where epp.Spouse.DaysLeft() < t
                 //where epp.Car.Brand == "Volvo"
                 //where epp.Car.Motor.HorsePower == "400"
                 //where epp.Car.Motor.Valve == 6
@@ -198,13 +204,14 @@ namespace GenDB
                 select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
 
-            
+
             foreach(Person p in es)
             {
                 ObjectUtilities.PrintOut (p);
             }
 
             Console.WriteLine("Size of Table: {0}", es.Count);
+            
             Console.ReadLine();
         }
     }

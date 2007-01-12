@@ -22,6 +22,7 @@ namespace GenDB
 
         public IExpression Convert(Expression expr)
         {
+            
             return VisitExpr(expr);
         }
 
@@ -62,55 +63,55 @@ namespace GenDB
             return nref;
         }
 
-        internal IValue VisitMethodCallExpression(MethodCallExpression mce)
-        {
-            ReadOnlyCollection<Expression> roc = mce.Parameters;
-            IValue[] parArr= new IValue[2];
-            throw new Exception("stop");
-        }
-
         internal IExpression VisitMethodCall(MethodCallExpression mce)
         {
             ReadOnlyCollection<Expression> roc = mce.Parameters;
             IValue[] parArr= new IValue[2];
- 
-            if(roc[0] is MemberExpression)
+
+            if(roc.Count==2)
             {
-                MemberExpression tmp = (MemberExpression)roc[0];  
-                parArr[0] = VisitMemberExpression(tmp);
-                
-                switch(typeSystem.FindMappingType(roc[1].Type))
+                if(roc[0] is MemberExpression)
                 {
-                    case MappingType.STRING:
-                        parArr[1] = new CstString(roc[1].ToString().Trim('"'));
-                        break;
-                    case MappingType.DATETIME:
-                        ConstantExpression ce = (ConstantExpression)roc[1];
-                        parArr[1] = new CstDateTime((DateTime)ce.Value);
-                        break;
-                    case MappingType.BOOL:
-                        throw new Exception("MappingType.BOOL not implemented");
-                        break;
-                    case MappingType.LONG:
-                        throw new Exception("MappingType.LONG not implemented");
-                        break;
-                    case MappingType.REFERENCE:
-                        throw new Exception("MappingType.REFERENCE not implemented");
-                        break;
-                    default:
-                        throw new Exception("Unknown type "+typeSystem.FindMappingType(roc[1].Type));
-                }
+                    MemberExpression tmp = (MemberExpression)roc[0];  
+                    parArr[0] = VisitMemberExpression(tmp);
                     
-                if(mce.Method.Name=="op_Equality")
-                    return new GenDB.OP_Equals (parArr[0], parArr[1]);
-                else if(mce.Method.Name=="op_Inequality")
-                    return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
-                else 
-                    throw new Exception("Method unknown "+mce.Method.Name);
-            }
+                    switch(typeSystem.FindMappingType(roc[1].Type))
+                    {
+                        case MappingType.STRING:
+                            parArr[1] = new CstString(roc[1].ToString().Trim('"'));
+                            break;
+                        case MappingType.DATETIME:
+                            ConstantExpression ce = (ConstantExpression)roc[1];
+                            parArr[1] = new CstDateTime((DateTime)ce.Value);
+                            break;
+                        case MappingType.BOOL:
+                            throw new Exception("MappingType.BOOL not implemented");
+                            break;
+                        case MappingType.LONG:
+                            throw new Exception("MappingType.LONG not implemented");
+                            break;
+                        case MappingType.REFERENCE:
+                            throw new Exception("MappingType.REFERENCE not implemented");
+                            break;
+                        default:
+                            throw new Exception("Unknown type "+typeSystem.FindMappingType(roc[1].Type));
+                    }
+                        
+                    if(mce.Method.Name=="op_Equality")
+                        return new GenDB.OP_Equals (parArr[0], parArr[1]);
+                    else if(mce.Method.Name=="op_Inequality")
+                        return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
+                    else 
+                        throw new Exception("Method unknown "+mce.Method.Name);
+                }
+                else
+                {
+                    return new GenDB.CstNotTranslatable();
+                }
+            } 
             else
             {
-                throw new Exception("NodeType unknown: "+roc[0].NodeType.ToString());
+                return new CstNotTranslatable();
             }
         }
 
@@ -131,7 +132,10 @@ namespace GenDB
             }
             else if(be.Left is MethodCallExpression)
             {   
-                left = VisitMethodCall((MethodCallExpression) be.Left);
+                if(be.Left.NodeType.ToString()=="MethodCallVirtual")
+                    return new GenDB.CstNotTranslatable();
+                else
+                    left = VisitMethodCall((MethodCallExpression) be.Left);
             }
             else if(be.Left is BinaryExpression)
             {
@@ -308,7 +312,7 @@ namespace GenDB
                         left = VisitMethodCall(m_tmp);
                     }
                     else
-                        throw new Exception("Expression type unknown "+be.Left.GetType().Name);
+                        left = new GenDB.CstNotTranslatable();
 
                     // doing the right hand side
                     if(be.Right is BinaryExpression)
@@ -322,10 +326,9 @@ namespace GenDB
                         right = VisitMethodCall(m_tmp);
                     }
                     else 
-                        throw new Exception("Expression type unknown "+be.Right.ToString());
+                        right = new GenDB.CstNotTranslatable(); 
                     
                     return new GenDB.ExprAnd(left, right);
-                
                 }
                 else if(mecstr.StartsWith("OrElse("))
                 {
@@ -343,7 +346,7 @@ namespace GenDB
                         left = VisitMethodCall(m_tmp);
                     }
                     else
-                        throw new Exception("Expression type unkown "+be.Left.ToString());
+                        left = new GenDB.CstNotTranslatable();
                    
                     // doing the right hand side
                     if(be.Right is BinaryExpression)
@@ -355,7 +358,7 @@ namespace GenDB
                         right = VisitMethodCall((MethodCallExpression) be.Right);
                     }
                     else
-                        throw new Exception("Expression type unkown "+be.Right.ToString());
+                        right = new GenDB.CstNotTranslatable();
  
                     return new GenDB.ExprOr(left, right);
                 }
@@ -396,7 +399,7 @@ namespace GenDB
                         return VisitBooleanMember((MemberExpression)ue.Operand, false);
                     }
                     else
-                        throw new Exception("Unknown Operand.NodeType: "+ue.Operand.NodeType.ToString());
+                        return new GenDB.CstNotTranslatable();
                 }
                 else if(lambda.Body is MemberExpression)
                 {
@@ -413,7 +416,7 @@ namespace GenDB
                 }
                 else
                 {
-                    throw new Exception("Can not translate method name " + mecstr);
+                    return new GenDB.CstNotTranslatable();
                 }
             }
             else if(expr.NodeType.ToString()=="Not")
@@ -433,7 +436,7 @@ namespace GenDB
                 return VisitMethodCall((MethodCallExpression)expr);
             }
             else 
-                throw new Exception("unknown expression type: "+expr);
+                return new GenDB.CstNotTranslatable();
         }
 
         internal IExpression DecomposeQueryLE(Expression expr)
