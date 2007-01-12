@@ -265,7 +265,7 @@ namespace GenDB.DB
         /// <param name="entityType"></param>
         void Save(IEntityType entityType);
 
-        IEnumerable<IEntity> Where(IWhereable expression);
+        IEnumerable<IEntity> Where(IExpression expression);
 
         int Count(IWhereable expression);
 

@@ -378,7 +378,7 @@ namespace GenDB.DB
 
         public IEntity GetEntity(long entityPOID)
         {
-            IWhereable we = new EntityPOIDEquals(entityPOID);
+            IExpression we = new EntityPOIDEquals(entityPOID);
             int count = 0;
             IEntity res = null;
             foreach (IEntity e in Where(we))
@@ -425,7 +425,7 @@ namespace GenDB.DB
             return willRemove;
         }
 
-        public IEnumerable<IEntity> Where(IWhereable expression)
+        public IEnumerable<IEntity> Where(IExpression expression)
         {
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
             mswsb.Visit(expression);
