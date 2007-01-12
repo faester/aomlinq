@@ -16,14 +16,12 @@ namespace GenDB
     public sealed class DBTag
     {
         long entityPOID;
-        IBOCache iboCache = null;
 
         private DBTag() { /* empty */ }
 
-        internal DBTag (IBOCache iboCache, long entityPOID)
+        internal DBTag (long entityPOID)
         {
             this.entityPOID = entityPOID;
-            this.iboCache = iboCache;
         }
 
         /// <summary>
@@ -31,7 +29,7 @@ namespace GenDB
         /// </summary>
         ~DBTag() 
         {
-            iboCache.Remove(this.EntityPOID);
+            IBOCache.Instance.Remove(this.EntityPOID);
         }
 
         public long EntityPOID

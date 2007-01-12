@@ -102,8 +102,8 @@ namespace Tests
         }
 
         [Test, ExpectedException(typeof(NotTranslatableException))]
-        public void TestTranslateNoSetter()
-        {
+        public void TestTranslateNoSetter() 
+        { 
             tableOfShouldFailNoSetter = dc.CreateTable<ShouldFailNoSetter>();
         }
 
@@ -111,11 +111,14 @@ namespace Tests
         public void TestTranslateNoGetter()
         {
             tableOfShouldFailNoGetter = dc.CreateTable <ShouldFailNoGetter>();
+            tableOfShouldFailNoGetter.Add ( new ShouldFailNoGetter());
         }
 
         [Test]
         public void CanTranslatePureIBOs()
         {
+            tableOfPureIBusinessImpl.Clear();
+
             for (int i = 0; i < 10; i++)
             {
                 tableOfPureIBusinessImpl.Add(new PureIBusinessImpl{Value = i.ToString()});

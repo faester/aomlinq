@@ -79,7 +79,8 @@ namespace GenDB
             }
             typeSystem = new TypeSystem (this);
             typeSystem.Init();
-            iboCache = new IBOCache(this);
+            IBOCache.Init (this);
+            iboCache = IBOCache.Instance;
             bolistFactory = new BOListFactory(TypeSystem);
         }
 

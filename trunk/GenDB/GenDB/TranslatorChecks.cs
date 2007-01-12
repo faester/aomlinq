@@ -10,6 +10,13 @@ namespace GenDB
     {
         static string IBO_NAME = typeof(IBusinessObject).FullName;
 
+        public static void CheckIBusinessObjectTranslatability(Type t)
+        {
+            CheckObjectTypeTranslateability(t);
+            PropertyInfo[] propsToCheck = t.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            CheckPropertyTranslatability(propsToCheck);
+        }
+
         public static void CheckObjectTypeTranslateability(Type t)
         {
             Type hasIBO = t.GetInterface(IBO_NAME);
