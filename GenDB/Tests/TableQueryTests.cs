@@ -26,6 +26,15 @@ namespace TableTests
 
         DataContext dataContext = DataContext.Instance;
 
+        [TestFixtureTearDown]
+        public void TestFixtureTearDown()
+        {
+            spouse = null;
+            johnDoe = null;
+            tp.Clear();
+            dataContext.SubmitChanges();
+        }
+
         public class Car : AbstractBusinessObject
         {
             string brand = "Volvo";
@@ -140,12 +149,6 @@ namespace TableTests
 
         [TearDown]
         public void EndTest()
-        {
-
-        }
-
-        [TestFixtureTearDown]
-        public void Destroy()
         {
 
         }

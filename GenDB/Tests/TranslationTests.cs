@@ -5,7 +5,7 @@ using GenDB;
 using NUnit.Framework;
 using System.Query;
 
-namespace Tests
+namespace Translation
 {
     /// <summary>
     /// Tests the semantics of translation.
@@ -89,7 +89,7 @@ namespace Tests
             }
         }
 
-        DataContext dc = DataContext.Instance;
+        DataContext dc = null;
         Table<ShouldFailNoSetter> tableOfShouldFailNoSetter = null;
         Table<ShouldFailNoGetter> tableOfShouldFailNoGetter = null;
         Table<HasVolatileProperty> tableOfHasVolatileProperty = null;
@@ -97,8 +97,20 @@ namespace Tests
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
+            dc = DataContext.Instance;
             tableOfHasVolatileProperty = dc.CreateTable<HasVolatileProperty>();
             tableOfPureIBusinessImpl = dc.CreateTable<PureIBusinessImpl>();
+        }
+
+        [TestFixtureTearDown]
+        public void TestFixtureTearDown()
+        {
+            dc = null;
+            tableOfShouldFailNoGetter = null;
+            tableOfShouldFailNoSetter = null;
+            tableOfHasVolatileProperty = null;
+            tableOfPureIBusinessImpl = null;
+            GC.Collect();
         }
 
         [Test, ExpectedException(typeof(NotTranslatableException))]
