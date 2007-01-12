@@ -206,7 +206,6 @@ namespace GenDB
             }
 
             Console.WriteLine("Size of Table: {0}", es.Count);
-
             Console.ReadLine();
         }
     }

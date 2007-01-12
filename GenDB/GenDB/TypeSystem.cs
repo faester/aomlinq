@@ -114,8 +114,16 @@ namespace GenDB
             {
                 throw new Exception("Type already registered. (" + t.ToString() + ")");
             }
-            IEntityType et = ConstructEntityType(t);
-            RegisterType(et);
+            try 
+            {
+                TranslatorChecks.CheckIBusinessObjectTranslatability (t);
+                IEntityType et = ConstructEntityType(t);
+                RegisterType(et);
+            }
+            catch(NotTranslatableException e)
+            {
+                throw e;
+            }
         }
 
         /// <summary>

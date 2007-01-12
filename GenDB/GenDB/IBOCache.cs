@@ -9,21 +9,38 @@ using System.Diagnostics;
 
 namespace GenDB
 {
-
     internal class IBOCache
     {
+        private static IBOCache instance = null;
+
+        /// <summary>
+        /// Returns the singleton instance of the IBOCache.
+        /// It is mandatory to run IBOCache.Init(DataContext) before 
+        /// the first access to the instance, in order to set the 
+        /// DataContext for the IBOCache.
+        /// </summary>
+        public static IBOCache Instance 
+        {
+            get { return instance; }
+        }
+
+        public static void Init(DataContext dataContext)
+        {
+            instance = new IBOCache(dataContext);
+        }
+
         long retrieved = 0;
+
+        private IBOCache(DataContext dataContext)
+        {
+            this.dataContext = dataContext;
+        }
 
         DataContext dataContext;
 
         public long Retrieved
         {
             get { return retrieved; }
-        }
-
-        internal IBOCache(DataContext dataContext)
-        {
-            this.dataContext = dataContext;
         }
 
         internal int CommittedObjectsSize
@@ -213,7 +230,7 @@ namespace GenDB
         /// <param name="entityPOID"></param>
         internal void Add(IBusinessObject ibo, long entityPOID)
         {
-            DBTag dbTag = new DBTag(this, entityPOID);
+            DBTag dbTag = new DBTag( /* this, */ entityPOID);
             ibo.DBTag = dbTag;
 
             uncommittedObjects.Add(entityPOID, ibo);
