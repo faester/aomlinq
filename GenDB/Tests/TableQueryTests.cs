@@ -8,10 +8,10 @@ using System.Xml.XLinq;
 using System.Expressions;
 using GenDB;
 
-namespace TableTests
+namespace QueryToSqlTranslationTests
 {
     [TestFixture]
-    public class TestTableQuery
+    public class TableQueryTests1
     {
         #region member data
 

@@ -5,7 +5,7 @@ using GenDB;
 using NUnit.Framework;
 using System.Query;
 
-namespace Translation
+namespace TranslationTests
 {
     /// <summary>
     /// Tests the semantics of translation.
@@ -31,7 +31,7 @@ namespace Translation
             int foo;
 
             /// <summary>
-            /// Translation should fail, since Foo is public and only has a getter 
+            /// TranslationTests should fail, since Foo is public and only has a getter 
             /// </summary>
             public int Foo
             {

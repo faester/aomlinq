@@ -5,8 +5,9 @@ using GenDB;
 using NUnit.Framework;
 using System.Query;
 using System.Expressions;
+using CommonTestObjects;
 
-namespace TableTests
+namespace QueryToSqlTranslationTests
 {
     [TestFixture]
     public class TableQueryTests2
