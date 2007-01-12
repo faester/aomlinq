@@ -20,7 +20,7 @@ namespace GenDB
             this.typeSystem = typeSystem;
         }
 
-        public IWhereable Convert(Expression expr)
+        public IExpression Convert(Expression expr)
         {
             return VisitExpr(expr);
         }
