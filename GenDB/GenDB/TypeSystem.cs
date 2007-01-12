@@ -19,6 +19,7 @@ namespace GenDB
     class TypeSystem
     {
         internal const string COLLECTION_ELEMENT_TYPE_PROPERTY_NAME = "++ElementType"; // prefixed with ++ which is not legal in a C# cstProperty name
+        //internal const string COLLECTION_ELEMENT_MAPPING_TYPE_PROPERTY_NAME = "++ListElementMappingType"; 
         internal const string COLLECTION_KEY_PROPERTY_NAME = "++KeyType";      // to avoid clashes with existing properties.
 
         private  Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement>();
@@ -98,7 +99,7 @@ namespace GenDB
             dataContext.GenDB.Save(et);
             dataContext.GenDB.CommitTypeChanges();
             Console.Error.WriteLine("About to create translator for " + ce.ClrType);
-            dataContext.Translators.RegisterTranslator(ce.ClrType, ce.Target.EntityTypePOID);
+            dataContext.Translators.RegisterTranslator(ce.ClrType, ce.Target);
             Console.Error.WriteLine("Created translator for " + ce.ClrType);
         }
 
@@ -222,15 +223,71 @@ namespace GenDB
             return GetEntityTypesInstanceOf(etid2IEt[entityTypePOID].Target);
         }
 
+               
+        private IEntityType BOListEntityType(Type clrType)
+        {
+            IEntityType res = dataContext.GenDB.NewEntityType();
+            res.IsList = true;
+            res.AssemblyDescription = clrType.Assembly.FullName;
+            res.Name = clrType.FullName;
+
+            IPropertyType pt = dataContext.TypeSystem.GetPropertyType(clrType);
+            IProperty property = dataContext.GenDB.NewProperty();
+            property.EntityType = res;
+            property.PropertyName = TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME;
+            property.PropertyType = pt;
+            res.AddProperty (property);
+            return res;
+        }
+
+        private IEntityType IBOEntityType(Type t)
+        {
+            IEntityType et = dataContext.GenDB.NewEntityType();
+
+            et.Name = t.FullName;
+            et.AssemblyDescription = t.Assembly.FullName;
+
+            PropertyInfo[] clrProperties = t.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance |
+                                        BindingFlags.Public);
+
+            foreach (PropertyInfo clrProperty in clrProperties)
+            {
+                Attribute volatileAttribute = Attribute.GetCustomAttribute(clrProperty, typeof(Volatile));
+                if (clrProperty.PropertyType != typeof(DBTag) && volatileAttribute == null)
+                {
+                    IProperty property = dataContext.GenDB.NewProperty();
+                    property.PropertyName = clrProperty.Name;
+                    property.PropertyType = GetPropertyType(clrProperty.PropertyType);
+                    // cstProperty.MappingType = FindMappingType(clrProperty);
+                    property.EntityType = et;
+                    et.AddProperty(property);
+                }
+            }
+
+            Type superType = t.BaseType;
+            if (superType != null && superType != typeof(object))
+            {
+                if (type2IEt.ContainsKey(superType))
+                {
+                    et.SuperEntityType = type2IEt[superType].Target;
+                }
+                else
+                {
+                    IEntityType set = ConstructEntityType(superType);
+                    RegisterType(set);
+                    et.SuperEntityType = set;
+                }
+            }
+            return et;
+        }
+
         public  IEntityType ConstructEntityType(Type t)
         {
-            if (t.IsGenericType ) // TODO: Needs better checking
+            if (t.IsGenericType ) 
             {
                 if (t.GetGenericTypeDefinition() == BOListTranslator.TypeOfBOList)
                 {
-                    throw new Exception("Can not construct EntityType for BOLists");
-                    //IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(t);
-                    //return trans.EntityType;
+                    return BOListEntityType(t);
                 }
                 else 
                 {
@@ -239,43 +296,7 @@ namespace GenDB
             }
             else
             {
-                IEntityType et = dataContext.GenDB.NewEntityType();
-
-                et.Name = t.FullName;
-                et.AssemblyDescription = t.Assembly.FullName;
-
-                PropertyInfo[] clrProperties = t.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance |
-                                            BindingFlags.Public);
-
-                foreach (PropertyInfo clrProperty in clrProperties)
-                {
-                    Attribute volatileAttribute = Attribute.GetCustomAttribute(clrProperty, typeof(Volatile));
-                    if (clrProperty.PropertyType != typeof(DBTag) && volatileAttribute == null)
-                    {
-                        IProperty property = dataContext.GenDB.NewProperty();
-                        property.PropertyName = clrProperty.Name;
-                        property.PropertyType = GetPropertyType(clrProperty.PropertyType);
-                        // cstProperty.MappingType = FindMappingType(clrProperty);
-                        property.EntityType = et;
-                        et.AddProperty(property);
-                    }
-                }
-
-                Type superType = t.BaseType;
-                if (superType != null && superType != typeof(object))
-                {
-                    if (type2IEt.ContainsKey(superType))
-                    {
-                        et.SuperEntityType = type2IEt[superType].Target;
-                    }
-                    else
-                    {
-                        IEntityType set = ConstructEntityType(superType);
-                        RegisterType(set);
-                        et.SuperEntityType = set;
-                    }
-                }
-                return et;
+                return IBOEntityType(t);
             }
         }
 

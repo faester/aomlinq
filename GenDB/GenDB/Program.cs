@@ -146,11 +146,28 @@ namespace GenDB
         public static void Main(string[] args)
         {
             DataContext dcontext = DataContext.Instance;
-            dcontext.RebuildDatabase = true;
-            //dcontext.Init();
-            dcontext.RebuildDatabase = true;
 
             int objCount = 10;
+
+            Table<BOList<Person>> tbolist = dcontext.CreateTable<BOList<Person>>();
+
+            foreach (BOList<Person> bol in tbolist)
+            {
+                foreach(Person qwe in bol)
+                {
+                    Console.WriteLine(qwe.Name);
+                }
+            }
+
+            BOList<Person> bolist = dcontext.BolistFactory.BOListRef <Person>();
+            for (int i = 0; i < 10; i++)
+            {
+                bolist.Add (new Person{Name = i.ToString()});
+            }
+
+            tbolist.Add (bolist);
+
+            dcontext.SubmitChanges();
 
             Table<Person> tp = dcontext.CreateTable<Person>();
             Person lastPerson = null;
@@ -209,7 +226,7 @@ namespace GenDB
             {
                 ObjectUtilities.PrintOut (p);
             }
-
+            
             Console.WriteLine("Size of Table: {0}", es.Count);
             
             Console.ReadLine();

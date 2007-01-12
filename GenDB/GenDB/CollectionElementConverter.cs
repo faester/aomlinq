@@ -5,34 +5,83 @@ using GenDB.DB;
 
 namespace GenDB
 {
+    
+
     internal class CollectionElementConverter
     {
+        internal delegate object ValConv(object o);
         MappingType mt;
         DataContext dataContext;
+        ValConv converter;
+        Type t; 
 
-        public CollectionElementConverter(MappingType mt, DataContext dataContext)
+        public CollectionElementConverter(MappingType mt, DataContext dataContext, Type t) 
         {
             this.dataContext = dataContext;
             this.mt = mt;
+            this.t = t;
+            InitConverter();
         }
 
-        public object Translate(IGenCollectionElement ce)
+        private void InitConverter()
         {
+            if (TranslatorChecks.ImplementsIBusinessObject(t))
+            {
+                converter = delegate(object o) { return o; };
+            }
+            else if (t == typeof(int))
+            {
+                converter = delegate(object o) { return Convert.ToInt32(o); };
+            }
+            else if (t == typeof(string))
+            {
+                converter = delegate(object o) { return o.ToString(); };
+            }
+            else if (t == typeof(DateTime))
+            {
+                converter = delegate(object o) {
+                    return o;
+                };
+            }
+            else if (t == typeof(long))
+            {
+                converter = delegate(object o) {
+                    return o;
+                };
+            }
+            else 
+            {
+                throw new NotTranslatableException("Error in bolist generic type parameter. Don't know how to handle element type.", t);
+            }
+
+        }
+
+        public object PickCorrectElement(IGenCollectionElement ce)
+        {
+            Console.WriteLine("Using mappingtype: " + mt);
+            object o = null;
             switch (mt)
             {
-                case MappingType.BOOL: return ce.BoolValue;
-                case MappingType.DATETIME: return ce.DateTimeValue;
-                case MappingType.DOUBLE: return ce.DoubleValue;
-                case MappingType.REFERENCE: return GetObject(ce.RefValue);
-                case MappingType.STRING: return ce.StringValue;
-                case MappingType.LONG: return ce.LongValue;
+                case MappingType.BOOL:  o = ce.BoolValue; break;
+                case MappingType.DATETIME: o = ce.DateTimeValue; break;
+                case MappingType.DOUBLE: o = ce.DoubleValue; break;
+                case MappingType.REFERENCE: o = GetObject(ce.RefValue); break;
+                case MappingType.STRING: o = ce.StringValue; break;
+                case MappingType.LONG: o = ce.LongValue; break;
                 default:
                     throw new Exception("MappingType not implemented in " + GetType().Name + " (" + mt + ")");
             }
+            return DoConvert(o);
+        }
+
+        public object DoConvert(object o)
+        {
+            return converter(o);
         }
 
         private IBusinessObject GetObject(IBOReference reference)
         {
+            Console.WriteLine("Fetching object with reference: " + reference);
             if (reference.IsNullReference) { return null; }
 
             IBusinessObject ibo = dataContext.IBOCache.Get(reference.EntityPOID);
@@ -46,7 +95,6 @@ namespace GenDB
 
         public IGenCollectionElement Translate(object o)
         {
-            //if (o == null) { return null; }
             IGenCollectionElement res = new GenCollectionElement();
             switch (mt)
             {
@@ -71,6 +119,7 @@ namespace GenDB
                 default:
                     throw new Exception("MappingType not implemented in " + GetType().Name + " (" + mt + ")");
             }
+            Console.WriteLine("Mappingtype: {0}, Converting object: {1} ", mt, o);
             return res;
         }
 

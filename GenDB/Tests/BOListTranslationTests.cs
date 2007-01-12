@@ -10,8 +10,8 @@ namespace BOListTests
     [TestFixture]
     public class BOListTranslationTests
     {
-        const int ELEMENTS_TO_INSERT = 3;
-        const int LIST_LENGTH = 4;
+        const int ELEMENTS_TO_INSERT = 10;
+        const int LIST_LENGTH = 10;
 
         DataContext dataContext = DataContext.Instance;
 
@@ -35,7 +35,7 @@ namespace BOListTests
         [TestFixtureTearDown]
         public void TearDown()
         {
-            /* empty */
+            dataContext.SubmitChanges();
         }
 
         [Test]
@@ -126,7 +126,41 @@ namespace BOListTests
                 for (int i = 0; i < LIST_LENGTH; i++)
                 {
                     string s = bolist[i];
+                    Console.WriteLine(s);
                     Assert.AreEqual(i.ToString(), s, "Wrong value returned.");
+                }
+            }
+            Assert.AreEqual(ELEMENTS_TO_INSERT, listCount, "Wrong number of lists returned.");
+        }
+
+        [Test]
+        public void TestBOListOfDateTime()
+        {
+            Table<BOList<DateTime>> table = dataContext.CreateTable<BOList<DateTime>>();
+            table.Clear();
+            dataContext.SubmitChanges();
+
+            for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
+            {
+                BOList<DateTime> bolist = dataContext.BolistFactory.BOListDateTime();
+                for (int j = 0; j < LIST_LENGTH; j++)
+                {
+                    bolist.Add(DateTime.Now);
+                }
+                table.Add(bolist);
+            }
+            dataContext.SubmitChanges();
+            GC.Collect();
+
+            int listCount = 0;
+            foreach (BOList<DateTime> bolist in table)
+            {
+                listCount++;
+                for (int i = 0; i < LIST_LENGTH; i++)
+                {
+                    DateTime s = bolist[i];
+                    Console.WriteLine(s);
+                    //Assert.AreEqual(i.ToString(), s, "Wrong value returned.");
                 }
             }
             Assert.AreEqual(ELEMENTS_TO_INSERT, listCount, "Wrong number of lists returned.");

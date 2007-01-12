@@ -490,10 +490,10 @@ namespace GenDB
             get { return innerReference; }
         }
 
-        public NestedReference (NestedReference inner, CstProperty cstProperty)
+        public NestedReference (NestedReference inner, CstProperty property)
         {
             innerReference = inner;
-            this.cstProperty = cstProperty;
+            this.cstProperty = property;
         }
 
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)

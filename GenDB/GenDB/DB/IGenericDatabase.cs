@@ -45,6 +45,11 @@ namespace GenDB.DB
             this.isNullReference = isNullReference;
             this.entityPOID = entityPOID;
         }
+
+        public override string ToString()
+        {
+            return "IBOReference {" + (isNullReference ? " null " : " EntityPOID = " + entityPOID ) + "}";
+        }
     }
 
     interface IEntityType
