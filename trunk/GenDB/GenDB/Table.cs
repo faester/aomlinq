@@ -13,7 +13,7 @@ namespace GenDB
     public class Table<T> :  ICollection<T>, IEnumerable<T>
         where T : IBusinessObject
     {
-        IWhereable expression = new ExprInstanceOf(typeof(T));
+        IExpression expression = new ExprInstanceOf(typeof(T));
         IGenericDatabase db = null;
         TranslatorSet translators = null;
         TypeSystem typeSystem;
@@ -90,7 +90,7 @@ namespace GenDB
         {
             if (e == null) { return false;}
             if (e.DBTag == null) { return false; }
-            IWhereable where = new OP_Equals(new VarReference(e), new CstThis());
+            IExpression where = new OP_Equals(new VarReference(e), new CstThis());
 
             foreach (IEntity ibo in db.Where(where))
             {
