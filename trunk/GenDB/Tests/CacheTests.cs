@@ -4,7 +4,7 @@ using System.Text;
 using GenDB;
 using NUnit.Framework;
 
-namespace CacheTests
+namespace IBOCache
 {
     [TestFixture]
     public class Tests

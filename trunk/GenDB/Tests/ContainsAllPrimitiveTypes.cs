@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB;
 
-namespace TableTests
+namespace CommonTestObjects
 {
     /// <summary>
     /// Used for testing: Contains all types, that are considered primitive

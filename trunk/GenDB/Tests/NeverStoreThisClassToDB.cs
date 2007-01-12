@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB;
 
-namespace TableTests
+namespace CommonTestObjects
 {
     /// <summary>
     /// This class is used to test for correct database 
@@ -12,7 +12,7 @@ namespace TableTests
     /// So the name should be taken literally: It must not be 
     /// persisted, for the tests to run correctly.
     /// </summary>
-    class NeverStoreThisClassToDB : AbstractBusinessObject
+    public class NeverStoreThisClassToDB : AbstractBusinessObject
     {
     }
 }

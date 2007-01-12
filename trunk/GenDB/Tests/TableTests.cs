@@ -5,6 +5,7 @@ using NUnit.Framework;
 using GenDB;
 using System.Query;
 using System.Expressions;
+using CommonTestObjects;
 
 namespace TableTests
 {
@@ -39,13 +40,13 @@ namespace TableTests
             tpt.Clear();
             dataContext.SubmitChanges();
 
-            tpt.Add (new TestPerson {Name = "Per"});
-            tpt.Add (new TestPerson {Name = "Per"});
+            tpt.Add (new TestPerson {Name = "Per", Age = 10});
+            tpt.Add (new TestPerson {Name = "Per", Age = 21});
             tpt.Add (new TestPerson {Name = "Per"});
             tpt.Add (new TestPerson {Name = "Per"});
             tpt.Add (new TestPerson {Name = "Poul"});
-            tpt.Add (new TestPerson {Name = "Konrad"});
-            tpt.Add (new TestPerson {Name = "Jørgen"});
+            tpt.Add (new TestPerson {Name = "Konrad", Age = 30});
+            tpt.Add (new TestPerson {Name = "Jørgen", Age = 50});
             tpt.Add (new TestPerson {Name = "Svend"});
             tpt.Add (personToRemove);
 
@@ -53,12 +54,24 @@ namespace TableTests
         }
 
         [Test]
-        public void TestClearOnUnknownType()
+        public void TestCanClearOnUnPersistedType()
         {
             Table<NeverStoreThisClassToDB> tNeverStore = dataContext.CreateTable<NeverStoreThisClassToDB>();
             tNeverStore.Clear();
+            
             Table<ContainsAllPrimitiveTypes> tapt = dataContext.CreateTable<ContainsAllPrimitiveTypes>();
             tapt.Clear();
+
+            dataContext.SubmitChanges();
+        }
+
+        [Test]
+        public void TestCanClearOnPersistedType()
+        {
+            tpt.Clear();
+            dataContext.SubmitChanges();
+
+            Assert.AreEqual(0, tpt.Count, "Table is not empty after clear.");
         }
 
         [Test]
@@ -100,8 +113,22 @@ namespace TableTests
 
             c = tpt.Count;
             Assert.AreEqual (9, c, "Error in unfiltered result.");
+
+            Table<TestPerson> filtered = from person in tpt where person.Name == "Per" select person;
+            Assert.AreEqual (4, filtered.Count, "Filtered table returned wrong number of instances.");
         }
 
+        [Test]
+        public void TestConditionsUnions()
+        {
+            Table<TestPerson> pouls = from person in tpt where person.Name == "Per" select person;
+            Assert.AreEqual(4, pouls.Count, "Filtered table returned wrong number of instances.");
+
+            Table<TestPerson> oldPouls = from poul in pouls where poul.Age > 0 select poul;
+            Assert.AreEqual (2, oldPouls.Count, "Wrong number of elements in result.");
+            Console.WriteLine(oldPouls);
+        }
+        
         [Test]
         public void TestRemove()
         {
