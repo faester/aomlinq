@@ -62,6 +62,13 @@ namespace GenDB
             return nref;
         }
 
+        internal IValue VisitMethodCallExpression(MethodCallExpression mce)
+        {
+            ReadOnlyCollection<Expression> roc = mce.Parameters;
+            IValue[] parArr= new IValue[2];
+            throw new Exception("stop");
+        }
+
         internal IExpression VisitMethodCall(MethodCallExpression mce)
         {
             ReadOnlyCollection<Expression> roc = mce.Parameters;
@@ -111,6 +118,7 @@ namespace GenDB
         {
             Expression expr = (Expression) be;
             IValue[] parArr = new IValue[2];
+            IExpression left = null, right = null;
 
             // doing the left side
             if(be.Left is MemberExpression)
@@ -121,6 +129,17 @@ namespace GenDB
             {
                 parArr[0] = VisitUnaryExpressionValue((UnaryExpression)be.Left);
             }
+            else if(be.Left is MethodCallExpression)
+            {   
+                left = VisitMethodCall((MethodCallExpression) be.Left);
+            }
+            else if(be.Left is BinaryExpression)
+            {
+                left = VisitExpr(be.Left);
+            }
+            else
+                throw new Exception("Expression not implemented: "+be.Left.ToString());
+
             // doing the right side
             if(be.Right.ToString()=="null")
                 parArr[1] = new VarReference(null);
@@ -152,7 +171,6 @@ namespace GenDB
                 default:
                     throw new Exception("type not implemented "+expr.Type);
                 }
-                
             }
             else if(be.Right is UnaryExpression)
             {
@@ -171,8 +189,7 @@ namespace GenDB
             }
             else if(be.Right is MethodCallExpression)
             {
-                parArr[1] = (IValue)VisitMethodCall((MethodCallExpression)be.Right);
-                throw new Exception("not implemented: "+be.Right);
+                right = VisitMethodCall((MethodCallExpression) be.Right);
             }
             else
             {
@@ -200,8 +217,16 @@ namespace GenDB
             {
                 return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
             }
+            else if(nodeType=="OrElse")
+            {
+                return new GenDB.ExprOr(left, right);
+            }
+            else if(nodeType=="AndAlso")
+            {
+                return new GenDB.ExprAnd(left, right);
+            }
             else
-                throw new Exception("NodeType unknown "+expr.NodeType.ToString());
+                throw new Exception("NodeType unknown! "+expr.NodeType.ToString());
         }
 
         internal IExpression VisitUnaryExpression(UnaryExpression ue)
@@ -251,6 +276,7 @@ namespace GenDB
         
         public IExpression VisitExpr(Expression expr)
         {
+            IExpression left, right;
             if(expr.NodeType.ToString()=="Lambda")
             {
                 LambdaExpression lambda = (LambdaExpression)expr;
@@ -258,6 +284,8 @@ namespace GenDB
 
                 if (mecstr.StartsWith("op_Equality(") || mecstr.StartsWith("op_Inequality"))
                 {
+                    IValue[] val = new IValue[2];
+                    
                     return VisitMethodCall((MethodCallExpression) lambda.Body);                
                 }
                 else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT(") || mecstr.StartsWith("NE("))
@@ -267,7 +295,6 @@ namespace GenDB
                 else if(mecstr.StartsWith("AndAlso("))
                 {
                     BinaryExpression be = (BinaryExpression) lambda.Body;
-                    IExpression left, right;
                     
                     // doing the left hand side
                     if(be.Left is BinaryExpression)
@@ -303,7 +330,6 @@ namespace GenDB
                 else if(mecstr.StartsWith("OrElse("))
                 {
                     BinaryExpression be = (BinaryExpression) lambda.Body;
-                    IExpression left, right;
                     
                     // doing the left hand side  
                     if(be.Left is BinaryExpression)
@@ -395,6 +421,17 @@ namespace GenDB
                 UnaryExpression ue = (UnaryExpression) expr;
                 return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
             }
+            else if(expr.NodeType.ToString()=="OrElse")
+            {   
+                BinaryExpression be = (BinaryExpression) expr;
+                left = VisitExpr(be.Left);
+                right = VisitExpr(be.Right);
+                return new GenDB.ExprOr(left,right);
+            }
+            else if(expr.NodeType.ToString()=="MethodCall")
+            {
+                return VisitMethodCall((MethodCallExpression)expr);
+            }
             else 
                 throw new Exception("unknown expression type: "+expr);
         }
@@ -431,18 +468,31 @@ namespace GenDB
       
         internal IExpression VisitBooleanMember(MemberExpression me, bool equality)
         {
-            ParameterExpression pe = (ParameterExpression)me.Expression;
-            string name = me.Member.Name;
-
             IValue[] parArr = new IValue[2];
-            parArr[0] = VisitMemberExpression(me);
-            if(equality)
-                parArr[1] = new GenDB.CstBool(true);
-            else
-                parArr[1] = new GenDB.CstBool(false);
+            if(me.Expression.NodeType.ToString()=="Parameter")
+            {
+                ParameterExpression pe = (ParameterExpression)me.Expression;
+                string name = me.Member.Name;
+                parArr[0] = VisitMemberExpression(me);
 
-            IExpression ie = new GenDB.OP_NotEquals(parArr[0],parArr[1]);            
-            return new GenDB.ExprNot(ie);
+            }
+            else if(me.Expression.NodeType.ToString()=="MemberAccess")
+            {
+                MemberExpression me2 = (MemberExpression) me.Expression;
+                parArr[0]=VisitMemberExpression(me2);
+            }
+            else
+            {
+                throw new Exception("not impl");
+            }
+                
+            if(equality)
+                    parArr[1] = new GenDB.CstBool(true);
+                else
+                    parArr[1] = new GenDB.CstBool(false);
+
+                IExpression ie = new GenDB.OP_NotEquals(parArr[0],parArr[1]);            
+                return new GenDB.ExprNot(ie);
         }
 
         #region MakeTreeMethods

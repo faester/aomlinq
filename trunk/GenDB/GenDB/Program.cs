@@ -189,12 +189,13 @@ namespace GenDB
                 //where !(epp.Letter != 'c')
                 //where epp.Birth == t
                 //where epp.Alive
-                where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7"
+
+                where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7" || epp.Name == "Navn 1" || epp.Age == 3
 
                 //where epp.Car.Brand == "Volvo"
                 //where epp.Car.Motor.HorsePower == "400"
                 //where epp.Car.Motor.Valve == 6
-                //where epp.Car.Sunroof == false
+                //where epp.Car.Sunroof==false
                 select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
 
