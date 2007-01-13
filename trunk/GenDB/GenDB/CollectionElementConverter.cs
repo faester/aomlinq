@@ -37,13 +37,7 @@ namespace GenDB
             {
                 converter = delegate(object o) { return o.ToString(); };
             }
-            else if (t == typeof(DateTime))
-            {
-                converter = delegate(object o) {
-                    return o;
-                };
-            }
-            else if (t == typeof(long))
+            else if (t == typeof(DateTime) || t == typeof(char) || t == typeof(bool) || t == typeof(long))
             {
                 converter = delegate(object o) {
                     return o;
@@ -53,7 +47,6 @@ namespace GenDB
             {
                 throw new NotTranslatableException("Error in bolist generic type parameter. Don't know how to handle element type.", t);
             }
-
         }
 
         public object PickCorrectElement(IGenCollectionElement ce)
