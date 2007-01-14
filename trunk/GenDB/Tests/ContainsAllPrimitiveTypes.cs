@@ -74,5 +74,21 @@ namespace CommonTestObjects
             get { return integer; }
             set { integer = value; }
         }
+
+        short sh;
+
+        public short Sh
+        {
+            get { return sh; }
+            set { sh = value; }
+        }
+
+        uint ui;
+
+        public uint Ui
+        {
+            get { return ui; }
+            set { ui = value; }
+        }
     }
 }

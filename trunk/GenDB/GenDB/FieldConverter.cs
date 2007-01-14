@@ -6,6 +6,9 @@ using GenDB.DB;
 
 namespace GenDB
 {
+    /*
+     * http://www.codeproject.com/csharp/csharpcasts.asp
+     */
     class FieldConverter
     {
         PropertyValueGetter pvg;
@@ -123,6 +126,20 @@ namespace GenDB
                     System.Collections.IList vals =  (System.Collections.IList) Enum.GetValues(fi.PropertyType);
                     return vals[(int)ie.GetPropertyValue(prop).LongValue];
                     //return Enum.GetValues (fi.PropertyType). ((int)ie.GetPropertyValue(prop).LongValue);
+                };
+            }
+            else if (fi.PropertyType == typeof(short))
+            {
+                return delegate(IEntity ie)
+                {  //
+                    return Convert.ToInt16(ie.GetPropertyValue(prop).LongValue);
+                };
+            }
+            else if (fi.PropertyType == typeof(uint))
+            {
+                return delegate(IEntity ie)
+                {  //
+                    return Convert.ToUInt32(ie.GetPropertyValue(prop).LongValue);
                 };
             }
             else 
