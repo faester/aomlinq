@@ -27,19 +27,6 @@ namespace GenDB
         /// <returns></returns>
         internal void RegisterTranslator(Type t, IEntityType iet)
         {
-      
-#if DEBUG
-            //TODO: Should be checked in DEBUG mode only.
-            if (clrtype2translator.ContainsKey(t)) 
-            { 
-                throw new Exception("Translator for type " + t + " already created.");
-            };
-            
-            if (etPOID2translator.ContainsKey(entityTypePOID))
-            { 
-                throw new Exception("Translator for entityPOID " + entityTypePOID + " already created.");
-            };
-#endif
             IIBoToEntityTranslator translator = CreateTranslator(t, iet);
             clrtype2translator[t] = translator;
             etPOID2translator[iet.EntityTypePOID]  = translator;
