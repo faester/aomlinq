@@ -115,16 +115,16 @@ namespace GenDB
             {
                 throw new Exception("Type already registered. (" + t.ToString() + ")");
             }
-            try 
-            {
+            //try 
+            //{
                 TranslatorChecks.CheckIBusinessObjectTranslatability (t);
                 IEntityType et = ConstructEntityType(t);
                 RegisterType(et);
-            }
-            catch(NotTranslatableException e)
-            {
-                throw e;
-            }
+            //}
+            //catch(NotTranslatableException e)
+            //{
+            //    throw e;
+            //}
         }
 
         /// <summary>
@@ -309,7 +309,7 @@ namespace GenDB
             }
             else if (t.IsPrimitive)
             {
-                if (t == typeof(int) || t == typeof(long) || t == typeof(short))
+                if (t == typeof(int) || t == typeof(long) || t == typeof(short) || t == typeof(uint))
                 {
                     return MappingType.LONG;
                 }

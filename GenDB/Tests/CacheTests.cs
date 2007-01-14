@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB;
 using NUnit.Framework;
+using CommonTestObjects;
 
 namespace IBOCache
 {
@@ -42,6 +43,13 @@ namespace IBOCache
         DataContext dt = DataContext.Instance;
         Table<CacheTestObject> table = null;
         LinkedList<CacheTestObject> keepInstances = new LinkedList<CacheTestObject>();
+        int testsRun = 0;
+        int storeRecursiveDataType1 = 0;
+        int storeRecursiveDataType2 = 0;
+        int areChangesCommitted = 0;
+        int areChangesPersisted = 0;
+        int cacheEmptied = 0;
+        int cacheEmptied2 = 0;
 
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
@@ -57,9 +65,24 @@ namespace IBOCache
             }
         }
 
-        [Test]
-        public void Test1IsChangesComitted()
+        [SetUp]
+        public void Init()
         {
+            testsRun++;
+        }
+
+        private void Check(int testCount)
+        {
+            if (testCount < (testsRun - 1))
+            {
+                Assert.Ignore("Tests here must run sequentially");
+            }
+        }
+
+        [Test]
+        public void Test1AreChangesComitted()
+        {
+            areChangesCommitted = testsRun;
             dt.SubmitChanges();
             foreach (CacheTestObject cto in keepInstances)
             {
@@ -70,18 +93,86 @@ namespace IBOCache
         }
 
         [Test]
-        public void Test2IsChangesPersisted()
+        public void Test2AreChangesPersisted()
         {
+            Check(areChangesCommitted);
+            areChangesPersisted = testsRun;
             foreach(CacheTestObject cto in table)
             {
                 Assert.AreEqual("NAMECHANGE", cto.Name, "Name changes was not correctly committed");
             }
             Assert.AreEqual(instancesToCreate, table.Count);
+            table.Clear();
         }
 
         [Test]
-        public void Test3CacheEmptied()
+        public void Test3RecursiveDataType3()
         {
+            Check(areChangesPersisted);
+            storeRecursiveDataType1 = testsRun;
+            TestPerson tp = new TestPerson(); 
+            tp.Name = "Head element";
+
+            TestPerson lastPerson = tp;
+
+            for(int i = 0; i < 100; i++)
+            {
+                TestPerson newPerson = new TestPerson();
+                newPerson.Name = i.ToString();
+                lastPerson.Spouse = newPerson;
+                lastPerson = newPerson;
+            }
+            lastPerson.Spouse = tp;
+
+            Table<TestPerson> ttp = dt.CreateTable<TestPerson>();
+            ttp.Add (tp);
+            dt.SubmitChanges();
+            Console.WriteLine(ttp.Count);
+        }
+
+        [Test]
+        public void Test4RecursiveDataType2()
+        {
+            Check(storeRecursiveDataType1);
+            storeRecursiveDataType2 = testsRun;   
+            Table<TestPerson> ttp = dt.CreateTable<TestPerson>();
+
+            var qs = from tps in ttp
+                       where tps.Name == "0"
+                       select tps;
+
+            TestPerson head = null;
+            bool first = true;
+
+            foreach(TestPerson tp in qs)
+            {
+                head = tp;
+                first = false;
+                break;
+            }
+
+            Assert.IsFalse(first, "Ingen resultater returneret.");
+
+            int count = 0;
+            TestPerson spouse = head.Spouse;
+
+            while(spouse != head)
+            {
+                count++;
+                first = false;
+                spouse = spouse.Spouse;
+                Assert.IsTrue (count < 1000, "Test terminated.");
+            }
+            ttp.Clear();
+            dt.SubmitChanges();
+            Assert.AreEqual(100, count, "Wrong number of elements returned.");
+        }
+
+        [Test]
+        public void Test5CacheEmptied()
+        {
+            Check(storeRecursiveDataType2);
+            cacheEmptied = testsRun;
             dt.SubmitChanges();
             string msg = "(Failures here might indicate, that some other test is keeping a reference to objects. Check that this is not the case.";
             Assert.AreEqual(0, dt.CommittedObjectsSize, "Cache still contained committed objects. " + msg);
@@ -89,8 +180,9 @@ namespace IBOCache
         }
 
         [Test]
-        public void Test4CacheEmptied2()
+        public void Test6CacheEmptied2()
         {
+            Check(cacheEmptied);
             table.Clear();
             dt.SubmitChanges();
             CacheTestObject hvp = null;
@@ -105,5 +197,8 @@ namespace IBOCache
             Assert.AreEqual(0, dt.UnCommittedObjectsSize, "Uncommitted objects still contained values");
             Assert.AreEqual(0, dt.CommittedObjectsSize, "Committed objects still contained values");
         }
+
     }
+
+
 }

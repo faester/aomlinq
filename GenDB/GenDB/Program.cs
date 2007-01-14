@@ -7,6 +7,7 @@ using System.Xml.XLinq;
 using System.Data.DLinq;
 using System.Data.SqlClient;
 using System.Expressions;
+using System.Reflection;
 using GenDB.DB;
 
 namespace GenDB
@@ -162,7 +163,8 @@ namespace GenDB
             BOList<Person> bolist = dcontext.BolistFactory.BOListRef <Person>();
             for (int i = 0; i < 10; i++)
             {
-                bolist.Add (new Person{Name = i.ToString()});
+                Person p = new Person{Name = i.ToString() + "'"};
+                bolist.Add (p);
             }
 
             tbolist.Add (bolist);

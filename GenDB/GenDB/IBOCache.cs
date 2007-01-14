@@ -131,12 +131,14 @@ namespace GenDB
 #if DEBUG
             Console.WriteLine("Committed objects contains {0} elements", committedObjects.Count);
 #endif
-            IEnumerable<IBOCacheElement> ll = committedObjects.Values;
+            IBOCacheElement[] ll = new IBOCacheElement[committedObjects.Count];
+            committedObjects.Values.CopyTo(ll, 0);
             foreach (IBOCacheElement ce in ll)
             {
                 ce.Original = null;
             }
             GC.Collect();
+           
             foreach (IBOCacheElement ce in ll)
             {
                 if (ce.IsAlive)
