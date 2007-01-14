@@ -15,7 +15,7 @@ namespace GenDB.DB
 
         public MappingType MappingType
         {
-            get { return PropertyType.MappedType; }
+            get { return PropertyType.MappingType; }
         }
 
 

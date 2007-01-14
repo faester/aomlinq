@@ -265,7 +265,7 @@ namespace GenDB.DB
                     string name = (string)reader[0];
                     short mapping = (short)reader[2];
                     MappingType mpt = (MappingType)Enum.ToObject(typeof(MappingType), mapping);
-                    tmp.MappedType = mpt;
+                    tmp.MappingType = mpt;
                     long ptid = long.Parse(reader[1].ToString());
                     tmp.PropertyTypePOID = ptid;
                     tmp.Name = name;
@@ -1042,7 +1042,7 @@ namespace GenDB.DB
             sbPropertyTypeInserts.Append(",'");
             sbPropertyTypeInserts.Append(pt.Name);
             sbPropertyTypeInserts.Append("',");
-            short mt = (short)pt.MappedType;
+            short mt = (short)pt.MappingType;
             sbPropertyTypeInserts.Append(mt);
             sbPropertyTypeInserts.Append(")");
             pt.ExistsInDatabase = true;

@@ -50,7 +50,7 @@ namespace GenDB
             elementType = clrType.GetGenericArguments()[0];
             elementIsIBusinessObject = elementType.GetInterface(typeof(IBusinessObject).FullName) != null;
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
-            bolistEntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).PropertyType.MappedType = 
+            bolistEntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).PropertyType.MappingType = 
                 dataContext.TypeSystem.FindMappingType(elementType);
             if (elementIsIBusinessObject  && ! dataContext.TypeSystem.IsTypeKnown (elementType))
             {

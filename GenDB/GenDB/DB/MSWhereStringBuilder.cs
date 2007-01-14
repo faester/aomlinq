@@ -79,13 +79,13 @@ namespace GenDB.DB
                 wherePart.Append(entityTypePoids);
             }
             else
-            {
+            {   // Unknown type, nothing should be returned.
                 wherePart.Append("(0 = 1)");
             }
         }
 
         //Leaf
-        public void VisitNumericalProperty(CstProperty vp)
+        public void VisitProperty(CstProperty vp)
         {
             string pvName = "pv" + currentPropertyNumber;
             selectPart.Append (", PropertyValue " + pvName);

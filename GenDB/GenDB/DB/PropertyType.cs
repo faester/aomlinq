@@ -17,7 +17,7 @@ namespace GenDB.DB
             set { existsInDatabase = value; }
         }
 
-        public MappingType MappedType
+        public MappingType MappingType
         {
             get { return mappedType; }
             set { mappedType = value; }
