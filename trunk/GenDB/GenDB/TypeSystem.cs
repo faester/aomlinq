@@ -10,16 +10,16 @@ namespace GenDB
     /// Vedligeholder typebeskrivelser og oversættere til de forskellige klasser.
     /// 
     /// Aktuelt skaber det Exceptions, hvis der ændres index typer index en eksisterende DB.
-    /// Det skal formentlig udbedres, da det index nogen grad fjerner ideen index en generisk
+    /// Det skal formentlig udbedres, da det index nogen grad fjerner ideen i en generisk
     /// database. Der skal dog fastlægges en semantik omkring dette, og det er også 
     /// muligt vi skal vælge at acceptere, at databasen skal nulstilles, når man ændrer
-    /// index klassehierarkiet. Det er trods alt ikke afgørende for at undersøge, om man 
+    /// i klassehierarkiet. Det er trods alt ikke afgørende for at undersøge, om man 
     /// kan få skidtet til at performe effektivt.
     /// </summary>
     class TypeSystem
     {
         internal const string COLLECTION_ELEMENT_TYPE_PROPERTY_NAME = "++ElementType"; // prefixed with ++ which is not legal in a C# cstProperty name
-        //internal const string COLLECTION_ELEMENT_MAPPING_TYPE_PROPERTY_NAME = "++ListElementMappingType"; 
+        internal const string COLLECTION_ELEMENT_MAPPING_TYPE_PROPERTY_NAME = "++ListElementMappingType"; 
         internal const string COLLECTION_KEY_PROPERTY_NAME = "++KeyType";      // to avoid clashes with existing properties.
 
         private  Dictionary<long, IETCacheElement> etid2IEt = new Dictionary<long, IETCacheElement>();
@@ -383,7 +383,7 @@ namespace GenDB
             {
                 res = dataContext.GenDB.NewPropertyType();
                 res.Name = t.FullName;
-                res.MappedType = FindMappingType(t);
+                res.MappingType = FindMappingType(t);
                 ptName2pt.Add(res.Name, res);
                 ptid2pt.Add(res.PropertyTypePOID, res);
             }

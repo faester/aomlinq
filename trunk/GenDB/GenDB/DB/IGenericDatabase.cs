@@ -152,7 +152,7 @@ namespace GenDB.DB
         /// Constants should be provided by the 
         /// implementation of IGenericDatabase
         /// </summary>
-        MappingType MappedType { get; set; }
+        MappingType MappingType { get; set; }
 
         /// <summary>
         /// Used to determine if insertion should 

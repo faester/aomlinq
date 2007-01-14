@@ -9,7 +9,7 @@ namespace GenDB
     {
         void Visit(IWhereable clause);
         void VisitCstThis(CstThis cstThis);
-        void VisitNumericalProperty(CstProperty vp);
+        void VisitProperty(CstProperty vp);
         void VisitCstString(CstString cs);
         void VisitCstBool(CstBool cb);
         void VisitCstLong(CstLong cl);
@@ -292,7 +292,7 @@ namespace GenDB
 
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
-            visitor.VisitNumericalProperty(this);
+            visitor.VisitProperty(this);
         }
 
         public override string ToString()
