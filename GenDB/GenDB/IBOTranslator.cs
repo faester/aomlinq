@@ -156,11 +156,11 @@ namespace GenDB
 
         /// <summary>
         /// Copies values from PropertyValues stored in 
-        /// e to the fields in ibo. (Thus changing state 
-        /// of ibo)
+        /// e to the fields in res. (Thus changing state 
+        /// of res)
         /// </summary>
         /// <param name="e"></param>
-        /// <param name="ibo"></param>
+        /// <param name="res"></param>
         public void SetValues(IEntity e, IBusinessObject ibo)
         {
             foreach (FieldConverter c in fieldConverters)

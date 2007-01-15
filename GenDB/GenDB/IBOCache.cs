@@ -214,7 +214,7 @@ namespace GenDB
                         IBusinessObject ibo = ce.Target;
                         IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
                         trans.SaveToDB(dataContext.GenDB, ibo);
-                        //IEntity e = trans.PickCorrectElement(ibo);
+                        //IEntity e = trans.PickCorrectElement(res);
                         //DataContext.GenDB.Save(e);
                         ce.ClearDirtyBit();
                     }
@@ -231,7 +231,7 @@ namespace GenDB
         /// Adds object to the cache and assigns a DBTag 
         /// at the same time.
         /// </summary>
-        /// <param name="ibo"></param>
+        /// <param name="res"></param>
         /// <param name="entityPOID"></param>
         internal void Add(IBusinessObject ibo, long entityPOID)
         {

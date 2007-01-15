@@ -8,26 +8,30 @@ public class NotTranslatableException : Exception
     Type t;
 
     public NotTranslatableException(string msg, FieldInfo fi)
-        : base(msg)
+        : base(msg + fi)
     {
+        if (fi == null) { throw new NullReferenceException("fi"); }
         this.fi = fi;
     }
 
     public NotTranslatableException(string msg, PropertyInfo clrProperty)
-        : base(msg)
+        : base(msg + clrProperty)
     {
+        if (clrProperty == null) { throw new NullReferenceException("clrProperty"); }
         this.clrProperty = clrProperty;
     }
 
     public NotTranslatableException(string msg, PropertyInfo clrProperty, NotTranslatableException inner)
-        : base(msg, inner)
+        : base(msg + clrProperty, inner)
     {
+        if (clrProperty == null) { throw new NullReferenceException("clrProperty"); }
         this.clrProperty = clrProperty;
     }
 
     public NotTranslatableException(string msg, Type t)
-        : base(msg)
+        : base(msg + t)
     {
+        if (t == null) { throw new NullReferenceException("t"); }
         this.t = t;
     }
 

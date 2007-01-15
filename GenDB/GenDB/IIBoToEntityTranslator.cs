@@ -25,7 +25,7 @@ namespace GenDB
         /// actually matches the IBusinessObject given.
         /// </summary>
         /// <param name="db"></param>
-        /// <param name="ibo"></param>
+        /// <param name="res"></param>
         void SaveToDB(IGenericDatabase db, IBusinessObject ibo);
     }
 }
