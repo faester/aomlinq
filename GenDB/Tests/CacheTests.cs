@@ -127,7 +127,6 @@ namespace IBOCache
             Table<TestPerson> ttp = dt.CreateTable<TestPerson>();
             ttp.Add (tp);
             dt.SubmitChanges();
-            Console.WriteLine(ttp.Count);
         }
 
         [Test]
