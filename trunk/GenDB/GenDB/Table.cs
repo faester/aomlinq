@@ -127,10 +127,12 @@ namespace GenDB
         /// <param name="index">Starting position in array</param>
         public void CopyTo(T[] arr, int index)
         {
-            throw new Exception ("Husk linq");
             foreach(T t in this)
             {
-                arr[index++] = t;
+                if(exprFullySqlTranslatable || linqFunc(t))
+                {
+                    arr[index++] = t;
+                }
             }
         }
 
