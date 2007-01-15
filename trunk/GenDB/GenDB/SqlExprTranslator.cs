@@ -127,11 +127,15 @@ namespace GenDB
             Expression expr = (Expression) be;
             IValue[] parArr = new IValue[2];
             IExpression left = null, right = null;
-
+            MemberExpression me;
             // doing the left side
             if(be.Left is MemberExpression)
             {
-                parArr[0] = VisitMemberExpression((MemberExpression) be.Left);
+                me = (MemberExpression)be.Left;
+                if(me.Member.MemberType == MemberTypes.Field)
+                    throw new Exception("The value of Public fields can not be guarenteed and therefore are allowed");
+                else
+                    parArr[0] = VisitMemberExpression((MemberExpression) be.Left);
             }
             else if(be.Left is UnaryExpression)
             {
@@ -176,6 +180,7 @@ namespace GenDB
 
                         default:
                             throw new Exception("Unknown MappingType: "+typeSystem.FindMappingType(be.Right.Type));
+                            
                     }
                         break;
 

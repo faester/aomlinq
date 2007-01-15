@@ -64,6 +64,7 @@ namespace GenDB
         public class Person : AbstractBusinessObject
         {
             Sex sex;
+            public int disco = 21;
 
             public Person() { /* empty */ }
 
@@ -129,6 +130,7 @@ namespace GenDB
                 get {return alive;}
                 set{alive = value;}
             }
+
         }
 
         public class Student : Person { 
@@ -142,6 +144,8 @@ namespace GenDB
                 get { return enlisted; }
                 set { enlisted = value; }
             }
+
+
         }
 
         public static void Main(string[] args)
@@ -203,8 +207,8 @@ namespace GenDB
             dcontext.SubmitChanges();
             
             var es = from epp in tp     
-                 where epp.Name.Contains("knud")
-                //where !(epp.Age <= 9)
+                     where epp.disco == 21
+                   // where epp.Age == 4
                 //where !(epp.Name != "Navn 3")
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                 //where epp.Name == "Navn 6" || epp.Age == 7
