@@ -175,6 +175,8 @@ namespace QueryToSqlTranslationTests
             Assert.IsFalse(PropertyEqualsReference(tp,johnDoe),"John Doe should not be a Spouse");
             // Null Reference
             Assert.IsTrue(PropertyEqualsReference(tp,null),"Spouse = null should exist");
+
+            Assert.IsTrue(tp.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -184,6 +186,7 @@ namespace QueryToSqlTranslationTests
             Assert.IsTrue(PropertyLargerThanNumber(tp,trueInt),"Age larger than should exist");
             Assert.IsFalse(PropertyLessThanNumber(tp,smallInt),"Age less than should not exist");
             Assert.IsFalse(PropertyLargerThanNumber(tp,largeInt),"Age larger than should not exists");
+            Assert.IsTrue(tp.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -191,6 +194,7 @@ namespace QueryToSqlTranslationTests
         {
             Assert.IsTrue(StringOrElseNumber(tp,trueStr, falseInt),"Name(true) OR Age(false) should exist");
             Assert.IsFalse(StringOrElseNumber(tp,falseStr,falseInt),"Name(false) OR Age(false), should not exist");
+            Assert.IsTrue(tp.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -198,6 +202,7 @@ namespace QueryToSqlTranslationTests
         {
             Assert.IsFalse(StringAndAlsoNumber(tp,falseStr, trueInt),"Name(false) AND Age(true), should not exist");
             Assert.IsTrue(StringAndAlsoNumber(tp,trueStr,trueInt),"Name(true) AND Age(true) should exist");
+            Assert.IsTrue(tp.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -228,6 +233,7 @@ namespace QueryToSqlTranslationTests
             // NotNe, reference
             Assert.IsTrue(NotNeReference(tp,spouse),"Person should exist");
             Assert.IsFalse(NotNeReference(tp,johnDoe),"Person should not exist");
+            Assert.IsTrue(tp.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -235,6 +241,7 @@ namespace QueryToSqlTranslationTests
         {
             Assert.IsTrue(PropertyLessThanOrEqualsNumber(tp,trueInt),"Age should exist");
             Assert.IsFalse(PropertyLessThanOrEqualsNumber(tp,falseInt),"Age should not exist");
+            Assert.IsTrue(tp.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -242,6 +249,7 @@ namespace QueryToSqlTranslationTests
         {
             Assert.IsTrue(PropertyLargerThanOrEqualsNumber(tp,trueInt),"Age should exist");
             Assert.IsFalse(PropertyLargerThanOrEqualsNumber(tp,largeInt),"Age should not exist");
+            Assert.IsTrue(tp.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         #endregion

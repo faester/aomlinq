@@ -101,6 +101,8 @@ namespace QueryToSqlTranslationTests
                 count++;
             }
             Assert.AreEqual(ELEMENTS_TO_STORE, count, "Returned unexpected number of results");
+            Assert.IsTrue(tableAllPrimitives.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
+
         }
 
         [Test]
@@ -118,6 +120,7 @@ namespace QueryToSqlTranslationTests
             }
 
             Assert.AreEqual (ELEMENTS_TO_STORE / 2, count, "Incorrect number of elements returned.");
+            Assert.IsTrue(xs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -135,6 +138,7 @@ namespace QueryToSqlTranslationTests
             }
 
             Assert.AreEqual (ELEMENTS_TO_STORE / 2, count, "Incorrect number of elements returned.");
+            Assert.IsTrue(xs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -151,6 +155,7 @@ namespace QueryToSqlTranslationTests
                 Assert.IsTrue (x.Lng == 0, "Filter error: All Lng values should be zero.");
             }
             Assert.AreEqual (ELEMENTS_TO_STORE / 2, count, "Incorrect number of elements returned.");
+            Assert.IsTrue(xs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -168,6 +173,7 @@ namespace QueryToSqlTranslationTests
             }
 
             Assert.AreEqual (ELEMENTS_TO_STORE / 2, count, "Incorrect number of elements returned.");
+            Assert.IsTrue(xs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -186,6 +192,7 @@ namespace QueryToSqlTranslationTests
             }
 
             Assert.AreEqual (ELEMENTS_TO_STORE / 2 , count, "Incorrect number of elements returned.");
+            Assert.IsTrue(xs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -203,6 +210,7 @@ namespace QueryToSqlTranslationTests
             }
 
             Assert.AreEqual (ELEMENTS_TO_STORE / 2 , count, "Incorrect number of elements returned.");
+            Assert.IsTrue(xs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -220,6 +228,7 @@ namespace QueryToSqlTranslationTests
             }
 
             Assert.AreEqual (ELEMENTS_TO_STORE / 2 , count, "Incorrect number of elements returned.");
+            Assert.IsTrue(xs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -237,6 +246,7 @@ namespace QueryToSqlTranslationTests
             }
 
             Assert.AreEqual (ELEMENTS_TO_STORE / 2 , count, "Incorrect number of elements returned.");
+            Assert.IsTrue(xs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -263,6 +273,7 @@ namespace QueryToSqlTranslationTests
             }
 
             Assert.IsTrue (foundIt, "Did not find the added value.");
+            Assert.IsTrue(res.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -283,6 +294,7 @@ namespace QueryToSqlTranslationTests
                 Console.WriteLine("Person.Name = '{0}', Person.Spouse.Name = {1},  Person.Spouse.Spouse.Name = {2}", person.Name, spouseName, spouseSpouseName);
                 Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
             }
+            Assert.IsTrue(qs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
  
         [Test]
@@ -304,6 +316,7 @@ namespace QueryToSqlTranslationTests
                 Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
                 Assert.IsTrue(spouseAge > 3, "Spouse age was wrong");
             }
+            Assert.IsTrue(qs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -314,6 +327,8 @@ namespace QueryToSqlTranslationTests
             var qs = from persons in ttp
                      where persons.Spouse.Spouse.Name != "Name1" && persons.Name != "Name1" && persons.Spouse.Name != "Name1"
                      select persons;
+
+            Assert.IsTrue(qs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
 
             foreach (var person in qs)
             {
@@ -328,6 +343,7 @@ namespace QueryToSqlTranslationTests
                 Assert.AreNotEqual("Name1", spouseName, "Spouse name was ALL WRONG!");
                 Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
             }
+            Assert.IsTrue(qs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
         [Test]
@@ -346,6 +362,7 @@ namespace QueryToSqlTranslationTests
             }
 
             Assert.IsTrue (foundSome, "No results produced. Test that test has meaningful condition.");
+            Assert.IsTrue(es.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
     }
 }
