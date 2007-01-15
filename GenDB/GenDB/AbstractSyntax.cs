@@ -92,6 +92,17 @@ namespace GenDB
     
     class CstNotTranslatable : IExpression
     {
+        private CstNotTranslatable(){}
+
+        private static CstNotTranslatable instance = new CstNotTranslatable();
+
+        internal static CstNotTranslatable Instance
+        {
+            get { return instance; }
+        }
+
+        
+
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitNotSqlTranslatable(this);
