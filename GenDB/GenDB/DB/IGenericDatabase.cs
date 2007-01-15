@@ -69,7 +69,7 @@ namespace GenDB.DB
         /// When using types outside the namespace/assembly, it
         /// may be neccessary to load the assembly at run-time. 
         /// This string gives a unique description of the assembly
-        /// specifying the type.
+        /// defining the type.
         /// </summary>
         string AssemblyDescription { get; set; }
 
@@ -173,13 +173,15 @@ namespace GenDB.DB
         /// happen using an update or insert command.
         /// </summary>
         bool ExistsInDatabase { get; set; }
+
+        IPropertyValue CreateNewPropertyValue(IEntity entity);
     }
 
     interface IPropertyValue
     {
-        IProperty Property { get; set; }
+        IProperty Property { get; }
 
-        IEntity Entity { get; set; }
+        IEntity Entity { get; }
 
         string StringValue { get; set; }
 
@@ -236,7 +238,7 @@ namespace GenDB.DB
 
         IPropertyType NewPropertyType();
 
-        IPropertyValue NewPropertyValue();
+        //IPropertyValue NewPropertyValue();
 
         /// <summary>
         /// Returns all IEntityTypes stored in the database.
@@ -302,11 +304,7 @@ namespace GenDB.DB
 
     interface IGenCollectionElement
     {
-        //IEntity Entity { get; set; }
-
         int ElementIndex { get; set; }
-
-        //MappingType MappingType { get; set; }
 
         string StringValue { get; set; }
 
