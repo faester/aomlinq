@@ -87,8 +87,6 @@ namespace GenDB
                 foreach (IGenCollectionElement ce in DataContext.Instance.GenDB.AllElements(DBTag.EntityPOID))
                 {
                     object o = cnv.PickCorrectElement(ce);
-                    Console.WriteLine(o.GetType() + " " + o.GetType().IsPrimitive + " <=> " + typeof(T) + " " + typeof(T).IsPrimitive);
-                    Console.WriteLine ("=====================> " + o);
                     T value = (T)o;
                     Set(ce.ElementIndex, value);
                 }
