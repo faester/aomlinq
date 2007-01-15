@@ -17,6 +17,12 @@ namespace GenDB.DB
         private IBOReference refValue = new IBOReference(true, 0);
         private double doubleValue = default(double);
 
+        public PropertyValue (IProperty property, IEntity entity)
+        {
+            this.entity = entity;
+            this.property = property;
+        }
+
         public double DoubleValue
         {
             get { return doubleValue; }
@@ -69,13 +75,11 @@ namespace GenDB.DB
         public IEntity Entity
         {
             get { return entity; }
-            set { entity = value; }
         }
 
         public IProperty Property
         {
             get { return property; }
-            set { property = value; }
         }
 
         public override string ToString()

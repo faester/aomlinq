@@ -49,6 +49,13 @@ namespace GenDB.DB
             set { propertyType = value; }
         }
 
+        public IPropertyValue CreateNewPropertyValue(IEntity entity)
+        {
+            IPropertyValue pv = new PropertyValue(this, entity);
+            entity.StorePropertyValue(pv);
+            return pv;
+        }
+
         public override string ToString()
         {
             return "Property {name = " + propertyName + " " + PropertyType + " }";

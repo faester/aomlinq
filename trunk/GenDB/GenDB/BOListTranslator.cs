@@ -81,14 +81,13 @@ namespace GenDB
 
             // The mapping type for the elements are stored in this cstProperty. No other values are relevant.
             IProperty elementTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
-            
-            IPropertyValue pv = dataContext.GenDB.NewPropertyValue();
+
+            IPropertyValue pv = elementTypeProperty.CreateNewPropertyValue(e);
+
             //pv.LongValue = elementEntityType.EntityTypePOID;
             e.EntityType = entityType;
-            pv.Property = elementTypeProperty;
             pv.StringValue = elementType.FullName;
-            pv.Entity = e;
-            e.StorePropertyValue(pv);
+
             if (ibo.DBTag != null) 
             { 
                 e.EntityPOID = ibo.DBTag.EntityPOID; 

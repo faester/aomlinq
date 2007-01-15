@@ -208,10 +208,10 @@ namespace GenDB.DB
         }
         #endregion
 
-        public IPropertyValue NewPropertyValue()
-        {
-            return new PropertyValue();
-        }
+        //public IPropertyValue NewPropertyValue()
+        //{
+        //    return new PropertyValue();
+        //}
 
         /// <summary>
         /// Returns a new IEntityType instance with 
@@ -485,10 +485,7 @@ namespace GenDB.DB
 
                         foreach (IProperty prop in result.EntityType.GetAllProperties)
                         {
-                            IPropertyValue pv = new PropertyValue();
-                            pv.Property = prop;
-                            pv.Entity = result; 
-                            result.StorePropertyValue(pv);
+                            IPropertyValue pv = prop.CreateNewPropertyValue (result);
                         } // foreach
                     } // if
                     if (reader[1] != DBNull.Value) // Does any properties exist?

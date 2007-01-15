@@ -198,10 +198,7 @@ namespace GenDB
             {
                 foreach (IProperty property in entityType.DeclaredProperties)
                 {
-                    IPropertyValue propertyValue = dataContext.GenDB.NewPropertyValue();
-                    propertyValue.Entity = e;
-                    propertyValue.Property = property;
-                    e.StorePropertyValue(propertyValue);
+                    IPropertyValue propertyValue = property.CreateNewPropertyValue (e);
                 }
 
                 foreach (FieldConverter fcv in fieldConverters)

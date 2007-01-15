@@ -190,8 +190,8 @@ namespace GenDB
         /// all primitive fields have same cstProperty. Fields of reference
         /// type must by ReferenceEquals for the method to return
         /// true. Note that fields with attribute [Volatile] are 
-        /// not tested, since the method is ment to be used when 
-        /// determining, if an object needs to be rewritten to the
+        /// not tested, since the method is ment to be used to 
+        /// determine if an object needs to be rewritten to the
         /// database. 
         /// </summary>
         /// <param name="a"></param>
