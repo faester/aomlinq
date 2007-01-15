@@ -116,10 +116,42 @@ namespace QueryToSqlTranslationTests
         [Test]
         public void TestIndexOf()
         {
-            var p = from persons in ttp
+            var p1 = from persons in ttp
                     where persons.Name.IndexOf("3") == 4
                     select persons;
+            Assert.AreEqual(1,p1.Count,"incorrect number of persons returned");
+
+            var p2 = from persons in ttp
+                    where persons.Name.LastIndexOf("3") == 4
+                    select persons;
+            Assert.AreEqual(1,p2.Count,"incorrect number of persons returned");
+        }
+
+        [Test]
+        public void TestStartsWith()
+        {
+            var p = from persons in ttp
+                    where persons.Name.StartsWith("Name")
+                    select persons;
+            Assert.Greater(0,p.Count,"not enough persons returned");
+        }
+
+        [Test]
+        public void TestEndsWith()
+        {
+            var p = from persons in ttp
+                    where persons.Name.EndsWith("e3")
+                    select persons;
             Assert.AreEqual(1,p.Count,"incorrect number of persons returned");
+        }
+
+        [Test]
+        public void TestContains()
+        {
+            var p = from persons in ttp
+                    where persons.Name.Contains("ame")
+                    select persons;
+            Assert.Greater(0,p.Count,"not enough persons returned");
         }
     }
 }
