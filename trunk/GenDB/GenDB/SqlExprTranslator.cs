@@ -188,7 +188,8 @@ namespace GenDB
                 } 
                 catch(Exception)
                 {
-                    parArr[1] = CstIsFalse.Instance;
+                    return CstIsFalse.Instance;
+                    //parArr[1] = CstIsFalse.Instance;
                 }
             }
             else if(be.Right is MethodCallExpression)
