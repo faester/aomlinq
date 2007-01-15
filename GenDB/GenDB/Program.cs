@@ -208,15 +208,11 @@ namespace GenDB
                 //where !(epp.Name != "Navn 3")
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                 //where epp.Name == "Navn 6" || epp.Age == 7
-                //where epp.Spouse == s_p
-                //where epp.Car.Brand == "Volvo"
-                //where epp.Name == "SpousePerson"
-                //where !(epp.Letter != 'c')
-                //where epp.Birth == t
-                where epp.Alive
+                    where epp.Name.Length > 0
+                //where epp.Alive
                 //where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7" || epp.Name == "Navn 1" || epp.Age == 3
                 //where epp.Spouse.Age == 3 || epp.Spouse.Age == 4
-                     //where epp.Name.Substring(3) == "sd"
+                //where epp.Name.Substring(3) == "sd"
                 //where epp.Spouse.DaysLeft() < t
                 //where epp.Car.Brand == "Volvo"
                 //where epp.Car.Motor.HorsePower == "400"

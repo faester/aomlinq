@@ -86,7 +86,7 @@ namespace GenDB
 
 
 
-    class CstIsTrue : IValue
+    class CstIsTrue : IExpression
     {
         private CstIsTrue() { /* empty, singleton */ }
 
@@ -103,7 +103,7 @@ namespace GenDB
         }
     }
 
-    class CstIsFalse : IValue
+    class CstIsFalse : IExpression
     {
         private CstIsFalse() { /* empty, singleton */ }
 
