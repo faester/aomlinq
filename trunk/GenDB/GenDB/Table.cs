@@ -21,6 +21,11 @@ namespace GenDB
         Func<T, bool> linqFunc = null;
         bool exprFullySqlTranslatable = true;
 
+        public bool ExprFullySqlTranslatable
+        {
+            get { return exprFullySqlTranslatable; }
+        }
+
 
         #region Constructors
         private Table() { /* empty */ }
