@@ -73,7 +73,6 @@ namespace GenDB
 
         private IBusinessObject GetObject(IBOReference reference)
         {
-            Console.WriteLine("Fetching object with reference: " + reference);
             if (reference.IsNullReference) { return null; }
 
             IBusinessObject ibo = dataContext.IBOCache.Get(reference.EntityPOID);
@@ -111,7 +110,6 @@ namespace GenDB
                 default:
                     throw new Exception("MappingType not implemented in " + GetType().Name + " (" + mt + ")");
             }
-            Console.WriteLine("Mappingtype: {0}, Converting object: {1} ", mt, o);
             return res;
         }
 

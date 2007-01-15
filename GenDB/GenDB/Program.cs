@@ -203,7 +203,7 @@ namespace GenDB
             dcontext.SubmitChanges();
             
             var es = from epp in tp     
-                 where epp.Spouse.Name == "Name 3"
+                 where epp.Name.Contains("knud")
                 //where !(epp.Age <= 9)
                 //where !(epp.Name != "Navn 3")
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
@@ -221,6 +221,7 @@ namespace GenDB
                 select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
 
+            //var fs = from q in es where q.Age > 10 select q;
 
             foreach(Person p in es)
             {

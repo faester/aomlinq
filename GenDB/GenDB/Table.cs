@@ -151,8 +151,21 @@ namespace GenDB
         public int Count
         {
             get { 
-                Console.WriteLine("COUNT: " + expression);
-                return db.Count(expression); 
+                if (exprFullySqlTranslatable)
+                {
+                    return db.Count(expression); 
+                }
+                else
+                {
+                    int count = 0;
+                    foreach(IEntity e in db.Where(expression))
+                    {
+                        IIBoToEntityTranslator trans = translators.GetTranslator(e.EntityType.EntityTypePOID);
+                        T test = (T)trans.Translate (e);
+                        if (linqFunc(test)) { count++; }
+                    }
+                    return count;
+                }
             }
         }
 
@@ -224,12 +237,11 @@ namespace GenDB
             IExpression sqlExpr = new ExprAnd( exprTranslator.Convert (expr), this.expression);
             Console.WriteLine("FØR: " + sqlExpr);
             checker.StartVisit(sqlExpr);
-            Console.WriteLine("EFTER: " + checker.CheckedExpression);
-            res.expression = checker.CheckedExpression;
+            Console.WriteLine("EFTER: " + sqlExpr);
+            res.expression = sqlExpr;
             
-            Console.WriteLine(res.expression);
-
-            res.exprFullySqlTranslatable = checker.HasModifiedExpression && this.exprFullySqlTranslatable;
+            res.exprFullySqlTranslatable = (!checker.HasModifiedExpression) && this.exprFullySqlTranslatable;
+            Console.WriteLine("NY TABEL: " + res.exprFullySqlTranslatable + " " + res.expression);
             if (!res.exprFullySqlTranslatable)
             {
                 if (!this.exprFullySqlTranslatable)

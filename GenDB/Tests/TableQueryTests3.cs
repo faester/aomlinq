@@ -32,6 +32,9 @@ namespace QueryToSqlTranslationTests
             dataContext.SubmitChanges();
         }
 
+        
+
+
         public void InitTableOfPersons()
         {
             ttp = dataContext.CreateTable<TestPerson>();
@@ -46,6 +49,7 @@ namespace QueryToSqlTranslationTests
                 lastPerson = tp;
                 ttp.Add(tp);
             }
+            ttp.Add (new TestPerson{Name =" Mærkeligtnavn "});
         }
 
         private void InitTableAllPrimitives()
@@ -99,19 +103,19 @@ namespace QueryToSqlTranslationTests
         public void TestTrim()
         {
             var p1 = from persons in ttp
-                    where persons.Name.Trim() == " Name3"
+                    where persons.Name.Trim() == "Mærkeligtnavn"
                     select persons;
-            Assert.AreEqual(1, p1.Count, "not the correct number of persons");
+            Assert.AreEqual(1, p1.Count, "not the correct number of persons (Trim())");
 
             var p2 = from persons in ttp
-                    where persons.Name.TrimStart(' ') == " Name3"
+                    where persons.Name.TrimStart(' ') == "Mærkeligtnavn "
                     select persons;
-            Assert.AreEqual(1, p2.Count, "not the correct number of persons");
+            Assert.AreEqual(1, p2.Count, "not the correct number of persons (TrimStart())");
 
             var p3 = from persons in ttp
-                    where persons.Name.TrimEnd(' ') == "Name3 "
+                    where persons.Name.TrimEnd(' ') == " Mærkeligtnavn"
                     select persons;
-            Assert.AreEqual(1, p3.Count, "not the correct number of persons");
+            Assert.AreEqual(1, p3.Count, "not the correct number of persons (TrimEnd())");
         }
 
         [Test]
@@ -134,7 +138,7 @@ namespace QueryToSqlTranslationTests
             var p = from persons in ttp
                     where persons.Name.StartsWith("Name")
                     select persons;
-            Assert.Greater(0, p.Count, "not enough persons returned");
+            Assert.AreEqual(10, p.Count, "not enough persons returned");
         }
 
         [Test]
@@ -159,9 +163,9 @@ namespace QueryToSqlTranslationTests
         public void TestLengthProperty()
         {
             var p = from persons in ttp
-                    where persons.Name.Length > 8
+                    where persons.Name.Length > 5
                     select persons;
-            Console.WriteLine(p);
+
             Assert.AreEqual(1,p.Count,"incorrect number of persons returned");
         }
     }
