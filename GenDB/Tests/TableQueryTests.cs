@@ -7,6 +7,7 @@ using System.Query;
 using System.Xml.XLinq;
 using System.Expressions;
 using GenDB;
+using CommonTestObjects;
 
 namespace QueryToSqlTranslationTests
 {
@@ -250,6 +251,26 @@ namespace QueryToSqlTranslationTests
             Assert.IsTrue(PropertyLargerThanOrEqualsNumber(tp,trueInt),"Age should exist");
             Assert.IsFalse(PropertyLargerThanOrEqualsNumber(tp,largeInt),"Age should not exist");
             Assert.IsTrue(tp.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
+        }
+
+        [Test, ExpectedException(typeof(FieldsNotAllowedInConditionsException))]
+        public void TestShouldNotAllowFiltersOnPublicProperties()
+        {
+            Table<ContainsAllPrimitiveTypes> tcapt = dataContext.CreateTable<ContainsAllPrimitiveTypes>();
+
+            var res = from capt in tcapt 
+                      where capt.stringNotPersisted == "hvadsomhelst"
+                      select capt;
+        }
+
+        [Test, ExpectedException(typeof(FieldsNotAllowedInConditionsException))]
+        public void TestShouldNotAllowFiltersOnPublicProperties_int()
+        {
+            Table<ContainsAllPrimitiveTypes> tcapt = dataContext.CreateTable<ContainsAllPrimitiveTypes>();
+
+            var res = from capt in tcapt 
+                      where capt.intNotPersisted == -1
+                      select capt;
         }
 
         #endregion

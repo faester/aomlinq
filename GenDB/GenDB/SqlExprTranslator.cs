@@ -9,13 +9,14 @@ using GenDB.DB;
 
 namespace GenDB
 {
-    // internal class fra System.Query.dll, sakset via reflector
-
-    public class NotTransException : Exception
+    public class FieldsNotAllowedInConditionsException : Exception
     {
-
+        public FieldsNotAllowedInConditionsException()
+            : base("The value of Public fields can not be guarenteed and therefore are allowed")
+        { }
     }
-    
+
+    // internal class fra System.Query.dll, sakset via reflector
     internal class SqlExprTranslator
     {
         TypeSystem typeSystem; 
@@ -133,7 +134,7 @@ namespace GenDB
             {
                 me = (MemberExpression)be.Left;
                 if(me.Member.MemberType == MemberTypes.Field)
-                    throw new Exception("The value of Public fields can not be guarenteed and therefore are allowed");
+                    throw new FieldsNotAllowedInConditionsException();
                 else
                     parArr[0] = VisitMemberExpression((MemberExpression) be.Left);
             }

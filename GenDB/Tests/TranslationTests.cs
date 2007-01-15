@@ -4,6 +4,7 @@ using System.Text;
 using GenDB;
 using NUnit.Framework;
 using System.Query;
+using CommonTestObjects;
 
 namespace TranslationTests
 {
@@ -147,6 +148,25 @@ namespace TranslationTests
             {
                 Assert.AreEqual(idx.ToString(), q.Value);
                 idx++;
+            }
+        }
+
+        [Test]
+        public void TestFieldsShouldNotBePersisted()
+        {
+            Table<ContainsAllPrimitiveTypes> tcapt = dc.CreateTable<ContainsAllPrimitiveTypes>();
+
+            for (int i = 0; i < 100; i++)
+            {
+                ContainsAllPrimitiveTypes toAdd = new ContainsAllPrimitiveTypes{stringNotPersisted = "Væk!", intNotPersisted = 989};
+                tcapt.Add(toAdd);
+            }
+            dc.SubmitChanges();
+
+            foreach(ContainsAllPrimitiveTypes capt in tcapt)
+            {
+                Assert.IsFalse(capt.stringNotPersisted == "Væk!", "Value of public string field was persisted.");
+                Assert.IsFalse(capt.intNotPersisted == 989, "Value of public int field was persisted.");
             }
         }
 

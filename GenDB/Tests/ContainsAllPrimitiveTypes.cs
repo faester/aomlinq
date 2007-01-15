@@ -90,5 +90,9 @@ namespace CommonTestObjects
             get { return ui; }
             set { ui = value; }
         }
+
+        public int intNotPersisted = 10;
+
+        public string stringNotPersisted = "";
     }
 }
