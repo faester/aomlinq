@@ -139,7 +139,7 @@ namespace GenDB.DB
         }
 
         //Leaf 
-        public void VisitNotSqlTranslatable(CstNotTranslatable cn)
+        public void VisitNotSqlTranslatable(ExprNotTranslatable cn)
         {
             throw new Exception("IWhereable expression contained nodes that was not SQL-translatable.");
         }
@@ -377,13 +377,17 @@ namespace GenDB.DB
             wherePart.Append(epe.EntityPOID);
         }
 
-        public void VisitCstIsTrue(CstIsTrue csi)
+        public void VisitExprIsTrue(ExprIsTrue csi)
         {
             wherePart.Append ("1 = 1");
         }
-        public void VisitCstIsFalse(CstIsFalse csi)
+        public void VisitExprIsFalse(ExprIsFalse csi)
         {
             wherePart.Append ("1 = 0");
+        }
+        public void VisitValNotTranslatable(ValNotTranslatable csi)
+        {
+            throw new Exception("Not SQL-translatable.");
         }
     }
 }

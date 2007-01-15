@@ -158,7 +158,7 @@ namespace GenDB
 
         public int CountEverything()
         {
-            IWhereable where = new ExprAnd(new ExprInstanceOf(typeof(AbstractBusinessObject)), CstIsTrue.Instance);
+            IWhereable where = new ExprAnd(new ExprInstanceOf(typeof(AbstractBusinessObject)), ExprIsTrue.Instance);
             return db.Count(where);
         }
 
@@ -222,8 +222,10 @@ namespace GenDB
             SqlExprTranslator exprTranslator = new SqlExprTranslator(typeSystem);
             SqlExprChecker checker = new SqlExprChecker();
             IExpression sqlExpr = new ExprAnd( exprTranslator.Convert (expr), this.expression);
+            Console.WriteLine("FØR: " + sqlExpr);
             checker.StartVisit(sqlExpr);
-            res.expression = sqlExpr;
+            Console.WriteLine("EFTER: " + checker.CheckedExpression);
+            res.expression = checker.CheckedExpression;
             
             Console.WriteLine(res.expression);
 

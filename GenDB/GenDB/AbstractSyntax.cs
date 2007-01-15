@@ -27,9 +27,10 @@ namespace GenDB
         void VisitEntityPOIDEquals(EntityPOIDEquals epe);
         void VisitOPNotEquals(OP_NotEquals ieq);
         void VisitInstanceOf(ExprInstanceOf instanceOf);
-        void VisitCstIsTrue(CstIsTrue valueIsTrue);
-        void VisitCstIsFalse(CstIsFalse valueIsFalse);
-        void VisitNotSqlTranslatable(CstNotTranslatable nts);
+        void VisitExprIsTrue(ExprIsTrue valueIsTrue);
+        void VisitExprIsFalse(ExprIsFalse valueIsFalse);
+        void VisitNotSqlTranslatable(ExprNotTranslatable nts);
+        void VisitValNotTranslatable(ValNotTranslatable cst);
     }
 
     interface IWhereable
@@ -90,13 +91,13 @@ namespace GenDB
         }
     }
     
-    class CstNotTranslatable : IExpression
+    class ExprNotTranslatable : IExpression
     {
-        private CstNotTranslatable(){}
+        private ExprNotTranslatable(){}
 
-        private static CstNotTranslatable instance = new CstNotTranslatable();
+        private static ExprNotTranslatable instance = new ExprNotTranslatable();
 
-        internal static CstNotTranslatable Instance
+        internal static ExprNotTranslatable Instance
         {
             get { return instance; }
         }
@@ -116,20 +117,20 @@ namespace GenDB
 
 
 
-    class CstIsTrue : IExpression
+    class ExprIsTrue : IExpression
     {
-        private CstIsTrue() { /* empty, singleton */ }
+        private ExprIsTrue() { /* empty, singleton */ }
 
-        static CstIsTrue instance = new CstIsTrue();
+        static ExprIsTrue instance = new ExprIsTrue();
 
-        internal static CstIsTrue Instance
+        internal static ExprIsTrue Instance
         {
-            get { return CstIsTrue.instance; }
+            get { return ExprIsTrue.instance; }
         }
 
         public void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
-            visitor.VisitCstIsTrue(this);
+            visitor.VisitExprIsTrue(this);
         }
 
         public override string ToString()
@@ -138,20 +139,37 @@ namespace GenDB
         }
     }
 
-    class CstIsFalse : IExpression
+    class ValNotTranslatable : IValue
     {
-        private CstIsFalse() { /* empty, singleton */ }
+        private ValNotTranslatable() { /* empty */ }
+        private static ValNotTranslatable instance = new ValNotTranslatable();
 
-        static CstIsFalse instance = new CstIsFalse();
-
-        internal static CstIsFalse Instance
+        internal static ValNotTranslatable Instance
         {
-            get { return CstIsFalse.instance; }
+            get { return ValNotTranslatable.instance; }
+        }
+
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitValNotTranslatable (this);
+        }
+
+    }
+
+    class ExprIsFalse : IExpression
+    {
+        private ExprIsFalse() { /* empty, singleton */ }
+
+        static ExprIsFalse instance = new ExprIsFalse();
+
+        internal static ExprIsFalse Instance
+        {
+            get { return ExprIsFalse.instance; }
         }
 
         public void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
-            visitor.VisitCstIsFalse(this);
+            visitor.VisitExprIsFalse(this);
         }
         
         public override string ToString()

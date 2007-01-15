@@ -203,12 +203,12 @@ namespace GenDB
             dcontext.SubmitChanges();
             
             var es = from epp in tp     
-                // where epp.Age == 3
+                 where epp.Spouse.Name == "Name 3"
                 //where !(epp.Age <= 9)
                 //where !(epp.Name != "Navn 3")
                 //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
                 //where epp.Name == "Navn 6" || epp.Age == 7
-                    where epp.Name.Length > 0
+                //where epp.Name.Length > 0
                 //where epp.Alive
                 //where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7" || epp.Name == "Navn 1" || epp.Age == 3
                 //where epp.Spouse.Age == 3 || epp.Spouse.Age == 4
