@@ -296,7 +296,7 @@ namespace GenDB
                 {
                     return VisitBinaryExpression((BinaryExpression) lambda.Body);
                 }
-                else if(mecstr.StartsWith("AndAlso("))
+                else if(mecstr.StartsWith("AndAlso(")) 
                 {
                     BinaryExpression be = (BinaryExpression) lambda.Body;
                     
