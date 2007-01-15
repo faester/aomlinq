@@ -48,7 +48,7 @@ namespace GenDB
             try {
                 return etPOID2translator[entityTypePOID];
             }
-            catch(KeyNotFoundException)
+            catch(KeyNotFoundException) 
             {
                 throw new UnknownTranslatorException("Can not find translator for entitytypePOID " + entityTypePOID);
             }

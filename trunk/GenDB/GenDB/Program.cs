@@ -201,6 +201,7 @@ namespace GenDB
 
             //IBOCache.FlushToDB();
             dcontext.SubmitChanges();
+            
             var es = from epp in tp     
                 // where epp.Age == 3
                 //where !(epp.Age <= 9)
@@ -215,6 +216,7 @@ namespace GenDB
                 where epp.Alive
                 //where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7" || epp.Name == "Navn 1" || epp.Age == 3
                 //where epp.Spouse.Age == 3 || epp.Spouse.Age == 4
+                     //where epp.Name.Substring(3) == "sd"
                 //where epp.Spouse.DaysLeft() < t
                 //where epp.Car.Brand == "Volvo"
                 //where epp.Car.Motor.HorsePower == "400"
