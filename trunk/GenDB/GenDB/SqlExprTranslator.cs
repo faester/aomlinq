@@ -10,6 +10,11 @@ using GenDB.DB;
 namespace GenDB
 {
     // internal class fra System.Query.dll, sakset via reflector
+
+    public class NotTransException : Exception
+    {
+
+    }
     
     internal class SqlExprTranslator
     {
@@ -50,7 +55,7 @@ namespace GenDB
                     mTmp=me;
                     Type type = mTmp.Expression.Type;
                     if(!typeSystem.IsTypeKnown(type))
-                        typeSystem.RegisterType(type);
+                        throw new NotTransException();
 
                     IEntityType et = typeSystem.GetEntityType(type);
                     IProperty prop = et.GetProperty(mTmp.Member.Name);
@@ -106,12 +111,12 @@ namespace GenDB
                 }
                 else
                 {
-                    return new GenDB.CstNotTranslatable();
+                    return GenDB.CstNotTranslatable.Instance;
                 }
             } 
             else
             {
-                return new CstNotTranslatable();
+                return CstNotTranslatable.Instance;
             }
         }
 
@@ -133,7 +138,7 @@ namespace GenDB
             else if(be.Left is MethodCallExpression)
             {   
                 if(be.Left.NodeType.ToString()=="MethodCallVirtual")
-                    return new GenDB.CstNotTranslatable();
+                    return CstNotTranslatable.Instance;
                 else
                     left = VisitMethodCall((MethodCallExpression) be.Left);
             }
@@ -189,7 +194,6 @@ namespace GenDB
                 catch(Exception)
                 {
                     return CstIsFalse.Instance;
-                    //parArr[1] = CstIsFalse.Instance;
                 }
             }
             else if(be.Right is MethodCallExpression)
@@ -264,11 +268,12 @@ namespace GenDB
             // LAST TYPE IN FOODCHAIN
             Type t = me.Expression.Type;
             if(!typeSystem.IsTypeKnown(t))
-                typeSystem.RegisterType(t);
+                throw new NotTransException();
  
             if(iPar>1)
             {
                 return GetNestedRefs(me,iPar);
+                
             }
             else
             {
@@ -281,163 +286,170 @@ namespace GenDB
         
         public IExpression VisitExpr(Expression expr)
         {
-            IExpression left, right;
-            if(expr.NodeType.ToString()=="Lambda")
+            try 
             {
-                LambdaExpression lambda = (LambdaExpression)expr;
-                string mecstr = lambda.Body.ToString();
+                IExpression left, right;
+                if(expr.NodeType.ToString()=="Lambda")
+                {
+                    LambdaExpression lambda = (LambdaExpression)expr;
+                    string mecstr = lambda.Body.ToString();
 
-                if (mecstr.StartsWith("op_Equality(") || mecstr.StartsWith("op_Inequality"))
-                {
-                    IValue[] val = new IValue[2];
-                    
-                    return VisitMethodCall((MethodCallExpression) lambda.Body);                
-                }
-                else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT(") || mecstr.StartsWith("NE("))
-                {
-                    return VisitBinaryExpression((BinaryExpression) lambda.Body);
-                }
-                else if(mecstr.StartsWith("AndAlso("))
-                {
-                    BinaryExpression be = (BinaryExpression) lambda.Body;
-                    
-                    // doing the left hand side
-                    if(be.Left is BinaryExpression)
+                    if (mecstr.StartsWith("op_Equality(") || mecstr.StartsWith("op_Inequality"))
                     {
-                        BinaryExpression b_tmp = (BinaryExpression) be.Left;
-                        left = VisitBinaryExpression(b_tmp);
+                        IValue[] val = new IValue[2];
+                        
+                        return VisitMethodCall((MethodCallExpression) lambda.Body);                
                     }
-                    else if(be.Left is MethodCallExpression)
+                    else if(mecstr.StartsWith("EQ(") || mecstr.StartsWith("GT(") || mecstr.StartsWith("LT(") || mecstr.StartsWith("NE("))
                     {
-                        MethodCallExpression m_tmp = (MethodCallExpression) be.Left;
-                        left = VisitMethodCall(m_tmp);
+                        return VisitBinaryExpression((BinaryExpression) lambda.Body);
                     }
-                    else
-                        left = new GenDB.CstNotTranslatable();
+                    else if(mecstr.StartsWith("AndAlso("))
+                    {
+                        BinaryExpression be = (BinaryExpression) lambda.Body;
+                        
+                        // doing the left hand side
+                        if(be.Left is BinaryExpression)
+                        {
+                            BinaryExpression b_tmp = (BinaryExpression) be.Left;
+                            left = VisitBinaryExpression(b_tmp);
+                        }
+                        else if(be.Left is MethodCallExpression)
+                        {
+                            MethodCallExpression m_tmp = (MethodCallExpression) be.Left;
+                            left = VisitMethodCall(m_tmp);
+                        }
+                        else
+                            left = CstNotTranslatable.Instance;
 
-                    // doing the right hand side
-                    if(be.Right is BinaryExpression)
-                    {
-                        BinaryExpression b_tmp = (BinaryExpression) be.Right;
-                        right = VisitBinaryExpression(b_tmp);
-                    } 
-                    else if(be.Right is MethodCallExpression)
-                    {
-                        MethodCallExpression m_tmp = (MethodCallExpression) be.Right;
-                        right = VisitMethodCall(m_tmp);
+                        // doing the right hand side
+                        if(be.Right is BinaryExpression)
+                        {
+                            BinaryExpression b_tmp = (BinaryExpression) be.Right;
+                            right = VisitBinaryExpression(b_tmp);
+                        } 
+                        else if(be.Right is MethodCallExpression)
+                        {
+                            MethodCallExpression m_tmp = (MethodCallExpression) be.Right;
+                            right = VisitMethodCall(m_tmp);
+                        }
+                        else 
+                            right = CstNotTranslatable.Instance; 
+                        
+                        return new GenDB.ExprAnd(left, right);
                     }
-                    else 
-                        right = new GenDB.CstNotTranslatable(); 
-                    
-                    return new GenDB.ExprAnd(left, right);
-                }
-                else if(mecstr.StartsWith("OrElse("))
-                {
-                    BinaryExpression be = (BinaryExpression) lambda.Body;
-                    
-                    // doing the left hand side  
-                    if(be.Left is BinaryExpression)
+                    else if(mecstr.StartsWith("OrElse("))
                     {
-                        BinaryExpression b_tmp = (BinaryExpression) be.Left;
-                        left = VisitBinaryExpression(b_tmp);
+                        BinaryExpression be = (BinaryExpression) lambda.Body;
+                        
+                        // doing the left hand side  
+                        if(be.Left is BinaryExpression)
+                        {
+                            BinaryExpression b_tmp = (BinaryExpression) be.Left;
+                            left = VisitBinaryExpression(b_tmp);
+                        }
+                        else if(be.Left is MethodCallExpression)
+                        {
+                            MethodCallExpression m_tmp = (MethodCallExpression) be.Left;
+                            left = VisitMethodCall(m_tmp);
+                        }
+                        else
+                            left = CstNotTranslatable.Instance;
+                       
+                        // doing the right hand side
+                        if(be.Right is BinaryExpression)
+                        {
+                            right = VisitBinaryExpression((BinaryExpression) be.Right);
+                        }
+                        else if(be.Right is MethodCallExpression)
+                        {
+                            right = VisitMethodCall((MethodCallExpression) be.Right);
+                        }
+                        else
+                            right = CstNotTranslatable.Instance;
+     
+                        return new GenDB.ExprOr(left, right);
                     }
-                    else if(be.Left is MethodCallExpression)
-                    {
-                        MethodCallExpression m_tmp = (MethodCallExpression) be.Left;
-                        left = VisitMethodCall(m_tmp);
+                    else if(mecstr.StartsWith("GE("))
+                    { // = !(x < y)
+                        return DecomposeQueryGE(expr);
                     }
-                    else
-                        left = new GenDB.CstNotTranslatable();
-                   
-                    // doing the right hand side
-                    if(be.Right is BinaryExpression)
-                    {
-                        right = VisitBinaryExpression((BinaryExpression) be.Right);
+                    else if(mecstr.StartsWith("LE("))
+                    { // = !(x > y) 
+                        return DecomposeQueryLE(expr);
                     }
-                    else if(be.Right is MethodCallExpression)
+                    else if(mecstr.StartsWith("Not("))
                     {
-                        right = VisitMethodCall((MethodCallExpression) be.Right);
+                        UnaryExpression ue = (UnaryExpression)lambda.Body;
+                        
+                        if(ue.Operand.NodeType.ToString() == "EQ" || ue.Operand.NodeType.ToString() == "NE")
+                        {
+                            return VisitExpr(ue);
+                        }
+                        else if(ue.Operand.NodeType.ToString() == "GE")
+                        {
+                            return DecomposeQueryGE(ue);
+                        }
+                        else if(ue.Operand.NodeType.ToString() == "LE")
+                        {
+                            return DecomposeQueryLE(ue);
+                        }
+                        else if(ue.Operand.NodeType.ToString() == "GT" || ue.Operand.NodeType.ToString() == "LT")
+                        {
+                            return VisitExpr(ue);
+                        }
+                        else if(ue.Operand.NodeType.ToString() == "MethodCall")
+                        {
+                            return new GenDB.ExprNot(VisitMethodCall((MethodCallExpression)ue.Operand));
+                        }
+                        else if(ue.Operand.NodeType.ToString() == "MemberAccess")
+                        {
+                            return VisitBooleanMember((MemberExpression)ue.Operand, false);
+                        }
+                        else
+                            return CstNotTranslatable.Instance;
                     }
-                    else
-                        right = new GenDB.CstNotTranslatable();
- 
-                    return new GenDB.ExprOr(left, right);
-                }
-                else if(mecstr.StartsWith("GE("))
-                { // = !(x < y)
-                    return DecomposeQueryGE(expr);
-                }
-                else if(mecstr.StartsWith("LE("))
-                { // = !(x > y) 
-                    return DecomposeQueryLE(expr);
-                }
-                else if(mecstr.StartsWith("Not("))
-                {
-                    UnaryExpression ue = (UnaryExpression)lambda.Body;
-                    
-                    if(ue.Operand.NodeType.ToString() == "EQ" || ue.Operand.NodeType.ToString() == "NE")
+                    else if(lambda.Body is MemberExpression)
                     {
-                        return VisitExpr(ue);
-                    }
-                    else if(ue.Operand.NodeType.ToString() == "GE")
-                    {
-                        return DecomposeQueryGE(ue);
-                    }
-                    else if(ue.Operand.NodeType.ToString() == "LE")
-                    {
-                        return DecomposeQueryLE(ue);
-                    }
-                    else if(ue.Operand.NodeType.ToString() == "GT" || ue.Operand.NodeType.ToString() == "LT")
-                    {
-                        return VisitExpr(ue);
-                    }
-                    else if(ue.Operand.NodeType.ToString() == "MethodCall")
-                    {
-                        return new GenDB.ExprNot(VisitMethodCall((MethodCallExpression)ue.Operand));
-                    }
-                    else if(ue.Operand.NodeType.ToString() == "MemberAccess")
-                    {
-                        return VisitBooleanMember((MemberExpression)ue.Operand, false);
-                    }
-                    else
-                        return new GenDB.CstNotTranslatable();
-                }
-                else if(lambda.Body is MemberExpression)
-                {
-                    MemberExpression me = (MemberExpression)lambda.Body;
-                    switch(typeSystem.FindMappingType(me.Type))
-                    {
-                        case MappingType.BOOL:
-                            return VisitBooleanMember(me, true);
-                            break;
+                        MemberExpression me = (MemberExpression)lambda.Body;
+                        switch(typeSystem.FindMappingType(me.Type))
+                        {
+                            case MappingType.BOOL:
+                                return VisitBooleanMember(me, true);
+                                break;
 
-                        default:
-                            throw new Exception("MappingType not implemented: "+typeSystem.FindMappingType(me.Type));
-                    }   
+                            default:
+                                throw new Exception("MappingType not implemented: "+typeSystem.FindMappingType(me.Type));
+                        }   
+                    }
+                    else
+                    {
+                        return CstNotTranslatable.Instance;
+                    }
                 }
-                else
+                else if(expr.NodeType.ToString()=="Not")
                 {
-                    return new GenDB.CstNotTranslatable();
+                    UnaryExpression ue = (UnaryExpression) expr;
+                    return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
                 }
-            }
-            else if(expr.NodeType.ToString()=="Not")
+                else if(expr.NodeType.ToString()=="OrElse")
+                {   
+                    BinaryExpression be = (BinaryExpression) expr;
+                    left = VisitExpr(be.Left);
+                    right = VisitExpr(be.Right);
+                    return new GenDB.ExprOr(left,right);
+                }
+                else if(expr.NodeType.ToString()=="MethodCall")
+                {
+                    return VisitMethodCall((MethodCallExpression)expr);
+                }
+                else 
+                    return CstNotTranslatable.Instance;
+                }
+            catch(NotTransException)
             {
-                UnaryExpression ue = (UnaryExpression) expr;
-                return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
+                return CstNotTranslatable.Instance;
             }
-            else if(expr.NodeType.ToString()=="OrElse")
-            {   
-                BinaryExpression be = (BinaryExpression) expr;
-                left = VisitExpr(be.Left);
-                right = VisitExpr(be.Right);
-                return new GenDB.ExprOr(left,right);
-            }
-            else if(expr.NodeType.ToString()=="MethodCall")
-            {
-                return VisitMethodCall((MethodCallExpression)expr);
-            }
-            else 
-                return new GenDB.CstNotTranslatable();
         }
 
         internal IExpression DecomposeQueryLE(Expression expr)
