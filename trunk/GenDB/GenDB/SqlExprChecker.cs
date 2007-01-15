@@ -149,14 +149,12 @@ namespace GenDB
         
         public void VisitNotSqlTranslatable(ExprNotTranslatable nts)
         { 
-            Console.WriteLine("***************** VisitNotSqlTranslatable");
             hasModifiedExpression = true;
             throw new CannotTranslate(); 
         }
 
         public void VisitValNotTranslatable(ValNotTranslatable cst)
         {
-            Console.WriteLine("**************** VisitValNotTranslatable");
             hasModifiedExpression = true;
             throw new CannotTranslate(); 
         }

@@ -49,7 +49,6 @@ namespace GenDB
         {
             foreach (IEntityType ets in dataContext.GenDB.GetAllEntityTypes())
             {
-                Console.Error.WriteLine("Retrieved type: " + ets);
                 RegisterType(ets);
             }
 
@@ -98,9 +97,7 @@ namespace GenDB
             }
             dataContext.GenDB.Save(et);
             dataContext.GenDB.CommitTypeChanges();
-            Console.Error.WriteLine("About to create translator for " + ce.ClrType);
             dataContext.Translators.RegisterTranslator(ce.ClrType, ce.Target);
-            Console.Error.WriteLine("Created translator for " + ce.ClrType);
         }
 
         /// <summary>
