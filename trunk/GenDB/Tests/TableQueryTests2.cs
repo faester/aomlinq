@@ -247,7 +247,7 @@ namespace QueryToSqlTranslationTests
 
             tableAllPrimitives.Add(capt);
 
-            dataContext.SubmitChanges();
+            dataContext.SubmitChanges(); 
 
             var res = from capts in tableAllPrimitives
                       where capts == capt
@@ -313,7 +313,6 @@ namespace QueryToSqlTranslationTests
 
             dataContext.SubmitChanges();
             
-
             var qs = from persons in ttp
                      where persons.Spouse.Spouse.Name != "Name1" && persons.Name != "Name1" && persons.Spouse.Name != "Name1"
                      select persons;
