@@ -35,6 +35,7 @@ namespace GenDB
             Visit(expr.Expression);
         }
 
+
         public void VisitAndExpr(ExprAnd expr){ 
             try {
                 parentSetter = delegate(IExpression e) { expr.Left = e; };
@@ -42,7 +43,8 @@ namespace GenDB
             }
             catch(CannotTranslate)
             {
-                expr.Left = CstIsTrue.Instance;
+                expr.Left = ExprIsTrue.Instance;
+                parentSetter = null;
             }
             try {
                 parentSetter = delegate(IExpression e) { expr.Right = e; };
@@ -50,7 +52,8 @@ namespace GenDB
             }
             catch(CannotTranslate)
             {
-                expr.Right = CstIsTrue.Instance;
+                expr.Right = ExprIsTrue.Instance;
+                parentSetter = null;
             }
         }
         
@@ -61,7 +64,7 @@ namespace GenDB
             }
             catch(CannotTranslate)
             {
-                parentSetter (CstIsTrue.Instance); 
+                parentSetter (ExprIsTrue.Instance); 
                 return;
             }
             try {
@@ -70,12 +73,12 @@ namespace GenDB
             }
             catch(CannotTranslate)
             {
-                parentSetter (CstIsTrue.Instance);
+                parentSetter (ExprIsTrue.Instance);
             }
         }
 
-        public void VisitCstIsTrue(CstIsTrue valueIsTrue){ return; }
-        public void VisitCstIsFalse(CstIsFalse valueIsFalse){ return; }
+        public void VisitExprIsTrue(ExprIsTrue valueIsTrue){ return; }
+        public void VisitExprIsFalse(ExprIsFalse valueIsFalse){ return; }
 
         public void VisitCstThis(CstThis cstThis){  return; }
         public void VisitProperty(CstProperty vp){ return; }
@@ -93,8 +96,17 @@ namespace GenDB
         public void VisitEntityPOIDEquals(EntityPOIDEquals epe){ return; }
         public void VisitOPNotEquals(OP_NotEquals ieq){ return; }
         public void VisitInstanceOf(ExprInstanceOf instanceOf){ return; }
-        public void VisitNotSqlTranslatable(CstNotTranslatable nts)
+        
+        public void VisitNotSqlTranslatable(ExprNotTranslatable nts)
         { 
+            Console.WriteLine("***************** VisitNotSqlTranslatable");
+            hasModifiedExpression = true;
+            throw new CannotTranslate(); 
+        }
+
+        public void VisitValNotTranslatable(ValNotTranslatable cst)
+        {
+            Console.WriteLine("**************** VisitValNotTranslatable");
             hasModifiedExpression = true;
             throw new CannotTranslate(); 
         }

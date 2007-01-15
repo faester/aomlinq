@@ -51,7 +51,6 @@ namespace GenDB
 
         public object PickCorrectElement(IGenCollectionElement ce)
         {
-            Console.WriteLine("Using mappingtype: " + mt);
             object o = null;
             switch (mt)
             {
