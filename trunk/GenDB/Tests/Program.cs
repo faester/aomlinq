@@ -74,8 +74,6 @@ namespace Tests
 
             dataContext.RebuildDatabase = true;
 
-            Console.WriteLine("Her....");
-
             dataContext.DbBatchSize = 2000;
             long objcount = 1;
 
@@ -95,7 +93,6 @@ namespace Tests
 
             foreach(BOList<int> bli in tbi)
             {
-                Console.WriteLine("New BOList<int>:");
                 bool first = true;
                 foreach(int i in bli)
                 {

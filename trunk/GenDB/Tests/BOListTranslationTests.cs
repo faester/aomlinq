@@ -126,7 +126,6 @@ namespace BOListTests
                 for (int i = 0; i < LIST_LENGTH; i++)
                 {
                     string s = bolist[i];
-                    Console.WriteLine(s);
                     Assert.AreEqual(i.ToString(), s, "Wrong value returned.");
                 }
             }
@@ -145,7 +144,7 @@ namespace BOListTests
                 BOList<DateTime> bolist = dataContext.BolistFactory.BOListDateTime();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
-                    bolist.Add(DateTime.Now);
+                    bolist.Add(new DateTime(j));
                 }
                 table.Add(bolist);
             }
@@ -159,8 +158,7 @@ namespace BOListTests
                 for (int i = 0; i < LIST_LENGTH; i++)
                 {
                     DateTime s = bolist[i];
-                    Console.WriteLine(s);
-                    //Assert.AreEqual(i.ToString(), s, "Wrong value returned.");
+                    Assert.AreEqual(new DateTime(i), s, "Wrong value returned.");
                 }
             }
             Assert.AreEqual(ELEMENTS_TO_INSERT, listCount, "Wrong number of lists returned.");

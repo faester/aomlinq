@@ -126,7 +126,6 @@ namespace TableTests
 
             Table<TestPerson> oldPouls = from poul in pouls where poul.Age > 0 select poul;
             Assert.AreEqual (2, oldPouls.Count, "Wrong number of elements in result.");
-            Console.WriteLine(oldPouls);
         }
         
         [Test]
