@@ -109,7 +109,7 @@ namespace GenDB
         /// to the DB.
         /// </summary>
         /// <param name="t"></param>
-        internal  void RegisterType(Type t)
+        internal void RegisterType(Type t)
         {
             if (type2IEt.ContainsKey(t))
             {

@@ -395,7 +395,9 @@ namespace GenDB.DB
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
             mswsb.Visit(expression);
             string whereStr = mswsb.WhereStr;
-            
+
+            Console.WriteLine(whereStr);
+
             int res = 0;
 
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))

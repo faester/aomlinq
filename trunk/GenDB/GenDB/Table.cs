@@ -18,6 +18,9 @@ namespace GenDB
         TranslatorSet translators = null;
         TypeSystem typeSystem;
         IBOCache iboCache;
+        Func<T, bool> linqFunc = null;
+        bool exprFullySqlTranslatable = true;
+
 
         #region Constructors
         private Table() { /* empty */ }
@@ -72,11 +75,28 @@ namespace GenDB
         /// </summary>
         public void Clear()
         {
-            foreach (IEntity ie in db.Where (expression))
+            if (exprFullySqlTranslatable)
             {
-                iboCache.Remove(ie.EntityPOID);
+                foreach (IEntity ie in db.Where(expression))
+                {
+                    iboCache.Remove(ie.EntityPOID);
+                }
+                db.ClearWhere(expression);
             }
-            db.ClearWhere(expression);
+            else
+            {
+                foreach (IEntity ie in db.Where(expression))
+                {
+                    IIBoToEntityTranslator trans = translators.GetTranslator(ie.EntityType.EntityTypePOID);
+
+                    T deleteCandidate = (T)trans.Translate (ie);
+                    if (linqFunc(deleteCandidate))
+                    {
+                        iboCache.Remove(ie.EntityPOID);
+                        db.ClearWhere(new OP_Equals (new VarReference(deleteCandidate), CstThis.Instance));
+                    }
+                }
+            }
         }
 
 
@@ -90,8 +110,7 @@ namespace GenDB
         {
             if (e == null) { return false;}
             if (e.DBTag == null) { return false; }
-            IExpression where = new OP_Equals(new VarReference(e), new CstThis());
-
+            IExpression where = new OP_Equals(new VarReference(e), CstThis.Instance);
             foreach (IEntity ibo in db.Where(where))
             {
                 return true;
@@ -108,6 +127,7 @@ namespace GenDB
         /// <param name="index">Starting position in array</param>
         public void CopyTo(T[] arr, int index)
         {
+            throw new Exception ("Husk linq");
             foreach(T t in this)
             {
                 arr[index++] = t;
@@ -124,13 +144,22 @@ namespace GenDB
         {
             if (e == null) { return false;}
             if (e.DBTag == null) { return false; }
-            IWhereable where = new OP_Equals(new VarReference(e), new CstThis());
+            IWhereable where = new OP_Equals(new VarReference(e), CstThis.Instance);
             return db.ClearWhere(where);
         }
 
         public int Count
         {
-            get { return db.Count(expression); }
+            get { 
+                Console.WriteLine("COUNT: " + expression);
+                return db.Count(expression); 
+            }
+        }
+
+        public int CountEverything()
+        {
+            IWhereable where = new ExprAnd(new ExprInstanceOf(typeof(AbstractBusinessObject)), CstIsTrue.Instance);
+            return db.Count(where);
         }
 
         public bool IsReadOnly
@@ -142,14 +171,31 @@ namespace GenDB
         {
             IEntityType lastType = null;
             IIBoToEntityTranslator translator = null;
+            Console.WriteLine("System.Collections.Generic.IEnumerator<T> GetEnumerator()");
             foreach (IEntity e in db.Where(expression))
             {
+                Console.WriteLine("***");
                 if (lastType != e.EntityType)
                 {
                     translator = translators.GetTranslator (e.EntityType.EntityTypePOID);
                 }
-                IBusinessObject ibo = translator.Translate (e);
-                yield return (T)ibo;
+                T res = (T)translator.Translate (e);
+                if (exprFullySqlTranslatable)
+                {
+                    yield return res;
+                }
+                else
+                {
+                    if (linqFunc(res))
+                    {
+                        Console.WriteLine("+++");
+                        yield return res;
+                    }
+                    else
+                    {
+                        Console.WriteLine("---");
+                    }
+                }
             }
         }
 
@@ -164,6 +210,8 @@ namespace GenDB
 
         public Table<T> Where(Expression<Func<T, bool>> expr)
         {
+            Console.WriteLine("Nu vil den gerne lave en Table med T = " + typeof(T));
+
             Table<T> res = new Table<T>();
             
             res.translators = this.translators ;
@@ -172,7 +220,32 @@ namespace GenDB
             res.iboCache = this.iboCache;
             
             SqlExprTranslator exprTranslator = new SqlExprTranslator(typeSystem);
-            res.expression = new ExprAnd( exprTranslator.Convert (expr), this.expression);
+            SqlExprChecker checker = new SqlExprChecker();
+            IExpression sqlExpr = new ExprAnd( exprTranslator.Convert (expr), this.expression);
+            checker.StartVisit(sqlExpr);
+            res.expression = sqlExpr;
+            
+            Console.WriteLine(res.expression);
+
+            res.exprFullySqlTranslatable = checker.HasModifiedExpression && this.exprFullySqlTranslatable;
+            if (!res.exprFullySqlTranslatable)
+            {
+                if (!this.exprFullySqlTranslatable)
+                {
+                    Func<T, bool> f = expr.Compile();
+                    Func<T, bool> andedFunc = delegate(T element) { return linqFunc(element) && f(element); };
+                    res.linqFunc = andedFunc;
+                }
+                else
+                {
+                    res.linqFunc = expr.Compile();
+                }
+            }
+            else
+            {
+                res.linqFunc = null;
+            }
+
             return res;
         }
 

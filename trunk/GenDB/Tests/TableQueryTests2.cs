@@ -309,8 +309,6 @@ namespace QueryToSqlTranslationTests
         [Test]
         public void TestReferenceFieldPropertyFilter3()
         {
-            TestPerson lastPerson = null;
-
             dataContext.SubmitChanges();
             
             var qs = from persons in ttp

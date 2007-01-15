@@ -70,9 +70,23 @@ namespace GenDB
 
     class CstThis : IValue
     {
+        private CstThis() { }
+        private static CstThis instance = new CstThis();
+
+        internal static CstThis Instance
+        {
+            get { return CstThis.instance; }
+            set { CstThis.instance = value; }
+        }
+
         public void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
             visitor.VisitCstThis(this);
+        }
+
+        public override string ToString()
+        {
+           return "CstThis";
         }
     }
     
@@ -81,6 +95,11 @@ namespace GenDB
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitNotSqlTranslatable(this);
+        }
+
+        public override string ToString()
+        {
+            return "CstNotTranslatable";
         }
     }
 
@@ -101,6 +120,11 @@ namespace GenDB
         {
             visitor.VisitCstIsTrue(this);
         }
+
+        public override string ToString()
+        {
+            return "CstIsTrue";
+        }
     }
 
     class CstIsFalse : IExpression
@@ -118,6 +142,11 @@ namespace GenDB
         {
             visitor.VisitCstIsFalse(this);
         }
+        
+        public override string ToString()
+        {
+            return "CstIsFalse";
+        }
     }
 
     class ExprNot : IExpression
@@ -127,6 +156,7 @@ namespace GenDB
         internal IExpression Expression
         {
             get { return expression; }
+            set { expression = value; }
         }
 
         public ExprNot(IExpression expr)
@@ -137,6 +167,11 @@ namespace GenDB
         public void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
             visitor.VisitNotExpr(this);
+        }
+
+        public override string ToString()
+        {
+            return "ExprNot(" + expression + ")";
         }
     }
 
@@ -157,6 +192,10 @@ namespace GenDB
         public void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
             visitor.VisitInstanceOf (this);
+        }
+        public override string ToString()
+        {
+            return "ExprInstanceOf (" + clrType + ")";
         }
     }
 
@@ -194,6 +233,11 @@ namespace GenDB
         {
             visitor.VisitAndExpr (this);
         }
+
+        public override string ToString()
+        {
+            return "ExprAnd (" + Left + "," + Right + ")";
+        }
     }
 
     class ExprOr : AbsBinaryExpression
@@ -203,6 +247,10 @@ namespace GenDB
         public override void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitOrExpr(this);
+        }
+        public override string ToString()
+        {
+            return "ExprOr (" + Left + "," + Right + ")";
         }
     }
 
@@ -251,6 +299,10 @@ namespace GenDB
         {
             visitor.VisitOPLessThan(this);
         }
+        public override string ToString()
+        {
+            return "OP_LessThan(" + Left.ToString() + ","  + Right.ToString() + ")";
+        }
     }
 
     class OP_GreaterThan : BinaryOperator, IBoolOperator
@@ -260,6 +312,11 @@ namespace GenDB
         {
             visitor.VisitOPGreaterThan(this);
         }
+                public override string ToString()
+        {
+            return "OP_GreaterThan(" + Left.ToString() + ","  + Right.ToString() + ")";
+        }
+
     }
 
     class OP_NotEquals : BinaryOperator, IBoolOperator
@@ -269,6 +326,11 @@ namespace GenDB
         {
             visitor.VisitOPNotEquals(this);
         }
+                     public override string ToString()
+        {
+            return "OP_NotEquals(" + Left.ToString() + ","  + Right.ToString() + ")";
+        }
+
     }
 
     /// <summary>
@@ -320,6 +382,11 @@ namespace GenDB
         {
             visitor.VisitCstDateTime(this);
         }
+
+        public override string ToString()
+        {
+            return "CstDateTime (" + this.Value + ")";
+        }
     }
 
     class CstString : IStringvalue
@@ -339,6 +406,12 @@ namespace GenDB
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitCstString(this);
+        }
+
+
+        public override string ToString()
+        {
+            return "CstString (" + this.Value + ")";
         }
     }
 
@@ -360,6 +433,11 @@ namespace GenDB
         {
             visitor.VisitCstChar(this);
         }
+
+        public override string ToString()
+        {
+            return "CstChar (" + this.ch + ")";
+        }     
     }
 
     class CstBool : IConstant
@@ -379,6 +457,11 @@ namespace GenDB
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitCstBool(this);
+        }
+
+        public override string ToString()
+        {
+            return "CstBool (" + value + ")";
         }
     }
 
@@ -401,6 +484,10 @@ namespace GenDB
         {
             visitor.VisitCstLong(this);
         }
+            public override string ToString()
+        {
+            return "CstLong (" + value + ")";
+        }
     }
 
     class CstDouble : INumerical
@@ -420,6 +507,10 @@ namespace GenDB
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitCstDouble(this);
+        }
+            public override string ToString()
+        {
+            return "CstDouble (" + value + ")";
         }
     }
 
@@ -467,6 +558,11 @@ namespace GenDB
         {
             visitor.VisitCstReference(this);
         }
+
+        public override string ToString()
+        {
+            return "VarReference(" + (this.reference.IsAlive ? reference.Target : "GC'ed") + ")";
+        }
     }
 
     /// <summary>
@@ -500,6 +596,11 @@ namespace GenDB
         {
             visitor.VisitNestedReference(this);
         }
+
+        public override string ToString()
+        {
+            return "NestedReference(" + CstProperty + ", inner = " + (innerReference == null ? "null" : innerReference.ToString()) + ")";
+        }
     }
 
     class EntityPOIDEquals : IExpression
@@ -519,6 +620,12 @@ namespace GenDB
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitEntityPOIDEquals(this);
+        }
+
+
+        public override string ToString()
+        {
+            return "EntityPOIDEquals(" + entityPOID + ")";
         }
     }
 }

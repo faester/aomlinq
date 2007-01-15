@@ -41,7 +41,7 @@ namespace TranslationTests
 
         private class ShouldFailNoGetter : AbstractBusinessObject
         {
-            int foo;
+            int foo = 0;
 
             public int Foo
             {

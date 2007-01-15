@@ -104,14 +104,14 @@ namespace GenDB
         /// No action. (Handled internally by the BOList it self)
         /// </summary>
         /// <param name="ie"></param>
-        /// <param name="ibo"></param>
+        /// <param name="res"></param>
         public void SetValues(IBusinessObject ibo, IEntity ie) { /* empty */ }
 
         /// <summary>
         /// No action. (Handled internally by the BOList it self)
         /// </summary>
         /// <param name="ie"></param>
-        /// <param name="ibo"></param>
+        /// <param name="res"></param>
         public void SetValues(IEntity ie, IBusinessObject ibo) { /* empty */ }
 
         public void SaveToDB(IGenericDatabase db, IBusinessObject ibo)

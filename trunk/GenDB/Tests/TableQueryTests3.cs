@@ -73,6 +73,7 @@ namespace QueryToSqlTranslationTests
                 capt.Dbl = i % 2; // Has test
                 tableAllPrimitives.Add (capt);
             }
+            dataContext.SubmitChanges();
         }
 
         [TearDown]
@@ -91,7 +92,7 @@ namespace QueryToSqlTranslationTests
             var p = from persons in ttp
                     where persons.Name.Substring(0,3) == "Nam"
                     select persons;
-            Assert.Greater(p.Count,0,"did not find enough");
+            Assert.Greater(p.Count, 0, "did not find enough");
         }
 
         [Test]
@@ -100,17 +101,17 @@ namespace QueryToSqlTranslationTests
             var p1 = from persons in ttp
                     where persons.Name.Trim() == " Name3"
                     select persons;
-            Assert.AreEqual(1,p1.Count,"not the correct number of persons");
+            Assert.AreEqual(1, p1.Count, "not the correct number of persons");
 
             var p2 = from persons in ttp
                     where persons.Name.TrimStart(' ') == " Name3"
                     select persons;
-            Assert.AreEqual(1,p2.Count,"not the correct number of persons");
+            Assert.AreEqual(1, p2.Count, "not the correct number of persons");
 
             var p3 = from persons in ttp
                     where persons.Name.TrimEnd(' ') == "Name3 "
                     select persons;
-            Assert.AreEqual(1,p3.Count,"not the correct number of persons");
+            Assert.AreEqual(1, p3.Count, "not the correct number of persons");
         }
 
         [Test]
@@ -119,12 +120,12 @@ namespace QueryToSqlTranslationTests
             var p1 = from persons in ttp
                     where persons.Name.IndexOf("3") == 4
                     select persons;
-            Assert.AreEqual(1,p1.Count,"incorrect number of persons returned");
+            Assert.AreEqual(1, p1.Count,"incorrect number of persons returned");
 
             var p2 = from persons in ttp
                     where persons.Name.LastIndexOf("3") == 4
                     select persons;
-            Assert.AreEqual(1,p2.Count,"incorrect number of persons returned");
+            Assert.AreEqual(1, p2.Count,"incorrect number of persons returned");
         }
 
         [Test]
@@ -133,7 +134,7 @@ namespace QueryToSqlTranslationTests
             var p = from persons in ttp
                     where persons.Name.StartsWith("Name")
                     select persons;
-            Assert.Greater(0,p.Count,"not enough persons returned");
+            Assert.Greater(0, p.Count, "not enough persons returned");
         }
 
         [Test]
@@ -142,7 +143,7 @@ namespace QueryToSqlTranslationTests
             var p = from persons in ttp
                     where persons.Name.EndsWith("e3")
                     select persons;
-            Assert.AreEqual(1,p.Count,"incorrect number of persons returned");
+            Assert.AreEqual(1, p.Count, "incorrect number of persons returned");
         }
 
         [Test]
@@ -151,7 +152,7 @@ namespace QueryToSqlTranslationTests
             var p = from persons in ttp
                     where persons.Name.Contains("ame")
                     select persons;
-            Assert.Greater(0,p.Count,"not enough persons returned");
+            Assert.AreEqual(10, p.Count, "not enough persons returned");
         }
 
         [Test]
@@ -160,6 +161,7 @@ namespace QueryToSqlTranslationTests
             var p = from persons in ttp
                     where persons.Name.Length > 8
                     select persons;
+            Console.WriteLine(p);
             Assert.AreEqual(1,p.Count,"incorrect number of persons returned");
         }
     }
