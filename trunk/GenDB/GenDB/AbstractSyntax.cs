@@ -590,7 +590,14 @@ namespace GenDB
 
         public override string ToString()
         {
-            return "VarReference(" + (this.reference.IsAlive ? reference.Target : "GC'ed") + ")";
+            if (this.reference != null)
+            {
+                return "VarReference(" + (this.reference.IsAlive ? reference.Target : "GC'ed") + ")";
+            }
+            else
+            {
+                return "VarReference(null)";
+            }
         }
     }
 
