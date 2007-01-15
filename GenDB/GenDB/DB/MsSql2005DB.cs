@@ -395,9 +395,9 @@ namespace GenDB.DB
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
             mswsb.Visit(expression);
             string whereStr = mswsb.WhereStr;
-
-            Console.WriteLine(whereStr);
-
+#if DEBUG
+            Console.WriteLine("DB.Count with wherestring: " + whereStr);
+#endif 
             int res = 0;
 
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
@@ -536,8 +536,6 @@ namespace GenDB.DB
             // Find mapping type for the elements.
             MappingType mapping = ie.EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).MappingType;
 
-            Console.WriteLine("MSSQL2005DB reading CollectionElements with mapping type: " + mapping);
-            Console.WriteLine("Using EntityType: " + ie.EntityType);
             LinkedList<IGenCollectionElement> res = new LinkedList<IGenCollectionElement>();
 
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
@@ -844,7 +842,6 @@ namespace GenDB.DB
                         if (insertCommand != "")
                         {
                             cmd.CommandText = insertCommand;
-                            //Console.WriteLine(insertCommand);
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -853,7 +850,6 @@ namespace GenDB.DB
                         if (insertCommand != "")
                         {
                             cmd.CommandText = insertCommand;
-                            //Console.WriteLine(insertCommand);
                             cmd.ExecuteNonQuery();
                         }
                     }

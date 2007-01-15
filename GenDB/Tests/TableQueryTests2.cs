@@ -291,7 +291,6 @@ namespace QueryToSqlTranslationTests
                 string spouseName = spouse != null ? spouse.Name : "N/A (No Spouse)";
                 string spouseSpouseName = spouseSpouse != null ? spouseSpouse.Name : "N/A (No Spouse)";
 
-                Console.WriteLine("Person.Name = '{0}', Person.Spouse.Name = {1},  Person.Spouse.Spouse.Name = {2}", person.Name, spouseName, spouseSpouseName);
                 Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
             }
             Assert.IsTrue(qs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
@@ -312,7 +311,6 @@ namespace QueryToSqlTranslationTests
                 string spouseName = spouse != null ? spouse.Name : "N/A (No Spouse)";
                 string spouseSpouseName = spouseSpouse != null ? spouseSpouse.Name : "N/A (No Spouse)";
                 int spouseAge = spouse != null ? spouse.Age : int.MaxValue;
-                Console.WriteLine("Person.Name = '{0}', Person.Spouse.Name = {1},  Person.Spouse.Spouse.Name = {2}", person.Name, spouseName, spouseSpouseName);
                 Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
                 Assert.IsTrue(spouseAge > 3, "Spouse age was wrong");
             }
@@ -338,7 +336,6 @@ namespace QueryToSqlTranslationTests
                 string spouseName = spouse != null ? spouse.Name : "N/A (No Spouse)";
                 string spouseSpouseName = spouseSpouse != null ? spouseSpouse.Name : "N/A (No Spouse)";
 
-                Console.WriteLine("Person.Name = '{0}', Person.Spouse.Name = {1},  Person.Spouse.Spouse.Name = {2}", person.Name, spouseName, spouseSpouseName);
                 Assert.AreNotEqual("Name1", person.Name, "Person name was ALL WRONG!");
                 Assert.AreNotEqual("Name1", spouseName, "Spouse name was ALL WRONG!");
                 Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
@@ -357,7 +354,6 @@ namespace QueryToSqlTranslationTests
             foreach (TestPerson tp in es)
             {
                 foundSome = true;
-                Console.WriteLine(tp.Age + " " + tp.Name);
                 Assert.IsTrue (tp.Age < 9 && tp.Name == "Name2", "Wrong result produced.");
             }
 

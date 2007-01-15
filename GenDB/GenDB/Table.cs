@@ -191,10 +191,8 @@ namespace GenDB
         {
             IEntityType lastType = null;
             IIBoToEntityTranslator translator = null;
-            Console.WriteLine("System.Collections.Generic.IEnumerator<T> GetEnumerator()");
             foreach (IEntity e in db.Where(expression))
             {
-                Console.WriteLine("***");
                 if (lastType != e.EntityType)
                 {
                     translator = translators.GetTranslator (e.EntityType.EntityTypePOID);
@@ -208,12 +206,7 @@ namespace GenDB
                 {
                     if (linqFunc(res))
                     {
-                        Console.WriteLine("+++");
                         yield return res;
-                    }
-                    else
-                    {
-                        Console.WriteLine("---");
                     }
                 }
             }
@@ -230,8 +223,6 @@ namespace GenDB
 
         public Table<T> Where(Expression<Func<T, bool>> expr)
         {
-            Console.WriteLine("Nu vil den gerne lave en Table med T = " + typeof(T));
-
             Table<T> res = new Table<T>();
             
             res.translators = this.translators ;
@@ -242,13 +233,10 @@ namespace GenDB
             SqlExprTranslator exprTranslator = new SqlExprTranslator(typeSystem);
             SqlExprChecker checker = new SqlExprChecker();
             IExpression sqlExpr = new ExprAnd( exprTranslator.Convert (expr), this.expression);
-            Console.WriteLine("FØR: " + sqlExpr);
             checker.StartVisit(sqlExpr);
-            Console.WriteLine("EFTER: " + sqlExpr);
             res.expression = sqlExpr;
             
             res.exprFullySqlTranslatable = (!checker.HasModifiedExpression) && this.exprFullySqlTranslatable;
-            Console.WriteLine("NY TABEL: " + res.exprFullySqlTranslatable + " " + res.expression);
             if (!res.exprFullySqlTranslatable)
             {
                 if (!this.exprFullySqlTranslatable)
