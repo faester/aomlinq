@@ -153,5 +153,14 @@ namespace QueryToSqlTranslationTests
                     select persons;
             Assert.Greater(0,p.Count,"not enough persons returned");
         }
+
+        [Test]
+        public void TestLengthProperty()
+        {
+            var p = from persons in ttp
+                    where persons.Name.Length > 8
+                    select persons;
+            Assert.AreEqual(1,p.Count,"incorrect number of persons returned");
+        }
     }
 }
