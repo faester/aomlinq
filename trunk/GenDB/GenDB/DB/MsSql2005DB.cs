@@ -487,7 +487,7 @@ namespace GenDB.DB
                 long entityPOID = 0;
                 long oldEntityPOID = entityPOID + 1; // Must be different
                 bool firstPass = true;
-                bool returnCacheCopy = false;
+                bool returnCachedCopy = false;
 
                 while (reader.Read())
                 {
@@ -506,8 +506,8 @@ namespace GenDB.DB
                         }
 
                         result = IBOCache.Instance.Get(entityPOID);
-                        returnCacheCopy = result != null;
-                        if (!returnCacheCopy)
+                        returnCachedCopy = result != null;
+                        if (!returnCachedCopy)
                         {
                             result = translator.CreateInstanceOfIBusinessObject(); // We do not set DBIdentity (use NewEntity()) , since id is retrieved from DB.
                             IBOCache.Instance.Add(result, entityPOID);
@@ -515,9 +515,9 @@ namespace GenDB.DB
 
                         oldEntityPOID = entityPOID;
                     } // if
-                    if (reader[1] != DBNull.Value && !returnCacheCopy) // Does any properties exist?
+                    if (reader[1] != DBNull.Value && !returnCachedCopy) // Does any properties exist?
                     {
-                        propertyPOID = long.Parse(reader[1].ToString());
+                        propertyPOID = long.Parse(reader[1]);
                         object value = null;
                         switch (iet.GetProperty(propertyPOID).MappingType)
                         {
