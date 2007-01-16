@@ -600,7 +600,6 @@ namespace GenDB.DB
 
         public void Save(IEntity entity)
         {
-            Console.WriteLine("Saving entity with DBIdentifier " + entity.EntityPOID);
             InternalEntitySave(entity);
             foreach (IPropertyValue pv in entity.AllPropertyValues)
             {

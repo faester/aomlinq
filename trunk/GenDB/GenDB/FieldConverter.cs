@@ -13,8 +13,20 @@ namespace GenDB
     {
         PropertyValueGetter pvg;
         PropertyValueSetter pvs;
-        SetHandler sh;
-        GetHandler gh;
+        SetHandler fieldSetHandler;
+
+        internal SetHandler FieldSetHandler
+        {
+            get { return fieldSetHandler; }
+        }
+
+        GetHandler fieldGetHandler;
+
+        internal GetHandler FieldGetHandler
+        {
+            get { return fieldGetHandler; }
+        }
+
         Type clrType;
         PropertyInfo fi;
         DataContext dataContext;
@@ -24,8 +36,8 @@ namespace GenDB
             this.dataContext = dataContext;
             this.fi = fi;
             clrType = t;
-            sh = DynamicMethodCompiler.CreateSetHandler(t, fi);
-            gh = DynamicMethodCompiler.CreateGetHandler(t, fi);
+            fieldSetHandler = DynamicMethodCompiler.CreateSetHandler(t, fi);
+            fieldGetHandler = DynamicMethodCompiler.CreateGetHandler(t, fi);
             pvg = CreateGetter(fi, property);
             pvs = CreateSetter(property);
         }
@@ -33,12 +45,12 @@ namespace GenDB
         public void SetObjectFieldValue(IBusinessObject ibo, IEntity entity)
         {
             object value = pvg(entity);
-            sh(ibo, value);
+            fieldSetHandler(ibo, value);
         }
 
         public void SetEntityPropertyValue(IBusinessObject ibo, IEntity e)
         {
-            pvs(e, gh(ibo));
+            pvs(e, fieldGetHandler(ibo));
         }
 
         private PropertyValueGetter CreateGetter(PropertyInfo fi, IProperty prop)
