@@ -491,7 +491,6 @@ namespace GenDB
                 ParameterExpression pe = (ParameterExpression)me.Expression;
                 string name = me.Member.Name;
                 parArr[0] = VisitMemberExpression(me);
-
             }
             else if(me.Expression.NodeType.ToString()=="MemberAccess")
             {
@@ -625,42 +624,8 @@ namespace GenDB
             throw new ArgumentException("eType: " + eType);
         }
 
-        internal static MemberExpression MakeMemberExpression(Expression expr, MemberInfo mi)
-        {
-            FieldInfo info3 = mi as FieldInfo;
-            if (info3 != null)
-            {
-                return Expression.Field(expr, info3);
-            }
-            PropertyInfo info4 = mi as PropertyInfo;
-            //if (info4 == null)
-            //{
-            //    throw new Exception("Member is not a Field or Property: " + mi);
-            //}
-            return Expression.Property(expr, info4);
-        }
-
-        internal static MethodCallExpression MakeMethodCallExpression(ExpressionType eType, Expression obj, MethodInfo method, IEnumerable<Expression> args)
-        {
-            switch (eType)
-            {
-                case ExpressionType.MethodCall:
-                    {
-                        return Expression.Call(method, obj, args);
-                    }
-                case ExpressionType.MethodCallVirtual:
-                    {
-                        return Expression.CallVirtual(method, obj, args);
-                    }
-            }
-            throw new ArgumentException("eType: " + eType);
-        }
-
         internal static UnaryExpression MakeUnaryExpression(ExpressionType eType, Expression operand, Type type)
         {
-#if DEBUG
-            Console.WriteLine("MakeUnaryExpression\n");
-#endif
             ExpressionType type1 = eType;
             if (type1 <= ExpressionType.ConvertChecked)
             {
