@@ -59,7 +59,7 @@
     <Compile Include="DataContext.cs" />
     <Compile Include="DBTag.cs" />
     <Compile Include="BOListTranslator.cs" />
-    <Compile Include="DB\DBIdentifier.cs" />
+    <Compile Include="DBIdentifier.cs" />
     <Compile Include="DB\Entity.cs" />
     <Compile Include="DB\EntityType.cs" />
     <Compile Include="DB\GenCollectionElement.cs" />
