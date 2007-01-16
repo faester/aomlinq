@@ -92,17 +92,9 @@ namespace GenDB
                             ConstantExpression ce = (ConstantExpression)roc[1];
                             parArr[1] = new CstDateTime((DateTime)ce.Value);
                             break;
-                        case MappingType.BOOL:
-                            throw new Exception("MappingType.BOOL not implemented");
-                            break;
-                        case MappingType.LONG:
-                            throw new Exception("MappingType.LONG not implemented");
-                            break;
-                        case MappingType.REFERENCE:
-                            throw new Exception("MappingType.REFERENCE not implemented");
-                            break;
                         default:
-                            throw new Exception("Unknown type "+typeSystem.FindMappingType(roc[1].Type));
+                            parArr[1] = ValNotTranslatable.Instance;
+                            break;
                     }
                         
                     if(mce.Method.Name=="op_Equality")
@@ -110,7 +102,7 @@ namespace GenDB
                     else if(mce.Method.Name=="op_Inequality")
                         return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
                     else 
-                        throw new Exception("Method unknown "+mce.Method.Name);
+                        return ExprNotTranslatable.Instance;
                 }
                 else
                 {
@@ -154,7 +146,7 @@ namespace GenDB
                 left = VisitExpr(be.Left);
             }
             else
-                throw new Exception("Expression not implemented: "+be.Left.ToString());
+                parArr[0] = ValNotTranslatable.Instance;
 
             // doing the right side
             if(be.Right.ToString()=="null")
@@ -178,15 +170,11 @@ namespace GenDB
                         case MappingType.DOUBLE:
                             parArr[1] = new CstDouble(System.Convert.ToDouble(be.Right.ToString()));
                             break;
-
-                        default:
-                            throw new Exception("Unknown MappingType: "+typeSystem.FindMappingType(be.Right.Type));
-                            
                     }
                         break;
-
                 default:
-                    throw new Exception("type not implemented "+expr.Type);
+                    parArr[1] = ValNotTranslatable.Instance;
+                    break;
                 }
             }
             else if(be.Right is UnaryExpression)
@@ -210,7 +198,7 @@ namespace GenDB
             }
             else
             {
-                throw new Exception("Unknown Type of Right side: "+be.Right.ToString());
+                parArr[1] = ValNotTranslatable.Instance;
             }
             
             string nodeType = expr.NodeType.ToString();
@@ -243,12 +231,7 @@ namespace GenDB
                 return new GenDB.ExprAnd(left, right);
             }
             else
-                throw new Exception("NodeType unknown! "+expr.NodeType.ToString());
-        }
-
-        internal IExpression VisitUnaryExpression(UnaryExpression ue)
-        {
-            throw new Exception("not implemented");
+                return ExprNotTranslatable.Instance;
         }
 
         internal IValue VisitUnaryExpressionValue(UnaryExpression ue)
@@ -264,7 +247,7 @@ namespace GenDB
             }
             else
             {
-                throw new Exception("Unknown type: "+ue.Operand.GetType().Name);
+                return ValNotTranslatable.Instance;
             }
         }
 
@@ -433,7 +416,7 @@ namespace GenDB
                             break;
 
                         default:
-                            throw new Exception("MappingType not implemented: "+typeSystem.FindMappingType(me.Type));
+                            return ExprNotTranslatable.Instance;
                     }   
                 }
                 else
@@ -517,7 +500,7 @@ namespace GenDB
             }
             else
             {
-                throw new Exception("not impl");
+                parArr[0] = ValNotTranslatable.Instance;
             }
                 
             if(equality)
@@ -644,19 +627,16 @@ namespace GenDB
 
         internal static MemberExpression MakeMemberExpression(Expression expr, MemberInfo mi)
         {
-#if DEBUG
-            Console.WriteLine("MakeMemberExpression\n");
-#endif
             FieldInfo info3 = mi as FieldInfo;
             if (info3 != null)
             {
                 return Expression.Field(expr, info3);
             }
             PropertyInfo info4 = mi as PropertyInfo;
-            if (info4 == null)
-            {
-                throw new Exception("Member is not a Field or Property: " + mi);
-            }
+            //if (info4 == null)
+            //{
+            //    throw new Exception("Member is not a Field or Property: " + mi);
+            //}
             return Expression.Property(expr, info4);
         }
 
@@ -737,91 +717,6 @@ namespace GenDB
         Label_0093:
             throw new ArgumentException("eType: " + eType);
         }
-
         #endregion
-
-        private void ExceptionThrower(Expression e)
-        {
-            throw new Exception("Cannot translate " + e.ToString());
-        }
-
-        #region VisitNodeMethods
-
-        //internal IWhereable Visit(Expression exp)
-        ////internal Expression Visit(Expression exp)
-        //{
-        //    if (exp == null)
-        //    {
-        //        Console.WriteLine("Call to Visit: NodeType=null");
-        //        return null;
-        //    }
-            
-        //    switch (exp.NodeType)
-        //    {
-        //        case ExpressionType.Add:
-        //        case ExpressionType.AddChecked:
-        //        case ExpressionType.And:
-        //        case ExpressionType.AndAlso:
-        //        case ExpressionType.BitwiseAnd:
-        //        case ExpressionType.BitwiseOr:
-        //        case ExpressionType.BitwiseXor:
-        //        case ExpressionType.Coalesce:
-        //        case ExpressionType.Divide:
-        //        case ExpressionType.EQ:
-        //            //VisitEqExpr((BinaryExpression)exp);
-        //            //break;
-
-        //        case ExpressionType.GT:
-        //        case ExpressionType.GE:
-        //        case ExpressionType.Index:
-        //            throw new Exception("not implemented");
-        //        case ExpressionType.LE:
-        //            throw new Exception("LE not implemented");
-        //        case ExpressionType.LShift:
-        //        case ExpressionType.LT:
-        //        case ExpressionType.Modulo:
-        //        case ExpressionType.Multiply:
-        //        case ExpressionType.MultiplyChecked:
-        //        case ExpressionType.NE:
-        //        case ExpressionType.Or:
-        //        case ExpressionType.OrElse:
-        //        case ExpressionType.RShift:
-        //        case ExpressionType.Subtract:
-        //        case ExpressionType.SubtractChecked:
-        //        case ExpressionType.As:
-        //        case ExpressionType.BitwiseNot:
-        //        case ExpressionType.Cast:
-        //        case ExpressionType.Convert:
-        //        case ExpressionType.ConvertChecked:
-        //        case ExpressionType.Len:
-        //        case ExpressionType.Negate:
-        //        case ExpressionType.Not:
-        //        case ExpressionType.Quote:
-        //        case ExpressionType.Conditional:
-        //        case ExpressionType.Constant:
-        //        case ExpressionType.Funclet:
-        //        case ExpressionType.Invoke:
-        //        case ExpressionType.Is:
-        //            throw new Exception("not implemented");
-        //            ExceptionThrower(exp);
-                    
-        //        case ExpressionType.Lambda:
-        //            return VisitExpr(exp);
-
-        //        case ExpressionType.ListInit:
-        //        case ExpressionType.MemberAccess:
-        //        case ExpressionType.MemberInit:
-        //        case ExpressionType.MethodCall:
-        //        case ExpressionType.MethodCallVirtual:
-        //        case ExpressionType.New:
-        //        case ExpressionType.NewArrayInit:
-        //        case ExpressionType.NewArrayBounds:
-        //            throw new Exception("not implemented");
-                
-        //    }
-        //    throw new InvalidOperationException(string.Format("Unhandled Expression Type: {0}", exp.NodeType));
-        //}
-        #endregion
-
     }
 }
