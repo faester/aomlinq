@@ -26,7 +26,7 @@ namespace PerformanceTests
 
             DLinqTest dlinqtest = new DLinqTest(ewDLinqDB_write, ewDLinqDB_read, ewDLiqnDB_clear);
 
-            for (int objCount = 5000; objCount <= 10000; objCount += 5000)
+            for (int objCount = 5000; objCount <= 20000; objCount += 5000)
             {
                 Console.WriteLine("==========================================================");
                 for (int repetitions = 0; repetitions < 2; repetitions++)
