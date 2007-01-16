@@ -11,6 +11,12 @@ namespace GenDB
 
         IBusinessObject Translate(IEntity e);
 
+        IBusinessObject CreateInstanceOfIBusinessObject();
+
+        IEnumerable<FieldConverter> FieldConverters { get; }
+
+        void SetProperty(long propertyPOID, IBusinessObject obj, object propertyValue);
+
         IEntity Translate (IBusinessObject ibo);
 
         void SetValues(IBusinessObject ibo, IEntity ie);    

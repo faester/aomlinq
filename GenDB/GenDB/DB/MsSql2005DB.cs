@@ -101,6 +101,8 @@ namespace GenDB.DB
         const string TB_COLLECTION_KEY_NAME = "CollectionKey";
         #endregion
 
+       
+
         internal MsSql2005DB(DataContext dataContext)
         {
             this.dataContext = dataContext;
@@ -427,12 +429,30 @@ namespace GenDB.DB
             return willRemove;
         }
 
-        public IEnumerable<IEntity> Where(IExpression expression)
+        public IEnumerable<IBusinessObject> Where(IExpression expression)
         {
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
+            mswsb.Reset();
             mswsb.Visit(expression);
             string whereStr = mswsb.WhereStr;
+            return Where(whereStr);
+        }
 
+        public IBusinessObject GetByEntityPOID(long entityPOID)
+        {
+            int count = 0;
+            IBusinessObject res = null;
+            foreach(IBusinessObject ibo in Where(entityPOID.ToString()))
+            {
+                count++;
+                if (count > 1) { throw new Exception("Internal error. Wrong where string"); }
+                res = ibo;
+            }
+            return res;
+        }
+
+        private IEnumerable<IBusinessObject> Where(string whereStr)
+        {
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
@@ -458,14 +478,16 @@ namespace GenDB.DB
                 cmd.Connection = cnn;
                 SqlDataReader reader = cmd.ExecuteReader();
 
-                IEntity result = null;
-                IEntityType currentType = null;
+                IEntityType iet = null;
+                IIBoToEntityTranslator translator = null;
+                IBusinessObject result = null;
                 long propertyPOID = 0;
                 long entityTypePOID = 0;
                 long oldEntityTypePOID = entityTypePOID + 1; // Must be different
                 long entityPOID = 0;
                 long oldEntityPOID = entityPOID + 1; // Must be different
                 bool firstPass = true;
+                bool returnCacheCopy = false;
 
                 while (reader.Read())
                 {
@@ -473,52 +495,59 @@ namespace GenDB.DB
                     entityPOID = Convert.ToInt64(reader[6]);
                     if (entityTypePOID != oldEntityTypePOID || firstPass)
                     {
-                        currentType = dataContext.TypeSystem.GetEntityType(entityTypePOID);
+                        translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
+                        iet = DataContext.Instance.TypeSystem.GetEntityType(entityTypePOID);
                         oldEntityTypePOID = entityTypePOID;
                     } // if
                     if (entityPOID != oldEntityPOID || firstPass)
                     {
-                        if (result != null) { yield return result; }
-                        result = new Entity(); // We do not set DBIdentity (use NewEntity()) , since id is retrieved from DB.
-                        result.EntityType = currentType;
-                        result.EntityPOID = entityPOID;
+                        if (result != null) { 
+                            yield return result; 
+                        }
+
+                        result = IBOCache.Instance.Get(entityPOID);
+                        returnCacheCopy = result != null;
+                        if (!returnCacheCopy)
+                        {
+                            result = translator.CreateInstanceOfIBusinessObject(); // We do not set DBIdentity (use NewEntity()) , since id is retrieved from DB.
+                            IBOCache.Instance.Add(result, entityPOID);
+                        }
 
                         oldEntityPOID = entityPOID;
-
-                        foreach (IProperty prop in result.EntityType.GetAllProperties)
-                        {
-                            IPropertyValue pv = prop.CreateNewPropertyValue (result);
-                        } // foreach
                     } // if
-                    if (reader[1] != DBNull.Value) // Does any properties exist?
+                    if (reader[1] != DBNull.Value && !returnCacheCopy) // Does any properties exist?
                     {
                         propertyPOID = long.Parse(reader[1].ToString());
-                        IProperty p = result.EntityType.GetProperty(propertyPOID);
-                        IPropertyValue pv = result.GetPropertyValue(p);
-                        switch (p.MappingType)
+                        object value = null;
+                        switch (iet.GetProperty(propertyPOID).MappingType)
                         {
-                            case MappingType.BOOL: pv.BoolValue = bool.Parse(reader[3].ToString()); break;
-                            case MappingType.DATETIME: pv.DateTimeValue = new DateTime((long)reader[2]); break;
-                            case MappingType.DOUBLE: pv.DoubleValue = Convert.ToDouble(reader[5]); break;
-                            case MappingType.LONG: pv.LongValue = long.Parse(reader[2].ToString()); break;
-                            case MappingType.REFERENCE: if (reader[2] == DBNull.Value)
+                            case MappingType.BOOL: value = bool.Parse(reader[3].ToString()); break;
+                            case MappingType.DATETIME: value = new DateTime((long)reader[2]); break;
+                            case MappingType.DOUBLE: value = Convert.ToDouble(reader[5]); break;
+                            case MappingType.LONG: value = long.Parse(reader[2].ToString()); break;
+                            case MappingType.REFERENCE: 
+                                if (reader[2] == DBNull.Value)
                                 {
-                                    pv.RefValue = new IBOReference(true); break;
+                                    value = null;
+                                    break;
                                 }
                                 else
                                 {
-                                    pv.RefValue = new IBOReference(long.Parse(reader[2].ToString()));
+                                    value = long.Parse(reader[2].ToString());
                                     break;
                                 }
-                            case MappingType.STRING: pv.StringValue = (string)reader[4]; break;
+                            case MappingType.STRING: value = (string)reader[4]; break;
                             default: throw new Exception("Could not translate the property value.");
                         } // switch
+                        translator.SetProperty(propertyPOID, result, value);
                     } // if
                     firstPass = false;
                 } // while
 
                 if (!reader.IsClosed) { reader.Close(); }
-                if (result != null) { yield return result; }
+                if (result != null) { 
+                    yield return result; 
+                }
             }
         }
 

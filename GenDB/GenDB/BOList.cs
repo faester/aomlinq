@@ -133,7 +133,6 @@ namespace GenDB
 
         public void Add(T item)
         {
-            Console.WriteLine("My DBIdentifier: " + DBIdentity);
             if (!isListPopulated) { this.RetrieveElements(); }
             theList.Add(item);
         }

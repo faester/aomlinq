@@ -82,22 +82,19 @@ namespace GenDB
         {
             if (exprFullySqlTranslatable)
             {
-                foreach (IEntity ie in db.Where(expression))
+                foreach (T ie in db.Where(expression))
                 {
-                    iboCache.Remove(ie.EntityPOID);
+                    iboCache.Remove(ie.DBIdentity);
                 }
                 db.ClearWhere(expression);
             }
             else
             {
-                foreach (IEntity ie in db.Where(expression))
+                foreach (T deleteCandidate in db.Where(expression))
                 {
-                    IIBoToEntityTranslator trans = translators.GetTranslator(ie.EntityType.EntityTypePOID);
-
-                    T deleteCandidate = (T)trans.Translate (ie);
                     if (linqFunc(deleteCandidate))
                     {
-                        iboCache.Remove(ie.EntityPOID);
+                        iboCache.Remove(deleteCandidate.DBIdentity);
                         db.ClearWhere(new OP_Equals (new VarReference(deleteCandidate), CstThis.Instance));
                     }
                 }
@@ -116,7 +113,7 @@ namespace GenDB
             if (e == null) { return false;}
             if (e.DBIdentity == 0) { return false; }
             IExpression where = new OP_Equals(new VarReference(e), CstThis.Instance);
-            foreach (IEntity ibo in db.Where(where))
+            foreach (T ibo in db.Where(where))
             {
                 return true;
             }
@@ -165,11 +162,9 @@ namespace GenDB
                 else
                 {
                     int count = 0;
-                    foreach(IEntity e in db.Where(expression))
+                    foreach (T ibo in db.Where(expression))
                     {
-                        IIBoToEntityTranslator trans = translators.GetTranslator(e.EntityType.EntityTypePOID);
-                        T test = (T)trans.Translate (e);
-                        if (linqFunc(test)) { count++; }
+                        if (linqFunc(ibo)) { count++; }
                     }
                     return count;
                 }
@@ -191,22 +186,17 @@ namespace GenDB
         {
             IEntityType lastType = null;
             IIBoToEntityTranslator translator = null;
-            foreach (IEntity e in db.Where(expression))
+            foreach (T e in db.Where(expression))
             {
-                if (lastType != e.EntityType)
-                {
-                    translator = translators.GetTranslator (e.EntityType.EntityTypePOID);
-                }
-                T res = (T)translator.Translate (e);
                 if (exprFullySqlTranslatable)
                 {
-                    yield return res;
+                    yield return e;
                 }
                 else
                 {
-                    if (linqFunc(res))
+                    if (linqFunc(e))
                     {
-                        yield return res;
+                        yield return e;
                     }
                 }
             }

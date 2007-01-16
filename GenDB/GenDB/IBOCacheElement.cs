@@ -8,6 +8,13 @@ namespace GenDB
     {
         WeakReference wr;
         long entityPOID;
+        int generation;
+
+        public int Generation
+        {
+            get { return generation; }
+            set { generation = value; }
+        }
 
         public long EntityPOID
         {
@@ -25,8 +32,9 @@ namespace GenDB
 
         private IBOCacheElement() { /* empty */ }
 
-        public IBOCacheElement(IBusinessObject target)
+        public IBOCacheElement(IBusinessObject target, int generation)
         {
+            this.generation = generation;
             original = target;
             wr = new WeakReference(target);
             clone = (IBusinessObject)ObjectUtilities.MakeClone(target);

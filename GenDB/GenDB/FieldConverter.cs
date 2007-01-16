@@ -13,32 +13,37 @@ namespace GenDB
     {
         PropertyValueGetter pvg;
         PropertyValueSetter pvs;
+        PropertySetter propertySetter;
+
+        internal PropertySetter PropertySetter
+        {
+            get { return propertySetter; }
+        }
+
         SetHandler fieldSetHandler;
-
-        internal SetHandler FieldSetHandler
-        {
-            get { return fieldSetHandler; }
-        }
-
         GetHandler fieldGetHandler;
-
-        internal GetHandler FieldGetHandler
-        {
-            get { return fieldGetHandler; }
-        }
-
         Type clrType;
-        PropertyInfo fi;
+        PropertyInfo propertyInfo;
         DataContext dataContext;
 
-        public FieldConverter(Type t, PropertyInfo fi, IProperty property, DataContext dataContext)
+        long propertyPOID;
+
+        public long PropertyPOID
+        {
+            get { return propertyPOID; }
+            set { propertyPOID = value; }
+        }
+
+        public FieldConverter(Type t, PropertyInfo propInfo, IProperty property, DataContext dataContext)
         {
             this.dataContext = dataContext;
-            this.fi = fi;
+            this.propertyInfo = propInfo;
+            this.propertyPOID = property.PropertyPOID;
             clrType = t;
-            fieldSetHandler = DynamicMethodCompiler.CreateSetHandler(t, fi);
-            fieldGetHandler = DynamicMethodCompiler.CreateGetHandler(t, fi);
-            pvg = CreateGetter(fi, property);
+            fieldSetHandler = DynamicMethodCompiler.CreateSetHandler(t, propInfo);
+            fieldGetHandler = DynamicMethodCompiler.CreateGetHandler(t, propInfo);
+            propertySetter = CreatePropertySetter(propInfo);
+            pvg = CreateGetter(propInfo, property);
             pvs = CreateSetter(property);
         }
 
@@ -53,10 +58,10 @@ namespace GenDB
             pvs(e, fieldGetHandler(ibo));
         }
 
-        private PropertyValueGetter CreateGetter(PropertyInfo fi, IProperty prop)
+        private PropertyValueGetter CreateGetter(PropertyInfo propInfo, IProperty prop)
         {
-            if ((fi.PropertyType.IsByRef || fi.PropertyType.IsClass) 
-                && !(fi.PropertyType == typeof(string) || fi.PropertyType == typeof(DateTime))
+            if ((propInfo.PropertyType.IsByRef || propInfo.PropertyType.IsClass) 
+                && !(propInfo.PropertyType == typeof(string) || propInfo.PropertyType == typeof(DateTime))
                 )
             { // Handles references other than string and DateTime
                 return delegate(IEntity ie)
@@ -80,74 +85,74 @@ namespace GenDB
                     }
                 };
             }
-            if (fi.PropertyType == typeof(long))
+            if (propInfo.PropertyType == typeof(long))
             {
                 return delegate(IEntity ie)
                 {
                     return ie.GetPropertyValue(prop).LongValue;
                 };
             }
-            else if (fi.PropertyType == typeof(int))
+            else if (propInfo.PropertyType == typeof(int))
             {
                 return delegate(IEntity ie) { return (int)ie.GetPropertyValue(prop).LongValue; };
             }
-            else if (fi.PropertyType == typeof(string))
+            else if (propInfo.PropertyType == typeof(string))
             {
                 return delegate(IEntity ie)
                 {
                     return ie.GetPropertyValue(prop).StringValue;
                 };
             }
-            else if (fi.PropertyType == typeof(DateTime))
+            else if (propInfo.PropertyType == typeof(DateTime))
             {
                 return delegate(IEntity ie)
                 {
                     return ie.GetPropertyValue(prop).DateTimeValue;
                 };
             }
-            else if (fi.PropertyType == typeof(bool))
+            else if (propInfo.PropertyType == typeof(bool))
             {
                 return delegate(IEntity ie) { return ie.GetPropertyValue(prop).BoolValue; };
             }
-            else if (fi.PropertyType == typeof(char))
+            else if (propInfo.PropertyType == typeof(char))
             {
                 return delegate(IEntity ie) {  //
                     return Convert.ToChar(ie.GetPropertyValue(prop).LongValue);
                 };
             }
-            else if (fi.PropertyType == typeof(float))
+            else if (propInfo.PropertyType == typeof(float))
             {
                 return delegate(IEntity ie)
                 {  //
                     return Convert.ToSingle(ie.GetPropertyValue(prop).DoubleValue);
                 };
             }
-            else if (fi.PropertyType == typeof(double))
+            else if (propInfo.PropertyType == typeof(double))
             {
                 return delegate(IEntity ie)
                 {  //
                     return ie.GetPropertyValue(prop).DoubleValue;
                 };
             }
-            else if (fi.PropertyType.IsEnum)
+            else if (propInfo.PropertyType.IsEnum)
             {
                 return delegate (IEntity ie)
                 {
                     // Oversætter til array indeholdende alle mulige værdier for den pågældende enum.
                     // Dernæst vælges værdien gemt index Long-feltet index den pågældende PropertyValue record.
-                    System.Collections.IList vals =  (System.Collections.IList) Enum.GetValues(fi.PropertyType);
+                    System.Collections.IList vals =  (System.Collections.IList) Enum.GetValues(propInfo.PropertyType);
                     return vals[(int)ie.GetPropertyValue(prop).LongValue];
-                    //return Enum.GetValues (fi.PropertyType). ((int)ie.GetPropertyValue(prop).LongValue);
+                    //return Enum.GetValues (propInfo.PropertyType). ((int)ie.GetPropertyValue(prop).LongValue);
                 };
             }
-            else if (fi.PropertyType == typeof(short))
+            else if (propInfo.PropertyType == typeof(short))
             {
                 return delegate(IEntity ie)
                 {  //
                     return Convert.ToInt16(ie.GetPropertyValue(prop).LongValue);
                 };
             }
-            else if (fi.PropertyType == typeof(uint))
+            else if (propInfo.PropertyType == typeof(uint))
             {
                 return delegate(IEntity ie)
                 {  //
@@ -156,7 +161,7 @@ namespace GenDB
             }
             else 
             {
-                throw new NotTranslatableException("Have not implemented PropertyValueGetter for field type.", fi);
+                throw new NotTranslatableException("Have not implemented PropertyValueGetter for field type.", propInfo);
             }
         }
 
@@ -213,6 +218,124 @@ namespace GenDB
                     };
                 default:
                     throw new Exception("Unknown MappingType in DelegateTranslator, CreateSetter: " + p.MappingType);
+            }
+        }
+
+        private PropertySetter CreatePropertySetter(PropertyInfo propInfo)
+        {
+            if ((propInfo.PropertyType.IsByRef || propInfo.PropertyType.IsClass) 
+                && !(propInfo.PropertyType == typeof(string) || propInfo.PropertyType == typeof(DateTime))
+                )
+            { // Handles references other than string and DateTime
+                return delegate(IBusinessObject ibo, object value)
+                {
+                    if (value == DBNull.Value || value == null) 
+                    {
+                        fieldSetHandler(ibo, null);
+                        return;
+                    }
+
+                    long refEntityPOID = Convert.ToInt64(value);
+
+                    IBusinessObject iboVal = IBOCache.Instance.Get(refEntityPOID);
+
+                    if (iboVal == null) 
+                    {
+                        IExpression where = new OP_Equals(new CstLong(refEntityPOID), CstThis.Instance);
+                        // TODO: Kunne nok gøres hurtigere...
+                        iboVal = dataContext.GenDB.GetByEntityPOID(refEntityPOID);
+                        fieldSetHandler(ibo, iboVal);
+                        return;
+                    }
+                    else
+                    {
+                        fieldSetHandler(ibo, iboVal);
+                    }
+                };
+            }
+            else if (propInfo.PropertyType == typeof(long))
+            {
+                return delegate(IBusinessObject ibo, object value)
+                {
+                    fieldSetHandler(ibo, Convert.ToInt64(value));
+                };
+            }
+            else if (propInfo.PropertyType == typeof(int))
+            {
+                return delegate(IBusinessObject ibo, object value) 
+                { 
+                    fieldSetHandler(ibo, Convert.ToInt32(value));
+                };
+            }
+            else if (propInfo.PropertyType == typeof(string))
+            {
+                return delegate(IBusinessObject ibo, object value)
+                {
+                    fieldSetHandler(ibo, value.ToString());
+                };
+            }
+            else if (propInfo.PropertyType == typeof(DateTime))
+            {
+                return delegate(IBusinessObject ibo, object value)
+                {
+                    fieldSetHandler(ibo, Convert.ToDateTime(value));
+                };
+            }
+            else if (propInfo.PropertyType == typeof(bool))
+            {
+                return delegate(IBusinessObject ibo, object value) 
+                {
+                    fieldSetHandler(ibo, Convert.ToBoolean(value));
+                };
+            }
+            else if (propInfo.PropertyType == typeof(char))
+            {
+                return delegate(IBusinessObject ibo, object value) {  //
+                    fieldSetHandler(ibo, Convert.ToChar(value));
+                };
+            }
+            else if (propInfo.PropertyType == typeof(float))
+            {
+                return delegate(IBusinessObject ibo, object value)
+                {  //
+                    fieldSetHandler(ibo, Convert.ToSingle(value));
+                };
+            }
+            else if (propInfo.PropertyType == typeof(double))
+            {
+                return delegate(IBusinessObject ibo, object value)
+                {  //
+                    fieldSetHandler(ibo, Convert.ToDouble(value));
+                };
+            }
+            else if (propInfo.PropertyType.IsEnum)
+            {
+                return delegate (IBusinessObject ibo, object value)
+                {
+                    // Oversætter til array indeholdende alle mulige værdier for den pågældende enum.
+                    // Dernæst vælges værdien gemt index Long-feltet index den pågældende PropertyValue record.
+                    System.Collections.IList vals =  (System.Collections.IList) Enum.GetValues(propInfo.PropertyType);
+                    fieldSetHandler(ibo,  vals[Convert.ToInt32(value)]);
+                    //return Enum.GetValues (propInfo.PropertyType). ((int)ie.GetPropertyValue(prop).LongValue);
+                };
+            }
+            else if (propInfo.PropertyType == typeof(short))
+            {
+                return delegate(IBusinessObject ibo, object value)
+                {  //
+                    fieldSetHandler(ibo, Convert.ToInt16(value));
+                };
+            }
+            else if (propInfo.PropertyType == typeof(uint))
+            {
+                return delegate(IBusinessObject ibo, object value)
+                {  //
+                    fieldSetHandler(ibo, Convert.ToUInt32(value));
+                };
+            }
+            else 
+            {
+                throw new NotTranslatableException("Have not implemented PropertyValueGetter for field type.", propInfo);
             }
         }
     }
