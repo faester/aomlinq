@@ -108,7 +108,7 @@ namespace GenDB
             foreach (PropertyInfo clrProperty in fields)
             {
                 Attribute a = Volatile.GetCustomAttribute(clrProperty, typeof(Volatile));
-                if (clrProperty.Name != "EntityPOID" && a == null)
+                if (clrProperty.PropertyType != typeof(DBIdentifier) && a == null)
                 {
                     IProperty prop = properties[clrProperty.Name];
                     fieldConverters.AddLast(new FieldConverter(t, clrProperty, prop, dataContext));

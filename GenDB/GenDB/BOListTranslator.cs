@@ -88,7 +88,7 @@ namespace GenDB
             e.EntityType = entityType;
             pv.StringValue = elementType.FullName;
 
-            if (!ibo.DBIdentity.IsPersistent) 
+            if (ibo.DBIdentity.IsPersistent) 
             { 
                 e.EntityPOID = ibo.DBIdentity; 
             }
