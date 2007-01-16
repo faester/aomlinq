@@ -42,6 +42,7 @@ namespace QueryToSqlTranslationTests
                 TestPerson tp = new TestPerson();
                 tp.Name = "Name" + i.ToString();
                 tp.Age = i;
+                if(i%2==0) tp.GoodLooking=true;
                 tp.Spouse = lastPerson;
                 lastPerson = tp;
                 ttp.Add(tp);
@@ -341,6 +342,25 @@ namespace QueryToSqlTranslationTests
                 Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
             }
             Assert.IsTrue(qs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
+        }
+
+        [Test]
+        public void TestReferenceFieldBooleanPropertyFilter()
+        {
+            var qs_false  = from persons in ttp
+                      where persons.Spouse.GoodLooking == false
+                      select persons;
+            Assert.AreEqual(4, qs_false.Count,"there should be 5 ugly bastards out there!!");
+
+            foreach(var person in qs_false)
+            {
+                Assert.IsFalse(person.Spouse.GoodLooking,"this person should have been ugly");
+            }
+
+            var qs_true  = from persons in ttp
+                      where persons.Spouse.GoodLooking == true
+                      select persons;
+            Assert.AreEqual(5, qs_true.Count,"there should be 5 beauty's out there!!");
         }
 
         [Test]

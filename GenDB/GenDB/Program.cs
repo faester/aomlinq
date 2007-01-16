@@ -39,7 +39,8 @@ namespace GenDB
         public class Car : AbstractBusinessObject
         {
             string brand = "Volvo";
-             bool sunroof = false;
+            bool sunroof;
+            int seets;
             Motor motor = new Motor();
 
             public string Brand
@@ -52,6 +53,12 @@ namespace GenDB
             {
                 get{return sunroof;}
                 set{sunroof=value;}
+            }
+
+            public int Seets
+            {
+                get{return seets;}
+                set{seets=value;}
             }
 
             public Motor Motor
@@ -188,6 +195,8 @@ namespace GenDB
             {
                 Car c = new Car();
                 c.Brand = (i - 1).ToString();
+                c.Seets = i%4;
+                if(i%2==0)c.Sunroof = true;
                 Person p = new Person{ Name = "Navn " + i };
                 p.Car = c;
                 if (i % 2 == 0) { p.Sex = Sex.FEMALE; }
@@ -214,28 +223,23 @@ namespace GenDB
             
             var es = from epp in tp     
                 //where epp.disco == "21"
-                where epp.Age == 4
-                //where !(epp.Name != "Navn 3")
-                //where epp.Sex == Sex.FEMALE || epp.Name == "Navn 3"
-                //where epp.Name == "Navn 6" || epp.Age == 7
-                //where epp.Name.Length > 0
+                //where epp.Age == 4
                 //where epp.Alive
                 //where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7" || epp.Name == "Navn 1" || epp.Age == 3
                 //where epp.Spouse.Age == 3 || epp.Spouse.Age == 4
-                //where epp.Name.Substring(3) == "sd"
-                //where epp.Spouse.DaysLeft() < t
-                //where epp.Car.Brand == "Volvo"
+
                 //where epp.Car.Motor.HorsePower == "400"
                 //where epp.Car.Motor.Valve == 6
-                //where epp.Car.Sunroof==false
+                where epp.Car.Sunroof==false
+                //where !(epp.Age!=4)
                 select epp;
                 //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
 
-            //var fs = from q in es where q.Age > 10 select q;
 
             foreach(Person p in es)
             {
                 ObjectUtilities.PrintOut (p);
+                //Console.WriteLine("*********************** Sunroof: "+p.Car.Sunroof);
             }
             
             Console.WriteLine("Size of Table: {0}", es.Count);
