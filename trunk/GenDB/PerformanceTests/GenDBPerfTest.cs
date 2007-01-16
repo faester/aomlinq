@@ -52,7 +52,7 @@ namespace PerformanceTests
                 count++;
             }
             long ms = sw.ElapsedMilliseconds;
-            ewRead.WriteInformation(count, ms / 1000);
+            ewRead.WriteInformation(count, ms / 1000.0);
             Console.WriteLine("GenDB read: {0} objs {1} sek", count, ms / 1000.0);
         }
 
