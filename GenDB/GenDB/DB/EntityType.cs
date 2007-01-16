@@ -18,6 +18,7 @@ namespace GenDB.DB
         IEntityType superEntityType;
 
         Dictionary<long, IProperty> properties;
+        LinkedList<IProperty> allProperties = null;
 
         public IProperty GetProperty(string propertyname)
         {
@@ -47,27 +48,36 @@ namespace GenDB.DB
             }
         }
 
+        private void CreateAllProperties()
+        {
+            allProperties = new LinkedList<IProperty>();
+            if (DeclaredProperties != null)
+            {
+                foreach (IProperty p in DeclaredProperties)
+                {
+                    allProperties.AddLast(p);
+                }
+            }
+            if (superEntityType != null)
+            {
+                foreach (IProperty p in superEntityType.GetAllProperties)
+                {
+                    allProperties.AddLast(p);
+                }
+            }
+        }
+
         public IEnumerable<IProperty> GetAllProperties
         {
             get
             {
-                if (DeclaredProperties != null)
+                if (allProperties == null)
                 {
-                    foreach (IProperty p in DeclaredProperties)
-                    {
-                        yield return p;
-                    }
+                    CreateAllProperties();
                 }
-                if (superEntityType != null)
+                foreach(IProperty p in allProperties)
                 {
-                    foreach (IProperty p in superEntityType.GetAllProperties)
-                    {
-                        yield return p;
-                    }
-                }
-                else
-                {
-                    yield break;
+                    yield return p;
                 }
             }
         }

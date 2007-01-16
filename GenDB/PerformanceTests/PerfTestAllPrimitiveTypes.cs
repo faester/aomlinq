@@ -22,7 +22,7 @@ namespace PerformanceTests
         }
 
         long id;
-        [Column(Id = true, AutoGen = true)]
+        [Column(Id = true, AutoGen = true), Volatile]
         public long Id
         {
             get { return id; }
