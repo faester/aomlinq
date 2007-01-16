@@ -197,6 +197,36 @@ namespace IBOCache
             Assert.AreEqual(0, dt.CommittedObjectsSize, "Committed objects still contained values");
         }
 
+
+        [Test]
+        public void TestChangesPersisted()
+        {
+            int obs = 500;
+            Table<ContainsAllPrimitiveTypes> tcapt = dt.CreateTable<ContainsAllPrimitiveTypes>();
+
+            for (int i = 0; i < obs; i++)
+            {
+                tcapt.Add (new ContainsAllPrimitiveTypes());
+            }
+            
+            dt.SubmitChanges();
+            GC.Collect();
+
+            foreach(ContainsAllPrimitiveTypes c in tcapt)
+            {
+                c.Integer = 1000;
+                c.Str = "Changed";
+            }
+            
+            dt.SubmitChanges();
+            GC.Collect();
+
+            foreach(ContainsAllPrimitiveTypes c in tcapt)
+            {
+                Assert.AreEqual("Changed", c.Str, "Ændring ikke persisteret!");
+                Assert.AreEqual(1000, c.Integer, "Ændring ikke persisteret!");
+            }
+        }
     }
 
 
