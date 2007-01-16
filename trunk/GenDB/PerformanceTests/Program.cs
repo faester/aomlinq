@@ -26,27 +26,57 @@ namespace PerformanceTests
 
             DLinqTest dlinqtest = new DLinqTest(ewDLinqDB_write, ewDLinqDB_read, ewDLiqnDB_clear);
 
+            long dlms = 0;
+            long gdbms = 0;
+
             for (int objCount = 5000; objCount <= 20000; objCount += 5000)
             {
                 Console.WriteLine("==========================================================");
-                for (int repetitions = 0; repetitions < 2; repetitions++)
+                Console.WriteLine("Writing {0} objects", objCount);
+                stopwatch.Reset();
+                stopwatch.Start();
+                gdbtest.PerformWriteTest(objCount);
+                Console.WriteLine("GenDB used {0} ms", stopwatch.ElapsedMilliseconds);
+
+                stopwatch.Reset();
+                stopwatch.Start();
+                dlinqtest.PerformWriteTest(objCount);
+                Console.WriteLine("DLinq used {0} ms", stopwatch.ElapsedMilliseconds);
+
+                Console.WriteLine();
+                Console.WriteLine("Now performing read tests");
+
+                for (int repetitions = 0; repetitions < 10; repetitions++)
                 {
                     long ms = 0;
 
                     stopwatch.Reset();
                     stopwatch.Start();
-                    gdbtest.PerformTests(objCount);
+                    gdbtest.PerformReadTest();
                     ms = stopwatch.ElapsedMilliseconds;
                     Console.WriteLine("GenDB: {0} objs in test took {1} ms. {2} objs/sec", objCount, ms, ms > 0 ? (objCount * 1000) / ms : -1);
-
+                    gdbms += ms;
                     stopwatch.Reset();
                     stopwatch.Start();
-                    dlinqtest.PerformTests(objCount);
+                    dlinqtest.PerformReadTest();
                     ms = stopwatch.ElapsedMilliseconds;
                     Console.WriteLine("DLinq: {0} objs in test took {1} ms. {2} objs/sec", objCount, ms, ms > 0 ? (objCount * 1000) / ms : -1);
+                    dlms += ms;
+                    Console.WriteLine("Akkumuleret læsefaktor: {0}", ((double)gdbms) / dlms);
                     Console.WriteLine();
                 }
+
+                Console.WriteLine("Clearing tables...");
+                stopwatch.Reset();
+                stopwatch.Start();
+                gdbtest.PerformClearTest();
+                long gendbms = stopwatch.ElapsedMilliseconds;
+                dlinqtest.PerformClearTest();
+                long dlinqms = stopwatch.ElapsedMilliseconds - gendbms ;
+                Console.WriteLine("Clear times: GenDB {0} ms, DLinq {1} ms", gendbms, dlinqms);
             }
+
+            Console.WriteLine("Akkumuleret læsefaktor: {0}", ((double)gdbms) / dlms);
             ewGenDB_write.Dispose();
 
             Console.WriteLine("Press return...");

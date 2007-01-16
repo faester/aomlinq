@@ -46,7 +46,7 @@ namespace PerformanceTests
             PerformClearTest();
         }
 
-        private void PerformWriteTest(int objectsToWrite)
+        public void PerformWriteTest(int objectsToWrite)
         {
             lastInsert = objectsToWrite;
             Stopwatch sw = new Stopwatch();
@@ -59,7 +59,7 @@ namespace PerformanceTests
             ewWrite.WriteInformation(objectsToWrite, sw.ElapsedMilliseconds);
         }
 
-        private void PerformReadTest()
+        public void PerformReadTest()
         {
             int count = 0;
             Stopwatch sw = new Stopwatch();
@@ -73,7 +73,7 @@ namespace PerformanceTests
             Console.WriteLine("DLinq read: {0} objs {1} sek", count, ms / 1000.0);
         }
 
-        private void PerformClearTest()
+        public void PerformClearTest()
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
