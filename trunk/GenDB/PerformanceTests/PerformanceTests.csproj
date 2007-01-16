@@ -35,7 +35,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ContainsAllPrimitiveTypes.cs" />
+    <Compile Include="PerfTestAllPrimitiveTypes.cs" />
     <Compile Include="DLinqWriteTest.cs" />
     <Compile Include="ExcelWriter.cs" />
     <Compile Include="GenDBPerfTest.cs" />
