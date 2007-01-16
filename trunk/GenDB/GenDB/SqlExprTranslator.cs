@@ -16,7 +16,6 @@ namespace GenDB
         { }
     }
 
-    // internal class fra System.Query.dll, sakset via reflector
     internal class SqlExprTranslator
     {
         TypeSystem typeSystem; 
@@ -28,7 +27,6 @@ namespace GenDB
 
         public IExpression Convert(Expression expr)
         {
-            
             return VisitExpr(expr);
         }
 
@@ -515,9 +513,6 @@ namespace GenDB
 
         internal static BinaryExpression MakeBinaryExpression(ExpressionType eType, Expression left, Expression right)
         {
-#if DEBUG
-            Console.WriteLine("MakeBinaryExpression\n");
-#endif
             switch (eType)
             {
                 case ExpressionType.Add:
