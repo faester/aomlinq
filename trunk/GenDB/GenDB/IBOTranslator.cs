@@ -13,6 +13,7 @@ namespace GenDB
      */
     delegate object PropertyValueGetter(IEntity e);
     delegate void PropertyValueSetter(IEntity e, object value);
+    delegate void PropertySetter(IBusinessObject ibo, object value);
 
 
     /// <summary>
@@ -31,12 +32,43 @@ namespace GenDB
         Type t;
         PropertyInfo[] fields;
         LinkedList<FieldConverter> fieldConverters = new LinkedList<FieldConverter>();
+
+        public IEnumerable<FieldConverter> FieldConverters
+        {
+            get {
+                foreach(FieldConverter fc in fieldConverters)
+                {
+                    yield return fc;
+                }
+                if (superTranslator != null)
+                {
+                    foreach (FieldConverter fc in superTranslator.FieldConverters)
+                    {
+                        yield return fc;
+                    }
+                }
+            }
+        
+        }
+
+        Dictionary<long, FieldConverter> fieldConverterDict = new Dictionary<long, FieldConverter>();
+        
         InstantiateObjectHandler instantiator;
         private IBOTranslator() { /* empty */ }
 
         public IEntityType EntityType
         {
             get { return entityType; }
+        }
+
+        public IBusinessObject CreateInstanceOfIBusinessObject()
+        {
+            return (IBusinessObject)instantiator();
+        }
+
+        public void SetProperty(long propertyPOID, IBusinessObject obj, object propertyValue)
+        {
+            fieldConverterDict[propertyPOID].PropertySetter(obj, propertyValue);
         }
 
         public IBOTranslator(Type t, IEntityType iet, DataContext dataContext)
@@ -74,6 +106,10 @@ namespace GenDB
             if (entityType.SuperEntityType != null)
             {
                 superTranslator = dataContext.Translators.GetTranslator(entityType.SuperEntityType.EntityTypePOID);
+                foreach (FieldConverter fc in superTranslator.FieldConverters)
+                {
+                    fieldConverterDict[fc.PropertyPOID] = fc;
+                }
             }
         }
 
@@ -112,6 +148,7 @@ namespace GenDB
                 {
                     IProperty prop = properties[clrProperty.Name];
                     fieldConverters.AddLast(new FieldConverter(t, clrProperty, prop, dataContext));
+                    fieldConverterDict[prop.PropertyPOID] = fieldConverters.Last.Value;
                     if (
                         TranslatorChecks.ImplementsIBusinessObject(clrProperty.PropertyType)
                         && !dataContext.TypeSystem.IsTypeKnown(clrProperty.PropertyType)

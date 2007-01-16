@@ -128,5 +128,19 @@ namespace GenDB
             saveable.SaveElementsToDB();
         }
 
+        public IBusinessObject CreateInstanceOfIBusinessObject()
+        {
+            throw new Exception("Them BOList's surely are a bore.");
+        }
+
+        public void SetProperty(long propertyPoid, IBusinessObject ibo, object obj)
+        {
+            throw new Exception("Them BOList's surely are a bore.");
+        }
+
+        public IEnumerable<FieldConverter> FieldConverters 
+        {
+            get { throw new Exception("Not implemented....."); }
+        }
     }
 }

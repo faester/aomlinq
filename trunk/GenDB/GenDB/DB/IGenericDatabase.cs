@@ -272,7 +272,7 @@ namespace GenDB.DB
         /// <param name="entityType"></param>
         void Save(IEntityType entityType);
 
-        IEnumerable<IEntity> Where(IExpression expression);
+        IEnumerable<IBusinessObject> Where(IExpression expression);
 
         int Count(IWhereable expression);
 
@@ -284,6 +284,8 @@ namespace GenDB.DB
         void Save(IEntity entity);
 
         void Save(IGenCollectionElement ce, long collectionElementPOID, MappingType mt);
+
+        IBusinessObject GetByEntityPOID(long entityPOID);
 
         void CommitChanges();
 

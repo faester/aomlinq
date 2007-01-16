@@ -12,6 +12,9 @@ namespace GenDB
     internal class IBOCache
     {
         int MAX_OLD_OBJECTS_TO_KEEP = 1000;
+
+        int generation = 0;
+
         private static IBOCache instance = null;
 
         /// <summary>
@@ -79,7 +82,7 @@ namespace GenDB
 
         private void AddToCommitted(IBusinessObject obj)
         {
-            IBOCacheElement wr = new IBOCacheElement(obj);
+            IBOCacheElement wr = new IBOCacheElement(obj, generation);
             committedObjects[obj.DBIdentity] = wr;
         }
 
@@ -105,7 +108,6 @@ namespace GenDB
                 {
                     return null;
                 }
-
             }
             else
             {
@@ -127,6 +129,8 @@ namespace GenDB
         {
 #if DEBUG
             Console.WriteLine("Committed objects contains {0} elements", committedObjects.Count);
+            Console.WriteLine("IBOCache contains {0} committed objects.", CommittedObjectsSize);
+            int removeCount = 0;
 #endif
             IBOCacheElement[] ll = new IBOCacheElement[committedObjects.Count];
             committedObjects.Values.CopyTo(ll, 0);
@@ -144,13 +148,15 @@ namespace GenDB
                 }
                 else
                 {
+#if DEBUG
+                    removeCount++;
+#endif
                     Remove(ce.EntityPOID);
-                    //throw new Exception("Objektet skal fjernes fra cachen her.");
                 }
             }
             ll = null;
-
 #if DEBUG
+            Console.WriteLine("IBOCache removed {0} objects.", removeCount);
             Console.WriteLine("Committed objects now contains {0} elements", committedObjects.Count);
 #endif
         }
@@ -180,6 +186,7 @@ namespace GenDB
             stp.Reset();
             stp.Start();
 #endif
+            generation++;
             dataContext.GenDB.CommitChanges();
 #if DEBUG
             stp.Stop();
