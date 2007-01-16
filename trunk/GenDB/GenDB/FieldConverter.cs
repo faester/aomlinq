@@ -122,7 +122,7 @@ namespace GenDB
                         return;
                     }
 
-                    long refEntityPOID = Convert.ToInt64(value);
+                    long refEntityPOID = (long)value;
 
                     IBusinessObject iboVal = IBOCache.Instance.Get(refEntityPOID);
 
@@ -144,14 +144,14 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {
-                    fieldSetHandler(ibo, Convert.ToInt64(value));
+                    fieldSetHandler(ibo, (long)value);
                 };
             }
             else if (propInfo.PropertyType == typeof(int))
             {
                 return delegate(IBusinessObject ibo, object value) 
-                { 
-                    fieldSetHandler(ibo, Convert.ToInt32(value));
+                {
+                    fieldSetHandler(ibo, ((IConvertible) value).ToInt32(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(string))
@@ -165,7 +165,7 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {
-                    fieldSetHandler(ibo, Convert.ToDateTime(value));
+                    fieldSetHandler(ibo, (DateTime)value);
                 };
             }
             else if (propInfo.PropertyType == typeof(bool))
@@ -178,21 +178,21 @@ namespace GenDB
             else if (propInfo.PropertyType == typeof(char))
             {
                 return delegate(IBusinessObject ibo, object value) {  //
-                    fieldSetHandler(ibo, Convert.ToChar(value));
+                    fieldSetHandler(ibo, ((IConvertible) value).ToChar(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(float))
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    fieldSetHandler(ibo, Convert.ToSingle(value));
+                    fieldSetHandler(ibo, ((IConvertible)value).ToSingle(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(double))
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    fieldSetHandler(ibo, Convert.ToDouble(value));
+                    fieldSetHandler(ibo, (double)(value));
                 };
             }
             else if (propInfo.PropertyType.IsEnum)
@@ -210,19 +210,19 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    fieldSetHandler(ibo, Convert.ToInt16(value));
+                    fieldSetHandler(ibo, ((IConvertible) value).ToInt16(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(uint))
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    fieldSetHandler(ibo, Convert.ToUInt32(value));
+                    fieldSetHandler(ibo, ((IConvertible) value).ToUInt32(null));
                 };
             }
             else 
             {
-                throw new NotTranslatableException("Have not implemented PropertyValueGetter for field type.", propInfo);
+                throw new NotTranslatableException("Have not implemented PropertySetter for field type.", propInfo);
             }
         }
     }
