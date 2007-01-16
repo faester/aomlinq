@@ -8,10 +8,10 @@ namespace GenDB
 {
     /*
      * http://www.codeproject.com/csharp/csharpcasts.asp
+     * TODO: Rename til PropertyConverter
      */
     class FieldConverter
     {
-        PropertyValueGetter pvg;
         PropertyValueSetter pvs;
         PropertySetter propertySetter;
 
@@ -43,126 +43,13 @@ namespace GenDB
             fieldSetHandler = DynamicMethodCompiler.CreateSetHandler(t, propInfo);
             fieldGetHandler = DynamicMethodCompiler.CreateGetHandler(t, propInfo);
             propertySetter = CreatePropertySetter(propInfo);
-            pvg = CreateGetter(propInfo, property);
+            //pvg = CreateGetter(propInfo, property);
             pvs = CreateSetter(property);
-        }
-
-        public void SetObjectFieldValue(IBusinessObject ibo, IEntity entity)
-        {
-            object value = pvg(entity);
-            fieldSetHandler(ibo, value);
         }
 
         public void SetEntityPropertyValue(IBusinessObject ibo, IEntity e)
         {
             pvs(e, fieldGetHandler(ibo));
-        }
-
-        private PropertyValueGetter CreateGetter(PropertyInfo propInfo, IProperty prop)
-        {
-            if ((propInfo.PropertyType.IsByRef || propInfo.PropertyType.IsClass) 
-                && !(propInfo.PropertyType == typeof(string) || propInfo.PropertyType == typeof(DateTime))
-                )
-            { // Handles references other than string and DateTime
-                return delegate(IEntity ie)
-                {
-                    IBOReference entityRef = (IBOReference)(ie.GetPropertyValue(prop).RefValue);
-                    if (!entityRef.IsNullReference)
-                    {
-                        IBusinessObject res = dataContext.IBOCache.Get(entityRef.EntityPOID);
-                        if (res == null)
-                        {
-                            IEntity e = dataContext.GenDB.GetEntity(entityRef.EntityPOID);
-                            //IIBoToEntityTranslator trans = TypeSystem.RegisterTranslator(clrType);
-                            IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(e.EntityType.EntityTypePOID);
-                            res = trans.Translate(e);
-                        }
-                        return res;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                };
-            }
-            if (propInfo.PropertyType == typeof(long))
-            {
-                return delegate(IEntity ie)
-                {
-                    return ie.GetPropertyValue(prop).LongValue;
-                };
-            }
-            else if (propInfo.PropertyType == typeof(int))
-            {
-                return delegate(IEntity ie) { return (int)ie.GetPropertyValue(prop).LongValue; };
-            }
-            else if (propInfo.PropertyType == typeof(string))
-            {
-                return delegate(IEntity ie)
-                {
-                    return ie.GetPropertyValue(prop).StringValue;
-                };
-            }
-            else if (propInfo.PropertyType == typeof(DateTime))
-            {
-                return delegate(IEntity ie)
-                {
-                    return ie.GetPropertyValue(prop).DateTimeValue;
-                };
-            }
-            else if (propInfo.PropertyType == typeof(bool))
-            {
-                return delegate(IEntity ie) { return ie.GetPropertyValue(prop).BoolValue; };
-            }
-            else if (propInfo.PropertyType == typeof(char))
-            {
-                return delegate(IEntity ie) {  //
-                    return Convert.ToChar(ie.GetPropertyValue(prop).LongValue);
-                };
-            }
-            else if (propInfo.PropertyType == typeof(float))
-            {
-                return delegate(IEntity ie)
-                {  //
-                    return Convert.ToSingle(ie.GetPropertyValue(prop).DoubleValue);
-                };
-            }
-            else if (propInfo.PropertyType == typeof(double))
-            {
-                return delegate(IEntity ie)
-                {  //
-                    return ie.GetPropertyValue(prop).DoubleValue;
-                };
-            }
-            else if (propInfo.PropertyType.IsEnum)
-            {
-                return delegate (IEntity ie)
-                {
-                    // Oversætter til array indeholdende alle mulige værdier for den pågældende enum.
-                    // Dernæst vælges værdien gemt index Long-feltet index den pågældende PropertyValue record.
-                    System.Collections.IList vals =  (System.Collections.IList) Enum.GetValues(propInfo.PropertyType);
-                    return vals[(int)ie.GetPropertyValue(prop).LongValue];
-                    //return Enum.GetValues (propInfo.PropertyType). ((int)ie.GetPropertyValue(prop).LongValue);
-                };
-            }
-            else if (propInfo.PropertyType == typeof(short))
-            {
-                return delegate(IEntity ie)
-                {  //
-                    return Convert.ToInt16(ie.GetPropertyValue(prop).LongValue);
-                };
-            }
-            else if (propInfo.PropertyType == typeof(uint))
-            {
-                return delegate(IEntity ie)
-                {  //
-                    return Convert.ToUInt32(ie.GetPropertyValue(prop).LongValue);
-                };
-            }
-            else 
-            {
-                throw new NotTranslatableException("Have not implemented PropertyValueGetter for field type.", propInfo);
-            }
         }
 
         PropertyValueSetter CreateSetter(IProperty p)

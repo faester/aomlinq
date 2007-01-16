@@ -73,6 +73,7 @@ namespace GenDB
 
         private IBusinessObject GetObject(IBOReference reference)
         {
+            throw new Exception("Brugte gamle IIBoTranslatorInterface. Objekter kan nu hentes fra databasen.");
             if (reference.IsNullReference) { return null; }
 
             IBusinessObject ibo = dataContext.IBOCache.Get(reference.EntityPOID);
@@ -81,7 +82,7 @@ namespace GenDB
             IEntity e = dataContext.GenDB.GetEntity(reference.EntityPOID);
 
             IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(e.EntityType.EntityTypePOID);
-            return trans.Translate(e);
+            //return trans.Translate(e);
         }
 
         public IGenCollectionElement Translate(object o)
