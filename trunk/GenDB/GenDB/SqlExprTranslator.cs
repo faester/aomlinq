@@ -12,7 +12,7 @@ namespace GenDB
     public class FieldsNotAllowedInConditionsException : Exception
     {
         public FieldsNotAllowedInConditionsException()
-            : base("The value of Public fields can not be guarenteed and therefore are allowed")
+            : base("The value of Public fields can not be guarenteed and therefore are not allowed")
         { }
     }
 
@@ -138,7 +138,7 @@ namespace GenDB
                 else
                     parArr[0] = VisitMemberExpression((MemberExpression) be.Left);
             }
-            else if(be.Left is UnaryExpression)
+            else if(be.Left is UnaryExpression) 
             {
                 parArr[0] = VisitUnaryExpressionValue((UnaryExpression)be.Left);
             }
@@ -283,16 +283,23 @@ namespace GenDB
                     return ValNotTranslatable.Instance;
             }
  
-            if(iPar>1)
+            if(me.Member.MemberType == MemberTypes.Field)
             {
-                return GetNestedRefs(me,iPar);  
+                throw new FieldsNotAllowedInConditionsException();
             }
             else
             {
-                IEntityType et = typeSystem.GetEntityType(t);
-                string propstr = me.Member.Name;
-                IProperty po = et.GetProperty(propstr);
-                return new CstProperty(po);
+                if(iPar>1)
+                {
+                    return GetNestedRefs(me,iPar);  
+                }
+                else
+                {
+                    IEntityType et = typeSystem.GetEntityType(t);
+                    string propstr = me.Member.Name;
+                    IProperty po = et.GetProperty(propstr);
+                    return new CstProperty(po);
+                }
             }
         }
         
