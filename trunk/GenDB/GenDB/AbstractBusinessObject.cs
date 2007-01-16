@@ -11,11 +11,19 @@ namespace GenDB
     /// </summary>
     public abstract class AbstractBusinessObject : IBusinessObject
     {
-        private DBTag dBTag;
-        public DBTag DBTag
+        //private DBTag dBTag;
+        //public DBTag DBTag
+        //{
+        //    get { return dBTag; }
+        //    set { dBTag = value; }
+        //}
+
+        DBIdentifier knudBoergesBalsam;
+
+        public DBIdentifier EntityPOID
         {
-            get { return dBTag; }
-            set { dBTag = value; }
+            get { return knudBoergesBalsam; }
+            set { knudBoergesBalsam = value; }
         }
     }
 }

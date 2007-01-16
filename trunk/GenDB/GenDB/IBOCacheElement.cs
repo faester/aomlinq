@@ -8,6 +8,12 @@ namespace GenDB
     {
         WeakReference wr;
         long entityPOID;
+
+        public long EntityPOID
+        {
+            get { return entityPOID; }
+        }
+
         IBusinessObject clone;
         IBusinessObject original;
 
@@ -24,7 +30,7 @@ namespace GenDB
             original = target;
             wr = new WeakReference(target);
             clone = (IBusinessObject)ObjectUtilities.MakeClone(target);
-            entityPOID = target.DBTag.EntityPOID;
+            entityPOID = target.EntityPOID;
         }
 
         public bool IsAlive

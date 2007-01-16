@@ -73,12 +73,13 @@ namespace TranslationTests
         private class PureIBusinessImpl : IBusinessObject
         {
             public const string DEFAULT_VALUE = "Keld Olsens Sengehalm A/S";
-            DBTag dbtag;
 
-            public DBTag DBTag
+            DBIdentifier entityPOID;
+
+            public DBIdentifier EntityPOID
             {
-                get { return dbtag; }
-                set { dbtag = value; }
+                get { return entityPOID; }
+                set { entityPOID = value; }
             }
 
             string value = DEFAULT_VALUE;

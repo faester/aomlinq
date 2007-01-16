@@ -531,7 +531,7 @@ namespace GenDB.DB
              */
             IEntity ie = GetEntity(collectionEntityPOID);
             // TODO: Check below should be superfluous. Kept for debugging db consistency.
-            if (ie == null) {throw new Exception("Internal error in database. Request for unknown collection's elements!"); }
+            if (ie == null) {throw new Exception("Internal error in database. Request for unknown collection's elements! " + collectionEntityPOID); }
 
             // Find mapping type for the elements.
             MappingType mapping = ie.EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).MappingType;
@@ -600,6 +600,7 @@ namespace GenDB.DB
 
         public void Save(IEntity entity)
         {
+            Console.WriteLine("Saving entity with DBIdentifier " + entity.EntityPOID);
             InternalEntitySave(entity);
             foreach (IPropertyValue pv in entity.AllPropertyValues)
             {
@@ -951,7 +952,7 @@ namespace GenDB.DB
                     cmd.CommandText = "SELECT CASE WHEN Max(EntityTypePOID) is null THEN 0 ELSE Max(EntityTypePOID) + 1 END FROM EntityType";
                     nextETID = long.Parse(cmd.ExecuteScalar().ToString());
 
-                    cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) is null THEN 0 ELSE Max(EntityPOID) + 1 END FROM Entity";
+                    cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) is null THEN 1 ELSE Max(EntityPOID) + 1 END FROM Entity";
                     nextEID = long.Parse(cmd.ExecuteScalar().ToString());
 
                     cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) is null THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";

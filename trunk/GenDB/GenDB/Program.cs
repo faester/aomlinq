@@ -144,12 +144,18 @@ namespace GenDB
                 get { return enlisted; }
                 set { enlisted = value; }
             }
-
-
         }
 
         public static void Main(string[] args)
         {
+            DBIdentifier dbid = new DBIdentifier(100);
+            Console.WriteLine(dbid.IsInCache);
+            long dbidvalue = dbid;
+            Console.WriteLine(dbidvalue);
+
+            Console.ReadLine();
+            return;
+
             DataContext dcontext = DataContext.Instance;
 
             int objCount = 10;
