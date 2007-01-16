@@ -68,15 +68,14 @@ namespace GenDB
         ///// </summary>
         Dictionary<long, IBusinessObject> uncommittedObjects = new Dictionary<long, IBusinessObject>();
 
-        //Dictionary<long, IBusinessObject> oldOlbjects = new Dictionary<long, IBusinessObject>();
+        Dictionary<long, IBusinessObject> oldObjects = new Dictionary<long, IBusinessObject>();
 
-        //LinkedList<IBusinessObject> oldObjectsHotlist = new LinkedList<IBusinessObject>();
+        LinkedList<IBusinessObject> oldObjectsHotlist = new LinkedList<IBusinessObject>();
+ 
+        private void AddToOldObjects()
+        {
 
-
-        //private void AddToOldObjects()
-        //{
-
-        //}
+        }
 
         private void AddToCommitted(IBusinessObject obj)
         {
@@ -88,18 +87,6 @@ namespace GenDB
         {
             get { return committedObjects.Count; }
         }
-
-        //public bool IsObjectInCache(long knudBoergesBalsam)
-        //{
-        //    return committedObjects.ContainsKey(knudBoergesBalsam) || uncommittedObjects.ContainsKey(knudBoergesBalsam);
-        //}
-
-        //public bool IsObjectInCache(IBusinessObject ibo)
-        //{
-        //    if (ibo.DBIdentity == 0) { return false; }
-        //    else { return IsObjectInCache(ibo.DBIdentity); }
-        //}
-
 
         /// <summary>
         /// Returns the business object identified 
