@@ -26,22 +26,26 @@ namespace PerformanceTests
 
             DLinqTest dlinqtest = new DLinqTest(ewDLinqDB_write, ewDLinqDB_read, ewDLiqnDB_clear);
 
-            for (int objCount = 5000; objCount <= 30000; objCount += 5000)
+            for (int objCount = 5000; objCount <= 100000; objCount += 10000)
             {
-                long ms = 0;
+                Console.WriteLine("==========================================================");
+                for (int repetitions = 0; repetitions < 5; repetitions++)
+                {
+                    long ms = 0;
 
-                stopwatch.Reset();
-                stopwatch.Start();
-                gdbtest.PerformTests(objCount);
-                ms = stopwatch.ElapsedMilliseconds;
-                Console.WriteLine("GenDB: {0} objs in test took {1} ms. {2} objs/sec", objCount , ms, ms > 0 ? (objCount * 1000) / ms : -1);
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                    gdbtest.PerformTests(objCount);
+                    ms = stopwatch.ElapsedMilliseconds;
+                    Console.WriteLine("GenDB: {0} objs in test took {1} ms. {2} objs/sec", objCount, ms, ms > 0 ? (objCount * 1000) / ms : -1);
 
-                stopwatch.Reset();
-                stopwatch.Start();
-                dlinqtest.PerformTests(objCount);
-                ms = stopwatch.ElapsedMilliseconds;
-                Console.WriteLine("DLinq: {0} objs in test took {1} ms. {2} objs/sec", objCount, ms, ms > 0 ? (objCount * 1000) / ms : -1);
-
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                    dlinqtest.PerformTests(objCount);
+                    ms = stopwatch.ElapsedMilliseconds;
+                    Console.WriteLine("DLinq: {0} objs in test took {1} ms. {2} objs/sec", objCount, ms, ms > 0 ? (objCount * 1000) / ms : -1);
+                    Console.WriteLine();
+                }
             }
             ewGenDB_write.Dispose();
 

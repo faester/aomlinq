@@ -39,7 +39,7 @@ namespace PerformanceTests
                 table.Add(new T());
             }
             dc.SubmitChanges();
-            ewWrite.WriteInformation(objectsToWrite, sw.ElapsedMilliseconds / 1000);
+            ewWrite.WriteInformation(objectsToWrite, sw.ElapsedMilliseconds / 1000.0);
         }
 
         private void PerformReadTest()
@@ -62,7 +62,7 @@ namespace PerformanceTests
             sw.Start();
             table.Clear();
             dc.SubmitChanges();
-            ewClear.WriteInformation(lastInsert, sw.ElapsedMilliseconds / 1000);
+            ewClear.WriteInformation(lastInsert, sw.ElapsedMilliseconds / 1000.0);
         }       
 
     }
