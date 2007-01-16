@@ -47,8 +47,8 @@ namespace GenDB
             MemberExpression mTmp;
             NestedReference nref=null;
             NestedReference nTmp=null;
-            if(size>1)
-            {
+            //if(size>1)
+            //{
                 for(int i=0; i<size; i++)
                 {
                     mTmp=me;
@@ -65,7 +65,7 @@ namespace GenDB
                     if(mTmp.Expression.NodeType.ToString() == "MemberAccess")
                         me = (MemberExpression)mTmp.Expression;
                 }
-            }            
+            //}            
             return nref;
         }
 
@@ -490,10 +490,9 @@ namespace GenDB
                 string name = me.Member.Name;
                 parArr[0] = VisitMemberExpression(me);
             }
-            else if(me.Expression.NodeType.ToString()=="MemberAccess")
+            else if(me.Member.MemberType == MemberTypes.Property )
             {
-                MemberExpression me2 = (MemberExpression) me.Expression;
-                parArr[0]=VisitMemberExpression(me2);
+                parArr[0] = GetNestedRefs(me,GetNumParamFromMember(me));
             }
             else
             {

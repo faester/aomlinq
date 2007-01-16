@@ -23,6 +23,14 @@ namespace CommonTestObjects
             set { age = value; }
         }
 
+        bool goodLooking;
+
+        public bool GoodLooking
+        {
+            get{return goodLooking;}
+            set{goodLooking=value;}
+        }
+
         TestPerson spouse;
 
         public TestPerson Spouse

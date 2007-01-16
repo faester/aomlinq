@@ -258,6 +258,11 @@ namespace GenDB
             return res;
         }
 
+        public Table<T> Join(Expression<Func<T, bool>> expr)
+        {
+            throw new Exception("stops");
+        }
+
         #endregion
 
         public override string ToString()
