@@ -20,7 +20,7 @@ namespace GenDB
 
         DBIdentifier knudBoergesBalsam;
 
-        public DBIdentifier EntityPOID
+        public DBIdentifier DBIdentity
         {
             get { return knudBoergesBalsam; }
             set { knudBoergesBalsam = value; }

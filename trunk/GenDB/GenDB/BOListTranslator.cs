@@ -88,9 +88,9 @@ namespace GenDB
             e.EntityType = entityType;
             pv.StringValue = elementType.FullName;
 
-            if (!ibo.EntityPOID.IsInCache) 
+            if (!ibo.DBIdentity.IsPersistent) 
             { 
-                e.EntityPOID = ibo.EntityPOID; 
+                e.EntityPOID = ibo.DBIdentity; 
             }
             else
             { 

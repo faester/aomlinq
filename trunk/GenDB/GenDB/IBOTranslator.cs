@@ -131,7 +131,7 @@ namespace GenDB
         /// <summary>
         /// Translates the IEntity given to a IBusinessObject 
         /// instance. If the cache contains a business object 
-        /// with an id edentical to e.EntityPOID the cached 
+        /// with an id edentical to e.DBIdentity the cached 
         /// businessobject will be returned, regardless of the 
         /// PropertyValues in e.
         /// <p/> 
@@ -177,10 +177,10 @@ namespace GenDB
         {
             IEntity res = dataContext.GenDB.NewEntity();
 
-            // Drop the db-created EntityPOID if DBTag is set.
-            if (ibo.EntityPOID.IsInCache)
+            // Drop the db-created DBIdentity if DBTag is set.
+            if (ibo.DBIdentity.IsPersistent)
             {
-                res.EntityPOID = ibo.EntityPOID;
+                res.EntityPOID = ibo.DBIdentity;
             }
             else
             { // No DBTag. Add it to cache/db, and assign tag

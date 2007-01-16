@@ -215,7 +215,7 @@ namespace GenDB.DB
 
         /// <summary>
         /// Returns a new IEntityType instance with 
-        /// correct EntityPOID, name set and no associated
+        /// correct DBIdentity, name set and no associated
         /// properties.
         /// 
         /// The type is not persisted until it is added to the database.
@@ -479,7 +479,7 @@ namespace GenDB.DB
                     if (entityPOID != oldEntityPOID || firstPass)
                     {
                         if (result != null) { yield return result; }
-                        result = new Entity(); // We do not set EntityPOID (use NewEntity()) , since id is retrieved from DB.
+                        result = new Entity(); // We do not set DBIdentity (use NewEntity()) , since id is retrieved from DB.
                         result.EntityType = currentType;
                         result.EntityPOID = entityPOID;
 
