@@ -39,7 +39,7 @@ namespace PerformanceTests
                 table.Add(new T());
             }
             dc.SubmitChanges();
-            ewWrite.WriteInformation(objectsToWrite, sw.ElapsedMilliseconds / 1000.0);
+            ewWrite.WriteInformation(objectsToWrite, sw.ElapsedMilliseconds);
         }
 
         private void PerformReadTest()
@@ -52,7 +52,7 @@ namespace PerformanceTests
                 count++;
             }
             long ms = sw.ElapsedMilliseconds;
-            ewRead.WriteInformation(count, ms / 1000.0);
+            ewRead.WriteInformation(count, ms);
             Console.WriteLine("GenDB read: {0} objs {1} sek", count, ms / 1000.0);
         }
 
@@ -62,7 +62,7 @@ namespace PerformanceTests
             sw.Start();
             table.Clear();
             dc.SubmitChanges();
-            ewClear.WriteInformation(lastInsert, sw.ElapsedMilliseconds / 1000.0);
+            ewClear.WriteInformation(lastInsert, sw.ElapsedMilliseconds);
         }       
 
     }
