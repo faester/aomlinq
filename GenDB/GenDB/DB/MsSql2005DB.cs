@@ -521,10 +521,10 @@ namespace GenDB.DB
                         object value = null;
                         switch (iet.GetProperty(propertyPOID).MappingType)
                         {
-                            case MappingType.BOOL: value = bool.Parse(reader[3].ToString()); break;
+                            case MappingType.BOOL: value = reader[3]; break;
                             case MappingType.DATETIME: value = new DateTime((long)reader[2]); break;
-                            case MappingType.DOUBLE: value = Convert.ToDouble(reader[5]); break;
-                            case MappingType.LONG: value = long.Parse(reader[2].ToString()); break;
+                            case MappingType.DOUBLE: value = reader[5]; break;
+                            case MappingType.LONG: value = reader[2]; break;
                             case MappingType.REFERENCE: 
                                 if (reader[2] == DBNull.Value)
                                 {
@@ -533,10 +533,10 @@ namespace GenDB.DB
                                 }
                                 else
                                 {
-                                    value = long.Parse(reader[2].ToString());
+                                    value = reader[2];
                                     break;
                                 }
-                            case MappingType.STRING: value = (string)reader[4]; break;
+                            case MappingType.STRING: value = reader[4]; break;
                             default: throw new Exception("Could not translate the property value.");
                         } // switch
                         translator.SetProperty(propertyPOID, result, value);
