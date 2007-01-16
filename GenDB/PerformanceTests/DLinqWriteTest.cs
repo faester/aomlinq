@@ -56,7 +56,7 @@ namespace PerformanceTests
                 table.Add(new PerfTestAllPrimitiveTypes());
             }
             db.SubmitChanges();
-            ewWrite.WriteInformation(objectsToWrite, sw.ElapsedMilliseconds / 1000.0);
+            ewWrite.WriteInformation(objectsToWrite, sw.ElapsedMilliseconds);
         }
 
         private void PerformReadTest()
@@ -70,7 +70,7 @@ namespace PerformanceTests
             }
             long ms = sw.ElapsedMilliseconds;
             ewRead.WriteInformation(count, ms / 1000.0);
-            Console.WriteLine("DLinq read: {0} objs {1} sek", count, ms / 1000.0);
+            Console.WriteLine("DLinq read: {0} objs {1} sek", count, ms);
         }
 
         private void PerformClearTest()
@@ -79,7 +79,7 @@ namespace PerformanceTests
             sw.Start();
             table.RemoveAll(table);
             db.SubmitChanges();
-            ewClear.WriteInformation(lastInsert, sw.ElapsedMilliseconds / 1000.0);
+            ewClear.WriteInformation(lastInsert, sw.ElapsedMilliseconds);
         }
     }
 }
