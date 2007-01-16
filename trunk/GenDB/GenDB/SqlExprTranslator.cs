@@ -133,7 +133,7 @@ namespace GenDB
             if(be.Left is MemberExpression)
             {
                 me = (MemberExpression)be.Left;
-                if(me.Member.MemberType == MemberTypes.Field)
+                if(IsMemberAPublicField(me))
                     throw new FieldsNotAllowedInConditionsException();
                 else
                     parArr[0] = VisitMemberExpression((MemberExpression) be.Left);
@@ -282,11 +282,8 @@ namespace GenDB
                 else
                     return ValNotTranslatable.Instance;
             }
- 
-            if(me.Member.MemberType == MemberTypes.Field)
-            {
+            if(IsMemberAPublicField(me))
                 throw new FieldsNotAllowedInConditionsException();
-            }
             else
             {
                 if(iPar>1)
@@ -492,6 +489,15 @@ namespace GenDB
             BinaryExpression operand = (BinaryExpression)ue.Operand;
             BinaryExpression be = MakeBinaryExpression(ExpressionType.LT, operand.Left, operand.Right);
             return VisitBinaryExpression(be);
+        }
+
+        internal bool IsMemberAPublicField(MemberExpression me)
+        {
+            if(me.Member.MemberType == MemberTypes.Field)
+            {
+                return true;
+            }
+            return false;
         }
       
         internal IExpression VisitBooleanMember(MemberExpression me, bool equality)
