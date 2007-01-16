@@ -250,7 +250,7 @@ namespace GenDB
             foreach (PropertyInfo clrProperty in clrProperties)
             {
                 Attribute volatileAttribute = Attribute.GetCustomAttribute(clrProperty, typeof(Volatile));
-                if (clrProperty.Name != "EntityPOID" && volatileAttribute == null)
+                if (clrProperty.PropertyType != typeof(DBIdentifier) && volatileAttribute == null)
                 {
                     IProperty property = dataContext.GenDB.NewProperty();
                     property.PropertyName = clrProperty.Name;

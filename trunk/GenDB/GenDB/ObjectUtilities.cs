@@ -175,7 +175,7 @@ namespace GenDB
             {
                 Attribute v = Volatile.GetCustomAttribute(f, typeof(Volatile));
 
-                if (f.GetType() != typeof(DBIdentifier) && v == null)
+                if (f.FieldType != typeof(DBIdentifier) && v == null)
                 {
                     object fv = f.GetValue(o);
                     f.SetValue(clone, fv);

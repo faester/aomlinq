@@ -153,8 +153,8 @@ namespace GenDB
             long dbidvalue = dbid;
             Console.WriteLine(dbidvalue);
 
-            Console.ReadLine();
-            return;
+            //Console.ReadLine();
+            //return;
 
             DataContext dcontext = DataContext.Instance;
 
