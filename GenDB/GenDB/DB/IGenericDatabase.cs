@@ -222,7 +222,7 @@ namespace GenDB.DB
 
         /// <summary>
         /// Returns a new IEntityType instance with 
-        /// correct EntityPOID, name set and no associated
+        /// correct DBIdentity, name set and no associated
         /// properties.
         /// 
         /// The type is not persisted until it is added to the database.

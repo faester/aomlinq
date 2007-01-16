@@ -562,13 +562,13 @@ namespace GenDB
                 if (reference == null) { return new IBOReference(true); }
                 IBusinessObject referencedObject = !reference.IsAlive ? null : (IBusinessObject)reference.Target;
                 if (referencedObject == null 
-                    || !referencedObject.EntityPOID.IsInCache)
+                    || !referencedObject.DBIdentity.IsPersistent)
                 {
                     return new IBOReference(true);
                 }
                 else 
                 {
-                    return new IBOReference(referencedObject.EntityPOID);
+                    return new IBOReference(referencedObject.DBIdentity);
                 }
             }
         }

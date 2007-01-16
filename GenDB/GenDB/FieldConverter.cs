@@ -181,16 +181,16 @@ namespace GenDB
                             return;
                         }
                         IBusinessObject ibo = (IBusinessObject)value;
-                        if (!ibo.EntityPOID.IsInCache)
+                        if (!ibo.DBIdentity.IsPersistent)
                         {
                             IEntity refered = dataContext.GenDB.NewEntity();
                             dataContext.IBOCache.Add(ibo, refered.EntityPOID);
-                            IBOReference reference = new IBOReference (ibo.EntityPOID);
+                            IBOReference reference = new IBOReference (ibo.DBIdentity);
                             e.GetPropertyValue(p).RefValue = reference;
                         }
                         else
                         {
-                            IBOReference reference = new IBOReference(false, ibo.EntityPOID);
+                            IBOReference reference = new IBOReference(false, ibo.DBIdentity);
                             e.GetPropertyValue(p).RefValue = reference;
                         }
                     };

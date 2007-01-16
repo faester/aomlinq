@@ -30,7 +30,7 @@ namespace GenDB
             original = target;
             wr = new WeakReference(target);
             clone = (IBusinessObject)ObjectUtilities.MakeClone(target);
-            entityPOID = target.EntityPOID;
+            entityPOID = target.DBIdentity;
         }
 
         public bool IsAlive

@@ -15,7 +15,7 @@ namespace GenDB
         /// system and should not be referenced or 
         /// modified by the user!
         /// </summary>
-        DBIdentifier EntityPOID { get; set; }
+        DBIdentifier DBIdentity { get; set; }
     }
 
     internal interface IDBSaveableCollection

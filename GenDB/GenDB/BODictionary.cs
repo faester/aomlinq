@@ -45,7 +45,7 @@ namespace GenDB
             {
                 return;
             }
-            if (!EntityPOID.IsInCache)
+            if (!DBIdentity.IsPersistent)
             {
                 throw new Exception("Attempted to save elements prior to saving the BODictionary");
             }

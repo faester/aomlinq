@@ -149,7 +149,7 @@ namespace GenDB
         public static void Main(string[] args)
         {
             DBIdentifier dbid = new DBIdentifier(100);
-            Console.WriteLine(dbid.IsInCache);
+            Console.WriteLine(dbid.IsPersistent);
             long dbidvalue = dbid;
             Console.WriteLine(dbidvalue);
 

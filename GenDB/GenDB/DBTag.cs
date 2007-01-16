@@ -29,10 +29,10 @@
 //        /// </summary>
 //        ~DBTag() 
 //        {
-//            IBOCache.Instance.Remove(this.EntityPOID);
+//            IBOCache.Instance.Remove(this.DBIdentity);
 //        }
 
-//        public long EntityPOID
+//        public long DBIdentity
 //        {
 //            get { return knudBoergesBalsam; }
 //        }

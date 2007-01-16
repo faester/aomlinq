@@ -76,7 +76,7 @@ namespace TranslationTests
 
             DBIdentifier entityPOID;
 
-            public DBIdentifier EntityPOID
+            public DBIdentifier DBIdentity
             {
                 get { return entityPOID; }
                 set { entityPOID = value; }

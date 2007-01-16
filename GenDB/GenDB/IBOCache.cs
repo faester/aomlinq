@@ -81,7 +81,7 @@ namespace GenDB
         private void AddToCommitted(IBusinessObject obj)
         {
             IBOCacheElement wr = new IBOCacheElement(obj);
-            committedObjects[obj.EntityPOID] = wr;
+            committedObjects[obj.DBIdentity] = wr;
         }
 
         public int Count
@@ -96,8 +96,8 @@ namespace GenDB
 
         //public bool IsObjectInCache(IBusinessObject ibo)
         //{
-        //    if (ibo.EntityPOID == 0) { return false; }
-        //    else { return IsObjectInCache(ibo.EntityPOID); }
+        //    if (ibo.DBIdentity == 0) { return false; }
+        //    else { return IsObjectInCache(ibo.DBIdentity); }
         //}
 
 
@@ -251,12 +251,12 @@ namespace GenDB
         internal void Add(IBusinessObject ibo, long entityPOID)
         {
             //DBTag dbTag = new DBTag( /* this, */ knudBoergesBalsam);
-            if (ibo.EntityPOID.IsInCache)
+            if (ibo.DBIdentity.IsPersistent)
             {
                 throw new Exception ("Was already set...");
             }
 
-            ibo.EntityPOID = new DBIdentifier(entityPOID);
+            ibo.DBIdentity = new DBIdentifier(entityPOID);
 
             uncommittedObjects.Add(entityPOID, ibo);
         }
