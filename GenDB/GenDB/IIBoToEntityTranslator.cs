@@ -9,8 +9,6 @@ namespace GenDB
     {
         IEntityType EntityType { get; }
 
-        IBusinessObject Translate(IEntity e);
-
         IBusinessObject CreateInstanceOfIBusinessObject();
 
         IEnumerable<FieldConverter> FieldConverters { get; }
@@ -20,8 +18,6 @@ namespace GenDB
         IEntity Translate (IBusinessObject ibo);
 
         void SetValues(IBusinessObject ibo, IEntity ie);    
-
-        void SetValues(IEntity ie, IBusinessObject ibo);
 
         /// <summary>
         /// This method is introduced to allow different save 

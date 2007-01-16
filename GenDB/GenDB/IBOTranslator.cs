@@ -11,7 +11,7 @@ namespace GenDB
      * http://www.codeproject.com/csharp/delegates_and_reflection.asp
      * http://www.codeproject.com/useritems/Dynamic_Code_Generation.asp
      */
-    delegate object PropertyValueGetter(IEntity e);
+
     delegate void PropertyValueSetter(IEntity e, object value);
     delegate void PropertySetter(IBusinessObject ibo, object value);
 
@@ -163,51 +163,6 @@ namespace GenDB
         private void InitInstantiator()
         {
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler(t);
-        }
-
-        /// <summary>
-        /// Translates the IEntity given to a IBusinessObject 
-        /// instance. If the cache contains a business object 
-        /// with an id edentical to e.DBIdentity the cached 
-        /// businessobject will be returned, regardless of the 
-        /// PropertyValues in e.
-        /// <p/> 
-        /// TODO: Consider if the responsibility of cache checking 
-        /// and object substitution should happen in the Table 
-        /// class instead.
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-
-        public IBusinessObject Translate(IEntity e)
-        {
-            IBusinessObject res = dataContext.IBOCache.Get(e.EntityPOID);
-            if (res == null)
-            {
-                res = (IBusinessObject)instantiator();
-                SetValues(e, res);
-                dataContext.IBOCache.Add(res, e.EntityPOID );
-            }
-            return res;
-        }
-
-        /// <summary>
-        /// Copies values from PropertyValues stored in 
-        /// e to the fields in res. (Thus changing state 
-        /// of res)
-        /// </summary>
-        /// <param name="e"></param>
-        /// <param name="res"></param>
-        public void SetValues(IEntity e, IBusinessObject ibo)
-        {
-            foreach (FieldConverter c in fieldConverters)
-            {
-                c.SetObjectFieldValue(ibo, e);
-            }
-            if (superTranslator != null)
-            {
-                superTranslator.SetValues(e, ibo);
-            }
         }
 
         public IEntity Translate(IBusinessObject ibo)
