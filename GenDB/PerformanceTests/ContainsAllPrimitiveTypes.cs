@@ -10,20 +10,26 @@ namespace PerformanceTests
     /// Used for testing: Contains all types, that are considered primitive
     /// by the generic database.
     /// </summary>
-    [Table]
-    public class ContainsAllPrimitiveTypes : AbstractBusinessObject
+    [Table(Name = "t_PerfTestAllPrimitiveTypes")]
+    public class PerfTestAllPrimitiveTypes  : IBusinessObject  
     {
-        bool boo;
+        DBTag dBtag;
 
-        int id;
+        public DBTag DBTag
+        {
+            get { return dBtag; }
+            set { dBtag = value; }
+        }
 
-        [Column(Id = true, AutoGen = true), Volatile]
-        public int Id
+        long id;
+        [Column(Id = true, AutoGen = true)]
+        public long Id
         {
             get { return id; }
             set { id = value; }
         }
 
+        bool boo;
         [Column]
         public bool Boo
         {
@@ -31,7 +37,7 @@ namespace PerformanceTests
             set { boo = value; }
         }
 
-        string str;
+        string str = "";
 
         [Column]
         public string Str
@@ -40,7 +46,7 @@ namespace PerformanceTests
             set { str = value; }
         }
 
-        DateTime dt;
+        DateTime dt = DateTime.Now;
 
         [Column]
         public DateTime Dt
@@ -51,7 +57,7 @@ namespace PerformanceTests
 
         float fl;
 
-        [Column]
+        [Column(DBType = "float")]
         public float Fl
         {
             get { return fl; }
@@ -105,16 +111,12 @@ namespace PerformanceTests
 
         uint ui;
 
-        [Column]
+        [Column(DBType = "int")]
         public uint Ui
         {
             get { return ui; }
             set { ui = value; }
         }
-
-        public int intNotPersisted = 10;
-
-        public string stringNotPersisted = "";
     }
 }
     

@@ -8,16 +8,16 @@ using System.Expressions;
 
 namespace PerformanceTests
 {
-    class DingelDangelDlinq : System.Data.DLinq.DataContext
+    public class DLinqDB : DataContext
     {
-        public DingelDangelDlinq(string cnnstr) : base(cnnstr) { }
-
-        public Table<ContainsAllPrimitiveTypes> TheTable;
+        public DLinqDB(string cnnstr) : base(cnnstr) { }
+        public Table<PerfTestAllPrimitiveTypes> Table;
     }
 
-    class DLinqTest
+    public class DLinqTest
     {
-        DingelDangelDlinq db = new DingelDangelDlinq("server=.;database=knud");
+        DLinqDB db = null;
+        Table<PerfTestAllPrimitiveTypes> table;
         ExcelWriter ewWrite;
         ExcelWriter ewRead;
         ExcelWriter ewClear;
@@ -28,10 +28,15 @@ namespace PerformanceTests
             this.ewWrite = ewWrite;
             this.ewRead = ewRead;
             this.ewClear = ewClear;
-            if (!db.DatabaseExists())
+            this.db = new DLinqDB ("server=.;database=dlinqperf;Integrated Security=SSPI");
+            if (db.DatabaseExists())
             {
-                db.CreateDatabase();
+                Console.WriteLine("Deleting DLinq db");
+                db.DeleteDatabase();
             }
+            db.CreateDatabase();
+            table = db.Table;
+            db.SubmitChanges();
         }
 
         public void PerformTests(int objectCount)
@@ -48,7 +53,7 @@ namespace PerformanceTests
             sw.Start();
             for (int i = 0; i < objectsToWrite; i++)
             {
-                db.TheTable.Add(new ContainsAllPrimitiveTypes());
+                table.Add(new PerfTestAllPrimitiveTypes());
             }
             db.SubmitChanges();
             ewWrite.WriteInformation(objectsToWrite, sw.ElapsedMilliseconds);
@@ -59,18 +64,20 @@ namespace PerformanceTests
             int count = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            foreach(ContainsAllPrimitiveTypes t in db.TheTable)
+            foreach(PerfTestAllPrimitiveTypes t in table)
             {
                 count++;
             }
-            ewRead.WriteInformation(count, sw.ElapsedMilliseconds);
+            long ms = sw.ElapsedMilliseconds;
+            ewRead.WriteInformation(count, ms);
+            Console.WriteLine("DLinq read: {0} objs {1} sek", count, ms / 1000.0);
         }
 
         private void PerformClearTest()
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            db.TheTable.RemoveAll(db.TheTable);
+            table.RemoveAll(table);
             db.SubmitChanges();
             ewClear.WriteInformation(lastInsert, sw.ElapsedMilliseconds);
         }
