@@ -258,9 +258,12 @@ namespace GenDB
             return res;
         }
 
-        public Table<T> Join(Expression<Func<T, bool>> expr)
+        public Table<T> Join<U, K, V>(IEnumerable<U> inner, 
+                                      Expression<Func<T, K>> outerKeySelector,
+                                      Expression<Func<U, K>> innerKeySelector,
+                                      Expression<Func<T, U, V>> resultSelector)
         {
-            throw new Exception("stops");
+            throw new Exception("halt");
         }
 
         #endregion
