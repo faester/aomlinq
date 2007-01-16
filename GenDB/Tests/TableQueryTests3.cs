@@ -38,6 +38,12 @@ namespace QueryToSqlTranslationTests
         public void InitTableOfPersons()
         {
             ttp = dataContext.CreateTable<TestPerson>();
+            ttp.Clear();
+            dataContext.SubmitChanges();
+            Assert.AreEqual(0, ttp.Count, "Table wasn't cleared properly.");
+            Assert.AreEqual (0, dataContext.CommittedObjectsSize , "Still objects in committed list in cache.");
+            Assert.AreEqual (0, dataContext.UnCommittedObjectsSize , "Still objects in uncommitted list in cache.");
+
             TestPerson lastPerson = null;
 
             for (int i = 0; i < 10; i++)
@@ -153,10 +159,15 @@ namespace QueryToSqlTranslationTests
         [Test]
         public void TestContains()
         {
-            var p = from persons in ttp
+            var ps = from persons in ttp
                     where persons.Name.Contains("ame")
                     select persons;
-            Assert.AreEqual(10, p.Count, "not enough persons returned");
+
+            foreach (TestPerson p in ps)
+            {
+                Console.WriteLine(p.Name);
+            }
+            Assert.AreEqual(10, ps.Count, "not enough persons returned");
         }
 
         [Test]

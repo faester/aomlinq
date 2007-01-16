@@ -269,7 +269,8 @@ namespace QueryToSqlTranslationTests
             foreach(ContainsAllPrimitiveTypes tst in res)
             {
                 if (foundIt) { Assert.Fail("Found more than one result."); }
-                Assert.IsTrue (object.ReferenceEquals (tst, capt));
+                Console.WriteLine(tst.DBIdentity + " : " + capt.DBIdentity);
+                Assert.IsTrue (object.ReferenceEquals (tst, capt), "Returned object did not ReferenceEquals requested object.");
                 foundIt = true;
             }
 
