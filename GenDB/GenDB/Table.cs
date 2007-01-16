@@ -114,7 +114,7 @@ namespace GenDB
         public bool Contains(T e)
         {
             if (e == null) { return false;}
-            if (e.DBTag == null) { return false; }
+            if (e.EntityPOID == 0) { return false; }
             IExpression where = new OP_Equals(new VarReference(e), CstThis.Instance);
             foreach (IEntity ibo in db.Where(where))
             {
@@ -150,7 +150,7 @@ namespace GenDB
         public bool Remove(T e)
         {
             if (e == null) { return false;}
-            if (e.DBTag == null) { return false; }
+            if (e.EntityPOID == 0) { return false; }
             IWhereable where = new OP_Equals(new VarReference(e), CstThis.Instance);
             return db.ClearWhere(where);
         }

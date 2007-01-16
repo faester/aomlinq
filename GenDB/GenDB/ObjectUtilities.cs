@@ -15,7 +15,7 @@ namespace GenDB
         static Type[] EMPTY_TYPE_ARRAY = new Type[0];
         static Type TYPEOF_STRING = typeof(string);
         static Type TYPEOF_DATETIME = typeof(DateTime);
-        static Type TYPEOF_DBTAG = typeof(DBTag);
+        //static Type TYPEOF_DBTAG = typeof(DBTag);
 
         static int MAX_INDENT_LEVEL = 5;
         static string Indent(int level)
@@ -175,7 +175,7 @@ namespace GenDB
             {
                 Attribute v = Volatile.GetCustomAttribute(f, typeof(Volatile));
 
-                if (f.FieldType != TYPEOF_DBTAG && v == null)
+                if (f.GetType() != typeof(DBIdentifier) && v == null)
                 {
                     object fv = f.GetValue(o);
                     f.SetValue(clone, fv);

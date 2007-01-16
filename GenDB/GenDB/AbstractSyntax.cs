@@ -551,8 +551,6 @@ namespace GenDB
         /// <summary>
         /// Stores the object to test internally, since it may
         /// be persisted after the expression is created.
-        /// TODO: What are the consequences of this references 
-        /// as regards the garbage collection?
         /// </summary>
         WeakReference reference = null;
         //IBusinessObject referencedObject = null;
@@ -563,13 +561,14 @@ namespace GenDB
             {
                 if (reference == null) { return new IBOReference(true); }
                 IBusinessObject referencedObject = !reference.IsAlive ? null : (IBusinessObject)reference.Target;
-                if (referencedObject == null || referencedObject.DBTag == null)
+                if (referencedObject == null 
+                    || !referencedObject.EntityPOID.IsInCache)
                 {
                     return new IBOReference(true);
                 }
                 else 
                 {
-                    return new IBOReference(referencedObject.DBTag.EntityPOID);
+                    return new IBOReference(referencedObject.EntityPOID);
                 }
             }
         }

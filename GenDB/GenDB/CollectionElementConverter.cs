@@ -117,12 +117,12 @@ namespace GenDB
         {
             if (o == null) { return new IBOReference(true); }
             IBusinessObject ibo = (IBusinessObject)o;
-            if (ibo.DBTag == null)
+            if (! ibo.EntityPOID.IsInCache)
             {
                 IEntity e = dataContext.GenDB.NewEntity();
                 dataContext.IBOCache.Add(ibo, e.EntityPOID);
             }
-            return new IBOReference(ibo.DBTag.EntityPOID);
+            return new IBOReference(ibo.EntityPOID);
         }
     }
 }

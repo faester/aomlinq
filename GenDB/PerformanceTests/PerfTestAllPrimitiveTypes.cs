@@ -13,12 +13,12 @@ namespace PerformanceTests
     [Table(Name = "t_PerfTestAllPrimitiveTypes")]
     public class PerfTestAllPrimitiveTypes  : IBusinessObject  
     {
-        DBTag dBtag;
+        DBIdentifier entityPOID;
 
-        public DBTag DBTag
+        public DBIdentifier EntityPOID
         {
-            get { return dBtag; }
-            set { dBtag = value; }
+            get { return entityPOID; }
+            set { entityPOID = value; }
         }
 
         long id;

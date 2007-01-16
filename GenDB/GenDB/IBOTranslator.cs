@@ -108,7 +108,7 @@ namespace GenDB
             foreach (PropertyInfo clrProperty in fields)
             {
                 Attribute a = Volatile.GetCustomAttribute(clrProperty, typeof(Volatile));
-                if (clrProperty.PropertyType != typeof(DBTag) && a == null)
+                if (clrProperty.Name != "EntityPOID" && a == null)
                 {
                     IProperty prop = properties[clrProperty.Name];
                     fieldConverters.AddLast(new FieldConverter(t, clrProperty, prop, dataContext));
@@ -178,9 +178,9 @@ namespace GenDB
             IEntity res = dataContext.GenDB.NewEntity();
 
             // Drop the db-created EntityPOID if DBTag is set.
-            if (ibo.DBTag != null)
+            if (ibo.EntityPOID.IsInCache)
             {
-                res.EntityPOID = ibo.DBTag.EntityPOID;
+                res.EntityPOID = ibo.EntityPOID;
             }
             else
             { // No DBTag. Add it to cache/db, and assign tag

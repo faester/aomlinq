@@ -11,6 +11,7 @@ namespace GenDB
 {
     internal class IBOCache
     {
+        int MAX_OLD_OBJECTS_TO_KEEP = 1000;
         private static IBOCache instance = null;
 
         /// <summary>
@@ -67,10 +68,20 @@ namespace GenDB
         ///// </summary>
         Dictionary<long, IBusinessObject> uncommittedObjects = new Dictionary<long, IBusinessObject>();
 
+        //Dictionary<long, IBusinessObject> oldOlbjects = new Dictionary<long, IBusinessObject>();
+
+        //LinkedList<IBusinessObject> oldObjectsHotlist = new LinkedList<IBusinessObject>();
+
+
+        //private void AddToOldObjects()
+        //{
+
+        //}
+
         private void AddToCommitted(IBusinessObject obj)
         {
             IBOCacheElement wr = new IBOCacheElement(obj);
-            committedObjects[obj.DBTag.EntityPOID] = wr;
+            committedObjects[obj.EntityPOID] = wr;
         }
 
         public int Count
@@ -78,18 +89,17 @@ namespace GenDB
             get { return committedObjects.Count; }
         }
 
-        /// <summary>
-        /// Returns the IBusinessObject identified
-        /// by the given DBTag id. Returns null if 
-        /// object is not found. If DBTag is null, a
-        /// NullReferenceException is thrown.
-        /// </summary>
-        /// <param name="id"></param>
-        public IBusinessObject Get(DBTag id)
-        {
-            if (id == null) { throw new NullReferenceException("id"); }
-            return Get(id.EntityPOID);
-        }
+        //public bool IsObjectInCache(long knudBoergesBalsam)
+        //{
+        //    return committedObjects.ContainsKey(knudBoergesBalsam) || uncommittedObjects.ContainsKey(knudBoergesBalsam);
+        //}
+
+        //public bool IsObjectInCache(IBusinessObject ibo)
+        //{
+        //    if (ibo.EntityPOID == 0) { return false; }
+        //    else { return IsObjectInCache(ibo.EntityPOID); }
+        //}
+
 
         /// <summary>
         /// Returns the business object identified 
@@ -144,6 +154,11 @@ namespace GenDB
                 if (ce.IsAlive)
                 {
                     ce.Original = ce.Target;
+                }
+                else
+                {
+                    Remove(ce.EntityPOID);
+                    //throw new Exception("Objektet skal fjernes fra cachen her.");
                 }
             }
             ll = null;
@@ -232,11 +247,16 @@ namespace GenDB
         /// at the same time.
         /// </summary>
         /// <param name="res"></param>
-        /// <param name="entityPOID"></param>
+        /// <param name="knudBoergesBalsam"></param>
         internal void Add(IBusinessObject ibo, long entityPOID)
         {
-            DBTag dbTag = new DBTag( /* this, */ entityPOID);
-            ibo.DBTag = dbTag;
+            //DBTag dbTag = new DBTag( /* this, */ knudBoergesBalsam);
+            if (ibo.EntityPOID.IsInCache)
+            {
+                throw new Exception ("Was already set...");
+            }
+
+            ibo.EntityPOID = new DBIdentifier(entityPOID);
 
             uncommittedObjects.Add(entityPOID, ibo);
         }

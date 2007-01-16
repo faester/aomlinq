@@ -82,9 +82,9 @@ namespace GenDB
              * there is nothing to load.
              */
 
-            if (DBTag != null)
+            if (EntityPOID.IsInCache)
             {
-                foreach (IGenCollectionElement ce in DataContext.Instance.GenDB.AllElements(DBTag.EntityPOID))
+                foreach (IGenCollectionElement ce in DataContext.Instance.GenDB.AllElements(EntityPOID))
                 {
                     object o = cnv.PickCorrectElement(ce);
                     T value = (T)o;
@@ -133,6 +133,7 @@ namespace GenDB
 
         public void Add(T item)
         {
+            Console.WriteLine("My DBIdentifier: " + EntityPOID);
             if (!isListPopulated) { this.RetrieveElements(); }
             theList.Add(item);
         }
@@ -194,7 +195,7 @@ namespace GenDB
             } 
 
             GenDB.DB.IGenericDatabase db = DataContext.Instance.GenDB;
-            long thisPOID = this.DBTag.EntityPOID;
+            long thisPOID = this.EntityPOID;
             db.ClearCollection(thisPOID);
 
             CollectionElementConverter cnv = new CollectionElementConverter(mt, DataContext.Instance, typeof(T));
