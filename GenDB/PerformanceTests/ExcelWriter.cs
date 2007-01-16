@@ -56,7 +56,8 @@ namespace PerformanceTests
 
         public void WriteInformation(int objectCount, float time)
         {
-            string cmdHeader = "INSERT INTO " + sheetname + " (objectCount, theTime) VALUES (" + objectCount + "," + time + ")";
+            string timeStr = time.ToString().Replace(',', '.');
+            string cmdHeader = "INSERT INTO " + sheetname + " (objectCount, theTime) VALUES (" + objectCount + "," + timeStr + ")";
             cmd.CommandText = cmdHeader;
             cmd.ExecuteNonQuery();
         }

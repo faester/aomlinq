@@ -30,10 +30,15 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DLinq, Version=1.0.2319.19044, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="System.Query, Version=1.0.2319.19041, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ContainsAllPrimitiveTypes.cs" />
+    <Compile Include="DLinqWriteTest.cs" />
     <Compile Include="ExcelWriter.cs" />
+    <Compile Include="GenDBPerfTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
