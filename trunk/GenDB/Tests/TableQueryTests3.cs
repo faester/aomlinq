@@ -41,8 +41,6 @@ namespace QueryToSqlTranslationTests
             dataContext.SubmitChanges();
             
             Assert.AreEqual(0, ttp.Count, "Table wasn't cleared properly.");
-            Assert.AreEqual (0, dataContext.CommittedObjectsSize , "Still objects in committed list in cache.");
-            Assert.AreEqual (0, dataContext.UnCommittedObjectsSize , "Still objects in uncommitted list in cache.");
 
             TestPerson lastPerson = null;
 
@@ -160,18 +158,18 @@ namespace QueryToSqlTranslationTests
         [Test]
         public void TestContains()
         {
-            dataContext.Log = Console.Out;
-
             var ps = from persons in ttp
                     where persons.Name.Contains("ame")
                     select persons;
 
+            int count = 0;
             foreach (TestPerson p in ps)
             {
+                count++;
                 Console.WriteLine(p.Name);
             }
+            Assert.AreEqual(count, ps.Count, "Count method of tables returned erroneous result.");
             Assert.AreEqual(10, ps.Count, "not enough persons returned");
-            dataContext.Log = null;
         }
 
         [Test]

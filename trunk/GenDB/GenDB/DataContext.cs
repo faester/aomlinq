@@ -31,22 +31,6 @@ namespace GenDB
 
         TranslatorSet translators;
 
-        TextWriter log = null;
-
-        public TextWriter Log
-        {
-            get { return log; }
-            set { log = value; }
-        }
-
-        internal void LogPrint(string logMessage)
-        {
-            if (log != null)
-            {
-                log.WriteLine(logMessage);
-            }
-        }
-
         internal TranslatorSet Translators
         {
             get { return translators; }

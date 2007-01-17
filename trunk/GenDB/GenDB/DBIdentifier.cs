@@ -22,7 +22,7 @@ namespace GenDB
 
         public void SetPersistent()
         {
-            value |= IS_SET_MASK;
+            value = value | IS_SET_MASK;
         }
 
         public static implicit operator long(DBIdentifier ident)

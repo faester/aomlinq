@@ -111,8 +111,14 @@ namespace GenDB
             }
             else
             {
-                if (!wr.IsAlive) { throw new Exception("Internal error in cache: Object has been reclaimed by garbagecollector, but was requested from cache."); }
-                result = wr.Target;
+                if (!wr.IsAlive) { 
+                    committedObjects.Remove(id);
+                    return null;
+                }
+                else
+                {
+                    result = wr.Target;
+                }
             }
             retrieved++;
             return result;
@@ -210,7 +216,7 @@ namespace GenDB
                     else
                     {
                         //TODO: Should never happen, but need proper testing....
-                        throw new Exception("Object reclaimed before if was flushed to the DB.");
+                        //throw new Exception("Object reclaimed before if was flushed to the DB.");
                     }
                 }
             }
@@ -224,11 +230,10 @@ namespace GenDB
         /// <param name="knudBoergesBalsam"></param>
         internal void Add(IBusinessObject ibo, long entityPOID)
         {
-            //DBTag dbTag = new DBTag( /* this, */ knudBoergesBalsam);
-            //if (ibo.DBIdentity.IsPersistent)
-            //{
-            //    throw new Exception ("Was already set...");
-            //}
+            if (ibo.DBIdentity.IsPersistent)
+            {
+                throw new Exception ("Was already set...");
+            }
 
             ibo.DBIdentity = new DBIdentifier(entityPOID);
 
@@ -248,12 +253,10 @@ namespace GenDB
         internal void AddFromDB(IBusinessObject ibo)
         {
             ibo.DBIdentity.SetPersistent();
-#if DEBUG
             if (!ibo.DBIdentity.IsPersistent)
             {
                 throw new Exception("Something wrong in DBIdentity class.");
             }
-#endif
             uncommittedObjects.Add(ibo.DBIdentity, ibo);
         }
 
@@ -268,8 +271,7 @@ namespace GenDB
         internal void Remove(long id)
         {
             //TODO: Need to make some kind of commit possible here.
-            dataContext.LogPrint("IBOCache is removing: " + id);
-            committedObjects.Remove(id);
+            //committedObjects.Remove(id);
             uncommittedObjects.Remove(id);
         }
     }
