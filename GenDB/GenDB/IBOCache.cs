@@ -225,10 +225,10 @@ namespace GenDB
         internal void Add(IBusinessObject ibo, long entityPOID)
         {
             //DBTag dbTag = new DBTag( /* this, */ knudBoergesBalsam);
-            if (ibo.DBIdentity.IsPersistent)
-            {
-                throw new Exception ("Was already set...");
-            }
+            //if (ibo.DBIdentity.IsPersistent)
+            //{
+            //    throw new Exception ("Was already set...");
+            //}
 
             ibo.DBIdentity = new DBIdentifier(entityPOID);
 
@@ -254,7 +254,7 @@ namespace GenDB
                 throw new Exception("Something wrong in DBIdentity class.");
             }
 #endif
-            committedObjects.Add(ibo.DBIdentity, new IBOCacheElement(ibo, generation));
+            uncommittedObjects.Add(ibo.DBIdentity, ibo);
         }
 
         /// <summary>
