@@ -20,6 +20,11 @@ namespace GenDB
             get {return (value & IS_SET_MASK) == IS_SET_MASK; }
         }
 
+        public void SetPersistent()
+        {
+            value |= IS_SET_MASK;
+        }
+
         public static implicit operator long(DBIdentifier ident)
         {
             return ident.Value;

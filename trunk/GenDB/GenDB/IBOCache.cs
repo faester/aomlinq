@@ -163,35 +163,14 @@ namespace GenDB
 
         public void FlushToDB()
         {
-#if DEBUG
-            Console.WriteLine("DEBUG INFORMATION FROM IBOCache.FlushToDB():");
-            Stopwatch stp = new Stopwatch();
-            
-            stp.Start();
-#endif
-            CommitChangedCommitted();
-#if DEBUG
-            stp.Stop();
-            Console.WriteLine("\tCommitUncomitted took: {0}", stp.Elapsed);
-            stp.Reset();
-
-            stp.Start();
-#endif
             CommitUncommitted();
-            TryGC();
-#if DEBUG
-            stp.Stop();
-            Console.WriteLine("\tCommitChangedComitted took: {0}", stp.Elapsed);
+            CommitChangedCommitted();
+            // Der kan være objekter i committed, der henviser til andre objekter i committed.
 
-            stp.Reset();
-            stp.Start();
-#endif
+            TryGC();
+
             generation++;
             dataContext.GenDB.CommitChanges();
-#if DEBUG
-            stp.Stop();
-            Console.WriteLine("\tConfiguration.GenDB.CommitChanges took: {0}", stp.Elapsed);
-#endif
         }
 
         private void CommitUncommitted()
@@ -223,9 +202,10 @@ namespace GenDB
                         IBusinessObject ibo = ce.Target;
                         IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
                         trans.SaveToDB(dataContext.GenDB, ibo);
-                        //IEntity e = trans.PickCorrectElement(res);
-                        //DataContext.GenDB.Save(e);
+
                         ce.ClearDirtyBit();
+
+                        ce.Original = null;
                     }
                     else
                     {
@@ -253,6 +233,28 @@ namespace GenDB
             ibo.DBIdentity = new DBIdentifier(entityPOID);
 
             uncommittedObjects.Add(entityPOID, ibo);
+        }
+
+
+        /// <summary>
+        /// When the db reads in a new object, it should be stored in the
+        /// cache, but not be put in the UnCommittedObjects dictionary, since
+        /// all changes are persisted. 
+        /// 
+        /// We also assume that this method is only called from the db, why the 
+        /// id part of the identity should be set correctly.
+        /// </summary>
+        /// <param name="ibo"></param>
+        internal void AddFromDB(IBusinessObject ibo)
+        {
+            ibo.DBIdentity.SetPersistent();
+#if DEBUG
+            if (!ibo.DBIdentity.IsPersistent)
+            {
+                throw new Exception("Something wrong in DBIdentity class.");
+            }
+#endif
+            committedObjects.Add(ibo.DBIdentity, new IBOCacheElement(ibo, generation));
         }
 
         /// <summary>
