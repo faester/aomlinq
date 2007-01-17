@@ -80,6 +80,7 @@ namespace GenDB
         /// </summary>
         public void Clear()
         {
+            Console.WriteLine("Performing clear on " + ToString());
             if (exprFullySqlTranslatable)
             {
                 foreach (T ie in db.Where(expression))
@@ -260,7 +261,7 @@ namespace GenDB
 
         public override string ToString()
         {
-            return "Table<" + typeof(T).ToString() + "> with condition " + expression;
+            return "Table<" + typeof(T).ToString() + "> with condition (" + exprFullySqlTranslatable + ") " + expression;
         }
     }
 }

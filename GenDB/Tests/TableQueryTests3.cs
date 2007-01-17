@@ -32,14 +32,14 @@ namespace QueryToSqlTranslationTests
             dataContext.SubmitChanges();
         }
 
-        
-
 
         public void InitTableOfPersons()
         {
             ttp = dataContext.CreateTable<TestPerson>();
             ttp.Clear();
+
             dataContext.SubmitChanges();
+            
             Assert.AreEqual(0, ttp.Count, "Table wasn't cleared properly.");
             Assert.AreEqual (0, dataContext.CommittedObjectsSize , "Still objects in committed list in cache.");
             Assert.AreEqual (0, dataContext.UnCommittedObjectsSize , "Still objects in uncommitted list in cache.");
@@ -90,6 +90,7 @@ namespace QueryToSqlTranslationTests
         public void TearDown()
         {
             tableAllPrimitives.Clear();
+            Console.WriteLine(ttp);
             ttp.Clear();
             dataContext.SubmitChanges();
             tableAllPrimitives = null;
