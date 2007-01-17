@@ -492,15 +492,11 @@ namespace GenDB.DB
                 while (reader.Read())
                 {
                     entityTypePOID = Convert.ToInt64(reader[0]);
-                    Console.WriteLine("entityTypePOID = " + entityTypePOID);
                     entityPOID = Convert.ToInt64(reader[6]);
                     if (entityTypePOID != oldEntityTypePOID || firstPass)
                     {
-                        Console.WriteLine("New EntityType!");
                         translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
                         iet = DataContext.Instance.TypeSystem.GetEntityType(entityTypePOID);
-                        Console.WriteLine(iet);
-                        Console.WriteLine(translator.EntityType);
                         oldEntityTypePOID = entityTypePOID;
                     } // if
                     if (entityPOID != oldEntityPOID || firstPass)
@@ -514,7 +510,9 @@ namespace GenDB.DB
                         if (!returnCachedCopy)
                         {
                             result = translator.CreateInstanceOfIBusinessObject(); // We do not set DBIdentity (use NewEntity()) , since id is retrieved from DB.
-                            IBOCache.Instance.Add(result, entityPOID);
+                            result.DBIdentity = new DBIdentifier(entityPOID);
+                            
+                            IBOCache.Instance.AddFromDB(result);
                         }
 
                         oldEntityPOID = entityPOID;
@@ -522,7 +520,6 @@ namespace GenDB.DB
                     if (reader[1] != DBNull.Value && !returnCachedCopy) // Does any properties exist?
                     {
                         propertyPOID = ((IConvertible) reader[1]).ToInt64(null);
-                        Console.WriteLine("PropertyPOID = {0}", propertyPOID);
                         object value = null;
                         switch (iet.GetProperty(propertyPOID).MappingType)
                         {
