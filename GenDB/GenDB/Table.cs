@@ -80,7 +80,7 @@ namespace GenDB
         /// </summary>
         public void Clear()
         {
-            Console.WriteLine("Performing clear on " + ToString());
+            //Console.WriteLine("Performing clear on " + ToString());
             if (exprFullySqlTranslatable)
             {
                 foreach (T ie in db.Where(expression))
