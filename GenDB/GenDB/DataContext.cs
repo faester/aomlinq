@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using GenDB.DB;
+using System.IO;
 
 namespace GenDB
 {
     public class DataContext
     {
         static DataContext instance = new DataContext();
-
+        
         public Table<T> CreateTable<T> ()
             where T : IBusinessObject
         {
@@ -29,6 +30,22 @@ namespace GenDB
         }
 
         TranslatorSet translators;
+
+        TextWriter log = null;
+
+        public TextWriter Log
+        {
+            get { return log; }
+            set { log = value; }
+        }
+
+        internal void LogPrint(string logMessage)
+        {
+            if (log != null)
+            {
+                log.WriteLine(logMessage);
+            }
+        }
 
         internal TranslatorSet Translators
         {

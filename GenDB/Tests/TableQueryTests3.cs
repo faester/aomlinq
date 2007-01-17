@@ -160,6 +160,8 @@ namespace QueryToSqlTranslationTests
         [Test]
         public void TestContains()
         {
+            dataContext.Log = Console.Out;
+
             var ps = from persons in ttp
                     where persons.Name.Contains("ame")
                     select persons;
@@ -169,6 +171,7 @@ namespace QueryToSqlTranslationTests
                 Console.WriteLine(p.Name);
             }
             Assert.AreEqual(10, ps.Count, "not enough persons returned");
+            dataContext.Log = null;
         }
 
         [Test]
