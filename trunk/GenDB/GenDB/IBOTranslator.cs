@@ -138,15 +138,12 @@ namespace GenDB
 
         private void InitPropertyTranslators()
         {
-            Dictionary<string, IProperty> properties =
-                entityType.GetAllProperties.ToDictionary((IProperty p) => p.PropertyName);
-
             foreach (PropertyInfo clrProperty in fields)
             {
                 Attribute a = Volatile.GetCustomAttribute(clrProperty, typeof(Volatile));
                 if (clrProperty.PropertyType != typeof(DBIdentifier) && a == null)
                 {
-                    IProperty prop = properties[clrProperty.Name];
+                    IProperty prop = this.entityType.GetProperty(clrProperty.Name);
                     fieldConverters.AddLast(new FieldConverter(t, clrProperty, prop, dataContext));
                     fieldConverterDict[prop.PropertyPOID] = fieldConverters.Last.Value;
                     if (
