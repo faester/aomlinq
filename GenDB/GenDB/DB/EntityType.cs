@@ -85,12 +85,15 @@ namespace GenDB.DB
         public IProperty GetProperty(long propertyPOID)
         {
             IProperty result;
-            if (!properties.TryGetValue(propertyPOID, out result))
+            if (properties != null && properties.TryGetValue(propertyPOID, out result))
+            {
+                return result;
+            }
+            else
             {
                 if (superEntityType == null) { throw new Exception("No such property in IEntityType '" + name + "': " + propertyPOID); }
-                result = superEntityType.GetProperty(propertyPOID);
+                return superEntityType.GetProperty(propertyPOID);
             }
-            return result;
         }
 
         /// <summary>
