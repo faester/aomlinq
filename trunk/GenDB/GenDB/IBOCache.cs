@@ -268,6 +268,7 @@ namespace GenDB
         internal void Remove(long id)
         {
             //TODO: Need to make some kind of commit possible here.
+            dataContext.LogPrint("IBOCache is removing: " + id);
             committedObjects.Remove(id);
             uncommittedObjects.Remove(id);
         }
