@@ -22,6 +22,13 @@ namespace GenDB
         }
 
         IBusinessObject clone;
+
+        public IBusinessObject Clone
+        {
+            get { return clone; }
+            set { clone = value; }
+        }
+
         IBusinessObject original;
 
         public IBusinessObject Original

@@ -113,6 +113,7 @@ namespace TranslationTests
             tableOfHasVolatileProperty = null;
             tableOfPureIBusinessImpl = null;
             GC.Collect();
+            Console.Error.WriteLine("IBOCache size is now: " + DataContext.Instance.CommittedObjectsSize);
         }
 
         [Test, ExpectedException(typeof(NotTranslatableException))]

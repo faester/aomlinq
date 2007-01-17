@@ -74,6 +74,7 @@ namespace PerformanceTests
                 dlinqtest.PerformClearTest();
                 long dlinqms = stopwatch.ElapsedMilliseconds - gendbms ;
                 Console.WriteLine("Clear times: GenDB {0} ms, DLinq {1} ms", gendbms, dlinqms);
+                Console.WriteLine("ComObjSize= " + GenDB.DataContext.Instance.CommittedObjectsSize);
             }
 
             Console.WriteLine("Akkumuleret læsefaktor: {0}", ((double)gdbms) / dlms);
