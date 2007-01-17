@@ -210,8 +210,6 @@ namespace GenDB
                         trans.SaveToDB(dataContext.GenDB, ibo);
 
                         ce.ClearDirtyBit();
-
-                        ce.Original = null;
                     }
                     else
                     {
@@ -270,7 +268,6 @@ namespace GenDB
         /// <param name="id"></param>
         internal void Remove(long id)
         {
-            //TODO: Need to make some kind of commit possible here.
             //committedObjects.Remove(id);
             uncommittedObjects.Remove(id);
         }
