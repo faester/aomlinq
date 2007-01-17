@@ -517,7 +517,7 @@ namespace GenDB.DB
                     } // if
                     if (reader[1] != DBNull.Value && !returnCachedCopy) // Does any properties exist?
                     {
-                        propertyPOID = long.Parse(reader[1]);
+                        propertyPOID = ((IConvertible) reader[1]).ToInt64(null);
                         object value = null;
                         switch (iet.GetProperty(propertyPOID).MappingType)
                         {
