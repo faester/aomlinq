@@ -35,7 +35,7 @@ namespace QueryToSqlTranslationTests
 
         public void InitTableOfPersons()
         {
-            ttp = dataContext.CreateTable<TestPerson>();
+            ttp = dataContext.CreateTable<TestPerson>();  
             ttp.Clear();
 
             dataContext.SubmitChanges();

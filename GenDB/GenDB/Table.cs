@@ -248,12 +248,19 @@ namespace GenDB
             return res;
         }
 
-        public Table<T> Join<U, K, V>(IEnumerable<U> inner, 
+        public IEnumerable<V> Join<U, K, V>(IEnumerable<U> inner, 
                                       Expression<Func<T, K>> outerKeySelector,
                                       Expression<Func<U, K>> innerKeySelector,
                                       Expression<Func<T, U, V>> resultSelector)
         {
-            throw new Exception("halt");
+            if (TranslatorChecks.ImplementsIBusinessObject(typeof(U)) && TranslatorChecks.ImplementsIBusinessObject(typeof(T)))
+            {
+                throw new Exception("do translation");
+            }
+            else
+            {
+                throw new Exception("halt");
+            }
         }
 
         #endregion
