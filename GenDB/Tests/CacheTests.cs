@@ -174,7 +174,6 @@ namespace IBOCache
             cacheEmptied = testsRun;
             dt.SubmitChanges();
             string msg = "(Failures here might indicate, that some other test is keeping a reference to objects. Check that this is not the case.";
-            Assert.AreEqual(0, dt.CommittedObjectsSize, "Cache still contained committed objects. " + msg);
             Assert.AreEqual(0, dt.UnCommittedObjectsSize, "Cache still contained uncommitted objects. " + msg);
         }
 
@@ -194,15 +193,41 @@ namespace IBOCache
             dt.SubmitChanges();
 
             Assert.AreEqual(0, dt.UnCommittedObjectsSize, "Uncommitted objects still contained values");
-            Assert.AreEqual(0, dt.CommittedObjectsSize, "Committed objects still contained values");
         }
 
+
+        [Test]
+        public void TestDeleteThenChangeValue()
+        {
+            table.Clear();
+            dt.SubmitChanges();
+
+            CacheTestObject co = new CacheTestObject ();
+            co.Name = "Before delete.";
+
+            table.Add (co);
+            dt.SubmitChanges();
+
+            Table<CacheTestObject> filtered = from c in table where c.Name == "Before delete." select c;
+            Assert.AreEqual(1, filtered.Count, "Test object was not persisted.");
+
+            table.Clear();
+            dt.SubmitChanges();
+            Assert.AreEqual(0, table.Count, "Table wasn't emptied correctly.");
+
+            co.Name = "After delete";
+
+            dt.SubmitChanges();
+            Assert.AreEqual(0, table.Count, "Object state change after delete caused object to be re-added to db.");
+        }
 
         [Test]
         public void TestChangesPersisted()
         {
             int obs = 500;
             Table<ContainsAllPrimitiveTypes> tcapt = dt.CreateTable<ContainsAllPrimitiveTypes>();
+            tcapt.Clear();
+            dt.SubmitChanges();
 
             for (int i = 0; i < obs; i++)
             {
@@ -212,19 +237,27 @@ namespace IBOCache
             dt.SubmitChanges();
             GC.Collect();
 
+            int idx = 0;
             foreach(ContainsAllPrimitiveTypes c in tcapt)
             {
-                c.Integer = 1000;
+                c.Integer = idx++;
                 c.Str = "Changed";
             }
             
             dt.SubmitChanges();
             GC.Collect();
 
+            bool[] found = new bool[obs];
+
             foreach(ContainsAllPrimitiveTypes c in tcapt)
             {
+                found[c.Integer] = true;
                 Assert.AreEqual("Changed", c.Str, "Ændring ikke persisteret!");
-                Assert.AreEqual(1000, c.Integer, "Ændring ikke persisteret!");
+            }
+
+            for (int i = 0; i < obs; i++)
+            {
+                Assert.IsTrue(found[i], "Not all saved values where returned.");
             }
         }
     }
