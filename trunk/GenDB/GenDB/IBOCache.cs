@@ -13,29 +13,27 @@ namespace GenDB
     {
         int MAX_OLD_OBJECTS_TO_KEEP = 1000;
 
-        int generation = 0;
+        //private static IBOCache instance = null;
 
-        private static IBOCache instance = null;
+        ///// <summary>
+        ///// Returns the singleton instance of the IBOCache.
+        ///// It is mandatory to run IBOCache.Init(DataContext) before 
+        ///// the first access to the instance, in order to set the 
+        ///// DataContext for the IBOCache.
+        ///// </summary>
+        //public static IBOCache Instance 
+        //{
+        //    get { return instance; }
+        //}
 
-        /// <summary>
-        /// Returns the singleton instance of the IBOCache.
-        /// It is mandatory to run IBOCache.Init(DataContext) before 
-        /// the first access to the instance, in order to set the 
-        /// DataContext for the IBOCache.
-        /// </summary>
-        public static IBOCache Instance 
-        {
-            get { return instance; }
-        }
-
-        public static void Init(DataContext dataContext)
-        {
-            instance = new IBOCache(dataContext);
-        }
+        //public static void Init(DataContext dataContext)
+        //{
+        //    instance = new IBOCache(dataContext);
+        //}
 
         long retrieved = 0;
 
-        private IBOCache(DataContext dataContext)
+        internal IBOCache(DataContext dataContext)
         {
             this.dataContext = dataContext;
         }
@@ -82,7 +80,7 @@ namespace GenDB
 
         private void AddToCommitted(IBusinessObject obj)
         {
-            IBOCacheElement wr = new IBOCacheElement(obj, generation);
+            IBOCacheElement wr = new IBOCacheElement(obj);
             committedObjects[obj.DBIdentity] = wr;
         }
 
@@ -157,6 +155,7 @@ namespace GenDB
 #if DEBUG
                     removeCount++;
 #endif
+                    committedObjects.Remove(ce.EntityPOID);
                     Remove(ce.EntityPOID);
                 }
             }
@@ -175,7 +174,6 @@ namespace GenDB
 
             TryGC();
 
-            generation++;
             dataContext.GenDB.CommitChanges();
         }
 
@@ -201,11 +199,11 @@ namespace GenDB
         {
             foreach (IBOCacheElement ce in committedObjects.Values)
             {
-                if (ce.IsDirty)
+                if (ce.Original.DBIdentity.IsPersistent && ce.IsDirty)
                 {
                     if (ce.IsAlive)
                     {
-                        IBusinessObject ibo = ce.Target;
+                        IBusinessObject ibo = ce.Original;
                         IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
                         trans.SaveToDB(dataContext.GenDB, ibo);
 
@@ -214,7 +212,7 @@ namespace GenDB
                     else
                     {
                         //TODO: Should never happen, but need proper testing....
-                        //throw new Exception("Object reclaimed before if was flushed to the DB.");
+                        throw new Exception("Object reclaimed before if was flushed to the DB.");
                     }
                 }
             }
@@ -233,7 +231,7 @@ namespace GenDB
                 throw new Exception ("Was already set...");
             }
 
-            ibo.DBIdentity = new DBIdentifier(entityPOID);
+            ibo.DBIdentity = new DBIdentifier(entityPOID, true);
 
             uncommittedObjects.Add(entityPOID, ibo);
         }
@@ -250,7 +248,6 @@ namespace GenDB
         /// <param name="ibo"></param>
         internal void AddFromDB(IBusinessObject ibo)
         {
-            ibo.DBIdentity.SetPersistent();
             if (!ibo.DBIdentity.IsPersistent)
             {
                 throw new Exception("Something wrong in DBIdentity class.");
@@ -268,6 +265,18 @@ namespace GenDB
         /// <param name="id"></param>
         internal void Remove(long id)
         {
+            IBOCacheElement obj = null;
+            if (committedObjects.TryGetValue(id, out obj))
+            {
+                IBusinessObject ibo = obj.Original;
+                DBIdentifier newID = new DBIdentifier (ibo.DBIdentity.Value, false);
+                obj.Original.DBIdentity = newID;
+                if (obj.Original.DBIdentity.IsPersistent)
+                {
+                    throw new Exception("Internal error in DBIdentity");
+                }
+            }
+
             //committedObjects.Remove(id);
             uncommittedObjects.Remove(id);
         }

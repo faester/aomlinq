@@ -124,7 +124,7 @@ namespace GenDB
 
                     long refEntityPOID = (long)value;
 
-                    IBusinessObject iboVal = IBOCache.Instance.Get(refEntityPOID);
+                    IBusinessObject iboVal = this.dataContext.IBOCache.Get(refEntityPOID);
 
                     if (iboVal == null) 
                     {

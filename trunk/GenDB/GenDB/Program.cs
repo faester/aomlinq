@@ -155,15 +155,11 @@ namespace GenDB
 
         public static void Main(string[] args)
         {
-            DBIdentifier dbid = new DBIdentifier(100);
-            Console.WriteLine(dbid.IsPersistent);
-            long dbidvalue = dbid;
-            Console.WriteLine(dbidvalue);
-
-            //Console.ReadLine();
-            //return;
-
             DataContext dcontext = DataContext.Instance;
+            dcontext.DeleteDatabase();
+            dcontext.CreateDatabase();
+            dcontext.Init();
+
 
             int objCount = 10;
 
@@ -228,7 +224,9 @@ namespace GenDB
 
             //IBOCache.FlushToDB();
             dcontext.SubmitChanges();
-            
+
+            tp.Clear();
+
             //var es = from epp in tp     
             //    //where epp.disco == "21"
             //    where epp.Spouse.Age > 4
