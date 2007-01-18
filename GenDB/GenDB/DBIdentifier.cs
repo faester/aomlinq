@@ -10,19 +10,17 @@ namespace GenDB
         public const long VALUE_BITS =  ~(1L << 63);
         long value;
 
-        internal DBIdentifier (long value)
+        internal DBIdentifier (long value, bool isPersistent)
         {
-            this.value = (value | IS_SET_MASK);
+            this.value = isPersistent ? value | IS_SET_MASK : value;
         }
 
         public bool IsPersistent
         {
-            get {return (value & IS_SET_MASK) == IS_SET_MASK; }
-        }
-
-        public void SetPersistent()
-        {
-            value = value | IS_SET_MASK;
+            get {
+                long left = (value & IS_SET_MASK) ;
+                return left == IS_SET_MASK; 
+            }
         }
 
         public static implicit operator long(DBIdentifier ident)

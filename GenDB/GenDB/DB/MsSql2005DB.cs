@@ -145,6 +145,7 @@ namespace GenDB.DB
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
             {
                 cnn.Open();
+                SqlTransaction transaction = null;
                 try
                 {
                     SqlCommand cmd = new SqlCommand("CREATE DATABASE "
@@ -156,13 +157,36 @@ namespace GenDB.DB
                 catch (SqlException ex)
                 {
                     throw new Exception("Error creating DB. See inner exception for details.", ex);
-
                 }
             }
-            CreateTables();
-            CreateIndexes();
-            CreateSProcs();
-            CreateFunctions();
+
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
+            {
+                cnn.Open();
+                SqlTransaction transaction = null;
+                try
+                {
+                    transaction = cnn.BeginTransaction();
+                    CreateTables(cnn, transaction);
+                    CreateIndexes(cnn, transaction);
+                    CreateSProcs(cnn, transaction);
+                    CreateFunctions(cnn, transaction);
+                    transaction.Commit();
+                }
+                catch (SqlException ex)
+                {
+                    transaction.Rollback();
+                    try {
+                        SqlCommand dc = new SqlCommand("DROP DATABASE " + dataContext.DatabaseName, cnn);
+                        dc.ExecuteNonQuery();
+                    }
+                    catch(Exception e) 
+                    { 
+                        Console.WriteLine(e);
+                    }
+                    throw new Exception("Error creating DB (could not create tables). See inner exception for details.", ex);
+                }
+            }
         }
 
         /// <summary>
@@ -201,7 +225,6 @@ namespace GenDB.DB
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
             {
                 cnn.Open();
-
                 SqlCommand cmd = new SqlCommand("DROP DATABASE " + dataContext.DatabaseName, cnn);
                 cmd.ExecuteNonQuery();
 
@@ -505,14 +528,14 @@ namespace GenDB.DB
                             yield return result; 
                         }
 
-                        result = IBOCache.Instance.Get(entityPOID);
+                        result = dataContext.IBOCache.Get(entityPOID);
                         returnCachedCopy = result != null;
                         if (!returnCachedCopy)
                         {
                             result = translator.CreateInstanceOfIBusinessObject(); // We do not set DBIdentity (use NewEntity()) , since id is retrieved from DB.
-                            result.DBIdentity = new DBIdentifier(entityPOID);
+                            result.DBIdentity = new DBIdentifier(entityPOID, true);
                             
-                            IBOCache.Instance.AddFromDB(result);
+                            this.dataContext.IBOCache.AddFromDB(result);
                         }
 
                         oldEntityPOID = entityPOID;
@@ -1076,19 +1099,19 @@ namespace GenDB.DB
         /// <summary>
         /// Creates indexes. (Pending task.)
         /// </summary>
-        private void CreateIndexes()
+        private void CreateIndexes(SqlConnection cnn, SqlTransaction t)
         {
             LinkedList<string> iCC = new LinkedList<string>(); //Table create commands
-            ExecuteNonQueries(iCC);
+            ExecuteNonQueries(iCC, cnn, t);
         }
 
-        private void CreateTables()
+        private void CreateTables(SqlConnection cnn, SqlTransaction t)
         {
             LinkedList<string> tCC = new LinkedList<string>(); //Table create commands
 
             tCC.AddLast("CREATE TABLE " + TB_ENTITYTYPE_NAME + " (EntityTypePOID int primary key, SuperEntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) , Name VARCHAR(max), AssemblyDescription VARCHAR(MAX), IsList bit not null, IsDictionary bit not null); ");
             tCC.AddLast("CREATE TABLE " + TB_PROPERTYTYPE_NAME + " (PropertyTypePOID int primary key, Name VARCHAR(max), MappingType smallint); ");
-            tCC.AddLast("CREATE TABLE " + TB_ENTITY_NAME + " (EntityPOID int primary key, EntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID)); ");
+            tCC.AddLast("CREATE TABLE " + TB_ENTITY_NAME + " (EntityPOID int primary key, EntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) ON UPDATE CASCADE); ");
             tCC.AddLast("CREATE TABLE " + TB_PROPERTY_NAME + " (PropertyPOID int primary key, PropertyTypePOID int references " + TB_PROPERTYTYPE_NAME + "(PropertyTypePOID), EntityTypePOID int references " + TB_ENTITYTYPE_NAME + " (EntityTypePOID) on delete cascade on update cascade, PropertyName VARCHAR(max)); ");
             tCC.AddLast("CREATE TABLE "
                 + TB_PROPERTYVALUE_NAME + " ( "
@@ -1097,7 +1120,8 @@ namespace GenDB.DB
                 + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
                 + " BoolValue BIT, "
                 + " StringValue VARCHAR(MAX), "
-                + " DoubleValue FLOAT) "
+                + " DoubleValue FLOAT, "
+                + " ReferenceValue INT) "
                 );
             tCC.AddLast("CREATE TABLE "
                 + TB_COLLECTION_ELEMENT_NAME + " ( "
@@ -1124,10 +1148,10 @@ namespace GenDB.DB
             tCC.AddLast("ALTER TABLE " + TB_COLLECTION_KEY_NAME + " ADD PRIMARY KEY ( EntityPOID, KeyID)");
             tCC.AddLast("ALTER TABLE " + TB_COLLECTION_KEY_NAME + " ADD FOREIGN KEY (EntityPOID, KeyID) REFERENCES " + TB_COLLECTION_ELEMENT_NAME + " (EntityPOID, ElementID) ");
 
-            ExecuteNonQueries(tCC);
+            ExecuteNonQueries(tCC, cnn, t);
         }
 
-        private void CreateSProcs()
+        private void CreateSProcs(SqlConnection cnn, SqlTransaction t)
         {
             string sp_UP_INS_ENTITY = "CREATE PROCEDURE sp_UP_INS_ENTITY "
                                       + "  @EntityPOID AS INT, "
@@ -1221,10 +1245,11 @@ namespace GenDB.DB
                             "		VALUES (@EntityPOID, @KeyID, @LongValue, @StringValue, @BoolValue, @DoubleValue)" +
                             "	END";
 
-            ExecuteNonQueries(new string[] { sp_UP_INS_ENTITY, sp_SET_PROPERTYVALUE, sp_SET_COLLECTION_ELEMENT, sp_SET_COLLECTION_KEY });
+            string[] cmds = new string[] { sp_UP_INS_ENTITY, sp_SET_PROPERTYVALUE, sp_SET_COLLECTION_ELEMENT, sp_SET_COLLECTION_KEY };
+            ExecuteNonQueries(cmds, cnn, t);
         }
 
-        private void CreateFunctions()
+        private void CreateFunctions(SqlConnection cnn, SqlTransaction t)
         {
             string cmdStr =
                 " CREATE FUNCTION dbo.fn_lookup_EntityPOID " +
@@ -1260,37 +1285,24 @@ namespace GenDB.DB
                 "		RETURN @res" +
                 " END ";
 
-            ExecuteNonQueries(new string[] { cmdStr });
+            ExecuteNonQueries(new string[] { cmdStr }, cnn, t);
         }
 
         /// <summary>
         /// Executes a series of command strings. Must be non queries.
         /// </summary>
         /// <param name="cmdStrings"></param>
-        private void ExecuteNonQueries(IEnumerable<string> cmdStrings)
+        private void ExecuteNonQueries(IEnumerable<string> cmdStrings, SqlConnection cnn, SqlTransaction transaction)
         {
-            SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName);
-            cnn.Open();
-
             SqlCommand cmd = new SqlCommand();
             cmd.Connection = cnn;
+            cmd.Transaction = transaction;
 
-            cmd.Transaction = cnn.BeginTransaction();
-
-            try
+            foreach (string cmdStr in cmdStrings)
             {
-                foreach (string cmdStr in cmdStrings)
-                {
-                    cmd.CommandText = cmdStr;
-                    cmd.ExecuteNonQuery();
-                }
-                cmd.Transaction.Commit();
+                cmd.CommandText = cmdStr;
+                cmd.ExecuteNonQuery();
             }
-            catch (SqlException ex)
-            {
-                throw new Exception("Could not create database.", ex);
-            }
-            cnn.Close();
         }
         #endregion
     }

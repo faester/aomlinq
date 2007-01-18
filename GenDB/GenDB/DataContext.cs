@@ -9,7 +9,14 @@ namespace GenDB
     public class DataContext
     {
         static DataContext instance = new DataContext();
-        
+
+        bool isInitialized = false;
+
+        public bool IsInitialized
+        {
+            get { return isInitialized; }
+        }
+
         public Table<T> CreateTable<T> ()
             where T : IBusinessObject
         {
@@ -59,33 +66,61 @@ namespace GenDB
 
         internal DataContext()
         {
-            Init();
-        }
-
-        private void Init()
-        {
             // Instantiation order is vital!
             translators = new TranslatorSet(this);
             genDB = new MsSql2005DB (this);
-            if (RebuildDatabase)
+        }
+
+        public void Init()
+        {
+            if (isInitialized)
             {
-                if (genDB.DatabaseExists())
-                {
-                    genDB.DeleteDatabase();
-                }
-            }
-            if (!genDB.DatabaseExists())
-            {
-                genDB.CreateDatabase();
+                throw new Exception("Database already up running.");
             }
             typeSystem = new TypeSystem (this);
             typeSystem.Init();
-            IBOCache.Init (this);
-            iboCache = IBOCache.Instance;
+
+            iboCache = new IBOCache(this);
             bolistFactory = new BOListFactory();
+            isInitialized = true;
         }
 
         private int dbBatchSize = 1;
+
+        /// <summary>
+        /// Attempts to build database. All changes will be lost. 
+        /// Cache will be emptied without committing. Should only 
+        /// be used as part of program initialization before any-
+        /// thing has been added to the database.
+        /// </summary>
+        public void DeleteDatabase()
+        {
+            if (isInitialized)
+            {
+                throw new Exception("Database already up running.");
+            }
+            genDB.DeleteDatabase();
+        }
+
+
+        /// <summary>
+        /// Attempts to build database. All changes will be lost. 
+        /// Cache will be emptied. Should only be used as part 
+        /// of program initialization.
+        /// </summary>
+        public void CreateDatabase()
+        {
+            if (isInitialized)
+            {
+                throw new Exception("Database already up running.");
+            }
+            genDB.CreateDatabase();
+        }
+
+        public bool DatabaseExists()
+        {
+            return genDB.DatabaseExists();
+        }
 
         public int DbBatchSize
         {
@@ -94,15 +129,6 @@ namespace GenDB
         } 
 
         private bool rebuildDatabase = true;
-
-        public bool RebuildDatabase
-        {
-            get { return rebuildDatabase; }
-            set { 
-                if (genDB != null && value != rebuildDatabase) { throw new Exception("Request for DB rebuild must be set before the DB is accessed for the first time."); }
-                rebuildDatabase = value;
-            }
-        }
 
         string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI;connection timeout=240";
 
@@ -133,6 +159,10 @@ namespace GenDB
             iboCache.FlushToDB();
         }
 
+        public void RollbackTransaction()
+        {
+            throw new Exception("Not implemented");
+        }
         /// <summary>
         /// Number of objects watched by the cache.
         /// </summary>
