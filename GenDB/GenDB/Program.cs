@@ -163,24 +163,24 @@ namespace GenDB
 
             int objCount = 10;
 
-            Table<BOList<Person>> tbolist = dcontext.CreateTable<BOList<Person>>();
+            //Table<BOList<Person>> tbolist = dcontext.CreateTable<BOList<Person>>();
 
-            foreach (BOList<Person> bol in tbolist)
-            {
-                foreach(Person qwe in bol)
-                {
-                    Console.WriteLine(qwe.Name);
-                }
-            }
+            //foreach (BOList<Person> bol in tbolist)
+            //{
+            //    foreach(Person qwe in bol)
+            //    {
+            //        Console.WriteLine(qwe.Name);
+            //    }
+            //}
 
-            BOList<Person> bolist = dcontext.BolistFactory.BOListRef <Person>();
-            for (int i = 0; i < 10; i++)
-            {
-                Person p = new Person{Name = i.ToString() + "'"};
-                bolist.Add (p);
-            }
+            //BOList<Person> bolist = dcontext.BolistFactory.BOListRef <Person>();
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    Person p = new Person{Name = i.ToString() + "'"};
+            //    bolist.Add (p);
+            //}
 
-            tbolist.Add (bolist);
+            //tbolist.Add (bolist);
 
             dcontext.SubmitChanges();
 
@@ -250,29 +250,29 @@ namespace GenDB
             
             // ******************************
 
-            int[] ages = {1, 2, 3, 4 };
+            //int[] ages = {1, 2, 3, 4 };
 
-            var qw = from pers in tp 
-                     join age in ages
-                     on pers.Age equals age
-                     select new {pers.Name, age};
+            //var qw = from pers in tp 
+            //         join age in ages
+            //         on pers.Age equals age
+            //         select new {pers.Name, age};
 
-            foreach(var q in qw)
-            {
-                Console.WriteLine(q);
-            }
-
-            // ********************************
-
-            var vlist = from pers in tp
-                               join car in cars on pers.Age equals car.Seets
-                               where (pers.Name == "Navn 6" || car.Brand == "Brand 7") && car.Seets > 6
-                               select new {pers.Name, car.Seets};
-            
-            //foreach(var v in vlist) 
+            //foreach(var q in qw)
             //{
-            //    Console.WriteLine("Person name: {0}, Car seets: {1}",v.Name, v.Seets);
+            //    Console.WriteLine(q);
             //}
+
+            //// ********************************
+
+            //var vlist = from pers in tp
+            //                   join car in cars on pers.Age equals car.Seets
+            //                   where (pers.Name == "Navn 6" || car.Brand == "Brand 7") && car.Seets > 6
+            //                   select new {pers.Name, car.Seets};
+            
+            ////foreach(var v in vlist) 
+            ////{
+            ////    Console.WriteLine("Person name: {0}, Car seets: {1}",v.Name, v.Seets);
+            ////}
 
             //Console.WriteLine("Size of Table: {0}", vlist.Count);
             

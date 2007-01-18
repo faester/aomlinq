@@ -488,7 +488,8 @@ namespace GenDB.DB
                     "    BoolValue, " + // 3x
                     "    StringValue, " + // 4
                     "    DoubleValue, " + // 5
-                    "    e.EntityPOID " + // 6
+                    "    e.EntityPOID, " + // 6
+                    "    ReferenceValue " + // 7
                     " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
                     " WHERE e.EntityPOID IN (" + whereStr + " )" +
                     " ORDER BY e.EntityTypePOID, e.EntityPOID"
@@ -551,14 +552,14 @@ namespace GenDB.DB
                             case MappingType.DOUBLE: value = reader[5]; break;
                             case MappingType.LONG: value = reader[2]; break;
                             case MappingType.REFERENCE: 
-                                if (reader[2] == DBNull.Value)
+                                if (reader[7] == DBNull.Value)
                                 {
                                     value = null;
                                     break;
                                 }
                                 else
                                 {
-                                    value = reader[2];
+                                    value = reader[7];
                                     break;
                                 }
                             case MappingType.STRING: value = reader[4]; break;
@@ -730,19 +731,18 @@ namespace GenDB.DB
                 PropertyValueStringBuilderToLL();
             }
             propertyValueInsertCount++;
-            long longValue; // DateTimes are stored as ticks to avoid problems with limited date span in SQL-server
+            long longValue = 0; // DateTimes are stored as ticks to avoid problems with limited date span in SQL-server
             bool longValueIsNull = false;
             switch (pv.Property.MappingType)
             {
-                case MappingType.REFERENCE:
-                    longValue = pv.RefValue.EntityPOID;
-                    longValueIsNull = pv.RefValue.IsNullReference;
-                    break;
                 case MappingType.DATETIME:
                     longValue = pv.DateTimeValue.Ticks;
                     break;
-                default:
+                case MappingType.LONG:
                     longValue = pv.LongValue;
+                    break;
+                default:
+                    longValueIsNull = true;
                     break;
             }
 
@@ -777,7 +777,9 @@ namespace GenDB.DB
             sbPropertyValueInserts.Append(',')
                        .Append(boolValue)
                        .Append(',')
-                       .Append( pv.DoubleValue.ToString().Replace(',', '.')) // ',' -> '.' to sole localization issues.
+                       .Append( pv.DoubleValue.ToString().Replace(',', '.')) // ',' -> '.' to solve localization issues.
+                       .Append (',')
+                       .Append (pv.RefValue.IsNullReference ? " null " : pv.RefValue.EntityPOID.ToString())
                        .Append(";");
         }
 
@@ -1148,6 +1150,11 @@ namespace GenDB.DB
             tCC.AddLast("ALTER TABLE " + TB_COLLECTION_KEY_NAME + " ADD PRIMARY KEY ( EntityPOID, KeyID)");
             tCC.AddLast("ALTER TABLE " + TB_COLLECTION_KEY_NAME + " ADD FOREIGN KEY (EntityPOID, KeyID) REFERENCES " + TB_COLLECTION_ELEMENT_NAME + " (EntityPOID, ElementID) ");
 
+            tCC.AddLast(
+            "CREATE TRIGGER cascade_delete_references ON " + TB_ENTITY_NAME + " AFTER DELETE AS " +
+            "UPDATE PropertyValue SET ReferenceValue = NULL WHERE ReferenceValue IN (SELECT EntityPOID FROM deleted) "
+            );
+
             ExecuteNonQueries(tCC, cnn, t);
         }
 
@@ -1174,7 +1181,8 @@ namespace GenDB.DB
                                         "	@LongValue AS BIGINT," +
                                         "	@StringValue AS VARCHAR(max)," +
                                         "	@BoolValue AS BIT, " +
-                                        "   @DoubleValue AS FLOAT " +
+                                        "   @DoubleValue AS FLOAT, " +
+                                        "   @ReferenceValue AS INT " + 
                                         " AS " +
                                         "	IF EXISTS (SELECT * FROM PropertyValue WHERE EntityPOID = @EntityPOID AND PropertyPOID = @PropertyPoid) " +
                                         "	BEGIN " +
@@ -1182,15 +1190,16 @@ namespace GenDB.DB
                                         "			LongValue = @LongValue," +
                                         "			StringValue = @StringValue ," +
                                         "			BoolValue = @BoolValue, " +
-                                        "			DoubleValue = @DoubleValue " +
+                                        "			DoubleValue = @DoubleValue, " +
+                                        "			ReferenceValue = @ReferenceValue " +
                                         "		WHERE " +
                                         "			EntityPOID = @EntityPOID AND PropertyPOID = @PropertyPOID" +
                                         "	END " +
                                         "	ELSE" +
                                         "	BEGIN" +
                                         "		INSERT INTO " +
-                                        "		PropertyValue (EntityPOID, PropertyPOID, LongValue, StringValue , BoolValue, DoubleValue)" +
-                                        "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @StringValue, @BoolValue, @DoubleValue)" +
+                                        "		PropertyValue (EntityPOID, PropertyPOID, LongValue, StringValue , BoolValue, DoubleValue, ReferenceValue)" +
+                                        "		VALUES (@EntityPOID, @PropertyPOID, @LongValue, @StringValue, @BoolValue, @DoubleValue, @ReferenceValue)" +
                                         "	END";
 
             string sp_SET_COLLECTION_ELEMENT
