@@ -253,13 +253,21 @@ namespace GenDB
                                       Expression<Func<U, K>> innerKeySelector,
                                       Expression<Func<T, U, V>> resultSelector)
         {
+            Table<T> res = new Table<T>();
+
             if (TranslatorChecks.ImplementsIBusinessObject(typeof(U)) && TranslatorChecks.ImplementsIBusinessObject(typeof(T)))
             {
+                SqlJoinTranslator joinTranslator = new SqlJoinTranslator(typeSystem);
+                res.expression = joinTranslator.Convert(outerKeySelector,innerKeySelector);
+                
                 throw new Exception("do translation");
             }
             else
             {
-                throw new Exception("halt");
+                IQueryable<T> outer=this.ToQueryable();
+                IQueryable<U> inner2=inner.ToQueryable();
+
+                return Queryable.Join<T, U, K, V>(outer, inner2, outerKeySelector, innerKeySelector, resultSelector);
             }
         }
 

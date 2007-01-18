@@ -250,6 +250,8 @@ namespace GenDB
             
             //Console.WriteLine("Size of Table: {0}", es.Count);
             
+            // ******************************
+
             int[] ages = {1, 2, 3, 4 };
 
             var qw = from pers in tp 
@@ -257,10 +259,17 @@ namespace GenDB
                      on pers.Age equals age
                      select new {pers.Name, age};
 
-            //var vlist = from pers in tp
-            //                   join car in cars on pers.Age equals car.Seets
-            //                   where (pers.Name == "Navn 6" || car.Brand == "Brand 7") && car.Seets > 6
-            //                   select new {pers.Name, car.Seets};
+            foreach(var q in qw)
+            {
+                Console.WriteLine(q);
+            }
+
+            // ********************************
+
+            var vlist = from pers in tp
+                               join car in cars on pers.Age equals car.Seets
+                               where (pers.Name == "Navn 6" || car.Brand == "Brand 7") && car.Seets > 6
+                               select new {pers.Name, car.Seets};
             
             //foreach(var v in vlist) 
             //{
