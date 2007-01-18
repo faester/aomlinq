@@ -18,17 +18,15 @@ namespace TableTests
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
-            try {
-                if(!dataContext.RebuildDatabase)
-                {
-                    dataContext.RebuildDatabase = true;
-                }
-            }
-            catch(Exception e)
+            if (!dataContext.IsInitialized)
             {
-                Console.Error.WriteLine (dataContext.RebuildDatabase);
-                Console.Error.WriteLine("Database must be rebuild prior to calling these tests.");
-                throw e;
+                dataContext.DeleteDatabase();
+                dataContext.CreateDatabase();
+            }
+
+            if (!dataContext.DatabaseExists())
+            {
+                dataContext.CreateDatabase();
             }
         }
 

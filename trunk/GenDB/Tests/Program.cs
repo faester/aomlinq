@@ -72,7 +72,12 @@ namespace Tests
 #endif
             DataContext dataContext = DataContext.Instance;
 
-            dataContext.RebuildDatabase = true;
+            if (dataContext.DatabaseExists())
+            {
+                dataContext.DeleteDatabase();
+            }
+            dataContext.CreateDatabase();
+
 
             dataContext.DbBatchSize = 2000;
             long objcount = 1;

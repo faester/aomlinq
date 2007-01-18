@@ -351,7 +351,7 @@ namespace QueryToSqlTranslationTests
             var qs_false  = from persons in ttp
                       where persons.Spouse.GoodLooking == false
                       select persons;
-            Assert.AreEqual(4, qs_false.Count,"there should be 5 ugly bastards out there!!");
+            Assert.AreEqual(4, qs_false.Count,"there should be 4 ugly bastards out there!!");
 
             foreach(var person in qs_false)
             {

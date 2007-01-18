@@ -106,7 +106,17 @@ namespace QueryToSqlTranslationTests
         [TestFixtureSetUp]
         public void Initialize()
         {
-            dataContext.RebuildDatabase = true;
+            if (!dataContext.IsInitialized)
+            {
+                dataContext.DeleteDatabase();
+                dataContext.CreateDatabase();
+            }
+
+            if (!dataContext.DatabaseExists())
+            {
+                dataContext.CreateDatabase();
+            }
+
             int objCount = 10;
             tp = dataContext.CreateTable<Person>();
             tp.Clear();
