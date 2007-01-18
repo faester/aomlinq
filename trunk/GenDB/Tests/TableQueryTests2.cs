@@ -367,7 +367,7 @@ namespace QueryToSqlTranslationTests
         [Test]
         public void TestLessThan()
         {
-            var es = from epp in ttp     
+            var es = from epp in ttp
                 where epp.Name == "Name2" && epp.Age < 9
                 select epp;
 

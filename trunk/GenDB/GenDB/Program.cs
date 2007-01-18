@@ -38,7 +38,7 @@ namespace GenDB
 
         public class Car : AbstractBusinessObject
         {
-            string brand = "Volvo";
+            string brand;// = "Volvo";
             bool sunroof;
             int seets;
             Motor motor = new Motor();
@@ -218,31 +218,56 @@ namespace GenDB
             Person p_p = new Person {Name = "NormalPerson", Spouse=s_p, Age=121, Alive=true};
             tp.Add (p_p);
 
+            Table<Car> cars = dcontext.CreateTable<Car>();
+            for(short i=0;i<objCount;i++)
+            {
+                Car c = new Car{Brand="Brand "+i, Seets=i};
+                if(i%2==0)c.Sunroof = true;
+                cars.Add(c);
+            }
+
             //IBOCache.FlushToDB();
             dcontext.SubmitChanges();
             
-            var es = from epp in tp     
-                //where epp.disco == "21"
-                //where epp.Age == 4
-                //where epp.Alive
-                //where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7" || epp.Name == "Navn 1" || epp.Age == 3
-                //where epp.Spouse.Age == 3 || epp.Spouse.Age == 4
+            //var es = from epp in tp     
+            //    //where epp.disco == "21"
+            //    where epp.Spouse.Age > 4
+            //    //where epp.Alive
+            //    //where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7" || epp.Name == "Navn 1" || epp.Age == 3
+            //    //where epp.Spouse.Age == 3 || epp.Spouse.Age == 4
 
-                //where epp.Car.Motor.HorsePower == "400"
-                //where epp.Car.Motor.Valve == 6
-                where epp.Car.Sunroof==false
-                //where !(epp.Age!=4)
-                select epp;
-                //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
+            //    //where epp.Car.Motor.HorsePower == "400"
+            //    //where epp.Car.Motor.Valve == 6
+            //    //where epp.Car.Sunroof==false
+            //    //where !(epp.Age!=4)
+            //    select epp;
+            //    //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
 
-
-            foreach(Person p in es)
-            {
-                ObjectUtilities.PrintOut (p);
-                //Console.WriteLine("*********************** Sunroof: "+p.Car.Sunroof);
-            }
+            //foreach(Person p in es)
+            //{
+            //    ObjectUtilities.PrintOut (p);
+            //}
             
-            Console.WriteLine("Size of Table: {0}", es.Count);
+            //Console.WriteLine("Size of Table: {0}", es.Count);
+            
+            int[] ages = {1, 2, 3, 4 };
+
+            var qw = from pers in tp 
+                     join age in ages
+                     on pers.Age equals age
+                     select new {pers.Name, age};
+
+            //var vlist = from pers in tp
+            //                   join car in cars on pers.Age equals car.Seets
+            //                   where (pers.Name == "Navn 6" || car.Brand == "Brand 7") && car.Seets > 6
+            //                   select new {pers.Name, car.Seets};
+            
+            //foreach(var v in vlist) 
+            //{
+            //    Console.WriteLine("Person name: {0}, Car seets: {1}",v.Name, v.Seets);
+            //}
+
+            //Console.WriteLine("Size of Table: {0}", vlist.Count);
             
             Console.ReadLine();
         }
