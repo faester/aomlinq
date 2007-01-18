@@ -110,7 +110,7 @@ namespace GenDB.DB
                 case MappingType.LONG: 
                     wherePart.Append(pvName + ".LongValue "); break;
                 case MappingType.REFERENCE: 
-                    wherePart.Append(pvName + ".LongValue "); break;
+                    wherePart.Append(pvName + ".ReferenceValue "); break;
                 case MappingType.STRING: 
                     wherePart.Append(pvName + ".StringValue "); break;
                 default:
@@ -222,7 +222,7 @@ namespace GenDB.DB
                 case MappingType.LONG: 
                     wherePart.Append(pvName + ".LongValue "); break;
                 case MappingType.REFERENCE: 
-                    wherePart.Append(pvName + ".LongValue "); break;
+                    wherePart.Append(pvName + ".ReferenceValue "); break;
                 case MappingType.STRING: 
                     wherePart.Append(pvName + ".StringValue "); break;
                 default:

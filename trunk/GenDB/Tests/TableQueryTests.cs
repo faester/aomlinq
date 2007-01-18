@@ -240,7 +240,7 @@ namespace QueryToSqlTranslationTests
 
             // NotEq, reference
             Assert.IsTrue(NotEqReference(tp,johnDoe),"Person should exist");
-            Assert.IsFalse(NotEqReference(tp,spouse),"Person shuld not exist");
+            Assert.IsFalse(NotEqReference(tp,spouse),"Person should not exist");
             // NotNe, reference
             Assert.IsTrue(NotNeReference(tp,spouse),"Person should exist");
             Assert.IsFalse(NotNeReference(tp,johnDoe),"Person should not exist");
@@ -436,7 +436,15 @@ namespace QueryToSqlTranslationTests
             var v = from col in t  
                     where !(col.Spouse != p)
                     select col;
-            return HasAtLeastOne(v);
+
+            bool foundIt = false;
+            foreach (var q in v)
+            {
+                Assert.IsTrue (!(q.Spouse != p), "Error in result (NotNeReference)");
+                foundIt = true;
+            }
+
+            return foundIt;
         }
 
         private bool HasAtLeastOne(Table<Person> v)

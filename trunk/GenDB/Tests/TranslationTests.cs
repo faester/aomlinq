@@ -99,6 +99,7 @@ namespace TranslationTests
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
+            dc = DataContext.Instance;  
             if (!dc.IsInitialized)
             {
                 dc.DeleteDatabase();

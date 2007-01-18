@@ -18,14 +18,12 @@ namespace GenDB.DB
         public long EntityPOID
         {
             get { return entityPOID; }
-            set { entityPOID = value; }
         }
         bool isNullReference;
 
         public bool IsNullReference
         {
             get { return isNullReference; }
-            set { isNullReference = value; }
         }
 
         public IBOReference(bool isNullReference)
@@ -48,7 +46,7 @@ namespace GenDB.DB
 
         public override string ToString()
         {
-            return "IBOReference {" + (isNullReference ? " null " : " EntityPOID = " + entityPOID ) + "}";
+            return "IBOReference {" + (isNullReference ? " null " : " EntityPOID = " + entityPOID) + "}";
         }
     }
 

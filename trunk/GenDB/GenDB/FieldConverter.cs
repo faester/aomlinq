@@ -94,7 +94,7 @@ namespace GenDB
                         }
                         else
                         {
-                            IBOReference reference = new IBOReference(false, ibo.DBIdentity);
+                            IBOReference reference = new IBOReference(ibo.DBIdentity);
                             e.GetPropertyValue(p).RefValue = reference;
                         }
                     };
@@ -122,7 +122,7 @@ namespace GenDB
                         return;
                     }
 
-                    long refEntityPOID = (long)value;
+                    long refEntityPOID = (int)value;
 
                     IBusinessObject iboVal = this.dataContext.IBOCache.Get(refEntityPOID);
 
