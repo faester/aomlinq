@@ -20,9 +20,9 @@ namespace BOListTests
         {
             try
             {
-                if (!dataContext.RebuildDatabase)
+                if (!dataContext.DatabaseExists())
                 {
-                    dataContext.RebuildDatabase = true;
+                    dataContext.CreateDatabase();
                 }
             }
             catch (Exception e)

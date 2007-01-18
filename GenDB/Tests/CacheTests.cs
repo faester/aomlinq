@@ -40,7 +40,7 @@ namespace IBOCache
         } 
 
         int instancesToCreate = 100;
-        DataContext dt = DataContext.Instance;
+        DataContext dc = DataContext.Instance;
         Table<CacheTestObject> table = null;
         LinkedList<CacheTestObject> keepInstances = new LinkedList<CacheTestObject>();
         int testsRun = 0;
@@ -54,7 +54,13 @@ namespace IBOCache
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
-            table = dt.CreateTable<CacheTestObject>();
+            if (!dc.IsInitialized)
+            {
+                dc.DeleteDatabase();
+                dc.CreateDatabase();
+            }
+
+            table = dc.CreateTable<CacheTestObject>();
             table.Clear();
 
             for (int i = 0; i < instancesToCreate; i++)
@@ -83,13 +89,13 @@ namespace IBOCache
         public void Test1AreChangesComitted()
         {
             areChangesCommitted = testsRun;
-            dt.SubmitChanges();
+            dc.SubmitChanges();
             foreach (CacheTestObject cto in keepInstances)
             {
                 cto.Name = "NAMECHANGE";
             }
             keepInstances.Clear();
-            dt.SubmitChanges();
+            dc.SubmitChanges();
         }
 
         [Test]
@@ -124,9 +130,9 @@ namespace IBOCache
             }
             lastPerson.Spouse = tp;
 
-            Table<TestPerson> ttp = dt.CreateTable<TestPerson>();
+            Table<TestPerson> ttp = dc.CreateTable<TestPerson>();
             ttp.Add (tp);
-            dt.SubmitChanges();
+            dc.SubmitChanges();
         }
 
         [Test]
@@ -134,7 +140,7 @@ namespace IBOCache
         {
             Check(storeRecursiveDataType1);
             storeRecursiveDataType2 = testsRun;   
-            Table<TestPerson> ttp = dt.CreateTable<TestPerson>();
+            Table<TestPerson> ttp = dc.CreateTable<TestPerson>();
 
             var qs = from tps in ttp
                        where tps.Name == "0"
@@ -163,7 +169,7 @@ namespace IBOCache
                 Assert.IsTrue (count < 1000, "Test terminated.");
             }
             ttp.Clear();
-            dt.SubmitChanges();
+            dc.SubmitChanges();
             Assert.AreEqual(100, count, "Wrong number of elements returned.");
         }
 
@@ -172,9 +178,9 @@ namespace IBOCache
         {
             Check(storeRecursiveDataType2);
             cacheEmptied = testsRun;
-            dt.SubmitChanges();
+            dc.SubmitChanges();
             string msg = "(Failures here might indicate, that some other test is keeping a reference to objects. Check that this is not the case.";
-            Assert.AreEqual(0, dt.UnCommittedObjectsSize, "Cache still contained uncommitted objects. " + msg);
+            Assert.AreEqual(0, dc.UnCommittedObjectsSize, "Cache still contained uncommitted objects. " + msg);
         }
 
         [Test]
@@ -182,7 +188,7 @@ namespace IBOCache
         {
             Check(cacheEmptied);
             table.Clear();
-            dt.SubmitChanges();
+            dc.SubmitChanges();
             CacheTestObject hvp = null;
             for (int i = 0; i < 10; i++)
             {
@@ -190,9 +196,9 @@ namespace IBOCache
                 table.Add (hvp);
             }
             hvp = null;
-            dt.SubmitChanges();
+            dc.SubmitChanges();
 
-            Assert.AreEqual(0, dt.UnCommittedObjectsSize, "Uncommitted objects still contained values");
+            Assert.AreEqual(0, dc.UnCommittedObjectsSize, "Uncommitted objects still contained values");
         }
 
 
@@ -200,24 +206,24 @@ namespace IBOCache
         public void TestDeleteThenChangeValue()
         {
             table.Clear();
-            dt.SubmitChanges();
+            dc.SubmitChanges();
 
             CacheTestObject co = new CacheTestObject ();
             co.Name = "Before delete.";
 
             table.Add (co);
-            dt.SubmitChanges();
+            dc.SubmitChanges();
 
             Table<CacheTestObject> filtered = from c in table where c.Name == "Before delete." select c;
             Assert.AreEqual(1, filtered.Count, "Test object was not persisted.");
 
             table.Clear();
-            dt.SubmitChanges();
+            dc.SubmitChanges();
             Assert.AreEqual(0, table.Count, "Table wasn't emptied correctly.");
 
             co.Name = "After delete";
 
-            dt.SubmitChanges();
+            dc.SubmitChanges();
             Assert.AreEqual(0, table.Count, "Object state change after delete caused object to be re-added to db.");
         }
 
@@ -225,16 +231,16 @@ namespace IBOCache
         public void TestChangesPersisted()
         {
             int obs = 500;
-            Table<ContainsAllPrimitiveTypes> tcapt = dt.CreateTable<ContainsAllPrimitiveTypes>();
+            Table<ContainsAllPrimitiveTypes> tcapt = dc.CreateTable<ContainsAllPrimitiveTypes>();
             tcapt.Clear();
-            dt.SubmitChanges();
+            dc.SubmitChanges();
 
             for (int i = 0; i < obs; i++)
             {
                 tcapt.Add (new ContainsAllPrimitiveTypes());
             }
             
-            dt.SubmitChanges();
+            dc.SubmitChanges();
             GC.Collect();
 
             int idx = 0;
@@ -244,7 +250,7 @@ namespace IBOCache
                 c.Str = "Changed";
             }
             
-            dt.SubmitChanges();
+            dc.SubmitChanges();
             GC.Collect();
 
             bool[] found = new bool[obs];

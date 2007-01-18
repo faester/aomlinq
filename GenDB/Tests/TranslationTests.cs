@@ -99,6 +99,11 @@ namespace TranslationTests
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
+            if (!dc.IsInitialized)
+            {
+                dc.DeleteDatabase();
+                dc.CreateDatabase();
+            }
             dc = DataContext.Instance;
             tableOfHasVolatileProperty = dc.CreateTable<HasVolatileProperty>();
             tableOfPureIBusinessImpl = dc.CreateTable<PureIBusinessImpl>();

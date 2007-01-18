@@ -20,6 +20,10 @@ namespace GenDB
         public Table<T> CreateTable<T> ()
             where T : IBusinessObject
         {
+            if (!isInitialized)
+            {
+                Init();
+            }
             return new Table<T>(GenDB, Translators, TypeSystem, IBOCache);
         }
 
