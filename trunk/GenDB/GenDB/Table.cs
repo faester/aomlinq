@@ -264,10 +264,7 @@ namespace GenDB
             }
             else
             {
-                IQueryable<T> outer=this.ToQueryable();
-                IQueryable<U> inner2=inner.ToQueryable();
-
-                return Queryable.Join<T, U, K, V>(outer, inner2, outerKeySelector, innerKeySelector, resultSelector);
+                return Queryable.Join<T, U, K, V>(this.ToQueryable(), inner.ToQueryable(), outerKeySelector, innerKeySelector, resultSelector);
             }
         }
 
