@@ -257,8 +257,9 @@ namespace GenDB
 
             if (TranslatorChecks.ImplementsIBusinessObject(typeof(U)) && TranslatorChecks.ImplementsIBusinessObject(typeof(T)))
             {
-                //SqlJoinTranslator joinTranslator = new SqlJoinTranslator(typeSystem);
-                //res.expression = joinTranslator.Convert(outerKeySelector,innerKeySelector);
+                SqlJoinTranslator joinTranslator = new SqlJoinTranslator(typeSystem);
+                IExpression exe = joinTranslator.Convert(outerKeySelector,innerKeySelector);
+
                 
                 throw new Exception("do translation");
             }
