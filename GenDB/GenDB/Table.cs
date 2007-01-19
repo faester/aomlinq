@@ -247,7 +247,7 @@ namespace GenDB
 
             return res;
         }
-
+        // inner join
         public IEnumerable<V> Join<U, K, V>(IEnumerable<U> inner, 
                                       Expression<Func<T, K>> outerKeySelector,
                                       Expression<Func<U, K>> innerKeySelector,
@@ -257,7 +257,7 @@ namespace GenDB
             if (TranslatorChecks.ImplementsIBusinessObject(typeof(U)) && TranslatorChecks.ImplementsIBusinessObject(typeof(T)))
             {
                 SqlJoinTranslator joinTranslator = new SqlJoinTranslator(typeSystem);
-                IExpression exe = joinTranslator.Convert(outerKeySelector,innerKeySelector);
+                IExpression exe = joinTranslator.Convert(outerKeySelector,innerKeySelector,false);
                 throw new Exception("do translation");
             }
             else
@@ -266,7 +266,7 @@ namespace GenDB
             }
         }
 
-
+        // outer join
         public IEnumerable<V> GroupJoin<U, K, V>(IEnumerable<U> inner, 
                                                 Expression<Func<T, K>> outerKeySelector,
                                                 Expression<Func<U, K>> innerKeySelector,
@@ -276,7 +276,7 @@ namespace GenDB
             if(TranslatorChecks.ImplementsIBusinessObject(typeof(U)) && TranslatorChecks.ImplementsIBusinessObject(typeof(T)))
             {
                 SqlJoinTranslator joinTranslator = new SqlJoinTranslator(typeSystem);
-                IExpression expr = joinTranslator.Convert(outerKeySelector,innerKeySelector);
+                IExpression expr = joinTranslator.Convert(outerKeySelector,innerKeySelector,true);
                 throw new Exception("not implemented");
             }
             else
