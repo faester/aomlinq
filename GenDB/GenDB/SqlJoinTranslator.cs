@@ -13,6 +13,7 @@ namespace GenDB
     {
         TypeSystem typeSystem;
         bool leftSideDone;
+        bool isOuterJoin;
         List<IProperty> outerProps = new List<IProperty>();
         List<IProperty> innerProps = new List<IProperty>();
 
@@ -21,8 +22,9 @@ namespace GenDB
             this.typeSystem = typeSystem;
         }
 
-        public IExpression Convert(Expression outer, Expression inner)
+        public IExpression Convert(Expression outer, Expression inner, bool isOuterJoin)
         {
+            this.isOuterJoin=isOuterJoin;
             VisitExpr(outer);
             VisitExpr(inner);
             throw new Exception("stop");
