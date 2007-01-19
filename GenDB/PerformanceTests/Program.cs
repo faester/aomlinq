@@ -12,6 +12,7 @@ namespace PerformanceTests
         {
             Stopwatch stopwatch = new Stopwatch();
             DataContext dc = DataContext.Instance;
+            dc.Init();
             dc.DbBatchSize = 200;
 
             ExcelWriter ewGenDB_write = new ExcelWriter("tst.xls", "GenDB_write");
