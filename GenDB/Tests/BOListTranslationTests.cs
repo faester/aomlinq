@@ -7,7 +7,7 @@ using CommonTestObjects;
 
 namespace BOListTests
 {
-    [TestFixture, Ignore("Known to fail...")]
+    [TestFixture]
     public class BOListTranslationTests
     {
         const int ELEMENTS_TO_INSERT = 10;
@@ -18,6 +18,11 @@ namespace BOListTests
         [TestFixtureSetUp]
         public void InitDB()
         {
+            if (!dataContext.IsInitialized)
+            {
+                if (dataContext.DatabaseExists()) { dataContext.DeleteDatabase(); }
+                dataContext.CreateDatabase();
+            }
             try
             {
                 if (!dataContext.DatabaseExists())

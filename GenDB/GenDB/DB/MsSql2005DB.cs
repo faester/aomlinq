@@ -402,12 +402,12 @@ namespace GenDB.DB
             return res;
         }
 
-        public IEntity GetEntity(long entityPOID)
+        public IBusinessObject GetEntity(long entityPOID)
         {
             IExpression we = new EntityPOIDEquals(entityPOID);
             int count = 0;
-            IEntity res = null;
-            foreach (IEntity e in Where(we))
+            IBusinessObject res = null;
+            foreach (IBusinessObject e in Where(we))
             {
                 res = e;
                 count++;
@@ -593,12 +593,14 @@ namespace GenDB.DB
              * share the same MappingType. 
              * Start by finding that:
              */
-            IEntity ie = GetEntity(collectionEntityPOID);
+            IBusinessObject ibo = GetEntity(collectionEntityPOID);
             // TODO: Check below should be superfluous. Kept for debugging db consistency.
-            if (ie == null) {throw new Exception("Internal error in database. Request for unknown collection's elements! " + collectionEntityPOID); }
+            if (ibo == null) {throw new Exception("Internal error in database. Request for unknown collection's elements! " + collectionEntityPOID); }
+
+            Type elementType = ibo.GetType().GetGenericArguments()[0];
 
             // Find mapping type for the elements.
-            MappingType mapping = ie.EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).MappingType;
+            MappingType mapping = dataContext.TypeSystem.FindMappingType(elementType);
 
             LinkedList<IGenCollectionElement> res = new LinkedList<IGenCollectionElement>();
 

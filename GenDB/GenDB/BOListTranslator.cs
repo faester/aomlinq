@@ -58,20 +58,20 @@ namespace GenDB
             }
         }
 
-        public IBusinessObject Translate(IEntity ie)
-        {
-            IBusinessObject res = dataContext.IBOCache.Get(ie.EntityPOID);
-            if (res == null)
-            {
-                //IProperty elementTypeProperty = ie.EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
-                //long elementEntityTypePOID = ie.GetPropertyValue(elementTypeProperty).LongValue;
-                //IEntityType elementEntityType = TypeSystem.GetEntityType (elementEntityTypePOID);
-                //Type elementType = TypeSystem.GetClrType(elementEntityType);
-                res = (IBusinessObject)instantiator();
-                dataContext.IBOCache.Add (res, ie.EntityPOID);
-            }
-            return res;
-        }
+        //public IBusinessObject Translate(IEntity ie)
+        //{
+        //    IBusinessObject res = dataContext.IBOCache.Get(ie.EntityPOID);
+        //    if (res == null)
+        //    {
+        //        //IProperty elementTypeProperty = ie.EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
+        //        //long elementEntityTypePOID = ie.GetPropertyValue(elementTypeProperty).LongValue;
+        //        //IEntityType elementEntityType = TypeSystem.GetEntityType (elementEntityTypePOID);
+        //        //Type elementType = TypeSystem.GetClrType(elementEntityType);
+        //        res = (IBusinessObject)instantiator();
+        //        dataContext.IBOCache.Add (res, ie.EntityPOID);
+        //    }
+        //    return res;
+        //}
 
         public IEntity Translate(IBusinessObject ibo)
         {
@@ -130,17 +130,17 @@ namespace GenDB
 
         public IBusinessObject CreateInstanceOfIBusinessObject()
         {
-            throw new Exception("Them BOList's surely are a bore.");
+            return (IBusinessObject)instantiator();
         }
 
         public void SetProperty(long propertyPoid, IBusinessObject ibo, object obj)
         {
-            throw new Exception("Them BOList's surely are a bore.");
+            //
         }
 
         public IEnumerable<FieldConverter> FieldConverters 
         {
-            get { throw new Exception("Not implemented....."); }
+            get { return new FieldConverter[0]; }
         }
     }
 }
