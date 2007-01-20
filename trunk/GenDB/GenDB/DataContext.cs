@@ -155,7 +155,10 @@ namespace GenDB
         public string DatabaseName 
         {
             get { return dbname; }
-            set { dbname = value; }
+            set { 
+                dbname = value; 
+                connectStringWithDBName = connectStringWithoutDBName + ";database=" + value;
+            }
         }
 
         public void SubmitChanges()

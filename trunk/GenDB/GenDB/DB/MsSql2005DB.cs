@@ -559,7 +559,7 @@ namespace GenDB.DB
                                 }
                                 else
                                 {
-                                    value = reader[7];
+                                    value = reader.GetInt64(7);
                                     break;
                                 }
                             case MappingType.STRING: value = reader.GetString(4); break;
