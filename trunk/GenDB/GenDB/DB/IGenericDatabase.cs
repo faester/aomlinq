@@ -246,7 +246,7 @@ namespace GenDB.DB
         /// <returns></returns>
         IEnumerable<IEntityType> GetAllEntityTypes();
 
-        IEntity GetEntity(long entityPOID);
+        IBusinessObject GetEntity(long entityPOID);
 
         /// <summary>
         /// Clears all elements stored for the 
