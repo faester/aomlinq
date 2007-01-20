@@ -7,7 +7,7 @@ namespace GenDB.DB
     internal class Entity : IEntity
     {
         IEntityType entityType;
-        long entityPOID;
+        int entityPOID;
         Dictionary<long, IPropertyValue> propertyValues = new Dictionary<long, IPropertyValue>();
         bool existsInDatabase;
 
@@ -17,7 +17,7 @@ namespace GenDB.DB
             set { existsInDatabase = value; }
         }
 
-        public long EntityPOID
+        public int EntityPOID
         {
             get { return entityPOID; }
             set { entityPOID = value; }

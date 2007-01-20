@@ -13,9 +13,9 @@ namespace GenDB.DB
     /// </summary>
     struct IBOReference
     {
-        long entityPOID;
+        int entityPOID;
 
-        public long EntityPOID
+        public int EntityPOID
         {
             get { return entityPOID; }
         }
@@ -29,16 +29,16 @@ namespace GenDB.DB
         public IBOReference(bool isNullReference)
         {
             this.isNullReference = isNullReference;
-            this.entityPOID = default(long);
+            this.entityPOID = default(int);
         }
 
-        public IBOReference(long entityPOID)
+        public IBOReference(int entityPOID)
         {
             isNullReference = false;
             this.entityPOID = entityPOID;
         }
 
-        public IBOReference(bool isNullReference, long entityPOID)
+        public IBOReference(bool isNullReference, int entityPOID)
         {
             this.isNullReference = isNullReference;
             this.entityPOID = entityPOID;
@@ -131,7 +131,7 @@ namespace GenDB.DB
     {
         IEntityType EntityType { get; set; }
 
-        long EntityPOID { get; set; }
+        int EntityPOID { get; set; }
 
         IPropertyValue GetPropertyValue(IProperty property);
 
@@ -144,7 +144,7 @@ namespace GenDB.DB
     {
         string Name { get; set; }
 
-        long PropertyTypePOID { get; set; }
+        int PropertyTypePOID { get; set; }
 
         /// <summary>
         /// Constants should be provided by the 
@@ -164,7 +164,7 @@ namespace GenDB.DB
         MappingType MappingType { get; }
         IPropertyType PropertyType { get; set; }
         IEntityType EntityType { get; set; }
-        long PropertyPOID { get; set; }
+        int PropertyPOID { get; set; }
         string PropertyName { get; set; }
         /// <summary>
         /// Used to determine if insertion should 
@@ -246,14 +246,14 @@ namespace GenDB.DB
         /// <returns></returns>
         IEnumerable<IEntityType> GetAllEntityTypes();
 
-        IBusinessObject GetEntity(long entityPOID);
+        IBusinessObject GetEntity(int entityPOID);
 
         /// <summary>
         /// Clears all elements stored for the 
         /// collection with the given collectionEntityPOID
         /// </summary>
         /// <param name="collectionEntityPOID"></param>
-        void ClearCollection(long collectionEntityPOID);
+        void ClearCollection(int collectionEntityPOID);
 
         /// <summary>
         /// Returns all elements pertaining to the collection 
@@ -261,7 +261,7 @@ namespace GenDB.DB
         /// </summary>
         /// <param name="CollectionEntityPOID"></param>
         /// <returns></returns>
-        IEnumerable<IGenCollectionElement> AllElements(long collectionEntityPOID);
+        IEnumerable<IGenCollectionElement> AllElements(int collectionEntityPOID);
 
         /// <summary>
         /// Saves the entityType as well as any unsaved 
@@ -281,9 +281,9 @@ namespace GenDB.DB
         /// <param name="entity"></param>
         void Save(IEntity entity);
 
-        void Save(IGenCollectionElement ce, long collectionElementPOID, MappingType mt);
+        void Save(IGenCollectionElement ce, int collectionElementPOID, MappingType mt);
 
-        IBusinessObject GetByEntityPOID(long entityPOID);
+        IBusinessObject GetByEntityPOID(int entityPOID);
 
         void CommitChanges();
 

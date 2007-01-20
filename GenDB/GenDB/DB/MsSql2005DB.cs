@@ -23,9 +23,9 @@ namespace GenDB.DB
         }
 
         DataContext dataContext;
-        long nextETID = 0;
+        int nextETID = 0;
         bool nextIDsInitialized = false;
-        public long NextETID
+        public int NextETID
         {
             get
             {
@@ -37,9 +37,9 @@ namespace GenDB.DB
                 return nextETID++;
             }
         }
-        long nextEID = 0;
+        int nextEID = 0;
 
-        public long NextEID
+        public int NextEID
         {
             get
             {
@@ -52,9 +52,9 @@ namespace GenDB.DB
             }
         }
 
-        long nextPTID = 0;
+        int nextPTID = 0;
 
-        public long NextPTID
+        public int NextPTID
         {
             get
             {
@@ -67,9 +67,9 @@ namespace GenDB.DB
                 return nextPTID++;
             }
         }
-        long nextPID = 0;
+        int nextPID = 0;
 
-        public long NextPID
+        public int NextPID
         {
             get
             {
@@ -263,9 +263,9 @@ namespace GenDB.DB
 
         public IEnumerable<IEntityType> GetAllEntityTypes()
         {
-            Dictionary<long, IEntityType> entityTypes = RawEntityTypes();
-            Dictionary<long, IPropertyType> propertyTypes = RawPropertyTypes();
-            Dictionary<long, IProperty> properties = RawProperties(propertyTypes, entityTypes);
+            Dictionary<int, IEntityType> entityTypes = RawEntityTypes();
+            Dictionary<int, IPropertyType> propertyTypes = RawPropertyTypes();
+            Dictionary<int, IProperty> properties = RawProperties(propertyTypes, entityTypes);
             foreach (IProperty property in properties.Values)
             {
                 property.EntityType.AddProperty(property);
@@ -292,7 +292,7 @@ namespace GenDB.DB
                     short mapping = (short)reader[2];
                     MappingType mpt = (MappingType)Enum.ToObject(typeof(MappingType), mapping);
                     tmp.MappingType = mpt;
-                    long ptid = long.Parse(reader[1].ToString());
+                    int ptid = int.Parse(reader[1].ToString());
                     tmp.PropertyTypePOID = ptid;
                     tmp.Name = name;
                     tmp.ExistsInDatabase = true;
@@ -302,19 +302,19 @@ namespace GenDB.DB
             return res;
         }
 
-        private Dictionary<long, IPropertyType> RawPropertyTypes()
+        private Dictionary<int, IPropertyType> RawPropertyTypes()
         {
-            Dictionary<long, IPropertyType> res = new Dictionary<long, IPropertyType>();
+            Dictionary<int, IPropertyType> res = new Dictionary<int, IPropertyType>();
             res = GetAllPropertyTypes().ToDictionary((IPropertyType p) => p.PropertyTypePOID);
             return res;
         }
 
-        private Dictionary<long, IProperty> RawProperties(
-            IDictionary<long, IPropertyType> propertyTypes,
-            IDictionary<long, IEntityType> entityTypes
+        private Dictionary<int, IProperty> RawProperties(
+            IDictionary<int, IPropertyType> propertyTypes,
+            IDictionary<int, IEntityType> entityTypes
             )
         {
-            Dictionary<long, IProperty> res = new Dictionary<long, IProperty>();
+            Dictionary<int, IProperty> res = new Dictionary<int, IProperty>();
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
@@ -323,9 +323,9 @@ namespace GenDB.DB
                 while (reader.Read())
                 {
                     IProperty tmp = new Property();
-                    long pid = long.Parse(reader[1].ToString());
-                    long tid = long.Parse(reader[2].ToString());
-                    long etid = long.Parse(reader[3].ToString());
+                    int pid = int.Parse(reader[1].ToString());
+                    int tid = int.Parse(reader[2].ToString());
+                    int etid = int.Parse(reader[3].ToString());
                     string name = reader[0].ToString();
                     tmp.PropertyPOID = pid;
                     tmp.PropertyName = name;
@@ -342,9 +342,9 @@ namespace GenDB.DB
         /// EntityTypes without Properties and PropertyTypes
         /// </summary>
         /// <returns></returns>
-        private Dictionary<long, IEntityType> RawEntityTypes()
+        private Dictionary<int, IEntityType> RawEntityTypes()
         {
-            Dictionary<long, IEntityType> res = new Dictionary<long, IEntityType>();
+            Dictionary<int, IEntityType> res = new Dictionary<int, IEntityType>();
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
                 cnn.Open();
@@ -356,7 +356,7 @@ namespace GenDB.DB
                 {
                     string t1 = reader[0].ToString();
                     string t2 = reader[1].ToString();
-                    long id = long.Parse(reader[0].ToString());
+                    int id = int.Parse(reader[0].ToString());
 
                     Boolean isList = (Boolean)reader[3]; 
                     Boolean isDictionary = (Boolean)reader[4];
@@ -376,10 +376,10 @@ namespace GenDB.DB
                 reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
-                    long id = long.Parse(reader[0].ToString());
+                    int id = int.Parse(reader[0].ToString());
                     if (reader[1] != DBNull.Value)
                     {
-                        long superId = long.Parse(reader[1].ToString());
+                        int superId = int.Parse(reader[1].ToString());
                         res[id].SuperEntityType = res[superId];
                     }
                 }
@@ -402,7 +402,7 @@ namespace GenDB.DB
             return res;
         }
 
-        public IBusinessObject GetEntity(long entityPOID)
+        public IBusinessObject GetEntity(int entityPOID)
         {
             IExpression we = new EntityPOIDEquals(entityPOID);
             int count = 0;
@@ -462,7 +462,7 @@ namespace GenDB.DB
             return Where(whereStr);
         }
 
-        public IBusinessObject GetByEntityPOID(long entityPOID)
+        public IBusinessObject GetByEntityPOID(int entityPOID)
         {
             int count = 0;
             IBusinessObject res = null;
@@ -512,18 +512,18 @@ namespace GenDB.DB
                 IEntityType iet = null;
                 IIBoToEntityTranslator translator = null;
                 IBusinessObject result = null;
-                long propertyPOID = 0;
-                long entityTypePOID = 0;
-                long oldEntityTypePOID = entityTypePOID + 1; // Must be different
-                long entityPOID = 0;
-                long oldEntityPOID = entityPOID + 1; // Must be different
+                int propertyPOID = 0;
+                int entityTypePOID = 0;
+                int oldEntityTypePOID = entityTypePOID + 1; // Must be different
+                int entityPOID = 0;
+                int oldEntityPOID = entityPOID + 1; // Must be different
                 bool firstPass = true;
                 bool returnCachedCopy = false;
 
                 while (reader.Read())
                 {
-                    entityTypePOID = Convert.ToInt64(reader[0]);
-                    entityPOID = Convert.ToInt64(reader[6]);
+                    entityTypePOID = (int)reader[0];
+                    entityPOID = (int)reader[6];
                     if (entityTypePOID != oldEntityTypePOID || firstPass)
                     {
                         translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
@@ -550,7 +550,7 @@ namespace GenDB.DB
                     } // if
                     if (reader[1] != DBNull.Value && !returnCachedCopy) // Does any properties exist?
                     {
-                        propertyPOID = ((IConvertible) reader[1]).ToInt64(null);
+                        propertyPOID = (int)reader[1];
                         object value = null;
                         switch (iet.GetProperty(propertyPOID).MappingType)
                         {
@@ -586,7 +586,7 @@ namespace GenDB.DB
         }
 
 
-        public IEnumerable<IGenCollectionElement> AllElements(long collectionEntityPOID)
+        public IEnumerable<IGenCollectionElement> AllElements(int collectionEntityPOID)
         {
             /*
              * The collection is generic, so all elements must 
@@ -638,7 +638,7 @@ namespace GenDB.DB
                                 }
                                 else
                                 {
-                                    element.RefValue = new IBOReference((long)reader[1]);
+                                    element.RefValue = new IBOReference((int)(long)reader[1]);
                                 }
                             }
                             break;
@@ -673,7 +673,7 @@ namespace GenDB.DB
             }
         }
 
-        public void Save(IGenCollectionElement ce, long collectionEntityPOID, MappingType mt)
+        public void Save(IGenCollectionElement ce, int collectionEntityPOID, MappingType mt)
         {
             StringBuilder sb = new StringBuilder(" exec sp_SET_COLLECTION_ELEMENT ");
             sb.Append(collectionEntityPOID)
@@ -882,7 +882,7 @@ namespace GenDB.DB
             ClearInsertStringBuilders();
         }
 
-        public void ClearCollection(long collectionEntityPOID)
+        public void ClearCollection(int collectionEntityPOID)
         {
             ClearCollectionElements(collectionEntityPOID);
             ClearCollectionKeys(collectionEntityPOID);
@@ -979,7 +979,7 @@ namespace GenDB.DB
             collectionKeyOperationCount = 0;
         }
 
-        private void ClearCollectionElements(long collectionEntityPOID)
+        private void ClearCollectionElements(int collectionEntityPOID)
         {
             if (collectionElementOperationCount > dataContext.DbBatchSize)
             {
@@ -992,7 +992,7 @@ namespace GenDB.DB
             sbCollectionElementOperations.Append(collectionEntityPOID);
         }
 
-        private void ClearCollectionKeys(long collectionEntityPOID)
+        private void ClearCollectionKeys(int collectionEntityPOID)
         {
             if (collectionKeyOperationCount > dataContext.DbBatchSize)
             {
@@ -1016,16 +1016,16 @@ namespace GenDB.DB
                     cmd.Connection = cnn;
 
                     cmd.CommandText = "SELECT CASE WHEN Max(EntityTypePOID) is null THEN 0 ELSE Max(EntityTypePOID) + 1 END FROM EntityType";
-                    nextETID = long.Parse(cmd.ExecuteScalar().ToString());
+                    nextETID = int.Parse(cmd.ExecuteScalar().ToString());
 
                     cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) is null THEN 1 ELSE Max(EntityPOID) + 1 END FROM Entity";
-                    nextEID = long.Parse(cmd.ExecuteScalar().ToString());
+                    nextEID = int.Parse(cmd.ExecuteScalar().ToString());
 
                     cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) is null THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";
-                    nextPID = long.Parse(cmd.ExecuteScalar().ToString());
+                    nextPID = int.Parse(cmd.ExecuteScalar().ToString());
 
                     cmd.CommandText = "SELECT CASE WHEN Max(PropertyTypePOID) is null THEN 0 ELSE Max(PropertyTypePOID) + 1 END FROM PropertyType";
-                    nextPTID = long.Parse(cmd.ExecuteScalar().ToString());
+                    nextPTID = int.Parse(cmd.ExecuteScalar().ToString());
 
                     cnn.Close();
                 }

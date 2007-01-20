@@ -224,7 +224,7 @@ namespace GenDB
         /// </summary>
         /// <param name="res"></param>
         /// <param name="knudBoergesBalsam"></param>
-        internal void Add(IBusinessObject ibo, long entityPOID)
+        internal void Add(IBusinessObject ibo, int entityPOID)
         {
             if (ibo.DBIdentity.IsPersistent)
             {
