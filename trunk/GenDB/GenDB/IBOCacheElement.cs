@@ -57,7 +57,7 @@ namespace GenDB
 
         public void ClearDirtyBit()
         {
-            clone = (IBusinessObject)ObjectUtilities.MakeClone(wr.Target);
+            clone = (IBusinessObject)ObjectUtilities.MakeClone((IBusinessObject)wr.Target);
         }
     }
 }

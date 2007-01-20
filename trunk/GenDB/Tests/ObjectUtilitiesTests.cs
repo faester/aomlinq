@@ -25,6 +25,8 @@ namespace ObjectUtilitiesTests
             {
                 dataContext.CreateDatabase();
             }
+            Table<EqualityTest> t_eq = dataContext.CreateTable<EqualityTest>();
+            Table<EqulityTestPrimitives > t_eqp = dataContext.CreateTable<EqulityTestPrimitives>();
         }
 
         [TestFixtureTearDown]
@@ -37,12 +39,18 @@ namespace ObjectUtilitiesTests
             etp2 = null;
         }
 
-        class EqulityTestPrimitives
+        class EqulityTestPrimitives : AbstractBusinessObject
         {
-            public int i = 0;
+            private int i = 0;
+
+            public int I
+            {
+                get { return i; }
+                set { i = value; }
+            }
         }
 
-        class EqualityTest
+        class EqualityTest : AbstractBusinessObject
         {
             int i = 0;
 
@@ -121,7 +129,7 @@ namespace ObjectUtilitiesTests
         public void CloneEquals()
         {
             EqualityTest clone = (EqualityTest)ObjectUtilities.MakeClone(et1);
-            Assert.IsTrue(ObjectUtilities.TestFieldEquality(et1, clone));
+            Assert.IsTrue(ObjectUtilities.TestFieldEquality(et1, clone), "Clone comparison to original returned false!");
         }
 
         [Test]

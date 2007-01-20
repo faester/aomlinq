@@ -20,9 +20,38 @@ namespace GenDB
             get { return propertySetter; }
         }
 
-        SetHandler fieldSetHandler;
-        GetHandler fieldGetHandler;
+        SetHandler propertySetHandler;
+
+        internal SetHandler PropertySetHandler
+        {
+            get { return propertySetHandler; }
+        }
+
+        GetHandler propertyGetHandler;
+
+        internal GetHandler PropertyGetHandler
+        {
+            get { return propertyGetHandler; }
+        }
+
+
+        bool referenceCompare = false;
+
+        public bool ReferenceCompare
+        {
+            get { return referenceCompare; }
+            set { referenceCompare = value; }
+        }
+
         Type clrType;
+
+        Type propertyType;
+
+        public Type PropertyType
+        {
+            get { return propertyType; }
+        }
+
         PropertyInfo propertyInfo;
         DataContext dataContext;
 
@@ -40,16 +69,18 @@ namespace GenDB
             this.propertyInfo = propInfo;
             this.propertyPOID = property.PropertyPOID;
             clrType = t;
-            fieldSetHandler = DynamicMethodCompiler.CreateSetHandler(t, propInfo);
-            fieldGetHandler = DynamicMethodCompiler.CreateGetHandler(t, propInfo);
+            propertySetHandler = DynamicMethodCompiler.CreateSetHandler(t, propInfo);
+            propertyGetHandler = DynamicMethodCompiler.CreateGetHandler(t, propInfo);
             propertySetter = CreatePropertySetter(propInfo);
             //pvg = CreateGetter(propInfo, property);
             pvs = CreateSetter(property);
+            propertyType = propInfo.PropertyType;
+            referenceCompare = !propertyType.IsPrimitive && propertyType != typeof(string) && propertyType != typeof(DateTime);
         }
 
         public void SetEntityPropertyValue(IBusinessObject ibo, IEntity e)
         {
-            pvs(e, fieldGetHandler(ibo));
+            pvs(e, propertyGetHandler(ibo));
         }
 
         PropertyValueSetter CreateSetter(IProperty p)
@@ -118,7 +149,7 @@ namespace GenDB
                 {
                     if (value == DBNull.Value || value == null) 
                     {
-                        fieldSetHandler(ibo, null);
+                        propertySetHandler(ibo, null);
                         return;
                     }
 
@@ -131,12 +162,12 @@ namespace GenDB
                         IExpression where = new OP_Equals(new CstLong(refEntityPOID), CstThis.Instance);
                         // TODO: Kunne nok gøres hurtigere...
                         iboVal = dataContext.GenDB.GetByEntityPOID(refEntityPOID);
-                        fieldSetHandler(ibo, iboVal);
+                        propertySetHandler(ibo, iboVal);
                         return;
                     }
                     else
                     {
-                        fieldSetHandler(ibo, iboVal);
+                        propertySetHandler(ibo, iboVal);
                     }
                 };
             }
@@ -144,55 +175,55 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {
-                    fieldSetHandler(ibo, ((IConvertible) value).ToInt64(null));
+                    propertySetHandler(ibo, ((IConvertible) value).ToInt64(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(int))
             {
                 return delegate(IBusinessObject ibo, object value) 
                 {
-                    fieldSetHandler(ibo, ((IConvertible) value).ToInt32(null));
+                    propertySetHandler(ibo, ((IConvertible) value).ToInt32(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(string))
             {
                 return delegate(IBusinessObject ibo, object value)
                 {
-                    fieldSetHandler(ibo, (value as string));
+                    propertySetHandler(ibo, (value as string));
                 };
             }
             else if (propInfo.PropertyType == typeof(DateTime))
             {
                 return delegate(IBusinessObject ibo, object value)
                 {
-                    fieldSetHandler(ibo, (DateTime)value);
+                    propertySetHandler(ibo, (DateTime)value);
                 };
             }
             else if (propInfo.PropertyType == typeof(bool))
             {
                 return delegate(IBusinessObject ibo, object value) 
                 {
-                    fieldSetHandler(ibo, Convert.ToBoolean(value));
+                    propertySetHandler(ibo, Convert.ToBoolean(value));
                 };
             }
             else if (propInfo.PropertyType == typeof(char))
             {
                 return delegate(IBusinessObject ibo, object value) {  //
-                    fieldSetHandler(ibo, ((IConvertible) value).ToChar(null));
+                    propertySetHandler(ibo, ((IConvertible) value).ToChar(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(float))
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    fieldSetHandler(ibo, ((IConvertible)value).ToSingle(null));
+                    propertySetHandler(ibo, ((IConvertible)value).ToSingle(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(double))
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    fieldSetHandler(ibo, ((IConvertible) value).ToDouble(null));
+                    propertySetHandler(ibo, ((IConvertible) value).ToDouble(null));
                 };
             }
             else if (propInfo.PropertyType.IsEnum)
@@ -202,7 +233,7 @@ namespace GenDB
                     // Oversætter til array indeholdende alle mulige værdier for den pågældende enum.
                     // Dernæst vælges værdien gemt index Long-feltet index den pågældende PropertyValue record.
                     System.Collections.IList vals =  (System.Collections.IList) Enum.GetValues(propInfo.PropertyType);
-                    fieldSetHandler(ibo,  vals[Convert.ToInt32(value)]);
+                    propertySetHandler(ibo,  vals[Convert.ToInt32(value)]);
                     //return Enum.GetValues (propInfo.PropertyType). ((int)ie.GetPropertyValue(prop).LongValue);
                 };
             }
@@ -210,14 +241,14 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    fieldSetHandler(ibo, ((IConvertible) value).ToInt16(null));
+                    propertySetHandler(ibo, ((IConvertible) value).ToInt16(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(uint))
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    fieldSetHandler(ibo, ((IConvertible) value).ToUInt32(null));
+                    propertySetHandler(ibo, ((IConvertible) value).ToUInt32(null));
                 };
             }
             else 
