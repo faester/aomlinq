@@ -12,6 +12,9 @@ namespace PerformanceTests
         {
             Stopwatch stopwatch = new Stopwatch();
             DataContext dc = DataContext.Instance;
+            dc.DeleteDatabase();
+            dc.CreateDatabase();
+
             dc.Init();
             dc.DbBatchSize = 200;
 
