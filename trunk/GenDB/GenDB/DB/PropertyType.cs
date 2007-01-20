@@ -7,7 +7,7 @@ namespace GenDB.DB
     public class PropertyType : IPropertyType
     {
         string name;
-        long propertyTypePOID;
+        int propertyTypePOID;
         MappingType mappedType;
         bool existsInDatabase;
 
@@ -23,7 +23,7 @@ namespace GenDB.DB
             set { mappedType = value; }
         }
 
-        public long PropertyTypePOID
+        public int PropertyTypePOID
         {
             get { return propertyTypePOID; }
             set { propertyTypePOID = value; }

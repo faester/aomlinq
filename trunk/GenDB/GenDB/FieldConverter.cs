@@ -122,7 +122,7 @@ namespace GenDB
                         return;
                     }
 
-                    long refEntityPOID = (int)value;
+                    int refEntityPOID = (int)value;
 
                     IBusinessObject iboVal = this.dataContext.IBOCache.Get(refEntityPOID);
 

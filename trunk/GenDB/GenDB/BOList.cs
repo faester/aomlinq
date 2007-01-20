@@ -194,7 +194,7 @@ namespace GenDB
             } 
 
             GenDB.DB.IGenericDatabase db = DataContext.Instance.GenDB;
-            long thisPOID = this.DBIdentity;
+            int thisPOID = this.DBIdentity;
             db.ClearCollection(thisPOID);
 
             CollectionElementConverter cnv = new CollectionElementConverter(mt, DataContext.Instance, typeof(T));

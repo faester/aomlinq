@@ -6,11 +6,11 @@ namespace GenDB
 {
     public struct DBIdentifier 
     {
-        public const long IS_SET_MASK = (1L << 63);
-        public const long VALUE_BITS =  ~(1L << 63);
-        long value;
+        public const int IS_SET_MASK = (1 << 31);
+        public const int VALUE_BITS =  ~(1 << 31);
+        int value;
 
-        internal DBIdentifier (long value, bool isPersistent)
+        internal DBIdentifier (int value, bool isPersistent)
         {
             this.value = isPersistent ? value | IS_SET_MASK : value;
         }
@@ -23,12 +23,12 @@ namespace GenDB
             }
         }
 
-        public static implicit operator long(DBIdentifier ident)
+        public static implicit operator int(DBIdentifier ident)
         {
             return ident.Value;
         }
         
-        public long Value
+        public int Value
         {
             get { return value & VALUE_BITS; }
         }

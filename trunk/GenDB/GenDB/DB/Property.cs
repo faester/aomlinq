@@ -9,7 +9,7 @@ namespace GenDB.DB
         IPropertyType propertyType;
         IEntityType entityType;
 
-        long propertyPOID;
+        int propertyPOID;
         string propertyName;
         bool existsInDatabase;
 
@@ -37,7 +37,7 @@ namespace GenDB.DB
             set { propertyName = value; }
         }
 
-        public long PropertyPOID
+        public int PropertyPOID
         {
             get { return propertyPOID; }
             set { propertyPOID = value; }
