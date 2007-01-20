@@ -37,9 +37,9 @@ namespace PerformanceTests
 
             long dlms = 0;
             long gdbms = 0;
-            int repetitions = 20;
+            int repetitions = 10;
 
-            for (int objCount = 1000; objCount <= 5000; objCount += 1000)
+            for (int objCount = 5000; objCount <= 20000; objCount += 5000)
             {
                 Console.WriteLine("==========================================================");
                 Console.WriteLine("Writing {0} objects", objCount);

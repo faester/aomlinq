@@ -32,23 +32,13 @@ namespace GenDB
         Type t;
         PropertyInfo[] fields;
         LinkedList<FieldConverter> fieldConverters = new LinkedList<FieldConverter>();
+        LinkedList<FieldConverter> allFieldConverters = new LinkedList<FieldConverter>();
 
         public IEnumerable<FieldConverter> FieldConverters
         {
             get {
-                foreach(FieldConverter fc in fieldConverters)
-                {
-                    yield return fc;
-                }
-                if (superTranslator != null)
-                {
-                    foreach (FieldConverter fc in superTranslator.FieldConverters)
-                    {
-                        yield return fc;
-                    }
-                }
+                return allFieldConverters;
             }
-        
         }
 
         Dictionary<long, FieldConverter> fieldConverterDict = new Dictionary<long, FieldConverter>();
@@ -96,6 +86,10 @@ namespace GenDB
             InitPropertyTranslators();
             InitInstantiator();
             InitSuperTranslator();
+            foreach(FieldConverter fc in fieldConverterDict.Values)
+            {
+                allFieldConverters.AddLast(fc);
+            }
         }
 
         /// <summary>

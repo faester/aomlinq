@@ -242,7 +242,7 @@ namespace GenDB
                 {
                     if (vala == null && valb == null)
                     {
-                        
+                        /* ignore */
                     }
                     else
                     {
@@ -258,57 +258,6 @@ namespace GenDB
                 }
             }
 
-            return true;
-
-            //// GAMMEL IMPLEMENTERING HERUNDER
-
-
-            FieldInfo[] fields = t.GetFields (
-                        BindingFlags.Instance
-                        | BindingFlags.Public
-                        | BindingFlags.NonPublic
-            );
-
-            foreach(FieldInfo f in fields)
-            {
-                Type fieldType = f.FieldType;
-                Attribute attr = Attribute.GetCustomAttribute(f, typeof(Volatile));
-                if (attr == null)
-                {
-                    object va = f.GetValue(a);
-                    object vb = f.GetValue(b);
-                    if (va == null ^ vb == null) { return false; }
-                    if (va == null && vb == null) { return true; }
-                    if (fieldType.IsPrimitive)
-                    {
-                        if (!va.Equals(vb)) { return false; }
-                    }
-                    else
-                    {
-                        if (fieldType == TYPEOF_DATETIME)
-                        {
-                            if (!va.Equals(vb))
-                            {
-                                return false;
-                            }
-                        }
-                        else if (fieldType == TYPEOF_STRING)
-                        {
-                            if (!va.Equals(vb))
-                            {
-                                return false;
-                            }
-                        }
-                        else
-                        {
-                            if (!Object.ReferenceEquals(va, vb))
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                }
-            }
             return true;
         }
     }
