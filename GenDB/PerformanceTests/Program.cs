@@ -12,6 +12,7 @@ namespace PerformanceTests
         {
             Stopwatch stopwatch = new Stopwatch();
             DataContext dc = DataContext.Instance;
+
             dc.DatabaseName = "perftest";
             if (dc.DatabaseExists())
             {
@@ -36,8 +37,9 @@ namespace PerformanceTests
 
             long dlms = 0;
             long gdbms = 0;
+            int repetitions = 20;
 
-            for (int objCount = 5000; objCount <= 20000; objCount += 5000)
+            for (int objCount = 1000; objCount <= 5000; objCount += 1000)
             {
                 Console.WriteLine("==========================================================");
                 Console.WriteLine("Writing {0} objects", objCount);
@@ -54,7 +56,7 @@ namespace PerformanceTests
                 Console.WriteLine();
                 Console.WriteLine("Now performing read tests");
 
-                for (int repetitions = 0; repetitions < 10; repetitions++)
+                for (int r = 0; r < repetitions; r++)
                 {
                     long ms = 0;
 

@@ -154,33 +154,43 @@ namespace GenDB
         /// </summary>
         /// <param name="o"></param>
         /// <returns></returns>
-        public static object MakeClone(object o)
+        public static object MakeClone(IBusinessObject o)
         {
             if (o == null)
             {
                 return null;
             }
             Type t = o.GetType();
-            FieldInfo[] fields = t.GetFields (
-                BindingFlags.Instance
-            | BindingFlags.Public
-            | BindingFlags.NonPublic
-            );
 
-            InstantiateObjectHandler inst = DynamicMethodCompiler.CreateInstantiateObjectHandler(t);
-            //ConstructorInfo cinf = t.GetConstructor(EMPTY_TYPE_ARRAY);
-            object clone = inst();
+            IIBoToEntityTranslator trans = DataContext.Instance.Translators.GetTranslator(t);
 
-            foreach (FieldInfo f in fields)
+            IBusinessObject clone = trans.CreateInstanceOfIBusinessObject();
+
+            foreach(FieldConverter fc in trans.FieldConverters)
             {
-                Attribute v = Volatile.GetCustomAttribute(f, typeof(Volatile));
-
-                if (f.FieldType != typeof(DBIdentifier) && v == null)
-                {
-                    object fv = f.GetValue(o);
-                    f.SetValue(clone, fv);
-                }
+                fc.PropertySetHandler(clone, fc.PropertyGetHandler(o));
             }
+
+            //FieldInfo[] fields = t.GetFields (
+            //    BindingFlags.Instance
+            //| BindingFlags.Public
+            //| BindingFlags.NonPublic
+            //);
+
+            //InstantiateObjectHandler inst = DynamicMethodCompiler.CreateInstantiateObjectHandler(t);
+            ////ConstructorInfo cinf = t.GetConstructor(EMPTY_TYPE_ARRAY);
+            //IBusinessObject clone = (IBusinessObject)inst();
+
+            //foreach (FieldInfo f in fields)
+            //{
+            //    Attribute v = Volatile.GetCustomAttribute(f, typeof(Volatile));
+
+            //    if (f.FieldType != typeof(DBIdentifier) && v == null)
+            //    {
+            //        object fv = f.GetValue(o);
+            //        f.SetValue(clone, fv);
+            //    }
+            //}
             return clone;
         }
 
@@ -213,6 +223,45 @@ namespace GenDB
             {
                 return false;
             }
+
+            IIBoToEntityTranslator trans = DataContext.Instance.Translators.GetTranslator(t);
+
+            foreach(FieldConverter fc in trans.FieldConverters)
+            {
+                object vala = fc.PropertyGetHandler(a);
+                object valb = fc.PropertyGetHandler(b);
+
+                if (fc.ReferenceCompare )
+                {
+                    if (!Object.ReferenceEquals(vala, valb))
+                    {
+                        return false;
+                    }
+                }
+                else 
+                {
+                    if (vala == null && valb == null)
+                    {
+                        
+                    }
+                    else
+                    {
+                        if (vala == null ^ valb == null)
+                        {
+                            return false;
+                        }
+                        else if (!vala.Equals(valb))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
+
+            //// GAMMEL IMPLEMENTERING HERUNDER
+
 
             FieldInfo[] fields = t.GetFields (
                         BindingFlags.Instance
