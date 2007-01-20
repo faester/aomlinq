@@ -122,7 +122,7 @@ namespace GenDB
                         return;
                     }
 
-                    int refEntityPOID = (int)value;
+                    int refEntityPOID = ((IConvertible) value).ToInt32(null);
 
                     IBusinessObject iboVal = this.dataContext.IBOCache.Get(refEntityPOID);
 
@@ -144,7 +144,7 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {
-                    fieldSetHandler(ibo, (long)value);
+                    fieldSetHandler(ibo, ((IConvertible) value).ToInt64(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(int))
@@ -158,7 +158,7 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {
-                    fieldSetHandler(ibo, value.ToString());
+                    fieldSetHandler(ibo, (value as string));
                 };
             }
             else if (propInfo.PropertyType == typeof(DateTime))
@@ -192,7 +192,7 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    fieldSetHandler(ibo, (double)(value));
+                    fieldSetHandler(ibo, ((IConvertible) value).ToDouble(null));
                 };
             }
             else if (propInfo.PropertyType.IsEnum)

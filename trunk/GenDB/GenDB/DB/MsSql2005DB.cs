@@ -5,7 +5,6 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Query;
 using GenDB.DB;
-using System.Diagnostics;
 
 namespace GenDB.DB
 {
@@ -502,13 +501,7 @@ namespace GenDB.DB
                 Console.WriteLine(cmd.CommandText);
 #endif
                 cmd.Connection = cnn;
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
                 SqlDataReader reader = cmd.ExecuteReader();
-                sw.Stop();
-
-                Console.WriteLine("Reader init took: {0}", sw.ElapsedMilliseconds);
-
                 IEntityType iet = null;
                 IIBoToEntityTranslator translator = null;
                 IBusinessObject result = null;
@@ -522,8 +515,8 @@ namespace GenDB.DB
 
                 while (reader.Read())
                 {
-                    entityTypePOID = (int)reader[0];
-                    entityPOID = (int)reader[6];
+                    entityTypePOID = reader.GetInt32(0);
+                    entityPOID = reader.GetInt32(6);
                     if (entityTypePOID != oldEntityTypePOID || firstPass)
                     {
                         translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
@@ -540,7 +533,7 @@ namespace GenDB.DB
                         returnCachedCopy = result != null;
                         if (!returnCachedCopy)
                         {
-                            result = translator.CreateInstanceOfIBusinessObject(); // We do not set DBIdentity (use NewEntity()) , since id is retrieved from DB.
+                            result = translator.CreateInstanceOfIBusinessObject(); 
                             result.DBIdentity = new DBIdentifier(entityPOID, true);
                             
                             this.dataContext.IBOCache.AddFromDB(result);
@@ -554,10 +547,10 @@ namespace GenDB.DB
                         object value = null;
                         switch (iet.GetProperty(propertyPOID).MappingType)
                         {
-                            case MappingType.BOOL: value = reader[3]; break;
-                            case MappingType.DATETIME: value = new DateTime((long)reader[2]); break;
-                            case MappingType.DOUBLE: value = reader[5]; break;
-                            case MappingType.LONG: value = reader[2]; break;
+                            case MappingType.BOOL: value = reader.GetBoolean(3); break;
+                            case MappingType.DATETIME: value = new DateTime(reader.GetInt64(2)); break;
+                            case MappingType.DOUBLE: value = reader.GetDouble (5); break;
+                            case MappingType.LONG: value = reader.GetInt64(2); break;
                             case MappingType.REFERENCE: 
                                 if (reader[7] == DBNull.Value)
                                 {
@@ -569,7 +562,7 @@ namespace GenDB.DB
                                     value = reader[7];
                                     break;
                                 }
-                            case MappingType.STRING: value = reader[4]; break;
+                            case MappingType.STRING: value = reader.GetString(4); break;
                             default: throw new Exception("Could not translate the property value.");
                         } // switch
                         translator.SetProperty(propertyPOID, result, value);
