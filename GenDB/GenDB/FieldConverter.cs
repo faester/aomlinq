@@ -54,7 +54,7 @@ namespace GenDB
 
         PropertyValueSetter CreateSetter(IProperty p)
         {
-            switch (p.MappingType)
+             switch (p.MappingType)
             {
                 case MappingType.BOOL:
                     return delegate(IEntity e, object value) {
