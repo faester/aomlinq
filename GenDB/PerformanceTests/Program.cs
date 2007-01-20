@@ -12,7 +12,11 @@ namespace PerformanceTests
         {
             Stopwatch stopwatch = new Stopwatch();
             DataContext dc = DataContext.Instance;
-            dc.DeleteDatabase();
+            dc.DatabaseName = "perftest";
+            if (dc.DatabaseExists())
+            {
+                dc.DeleteDatabase();
+            }
             dc.CreateDatabase();
 
             dc.Init();
