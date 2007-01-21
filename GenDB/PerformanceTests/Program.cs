@@ -18,8 +18,8 @@ namespace PerformanceTests
             {
                 dc.DeleteDatabase();
             }
-            dc.CreateDatabase(); 
-              
+            dc.CreateDatabase();
+
             dc.Init();
             dc.DbBatchSize = 200;
 
@@ -39,7 +39,7 @@ namespace PerformanceTests
             long gdbms = 0;
             int repetitions = 10;
 
-            for (int objCount = 5000; objCount < 5001; objCount += 5000)
+            for (int objCount = 5000; objCount <= 110000; objCount += 20000)
             {
                 Console.WriteLine("==========================================================");
                 Console.WriteLine("Writing {0} objects", objCount);
@@ -56,23 +56,24 @@ namespace PerformanceTests
                 Console.WriteLine();
                 Console.WriteLine("Now performing read tests");
 
-
                 for (int r = 0; r < repetitions; r++)
                 {
-                    long ms = 0;
+                    long gms = 0;
+                    long dms = 0;
 
                     stopwatch.Reset();
                     stopwatch.Start();
                     gdbtest.PerformReadTest();
-                    ms = stopwatch.ElapsedMilliseconds;
-                    Console.WriteLine("GenDB: {0} objs in test took {1} ms. {2} objs/sec", objCount, ms, ms > 0 ? (objCount * 1000) / ms : -1);
-                    gdbms += ms;
+                    gms = stopwatch.ElapsedMilliseconds;
+                    Console.WriteLine("GenDB: {0} objs in test took {1} ms. {2} objs/sec", objCount, gms, gms > 0 ? (objCount * 1000) / gms : -1);
+                    gdbms += gms;
                     stopwatch.Reset();
                     stopwatch.Start();
                     dlinqtest.PerformReadTest();
-                    ms = stopwatch.ElapsedMilliseconds;
-                    Console.WriteLine("DLinq: {0} objs in test took {1} ms. {2} objs/sec", objCount, ms, ms > 0 ? (objCount * 1000) / ms : -1);
-                    dlms += ms;
+                    dms = stopwatch.ElapsedMilliseconds;
+                    Console.WriteLine("DLinq: {0} objs in test took {1} ms. {2} objs/sec", objCount, dms, dms > 0 ? (objCount * 1000) / dms : -1);
+                    dlms += dms;
+                    Console.WriteLine("Læsefaktor: {0}", ((double)gms) / dms);
                     Console.WriteLine("Akkumuleret læsefaktor: {0}", ((double)gdbms) / dlms);
                     Console.WriteLine();
                 }
@@ -90,6 +91,12 @@ namespace PerformanceTests
 
             Console.WriteLine("Akkumuleret læsefaktor: {0}", ((double)gdbms) / dlms);
             ewGenDB_write.Dispose();
+            ewGenDB_clear.Dispose();
+            ewGenDB_read.Dispose();
+
+            ewDLinqDB_write.Dispose();
+            ewDLiqnDB_clear.Dispose();
+            ewDLinqDB_read.Dispose();
 
             Console.WriteLine("Press return...");
             Console.ReadLine();
