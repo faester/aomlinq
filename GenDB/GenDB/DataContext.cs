@@ -140,8 +140,6 @@ namespace GenDB
             set { dbBatchSize = value; }
         } 
 
-        private bool rebuildDatabase = true;
-
         string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI;connection timeout=240";
 
         internal string ConnectStringWithDBName

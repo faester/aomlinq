@@ -145,7 +145,6 @@ namespace GenDB.DB
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
             {
                 cnn.Open();
-                SqlTransaction transaction = null;
                 try
                 {
                     SqlCommand cmd = new SqlCommand("CREATE DATABASE "
@@ -486,20 +485,20 @@ namespace GenDB.DB
                     "    PropertyPOID, " + // 1
                     "    LongValue, " + // 2
                     "    BoolValue, " + // 3x
-
                     "    StringValue, " + // 4
                     "    DoubleValue, " + // 5
                     "    e.EntityPOID, " + // 6
                     "    ReferenceValue " + // 7
                     " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
                     " WHERE e.EntityPOID IN (" + entityPoidListQuery + " )" +
-                    " ORDER BY e.EntityTypePOID, e.EntityPOID"
+                    " ORDER BY e.EntityPOID"
                     );
 #if DEBUG
                 Console.WriteLine("WHEREBUILDER CONSTRUCTED: " + whereStr);
                 Console.WriteLine();
                 Console.WriteLine(cmd.CommandText);
 #endif
+                
                 cmd.Connection = cnn;
                 SqlDataReader reader = cmd.ExecuteReader();
                 IEntityType iet = null;
