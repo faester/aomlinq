@@ -20,6 +20,11 @@ namespace GenDB.DB
         Dictionary<int, IProperty> properties;
         LinkedList<IProperty> allProperties = null;
 
+        public EntityType(int entityTypePOID)
+        {
+            this.entityTypePOID = entityTypePOID;
+        }
+
         public IProperty GetProperty(string propertyname)
         {
             foreach (IProperty p in properties.Values)
@@ -116,7 +121,6 @@ namespace GenDB.DB
         public int EntityTypePOID
         {
             get { return entityTypePOID; }
-            set { entityTypePOID = value; }
         }
 
         public IEntityType SuperEntityType

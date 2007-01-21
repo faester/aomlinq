@@ -9,6 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PerformanceTests</RootNamespace>
     <AssemblyName>PerformanceTests</AssemblyName>
+    <StartupObject>PerformanceTests.JustRead</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,6 +36,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interface1.cs" />
+    <Compile Include="JustRead.cs" />
     <Compile Include="PerfTestAllPrimitiveTypes.cs" />
     <Compile Include="DLinqWriteTest.cs" />
     <Compile Include="ExcelWriter.cs" />

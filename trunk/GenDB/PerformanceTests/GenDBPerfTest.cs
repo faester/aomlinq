@@ -6,11 +6,12 @@ using System.Diagnostics;
 
 namespace PerformanceTests
 {
-    class GenDBPerfTests<T> where T : GenDB.IBusinessObject, new()
+    class GenDBPerfTests<T> : ReadWriteClearTest
+        where T : GenDB.IBusinessObject, new()
     {
         GenDB.DataContext dc = GenDB.DataContext.Instance;
-        GenDB.Table <T> table = GenDB.DataContext.Instance.CreateTable<T>();
-                ExcelWriter ewWrite;
+        GenDB.Table<T> table = GenDB.DataContext.Instance.CreateTable<T>();
+        ExcelWriter ewWrite;
         ExcelWriter ewRead;
         ExcelWriter ewClear;
         int lastInsert = 0;
@@ -22,14 +23,12 @@ namespace PerformanceTests
             this.ewClear = ewClear;
         }
 
-        public void PerformTests(int objectCount)
+        public long PerformAllTests(int objectCount)
         {
-            PerformWriteTest(objectCount);
-            PerformReadTest();
-            PerformClearTest();
+            return PerformWriteTest(objectCount) + PerformReadTest(objectCount) + PerformClearTest();
         }
 
-        public void PerformWriteTest(int objectsToWrite)
+        public long PerformWriteTest(int objectsToWrite)
         {
             lastInsert = objectsToWrite;
             Stopwatch sw = new Stopwatch();
@@ -39,31 +38,60 @@ namespace PerformanceTests
                 table.Add(new T());
             }
             dc.SubmitChanges();
-            ewWrite.WriteInformation(objectsToWrite, sw.ElapsedMilliseconds);
+            long ms = sw.ElapsedMilliseconds;
+            if (ewWrite != null)
+            {
+                ewWrite.WriteInformation(objectsToWrite, ms);
+            }
+            return ms;
         }
 
-        public void PerformReadTest()
+        public long PerformReadTest(int maxReads)
         {
             int count = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            foreach(T t in table)
+            foreach (T t in table)
             {
                 count++;
+                if (count >= maxReads)
+                {
+                    break;
+                }
             }
+
             long ms = sw.ElapsedMilliseconds;
-            ewRead.WriteInformation(count, ms);
-            Console.WriteLine("GenDB read: {0} objs {1} sek", count, ms / 1000.0);
+
+            if (count < maxReads)
+            {
+                return -1;
+            }
+            else if (count > maxReads)
+            {
+                return -ms;
+            }
+            else
+            {
+                if (ewRead != null)
+                {
+                    ewRead.WriteInformation(count, ms);
+                }
+                return ms;
+            }
         }
 
-        public void PerformClearTest()
+        public long PerformClearTest()
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
             table.Clear();
             dc.SubmitChanges();
-            ewClear.WriteInformation(lastInsert, sw.ElapsedMilliseconds);
-        }       
-
+            long ms = sw.ElapsedMilliseconds;
+            if (ewClear != null)
+            {
+                ewClear.WriteInformation(lastInsert, ms);
+            }
+            return ms;
+        }
     }
 }

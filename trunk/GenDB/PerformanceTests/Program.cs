@@ -10,7 +10,6 @@ namespace PerformanceTests
     {
         static void Main(string[] args)
         {
-            Stopwatch stopwatch = new Stopwatch();
             DataContext dc = DataContext.Instance;
 
             dc.DatabaseName = "perftest";
@@ -43,34 +42,24 @@ namespace PerformanceTests
             {
                 Console.WriteLine("==========================================================");
                 Console.WriteLine("Writing {0} objects", objCount);
-                stopwatch.Reset();
-                stopwatch.Start();
-                gdbtest.PerformWriteTest(objCount);
-                Console.WriteLine("GenDB used {0} ms", stopwatch.ElapsedMilliseconds);
+                long gms = gdbtest.PerformWriteTest(objCount);
+                Console.WriteLine("GenDB used {0} ms", gms);
 
-                stopwatch.Reset();
-                stopwatch.Start();
-                dlinqtest.PerformWriteTest(objCount);
-                Console.WriteLine("DLinq used {0} ms", stopwatch.ElapsedMilliseconds);
+                long dms = dlinqtest.PerformWriteTest(objCount);
+
+                Console.WriteLine("DLinq used {0} ms. (Faktor: {1})", dms, (double)gms / dms);
 
                 Console.WriteLine();
                 Console.WriteLine("Now performing read tests");
 
                 for (int r = 0; r < repetitions; r++)
                 {
-                    long gms = 0;
-                    long dms = 0;
-
-                    stopwatch.Reset();
-                    stopwatch.Start();
-                    gdbtest.PerformReadTest();
-                    gms = stopwatch.ElapsedMilliseconds;
+                    gms = gdbtest.PerformReadTest(objCount);
                     Console.WriteLine("GenDB: {0} objs in test took {1} ms. {2} objs/sec", objCount, gms, gms > 0 ? (objCount * 1000) / gms : -1);
                     gdbms += gms;
-                    stopwatch.Reset();
-                    stopwatch.Start();
-                    dlinqtest.PerformReadTest();
-                    dms = stopwatch.ElapsedMilliseconds;
+
+                    dms = dlinqtest.PerformReadTest(objCount);
+
                     Console.WriteLine("DLinq: {0} objs in test took {1} ms. {2} objs/sec", objCount, dms, dms > 0 ? (objCount * 1000) / dms : -1);
                     dlms += dms;
                     Console.WriteLine("Læsefaktor: {0}", ((double)gms) / dms);
@@ -79,12 +68,10 @@ namespace PerformanceTests
                 }
 
                 Console.WriteLine("Clearing tables...");
-                stopwatch.Reset();
-                stopwatch.Start();
-                gdbtest.PerformClearTest();
-                long gendbms = stopwatch.ElapsedMilliseconds;
-                dlinqtest.PerformClearTest();
-                long dlinqms = stopwatch.ElapsedMilliseconds - gendbms ;
+                
+                long gendbms = gdbtest.PerformClearTest();
+                long dlinqms  = dlinqtest.PerformClearTest();
+
                 Console.WriteLine("Clear times: GenDB {0} ms, DLinq {1} ms", gendbms, dlinqms);
                 Console.WriteLine("ComObjSize= " + GenDB.DataContext.Instance.CommittedObjectsSize);
             }
@@ -102,4 +89,4 @@ namespace PerformanceTests
             Console.ReadLine();
         }
     }
-} 
+}

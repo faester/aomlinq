@@ -5,18 +5,20 @@ using GenDB.DB;
 
 namespace GenDB.DB
 {
-    class MSWhereStringBuilder : IAbsSyntaxVisitor
+    /// <summary>
+    /// Antager at Entity tabellen får alias 'e'.
+    /// PropertyValue bliver p[PropertyPOID]
+    /// </summary>
+    class MSWhereStringBuilderJoinFields : IAbsSyntaxVisitor
     {
-        StringBuilder selectPart = null;
         StringBuilder wherePart = null;
-        StringBuilder joinPart = null;
         int currentPropertyNumber = 0;
         TypeSystem typeSystem = null;
         Dictionary<int, IEntityType> entityTypes = null;
 
-        private MSWhereStringBuilder() { /* empty */ }
+        private MSWhereStringBuilderJoinFields() { /* empty */ }
 
-        public MSWhereStringBuilder(TypeSystem typeSystem)
+        public MSWhereStringBuilderJoinFields(TypeSystem typeSystem)
         {
             this.typeSystem = typeSystem;
             Reset();
@@ -30,18 +32,7 @@ namespace GenDB.DB
         public String WhereStr 
         {
             get {
-                StringBuilder res = new StringBuilder(selectPart.Length + wherePart.Length + joinPart.Length + 30);
-                res.Append(selectPart);
-                res.Append (" \n\tWHERE (");
-                res.Append (wherePart );
-                if (joinPart.Length > 0)
-                {
-                    res.Append(") AND (");
-                    res.Append(joinPart);
-                }
-                res.Append (")");
-
-                return res.ToString();
+                return wherePart.ToString();
             }
         }
 
@@ -58,14 +49,12 @@ namespace GenDB.DB
         // Leaf
         public void VisitCstThis(CstThis cstThis)
         {
-            wherePart.Append (" EntityPOID ");
+            wherePart.Append (" e.EntityPOID ");
         }
 
         public void Reset()
         {
-            selectPart = new StringBuilder("SELECT DISTINCT e.EntityPOID FROM Entity e");
             wherePart = new StringBuilder();
-            joinPart = new StringBuilder();
             entityTypes = new Dictionary<int, IEntityType>();
         }
 
@@ -111,19 +100,10 @@ namespace GenDB.DB
         public void VisitProperty(CstProperty vp)
         {
             AppendEntityTypesHaving(vp.Property);
-
-            string pvName = "pv" + currentPropertyNumber;
-            selectPart.Append (", PropertyValue " + pvName);
             IProperty p = vp.Property;
-            if (currentPropertyNumber > 0)
-            {
-                joinPart.Append(" AND ");
-            }
-            joinPart.Append(pvName );
-            joinPart.Append(".EntityPOID = e.EntityPOID AND ");
-            joinPart.Append(pvName);
-            joinPart.Append(".PropertyPOID = ");
-            joinPart.Append(p.PropertyPOID);
+
+            string pvName = "p" + p.PropertyPOID;
+            
             switch (p.MappingType )
             {
                 case MappingType.BOOL: 
@@ -203,8 +183,6 @@ namespace GenDB.DB
             }
             else
             {
-                IEntityType et = typeSystem.GetEntityType(cr.TypeOfReference);
-                entityTypes[et.EntityTypePOID] = et;
                 wherePart.Append(cr.Value.EntityPOID);
             }
         }
@@ -226,39 +204,35 @@ namespace GenDB.DB
             erefSb.Append ("'");
             p = currentNRef.CstProperty.Property;
             string pvName = "pv" + currentPropertyNumber;
-            selectPart.Append (", PropertyValue " + pvName);
             
-            if (currentPropertyNumber > 0)
-            {
-                joinPart.Append(" AND ");
-            }
-            joinPart.Append(pvName );
-            joinPart.Append(".EntityPOID = dbo.fn_lookup_EntityPOID(e.EntityPOID, ");
-            joinPart.Append(erefSb);
-            joinPart.Append (") AND ");
-            joinPart.Append(pvName);
-            joinPart.Append(".PropertyPOID = ");
-            joinPart.Append(p.PropertyPOID);
+            wherePart.Append ("( SELECT PropertyValue");
+
             switch (p.MappingType )
             {
                 case MappingType.BOOL: 
-                    wherePart.Append(pvName + ".BoolValue "); break;
+                    wherePart.Append(".BoolValue "); break;
                 case MappingType.DATETIME: 
-                    wherePart.Append(pvName + ".LongValue "); break;
+                    wherePart.Append(".LongValue "); break;
                 case MappingType.DOUBLE: 
-                    wherePart.Append(pvName + ".DoubleValue "); break;
+                    wherePart.Append(".DoubleValue "); break;
                 case MappingType.LONG: 
-                    wherePart.Append(pvName + ".LongValue "); break;
+                    wherePart.Append(".LongValue "); break;
                 case MappingType.REFERENCE: 
-                    wherePart.Append(pvName + ".ReferenceValue "); break;
+                    wherePart.Append(".ReferenceValue "); break;
                 case MappingType.STRING: 
-                    wherePart.Append(pvName + ".StringValue "); break;
+                    wherePart.Append(".StringValue "); break;
                 default:
                     throw new Exception("Unknown property mapping.");
             }
-            wherePart.Append (' ');
-
-            currentPropertyNumber++;
+            wherePart.Append ("FROM PropertyValue WHERE EntityPOID = ");
+            wherePart.Append("dbo.fn_lookup_EntityPOID(e.EntityPOID, ");
+            wherePart.Append(erefSb);
+            wherePart.Append (") AND ");
+            wherePart.Append(pvName);
+            wherePart.Append(".PropertyPOID = ");
+            wherePart.Append(p.PropertyPOID);
+  
+            wherePart.Append (") ");
         }
 
         //Node
