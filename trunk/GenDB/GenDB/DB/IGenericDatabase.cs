@@ -61,7 +61,7 @@ namespace GenDB.DB
         /// <summary>
         /// Database id for this IEntityType
         /// </summary>
-        long EntityTypePOID { get; set; }
+        int EntityTypePOID { get; set; }
 
         /// <summary>
         /// When using types outside the namespace/assembly, it
@@ -99,7 +99,7 @@ namespace GenDB.DB
         /// </summary>
         /// <param name="propertyPOID"></param>
         /// <returns></returns>
-        IProperty GetProperty(long propertyPOID);
+        IProperty GetProperty(int propertyPOID);
 
         /// <summary>
         /// Returns the IProperty with the name given if present

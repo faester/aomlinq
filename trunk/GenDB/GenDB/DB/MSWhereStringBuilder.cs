@@ -12,6 +12,7 @@ namespace GenDB.DB
         StringBuilder joinPart = null;
         int currentPropertyNumber = 0;
         TypeSystem typeSystem = null;
+        Dictionary<int, IEntityType> entityTypes = null;
 
         private MSWhereStringBuilder() { /* empty */ }
 
@@ -39,6 +40,17 @@ namespace GenDB.DB
             }
         }
 
+        private void AppendEntityTypesHaving(IProperty prop)
+        {
+            IEntityType et = prop.EntityType;
+
+            foreach(IEntityType add in DataContext.Instance.TypeSystem.GetEntityTypesInstanceOf(et))
+            {
+                entityTypes[add.EntityTypePOID] = add;
+            }
+
+        }
+
         // Leaf
         public void VisitCstThis(CstThis cstThis)
         {
@@ -50,6 +62,7 @@ namespace GenDB.DB
             selectPart = new StringBuilder("SELECT DISTINCT e.EntityPOID FROM Entity e");
             wherePart = new StringBuilder();
             joinPart = new StringBuilder();
+            entityTypes = new Dictionary<int, IEntityType>();
         }
 
         public void Visit(IWhereable clause)

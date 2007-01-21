@@ -99,9 +99,9 @@ namespace GenDB.DB
         const string TB_PROPERTYVALUE_NAME = "PropertyValue";
         const string TB_COLLECTION_ELEMENT_NAME = "CollectionElement";
         const string TB_COLLECTION_KEY_NAME = "CollectionKey";
-        #endregion
 
-       
+        const bool WHERE_USING_JOINS = false;
+        #endregion
 
         internal MsSql2005DB(DataContext dataContext)
         {
@@ -451,15 +451,6 @@ namespace GenDB.DB
             return willRemove;
         }
 
-        public IEnumerable<IBusinessObject> Where(IExpression expression)
-        {
-            MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
-            mswsb.Reset();
-            mswsb.Visit(expression);
-            string whereStr = mswsb.WhereStr;
-            return Where(whereStr);
-        }
-
         public IBusinessObject GetByEntityPOID(int entityPOID)
         {
             int count = 0;
@@ -471,6 +462,28 @@ namespace GenDB.DB
                 res = ibo;
             }
             return res;
+        }
+
+
+        public IEnumerable<IBusinessObject> Where(IExpression expression)
+        {
+            if (WHERE_USING_JOINS)
+            {
+                return Where_JoiningFields(expression);
+            }
+            else
+            {
+                MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
+                mswsb.Reset();
+                mswsb.Visit(expression);
+                string whereStr = mswsb.WhereStr;
+                return Where(whereStr);
+            }
+        }
+
+        private IEnumerable<IBusinessObject> Where_JoiningFields(IExpression whereCondition)
+        {
+            throw new Exception("Not implemented");
         }
 
         private IEnumerable<IBusinessObject> Where(string entityPoidListQuery)
