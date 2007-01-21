@@ -573,6 +573,11 @@ namespace GenDB
             }
         }
 
+        public Type TypeOfReference
+        {
+            get { return reference.Target.GetType(); }
+        }
+
         public VarReference(IBusinessObject referencedObject)
         {
             if (referencedObject != null)

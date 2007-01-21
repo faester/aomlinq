@@ -61,7 +61,7 @@ namespace GenDB.DB
         /// <summary>
         /// Database id for this IEntityType
         /// </summary>
-        int EntityTypePOID { get; set; }
+        int EntityTypePOID { get; }
 
         /// <summary>
         /// When using types outside the namespace/assembly, it

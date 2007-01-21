@@ -156,12 +156,18 @@ namespace GenDB
         public static void Main(string[] args)
         {
             DataContext dcontext = DataContext.Instance;
-            dcontext.DeleteDatabase();
-            dcontext.CreateDatabase();
+            //if (dcontext.DatabaseExists())
+            //{
+            //    dcontext.DeleteDatabase();
+            //}
+            if (!dcontext.DatabaseExists())
+            {
+                dcontext.CreateDatabase();
+            }
             dcontext.Init();
 
 
-            int objCount = 10;
+            int objCount = 100;
 
             Table<BOList<Person>> tbolist = dcontext.CreateTable<BOList<Person>>();
 
@@ -217,6 +223,13 @@ namespace GenDB
                 p.Spouse = lastPerson;
                 tp.Add (p);
                 lastPerson = p;
+            }
+
+            dcontext.SubmitChanges();
+
+            foreach(Person p in tp)
+            {
+                Console.WriteLine(p);
             }
 
             lastPerson = null;

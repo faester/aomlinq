@@ -49,13 +49,23 @@ namespace GenDB
         {
             foreach (IEntityType ets in dataContext.GenDB.GetAllEntityTypes())
             {
-                RegisterType(ets);
+                if (!etid2IEt.ContainsKey(ets.EntityTypePOID))
+                {
+                    RegisterType(ets);
+                }
             }
 
             foreach (IPropertyType pt in dataContext.GenDB.GetAllPropertyTypes())
             {
                 ptid2pt.Add(pt.PropertyTypePOID, pt);
                 ptName2pt.Add(pt.Name, pt);
+            }
+
+            // Must register transalators after all types has been loaded to 
+            // prevent the translator to reregister types.
+            foreach(IETCacheElement ets in etid2IEt.Values)
+            {
+                dataContext.Translators.RegisterTranslator(ets.ClrType, ets.Target);
             }
 
 #if DEBUG
@@ -97,7 +107,7 @@ namespace GenDB
             }
             dataContext.GenDB.Save(et);
             dataContext.GenDB.CommitTypeChanges();
-            dataContext.Translators.RegisterTranslator(ce.ClrType, ce.Target);
+            //dataContext.Translators.RegisterTranslator(ce.ClrType, ce.Target);
         }
 
         /// <summary>
@@ -114,9 +124,10 @@ namespace GenDB
             }
             //try 
             //{
-                TranslatorChecks.CheckIBusinessObjectTranslatability (t);
-                IEntityType et = ConstructEntityType(t);
-                RegisterType(et);
+            TranslatorChecks.CheckIBusinessObjectTranslatability(t);
+            IEntityType et = ConstructEntityType(t);
+            RegisterType(et);
+            dataContext.Translators.RegisterTranslator(t, et);
             //}
             //catch(NotTranslatableException e)
             //{
@@ -234,12 +245,36 @@ namespace GenDB
             property.PropertyName = TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME;
             property.PropertyType = pt;
             res.AddProperty (property);
+            if (clrType.BaseType != null)
+            {
+                if (!IsTypeKnown(clrType.BaseType)) { RegisterType(clrType.BaseType); }
+                res.SuperEntityType = GetEntityType(clrType.BaseType);
+            }
+
             return res;
         }
 
         private IEntityType BODictionaryEntityType(Type clrType)
         {
             throw new Exception("not implemented");
+            IEntityType res = dataContext.GenDB.NewEntityType();
+            res.IsDictionary = true;
+            res.AssemblyDescription = clrType.Assembly.FullName;
+            res.Name = clrType.FullName;
+
+            //IPropertyType pt = dataContext.TypeSystem.GetPropertyType(clrType);
+            //IProperty property = dataContext.GenDB.NewProperty();
+            //property.EntityType = res;
+            //property.PropertyName = TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME;
+            //property.PropertyType = pt;
+            //res.AddProperty (property);
+            if (clrType.BaseType != null)
+            {
+                if (!IsTypeKnown(clrType.BaseType)) { RegisterType(clrType.BaseType); }
+                res.SuperEntityType = GetEntityType(clrType.BaseType);
+            }
+
+            return res;
         }
 
         private IEntityType IBOEntityType(Type t)

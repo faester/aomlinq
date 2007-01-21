@@ -81,7 +81,7 @@ namespace GenDB.DB
                 return nextPID++;
             }
         }
-        
+
         #region CONSTS
         /* ADO.NET opretholder en connection pool. Dette forudsætter at forbindelser 
          * åbnes og lukkes hver gang de bruges.
@@ -120,8 +120,8 @@ namespace GenDB.DB
 
         LinkedList<string> llEntityInserts = new LinkedList<string>();
         LinkedList<string> llPropertyValueInserts = new LinkedList<string>();
-        LinkedList<string> llCollectionElementInserts = new LinkedList <string>();
-        LinkedList<string> llSetKeyInserts = new LinkedList <string>();
+        LinkedList<string> llCollectionElementInserts = new LinkedList<string>();
+        LinkedList<string> llSetKeyInserts = new LinkedList<string>();
 
         int entityInsertCount = 0;
         int propertyValueInsertCount = 0;
@@ -133,7 +133,6 @@ namespace GenDB.DB
         //LinkedList<IPropertyType> dirtyPropertyTypes = new LinkedList <IPropertyType>();
         //LinkedList<IProperty> dirtyProperties = new LinkedList<IProperty>();
         #endregion
-
 
         #region DB logic
         /// <summary>
@@ -175,12 +174,13 @@ namespace GenDB.DB
                 catch (SqlException ex)
                 {
                     transaction.Rollback();
-                    try {
+                    try
+                    {
                         SqlCommand dc = new SqlCommand("DROP DATABASE " + dataContext.DatabaseName, cnn);
                         dc.ExecuteNonQuery();
                     }
-                    catch(Exception e) 
-                    { 
+                    catch (Exception e)
+                    {
                         Console.WriteLine(e);
                     }
                     throw new Exception("Error creating DB (could not create tables). See inner exception for details.", ex);
@@ -247,8 +247,7 @@ namespace GenDB.DB
         /// <returns></returns>
         public IEntityType NewEntityType()
         {
-            IEntityType res = new EntityType();
-            res.EntityTypePOID = NextETID;
+            IEntityType res = new EntityType(NextETID);
             return res;
         }
 
@@ -356,16 +355,15 @@ namespace GenDB.DB
                     string t2 = reader[1].ToString();
                     int id = int.Parse(reader[0].ToString());
 
-                    Boolean isList = (Boolean)reader[3]; 
+                    Boolean isList = (Boolean)reader[3];
                     Boolean isDictionary = (Boolean)reader[4];
 
                     string name = (string)reader[1];
-                    IEntityType et = new EntityType();
+                    IEntityType et = new EntityType(id);
                     et.IsList = isList;
                     et.IsDictionary = isDictionary;
                     et.Name = name;
                     et.AssemblyDescription = (string)reader[2];
-                    et.EntityTypePOID = id;
                     et.ExistsInDatabase = true;
                     res.Add(id, et);
                 }
@@ -421,7 +419,7 @@ namespace GenDB.DB
             string whereStr = mswsb.WhereStr;
 #if DEBUG
             Console.WriteLine("DB.Count with wherestring: " + whereStr);
-#endif 
+#endif
             int res = 0;
 
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
@@ -431,22 +429,22 @@ namespace GenDB.DB
                 SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Entity WHERE EntityPOID IN (" + whereStr + ")", cnn);
                 res = (int)cmd.ExecuteScalar();
             }
-            
+
             return res;
         }
 
         public bool ClearWhere(IWhereable expression)
         {
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
-            mswsb.Visit (expression);
+            mswsb.Visit(expression);
 
-            bool willRemove = this.Count (expression) > 0;
+            bool willRemove = this.Count(expression) > 0;
 
             if (entityInsertCount >= dataContext.DbBatchSize) { EntityInsertStringBuilderToLL(); }
             entityInsertCount++;
             string deleteString = " DELETE FROM Entity WHERE EntityPOID IN (" + mswsb.WhereStr + ") ";
 
-            sbEntityInserts.Append (deleteString);
+            sbEntityInserts.Append(deleteString);
 
             return willRemove;
         }
@@ -455,7 +453,7 @@ namespace GenDB.DB
         {
             int count = 0;
             IBusinessObject res = null;
-            foreach(IBusinessObject ibo in Where(entityPOID.ToString()))
+            foreach (IBusinessObject ibo in Where(entityPOID.ToString()))
             {
                 count++;
                 if (count > 1) { throw new Exception("Internal error. Wrong where string"); }
@@ -484,18 +482,122 @@ namespace GenDB.DB
         private IEnumerable<IBusinessObject> Where_JoiningFields(IExpression whereCondition)
         {
             MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
-            mswsb.Visit (whereCondition);
+            mswsb.Visit(whereCondition);
+            string conditionWhereString = mswsb.WhereStr;
             IEnumerable<IEntityType> entityTypes = mswsb.EntityTypes;
-
-
+            SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName);
+            cnn.Open();
             foreach (IEntityType et in entityTypes)
             {
-                StringBuilder sqlStr = new StringBuilder("SELECT e.EntityTypePOID etid, e.EntityPOID eid FROM Entity e ");
+                Console.WriteLine("Now reading entity type: " + et);
+                LinkedList<IProperty> properties = new LinkedList<IProperty>();
+                IIBoToEntityTranslator translator = dataContext.Translators.GetTranslator(et.EntityTypePOID);
+                StringBuilder selectPart = new StringBuilder("SELECT e.EntityTypePOID, e.EntityPOID ");
+                StringBuilder joinPart = new StringBuilder(" FROM Entity e INNER JOIN (");
+                joinPart.Append(conditionWhereString);
+                joinPart.Append(") ew ON ew.EntityPOID = e.EntityPOID ");
+                foreach (IProperty p in et.GetAllProperties)
+                {
+                    int propertyID = p.PropertyPOID;
+                    properties.AddLast(p);
+                    string pAlias = "p" + propertyID;
+                    string select = pAlias;
+                    switch (p.MappingType)
+                    {
+                        case MappingType.BOOL:
+                            select += ".BoolValue"; break;
+                        case MappingType.DATETIME:
+                        case MappingType.LONG:
+                            select += ".LongValue"; break;
+                        case MappingType.DOUBLE:
+                            select += ".DoubleValue"; break;
+                        case MappingType.REFERENCE:
+                            select += ".ReferenceValue"; break;
+                        case MappingType.STRING:
+                            select += ".StringValue"; break;
+                        default:
+                            throw new Exception("Don't know how to handle mappingtype: " + p.MappingType);
 
+                    }
+                    selectPart.Append(", ");
+                    selectPart.Append(select);
+                    joinPart.Append(" INNER JOIN PropertyValue ");
+                    joinPart.Append(pAlias);
+                    joinPart.Append(" ON e.EntityPOID = ");
+                    joinPart.Append(pAlias);
+                    joinPart.Append(".EntityPOID AND ");
+                    joinPart.Append(pAlias);
+                    joinPart.Append(".PropertyPOID = ");
+                    joinPart.Append(propertyID);
+                }
+                joinPart.Append(" \nWHERE e.EntityTypePOID = " + et.EntityTypePOID);
+                joinPart.Append("\n OPTION (LOOP JOIN, FORCE ORDER)");
+                string sqlStr = selectPart.ToString() + joinPart.ToString();
+                Console.WriteLine(sqlStr);
+#if DEBUG
+                Console.Error.WriteLine("****");
+                Console.Error.WriteLine(sqlStr);
+                Console.Error.WriteLine(" -- -- -- -- -- ");
+                Console.Error.WriteLine(conditionWhereString);
+#endif
+                SqlCommand cmd = new SqlCommand(sqlStr, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    int entityPOID = reader.GetInt32(1);
+                    IBusinessObject res = dataContext.IBOCache.Get(entityPOID);
+                    if (res == null)
+                    {
+                        res = translator.CreateInstanceOfIBusinessObject();
+                        res.DBIdentity = new DBIdentifier(entityPOID, true);
+                        this.dataContext.IBOCache.AddFromDB(res);
 
-            }
+                        int idx = 1;
+                        foreach (IProperty prop in properties)
+                        {
+                            idx++;
+                            int pid = prop.PropertyPOID;
+                            switch (prop.MappingType)
+                            {
+                                case MappingType.BOOL:
+                                    translator.SetProperty(pid, res, reader.GetBoolean(idx)); break;
+                                case MappingType.DATETIME:
+                                    translator.SetProperty(pid, res, new DateTime(reader.GetInt64(idx))); break;
+                                case MappingType.DOUBLE:
+                                    translator.SetProperty(pid, res, reader.GetDouble(idx)); break;
+                                case MappingType.LONG:
+                                    translator.SetProperty(pid, res, reader.GetInt64(idx)); break;
+                                case MappingType.REFERENCE:
+                                    {
+                                        if (reader[idx] == DBNull.Value)
+                                        {
+                                            translator.SetProperty(pid, res, null); break;
+                                        }
+                                        else
+                                        {
+                                            translator.SetProperty(pid, res, reader.GetInt32(idx)); break;
+                                        }
+                                    }
+                                    break;
+                                case MappingType.STRING:
+                                    if (reader[idx] == DBNull.Value)
+                                    {
+                                        translator.SetProperty(pid, res, null); break;
+                                    }
+                                    else
+                                    {
+                                        translator.SetProperty(pid, res, reader.GetString(idx)); break;
+                                    }
+                                default:
+                                    throw new Exception("Mapping type not implemented. " + prop.MappingType);
+                            } // switch
+                        } // foreach
+                    } // if (res == null)
+                    yield return res;
+                } // while reader.Read
+            } // foreach EntityType
 
-            throw new Exception("Not implemented");
+            cnn.Close();
         }
 
         private IEnumerable<IBusinessObject> Where(string entityPoidListQuery)
@@ -523,7 +625,7 @@ namespace GenDB.DB
                 Console.WriteLine();
                 Console.WriteLine(cmd.CommandText);
 #endif
-                
+
                 cmd.Connection = cnn;
                 SqlDataReader reader = cmd.ExecuteReader();
                 IEntityType iet = null;
@@ -539,33 +641,33 @@ namespace GenDB.DB
 
                 while (reader.Read())
                 {
-                    entityTypePOID = reader.GetInt32(0);
                     entityPOID = reader.GetInt32(6);
-                    if (entityTypePOID != oldEntityTypePOID || firstPass)
-                    {
-                        translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
-                        iet = DataContext.Instance.TypeSystem.GetEntityType(entityTypePOID);
-                        oldEntityTypePOID = entityTypePOID;
-                    } // if
                     if (entityPOID != oldEntityPOID || firstPass)
                     {
-                        if (result != null) { 
-                            yield return result; 
+                        entityTypePOID = reader.GetInt32(0);
+                        if (entityTypePOID != oldEntityTypePOID || firstPass)
+                        {
+                            translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
+                            iet = DataContext.Instance.TypeSystem.GetEntityType(entityTypePOID);
+                            oldEntityTypePOID = entityTypePOID;
+                        } // if
+                        if (result != null)
+                        {
+                            yield return result;
                         }
 
                         result = dataContext.IBOCache.Get(entityPOID);
                         returnCachedCopy = result != null;
                         if (!returnCachedCopy)
                         {
-                            result = translator.CreateInstanceOfIBusinessObject(); 
+                            result = translator.CreateInstanceOfIBusinessObject();
                             result.DBIdentity = new DBIdentifier(entityPOID, true);
-                            
                             this.dataContext.IBOCache.AddFromDB(result);
                         }
 
                         oldEntityPOID = entityPOID;
                     } // if
-                    if (reader[1] != DBNull.Value && !returnCachedCopy) // Does any properties exist?
+                    if (!returnCachedCopy && reader[1] != DBNull.Value) // Does any properties exist?
                     {
                         propertyPOID = (int)reader[1];
                         object value = null;
@@ -573,9 +675,9 @@ namespace GenDB.DB
                         {
                             case MappingType.BOOL: value = reader.GetBoolean(3); break;
                             case MappingType.DATETIME: value = new DateTime(reader.GetInt64(2)); break;
-                            case MappingType.DOUBLE: value = reader.GetDouble (5); break;
+                            case MappingType.DOUBLE: value = reader.GetDouble(5); break;
                             case MappingType.LONG: value = reader.GetInt64(2); break;
-                            case MappingType.REFERENCE: 
+                            case MappingType.REFERENCE:
                                 if (reader[7] == DBNull.Value)
                                 {
                                     value = null;
@@ -596,8 +698,9 @@ namespace GenDB.DB
 
 
                 if (!reader.IsClosed) { reader.Close(); }
-                if (result != null) { 
-                    yield return result; 
+                if (result != null)
+                {
+                    yield return result;
                 }
             }
         }
@@ -612,7 +715,7 @@ namespace GenDB.DB
              */
             IBusinessObject ibo = GetEntity(collectionEntityPOID);
             // TODO: Check below should be superfluous. Kept for debugging db consistency.
-            if (ibo == null) {throw new Exception("Internal error in database. Request for unknown collection's elements! " + collectionEntityPOID); }
+            if (ibo == null) { throw new Exception("Internal error in database. Request for unknown collection's elements! " + collectionEntityPOID); }
 
             Type elementType = ibo.GetType().GetGenericArguments()[0];
 
@@ -639,7 +742,7 @@ namespace GenDB.DB
                             element.BoolValue = (bool)reader[2];
                             break;
                         case MappingType.DATETIME:
-                            element.DateTimeValue = new DateTime ((long)reader[1]);
+                            element.DateTimeValue = new DateTime((long)reader[1]);
                             break;
                         case MappingType.DOUBLE:
                             element.DoubleValue = (double)reader[4];
@@ -649,9 +752,9 @@ namespace GenDB.DB
                             break;
                         case MappingType.REFERENCE:
                             {
-                                if (reader[1] == DBNull.Value )
+                                if (reader[1] == DBNull.Value)
                                 {
-                                    element.RefValue = new IBOReference (true);
+                                    element.RefValue = new IBOReference(true);
                                 }
                                 else
                                 {
@@ -716,27 +819,27 @@ namespace GenDB.DB
                 case MappingType.DATETIME:
                     sb.Append(ce.DateTimeValue.Ticks);
                     break;
-                default: 
-                    sb.Append("null"); 
+                default:
+                    sb.Append("null");
                     break;
             }
             if (ce.StringValue == null)
             {
-                sb.Append (",null,");
+                sb.Append(",null,");
             }
             else
             {
-            sb.Append(",'")
-            .Append(SqlSanitizeString(ce.StringValue))
-            .Append("',");
+                sb.Append(",'")
+                .Append(SqlSanitizeString(ce.StringValue))
+                .Append("',");
             }
-            sb.Append (ce.BoolValue)
-            .Append (',')
+            sb.Append(ce.BoolValue)
+            .Append(',')
             .Append(ce.DoubleValue);
 
             collectionElementOperationCount++;
             sbCollectionElementOperations.Append(sb.ToString());
-       }
+        }
 
         private void InternalEntitySave(IEntity entity)
         {
@@ -805,9 +908,9 @@ namespace GenDB.DB
             sbPropertyValueInserts.Append(',')
                        .Append(boolValue)
                        .Append(',')
-                       .Append( pv.DoubleValue.ToString().Replace(',', '.')) // ',' -> '.' to solve localization issues.
-                       .Append (',')
-                       .Append (pv.RefValue.IsNullReference ? " null " : pv.RefValue.EntityPOID.ToString())
+                       .Append(pv.DoubleValue.ToString().Replace(',', '.')) // ',' -> '.' to solve localization issues.
+                       .Append(',')
+                       .Append(pv.RefValue.IsNullReference ? " null " : pv.RefValue.EntityPOID.ToString())
                        .Append(";");
         }
 
@@ -859,7 +962,8 @@ namespace GenDB.DB
             {
                 cnn.Open();
                 SqlTransaction transaction = cnn.BeginTransaction();
-                try {
+                try
+                {
                     cmd.Connection = cnn;
                     cmd.Transaction = transaction;
                     if (sbEntityTypeInserts.Length != 0)
@@ -878,7 +982,7 @@ namespace GenDB.DB
                         cmd.ExecuteNonQuery();
                     }
                 }
-                catch(SqlException e)
+                catch (SqlException e)
                 {
                     transaction.Rollback();
                     throw e;
@@ -938,7 +1042,7 @@ namespace GenDB.DB
                         }
                     }
                 }
-                catch(SqlException e)
+                catch (SqlException e)
                 {
                     transaction.Rollback();
                     throw e;
@@ -989,7 +1093,7 @@ namespace GenDB.DB
         private void ClearCollectionCommands()
         {
             llCollectionElementInserts = new LinkedList<string>();
-            llSetKeyInserts = new LinkedList <string>();
+            llSetKeyInserts = new LinkedList<string>();
             sbCollectionElementOperations = new StringBuilder();
             sbSetKeyInserts = new StringBuilder();
             collectionElementOperationCount = 0;
@@ -1005,7 +1109,7 @@ namespace GenDB.DB
             collectionElementOperationCount++;
             sbCollectionElementOperations.Append(" DELETE FROM ");
             sbCollectionElementOperations.Append(TB_COLLECTION_ELEMENT_NAME);
-            sbCollectionElementOperations.Append (" WHERE EntityPOID = ");
+            sbCollectionElementOperations.Append(" WHERE EntityPOID = ");
             sbCollectionElementOperations.Append(collectionEntityPOID);
         }
 
@@ -1016,10 +1120,10 @@ namespace GenDB.DB
                 CollectionKeyStringBuilderToLL();
             }
             collectionKeyOperationCount++;
-            sbSetKeyInserts.Append (" DELETE FROM ");
-            sbSetKeyInserts.Append (TB_COLLECTION_KEY_NAME);
-            sbSetKeyInserts.Append (" WHERE EntityPOID = ");
-            sbSetKeyInserts.Append (collectionEntityPOID);
+            sbSetKeyInserts.Append(" DELETE FROM ");
+            sbSetKeyInserts.Append(TB_COLLECTION_KEY_NAME);
+            sbSetKeyInserts.Append(" WHERE EntityPOID = ");
+            sbSetKeyInserts.Append(collectionEntityPOID);
         }
 
         private void InitNextIDs()
@@ -1067,6 +1171,7 @@ namespace GenDB.DB
         private void InternalSaveEntityType(IEntityType et)
         {
             if (et == null || et.ExistsInDatabase) { return; }
+            et.ExistsInDatabase = true;
             InternalSaveEntityType(et.SuperEntityType);
 
             sbEntityTypeInserts.Append(" INSERT INTO ");
@@ -1081,9 +1186,9 @@ namespace GenDB.DB
             sbEntityTypeInserts.Append(",'");
             sbEntityTypeInserts.Append(et.AssemblyDescription);
             sbEntityTypeInserts.Append("',");
-            sbEntityTypeInserts.Append ( et.IsList ? 1 : 0);
-            sbEntityTypeInserts.Append (',');
-            sbEntityTypeInserts.Append ( et.IsDictionary ? 1 : 0);
+            sbEntityTypeInserts.Append(et.IsList ? 1 : 0);
+            sbEntityTypeInserts.Append(',');
+            sbEntityTypeInserts.Append(et.IsDictionary ? 1 : 0);
             sbEntityTypeInserts.Append(") ");
             if (et.DeclaredProperties != null)
             {
@@ -1092,7 +1197,6 @@ namespace GenDB.DB
                     InternalSaveProperty(p);
                 }
             }
-            et.ExistsInDatabase = true;
         }
 
         private void InternalSaveProperty(IProperty p)
@@ -1210,7 +1314,7 @@ namespace GenDB.DB
                                         "	@StringValue AS VARCHAR(max)," +
                                         "	@BoolValue AS BIT, " +
                                         "   @DoubleValue AS FLOAT, " +
-                                        "   @ReferenceValue AS INT " + 
+                                        "   @ReferenceValue AS INT " +
                                         " AS " +
                                         "	IF EXISTS (SELECT * FROM PropertyValue WHERE EntityPOID = @EntityPOID AND PropertyPOID = @PropertyPoid) " +
                                         "	BEGIN " +
