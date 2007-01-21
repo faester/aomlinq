@@ -184,8 +184,6 @@ namespace GenDB
 
         public System.Collections.Generic.IEnumerator<T> GetEnumerator()
         {
-            IEntityType lastType = null;
-            IIBoToEntityTranslator translator = null;
             foreach (T e in db.Where(expression))
             {
                 if (exprFullySqlTranslatable)
