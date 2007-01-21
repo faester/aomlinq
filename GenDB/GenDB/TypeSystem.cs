@@ -237,6 +237,11 @@ namespace GenDB
             return res;
         }
 
+        private IEntityType BODictionaryEntityType(Type clrType)
+        {
+            throw new Exception("not implemented");
+        }
+
         private IEntityType IBOEntityType(Type t)
         {
             IEntityType et = dataContext.GenDB.NewEntityType();
@@ -286,6 +291,10 @@ namespace GenDB
                 {
                     return BOListEntityType(t);
                 }
+                //else if(t.GetGenericTypeDefinition() == BODictionaryTranslator.TypeOfBODictionary)
+                //{
+                //    return BODictionaryEntityType(t);
+                //}
                 else 
                 {
                     throw new NotTranslatableException ("Don't know how to construct IEntityType for type", t);

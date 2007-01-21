@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Query;
+using GenDB.DB;
 using System.Collections;
 
 namespace GenDB
@@ -27,27 +27,40 @@ namespace GenDB
         public BODictionary<K, char> BODictionaryChar<K>() {return new BODictionary<K, char>();}
         public BODictionary<K, double> BODictionaryDouble<K>() {return new BODictionary<K, double>();}
         public BODictionary<K, float> BODictionaryFloat<K>() {return new BODictionary<K, float>();}
+    
     }
 
     internal class KeyDict<K>
     {
         BOList<K> keyList = new BOList<K>();
-        
+        int dBIdentifier;
+
+        public KeyDict() 
+        {
+            dBIdentifier=keyList.DBIdentity.Value;
+        }
+
         public BOList<K> KeyList
         {
             get{return keyList;}
             set{keyList=value;}
         }
 
-        public DBIdentifier GetDBID()
+        public int DBIdentifier
         {
-            return keyList.DBIdentity;
+            get{return dBIdentifier;}
         }
     }
 
     internal class ValueDict<V>
     {
         BOList<V> valueList = new BOList<V>();
+        int dBIdentifier;
+
+        public ValueDict()
+        {
+            dBIdentifier=valueList.DBIdentity.Value;
+        }
 
         public BOList<V> ValueList
         {
@@ -55,9 +68,9 @@ namespace GenDB
             set{valueList=value;}
         }
 
-        public DBIdentifier GetDBID()
+        public int DBIdentifier
         {
-            return valueList.DBIdentity;
+            get{return dBIdentifier;}
         }
     }
 
@@ -68,19 +81,33 @@ namespace GenDB
     /// </summary>
     /// <typeparam name="K"></typeparam>
     /// <typeparam name="V"></typeparam>
-    public class BODictionary<K, V> : AbstractBusinessObject, IDictionary<K, V>, IDBSaveableCollection
+    
+    public sealed class BODictionary<K, V> : AbstractBusinessObject, IDictionary<K, V>, IDBSaveableCollection
     {
         Dictionary<K, V> dict = new Dictionary<K,V>();
 
         KeyDict<K> keyDict = new KeyDict<K>();
         ValueDict<V> valueDict = new ValueDict<V>();
 
-        //BOList<K> keyList = new BOList<K>();
-        //BOList<V> valueList = new BOList<V>();
-
         bool isDictionaryPopulated = false;
         bool isReadOnly = false;
         bool hasBeenModified = false;
+        MappingType mt_key;
+        MappingType mt_value;
+        CollectionElementConverter cnv_key = null;
+        CollectionElementConverter cnv_value = null;
+
+        /// <summary>
+        /// Hide constructor to prevent instantiation 
+        /// of unrestricted type parameter.
+        /// </summary>
+        internal BODictionary()
+        {
+            mt_key = DataContext.Instance.TypeSystem.FindMappingType(typeof(K));
+            mt_value = DataContext.Instance.TypeSystem.FindMappingType(typeof(V));
+            cnv_key = new CollectionElementConverter(mt_key, DataContext.Instance, typeof(K));
+            cnv_value = new CollectionElementConverter(mt_value, DataContext.Instance, typeof(V));
+        }
 
         public bool IsReadOnly
         {
@@ -93,7 +120,7 @@ namespace GenDB
             get { return hasBeenModified; }
             set { hasBeenModified = value; }
         }
-        
+
         private void PopulateDictionary()
         {
             //throw new Exception("Not implemented");
@@ -175,6 +202,7 @@ namespace GenDB
                 TestPopulateDictionary();
                 return dict.Keys;
             }
+            set{return;}
         }
 
         public ICollection<V> Values
@@ -183,6 +211,7 @@ namespace GenDB
                 TestPopulateDictionary();
                 return dict.Values;
             }
+            set{return;}
         }
 
         public void Add(KeyValuePair<K, V> kvp)
@@ -243,6 +272,7 @@ namespace GenDB
                 TestPopulateDictionary();
                 return dict.Count;
             }
+            set{return;}
         }
 
         public System.Collections.Generic.IEnumerator<KeyValuePair<K, V>> GetEnumerator()
