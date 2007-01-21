@@ -80,11 +80,18 @@ namespace GenDB
 
         bool isDictionaryPopulated = false;
         bool isReadOnly = false;
+        bool hasBeenModified = false;
 
         public bool IsReadOnly
         {
             get { return isReadOnly; }
             set { isReadOnly = value; }
+        }
+
+        public bool HasBeenModified
+        {
+            get { return hasBeenModified; }
+            set { hasBeenModified = value; }
         }
         
         private void PopulateDictionary()
@@ -120,6 +127,7 @@ namespace GenDB
             }
             keyDict.KeyList.SaveElementsToDB();
             valueDict.ValueList.SaveElementsToDB();
+            HasBeenModified=false;
         }
 
         public bool ContainsKey(K key)
@@ -132,12 +140,14 @@ namespace GenDB
         {
             TestPopulateDictionary();
             dict.Add (key, value);
+            HasBeenModified=true;
         }
 
         public bool Remove(K key)
         {
             TestPopulateDictionary();
             return dict.Remove (key);
+            HasBeenModified=true;
         }
 
         public bool TryGetValue(K key, out V value)
@@ -155,6 +165,7 @@ namespace GenDB
             set { 
                 TestPopulateDictionary();
                 dict[key] = value;
+                HasBeenModified=true;
             }
         }
 
@@ -178,6 +189,7 @@ namespace GenDB
         {
             TestPopulateDictionary();
             dict.Add(kvp.Key, kvp.Value);
+            HasBeenModified=true;
         }
 
         public void Clear()
@@ -207,6 +219,7 @@ namespace GenDB
             {
                 kvps[idx++] = kvp;
             }
+            HasBeenModified=true;
         }
 
         public bool Remove(KeyValuePair<K, V> kvp)
@@ -215,6 +228,7 @@ namespace GenDB
             if (Contains(kvp))
             {
                 dict.Remove (kvp.Key);
+                HasBeenModified=true;
                 return true;
             }
             else

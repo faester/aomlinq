@@ -21,6 +21,7 @@ namespace GenDB
     internal interface IDBSaveableCollection
     {
         void SaveElementsToDB();
+        bool HasBeenModified {get; set;}
     }
 
 }
