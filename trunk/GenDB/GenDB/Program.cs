@@ -163,6 +163,9 @@ namespace GenDB
 
             int objCount = 10;
 
+            
+
+
             //Table<BOList<Person>> tbolist = dcontext.CreateTable<BOList<Person>>();
 
             //foreach (BOList<Person> bol in tbolist)
@@ -173,12 +176,29 @@ namespace GenDB
             //    }
             //}
 
-            //BOList<Person> bolist = dcontext.BolistFactory.BOListRef <Person>();
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    Person p = new Person{Name = i.ToString() + "'"};
-            //    bolist.Add (p);
-            //}
+            BOList<Person> bolist = dcontext.BolistFactory.BOListRef <Person>();
+            for (int i = 0; i < 10; i++)
+            {
+                Person p = new Person{Name = i.ToString() + "'"};
+                bolist.Add (p);
+            }
+
+            BODictionary<int, Person> bodict = dcontext.BODictionaryFactory.BODictionaryRef<int, Person>();
+            for (int i=0; i<10;i++)
+            {
+                Person p = new Person{Name = "Name"+i};
+                bodict.Add(i, p);
+            }
+
+            bodict.SaveElementsToDB();
+
+            bodict.Remove(3);
+            foreach(KeyValuePair<int, Person> kvp in bodict)
+            {
+                Person kp = (Person) kvp.Value;
+                int ks = kvp.Key;
+                Console.WriteLine("Key: {0}, Value: {1}",ks,kp.Name);
+            }
 
             //tbolist.Add (bolist);
 
@@ -227,53 +247,66 @@ namespace GenDB
 
             tp.Clear();
 
-            var es = from epp in tp     
-            //    //where epp.disco == "21"
-                  //where epp.Spouse.Age > 4
-            //    //where epp.Alive
-            //    //where epp.Spouse.Name == "SpousePerson" || epp.Car.Brand == "7" || epp.Name == "Navn 1" || epp.Age == 3
-            //    //where epp.Spouse.Age == 3 || epp.Spouse.Age == 4
-
+            //var es = from epp in tp     
             //    //where epp.Car.Motor.HorsePower == "400"
             //    //where epp.Car.Motor.Valve == 6
             //    //where epp.Car.Sunroof==false
-            where !(epp.Age!=4)
-                select epp;
+                  //where !(epp.Age!=4)
+                  //select epp;
             //    //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
 
-            foreach(Person p in es)
-            {
-                ObjectUtilities.PrintOut (p);
-            }
+            //foreach(Person p in es)
+            //{
+            //    ObjectUtilities.PrintOut (p);
+            //}
             
-            Console.WriteLine("Size of Table: {0}", es.Count);
+            //Console.WriteLine("Size of Table: {0}", es.Count);
             
             // ******************************
 
-            //int[] ages = {1, 2, 3, 4 };
-
+            //int[] ages = {1, 2, 3, 979 };
 
             //var qw = from pers in tp
             //         join age in ages
             //         on pers.Age equals age
             //         select new {pers.Name};
 
-            //var qw = from pers in tp 
-            //         join pesr in tp
-            //         on new {pers.Name, pers.Age} equals new {pesr.Name, pesr.Age}
-            //         select new {pers.Name};
+            // group join
+            //var gj = from person in tp
+            //         join person2 in tp
+            //         on new {person.Age, person.Name} equals new {person2.Age, person2.Name} into pc
+            //         from person2 in pc
+            //         select new {person.Name, person2.Age};
 
-            //var qw = from pers in tp 
-            //         join age in ages
-            //         on pers.Age equals age
-            //         select new {pers.Name, age};
-
-            //foreach(var q in qw)
+            //foreach(var thing in gj)
             //{
-            //    Console.WriteLine(q);
+            //    Console.WriteLine(thing);
             //}
             
             Console.ReadLine();
+
+            //Dictionary<int, string> d = new Dictionary<int, string>();
+            //for(int i=0;i<10;i++)
+            //{
+            //    d.Add(i,"Navn"+i);
+            //}
+            //Console.WriteLine("Dictionary: "+d[3]);
+            //string ud ="";
+            //if(d.TryGetValue(4,out ud))
+            //{
+            //    Console.WriteLine(ud);
+            //}
+            //Console.WriteLine("contains key:{0}, contains value:{1}",d.ContainsKey(4),d.ContainsValue("sd"));
+            //d.Remove(3);
+            
+            //foreach(KeyValuePair<int,string> kvp in d)
+            //{
+            //    Console.WriteLine("Key: {0}, Value: {1}",kvp.Key,kvp.Value);
+            //}
+            
+            
+            
+            
         }
     }
 }

@@ -6,16 +6,78 @@ using System.Collections;
 
 namespace GenDB
 {
+
+    public class BODictionaryFactory
+    {
+        internal BODictionaryFactory()
+        {
+        }
+
+        public BODictionary<K, V> BODictionaryRef<K, V>()
+            where V : IBusinessObject
+        {
+            return new BODictionary<K, V>();
+        }
+
+        public BODictionary<K, int> BODictionaryInt<K>() {return new BODictionary<K, int>();}
+        public BODictionary<K, string> BODictionaryString<K>() {return new BODictionary<K, string>();}
+        public BODictionary<K, DateTime> BODictionaryDateTime<K>() {return new BODictionary<K, DateTime>();}
+        public BODictionary<K, long> BODictionaryLong<K>() {return new BODictionary<K, long>();}
+        public BODictionary<K, bool> BODictionaryBool<K>() {return new BODictionary<K, bool>();}
+        public BODictionary<K, char> BODictionaryChar<K>() {return new BODictionary<K, char>();}
+        public BODictionary<K, double> BODictionaryDouble<K>() {return new BODictionary<K, double>();}
+        public BODictionary<K, float> BODictionaryFloat<K>() {return new BODictionary<K, float>();}
+    }
+
+    internal class KeyDict<K>
+    {
+        BOList<K> keyList = new BOList<K>();
+        
+        public BOList<K> KeyList
+        {
+            get{return keyList;}
+            set{keyList=value;}
+        }
+
+        public DBIdentifier GetDBID()
+        {
+            return keyList.DBIdentity;
+        }
+    }
+
+    internal class ValueDict<V>
+    {
+        BOList<V> valueList = new BOList<V>();
+
+        public BOList<V> ValueList
+        {
+            get{return valueList;}
+            set{valueList=value;}
+        }
+
+        public DBIdentifier GetDBID()
+        {
+            return valueList.DBIdentity;
+        }
+    }
+
     /// <summary>
     /// Gem typerne for K og V som properties på objektet og giv disse faste 
     /// navne index TypeSystem
-    /// TODO: BODictionary
+    /// TODO: BODictionary, gem i 2 bolist - skal huske entityPOID på dem så de kan retrieves.
     /// </summary>
     /// <typeparam name="K"></typeparam>
     /// <typeparam name="V"></typeparam>
     public class BODictionary<K, V> : AbstractBusinessObject, IDictionary<K, V>, IDBSaveableCollection
     {
-        Dictionary<K, V> dict = null;
+        Dictionary<K, V> dict = new Dictionary<K,V>();
+
+        KeyDict<K> keyDict = new KeyDict<K>();
+        ValueDict<V> valueDict = new ValueDict<V>();
+
+        //BOList<K> keyList = new BOList<K>();
+        //BOList<V> valueList = new BOList<V>();
+
         bool isDictionaryPopulated = false;
         bool isReadOnly = false;
 
@@ -24,11 +86,12 @@ namespace GenDB
             get { return isReadOnly; }
             set { isReadOnly = value; }
         }
-
+        
         private void PopulateDictionary()
         {
-            throw new Exception("Not implemented");
+            //throw new Exception("Not implemented");
         }
+
 
         private void TestPopulateDictionary()
         {
@@ -45,11 +108,18 @@ namespace GenDB
             {
                 return;
             }
-            if (!DBIdentity.IsPersistent)
+            //if (!DBIdentity.IsPersistent)
+            //{
+            //    throw new Exception("Attempted to save elements prior to saving the BODictionary");
+            //}
+            
+            foreach(KeyValuePair<K, V> kvp in dict)
             {
-                throw new Exception("Attempted to save elements prior to saving the BODictionary");
+                keyDict.KeyList.Add(kvp.Key);
+                valueDict.ValueList.Add(kvp.Value);
             }
-            throw new Exception("Not implemented");
+            keyDict.KeyList.SaveElementsToDB();
+            valueDict.ValueList.SaveElementsToDB();
         }
 
         public bool ContainsKey(K key)

@@ -47,7 +47,7 @@ namespace GenDB
         MappingType mt;
         CollectionElementConverter cnv = null;
                 
-
+         
         /// <summary>
         /// Hide constructor to prevent instantiation 
         /// of unrestricted type parameter.
@@ -81,7 +81,7 @@ namespace GenDB
              * persisted. Hence if DBTag is null, 
              * there is nothing to load.
              */
-
+            
             if (DBIdentity.IsPersistent)
             {
                 foreach (IGenCollectionElement ce in DataContext.Instance.GenDB.AllElements(DBIdentity))
