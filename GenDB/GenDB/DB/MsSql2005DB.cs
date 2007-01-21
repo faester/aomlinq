@@ -483,6 +483,18 @@ namespace GenDB.DB
 
         private IEnumerable<IBusinessObject> Where_JoiningFields(IExpression whereCondition)
         {
+            MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
+            mswsb.Visit (whereCondition);
+            IEnumerable<IEntityType> entityTypes = mswsb.EntityTypes;
+
+
+            foreach (IEntityType et in entityTypes)
+            {
+                StringBuilder sqlStr = new StringBuilder("SELECT e.EntityTypePOID etid, e.EntityPOID eid FROM Entity e ");
+
+
+            }
+
             throw new Exception("Not implemented");
         }
 

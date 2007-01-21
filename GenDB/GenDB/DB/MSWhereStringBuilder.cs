@@ -22,6 +22,11 @@ namespace GenDB.DB
             Reset();
         }
 
+        public IEnumerable<IEntityType> EntityTypes
+        {
+            get { return entityTypes.Values; }
+        }
+
         public String WhereStr 
         {
             get {
@@ -48,7 +53,6 @@ namespace GenDB.DB
             {
                 entityTypes[add.EntityTypePOID] = add;
             }
-
         }
 
         // Leaf
@@ -73,6 +77,12 @@ namespace GenDB.DB
         public void VisitInstanceOf(ExprInstanceOf instanceOf)
         {
             IEnumerable<IEntityType> types = typeSystem.GetEntityTypesInstanceOf(instanceOf.ClrType);
+
+            foreach(IEntityType et in types)
+            {
+                entityTypes [et.EntityTypePOID] = et;
+            }
+
             bool notFirst = false;
 
             StringBuilder entityTypePoids = new StringBuilder("e.EntityTypePOID IN (");
@@ -100,6 +110,8 @@ namespace GenDB.DB
         //Leaf
         public void VisitProperty(CstProperty vp)
         {
+            AppendEntityTypesHaving(vp.Property);
+
             string pvName = "pv" + currentPropertyNumber;
             selectPart.Append (", PropertyValue " + pvName);
             IProperty p = vp.Property;
@@ -198,6 +210,7 @@ namespace GenDB.DB
         //Leaf
         public void VisitNestedReference(NestedReference pro)
         {
+            AppendEntityTypesHaving(pro.CstProperty.Property);
             IProperty p = null;
             StringBuilder erefSb = new StringBuilder("'");
             NestedReference currentNRef = pro;
