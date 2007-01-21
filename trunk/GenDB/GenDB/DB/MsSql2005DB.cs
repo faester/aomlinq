@@ -100,7 +100,7 @@ namespace GenDB.DB
         const string TB_COLLECTION_ELEMENT_NAME = "CollectionElement";
         const string TB_COLLECTION_KEY_NAME = "CollectionKey";
 
-        const bool WHERE_USING_JOINS = false;
+        const bool WHERE_USING_JOINS = true;
         #endregion
 
         internal MsSql2005DB(DataContext dataContext)
@@ -400,16 +400,90 @@ namespace GenDB.DB
 
         public IBusinessObject GetEntity(int entityPOID)
         {
-            IExpression we = new EntityPOIDEquals(entityPOID);
-            int count = 0;
-            IBusinessObject res = null;
-            foreach (IBusinessObject e in Where(we))
+            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
-                res = e;
-                count++;
-                if (count > 1) { throw new Exception("Error in GetEntity method."); }
+                cnn.Open();
+
+                SqlCommand cmd = new SqlCommand(
+                    "SELECT " +
+                    "    e.EntityTypePOID, " + // 0
+                    "    PropertyPOID, " + // 1
+                    "    LongValue, " + // 2
+                    "    BoolValue, " + // 3x
+                    "    StringValue, " + // 4
+                    "    DoubleValue, " + // 5
+                    "    e.EntityPOID, " + // 6
+                    "    ReferenceValue " + // 7
+                    " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
+                    " WHERE e.EntityPOID = " + entityPOID +
+                    " ORDER BY e.EntityPOID"
+                    );
+#if DEBUG
+                Console.WriteLine("WHEREBUILDER CONSTRUCTED: " + whereStr);
+                Console.WriteLine();
+                Console.WriteLine(cmd.CommandText);
+#endif
+
+                cmd.Connection = cnn;
+                SqlDataReader reader = cmd.ExecuteReader();
+                IEntityType iet = null;
+                IIBoToEntityTranslator translator = null;
+                IBusinessObject result = null;
+                int propertyPOID = 0;
+                int entityTypePOID = 0;
+                bool firstPass = true;
+
+                while (reader.Read())
+                {
+                    if (firstPass)
+                    {
+                        entityPOID = reader.GetInt32(6);
+                        entityTypePOID = reader.GetInt32(0);
+                        result = dataContext.IBOCache.Get(entityPOID);
+                        if (result != null) { return result; }
+
+                        translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
+                        iet = DataContext.Instance.TypeSystem.GetEntityType(entityTypePOID);
+
+                        result = translator.CreateInstanceOfIBusinessObject();
+                        result.DBIdentity = new DBIdentifier(entityPOID, true);
+                        this.dataContext.IBOCache.AddFromDB(result);
+                    }
+
+                    if (reader[1] != DBNull.Value) // Does any properties exist?
+                    {
+                        propertyPOID = reader.GetInt32(1);
+                        object value = null;
+                        switch (iet.GetProperty(propertyPOID).MappingType)
+                        {
+                            case MappingType.BOOL: value = reader.GetBoolean(3); break;
+                            case MappingType.DATETIME: value = new DateTime(reader.GetInt64(2)); break;
+                            case MappingType.DOUBLE: value = reader.GetDouble(5); break;
+                            case MappingType.LONG: value = reader.GetInt64(2); break;
+                            case MappingType.REFERENCE:
+                                if (reader[7] == DBNull.Value)
+                                {
+                                    value = null;
+                                    break;
+                                }
+                                else
+                                {
+                                    value = reader.GetInt32(7);
+                                    break;
+                                }
+                            case MappingType.STRING: value = reader.GetString(4); break;
+                            default: throw new Exception("Could not translate the property value.");
+                        } // switch
+                        translator.SetProperty(propertyPOID, result, value);
+                    } // if
+                    firstPass = false;
+                } // while
+
+                return result;
+
+                if (!reader.IsClosed) { reader.Close(); }
+
             }
-            return res;
         }
 
         public int Count(IWhereable expression)

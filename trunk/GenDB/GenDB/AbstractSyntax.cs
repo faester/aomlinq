@@ -24,7 +24,7 @@ namespace GenDB
         void VisitAndExpr(ExprAnd expr);
         void VisitOrExpr(ExprOr expr);
         void VisitCstDateTime(CstDateTime cdt);
-        void VisitEntityPOIDEquals(EntityPOIDEquals epe);
+        //void VisitEntityPOIDEquals(EntityPOIDEquals epe);
         void VisitOPNotEquals(OP_NotEquals ieq);
         void VisitInstanceOf(ExprInstanceOf instanceOf);
         void VisitExprIsTrue(ExprIsTrue valueIsTrue);
@@ -643,29 +643,36 @@ namespace GenDB
         }
     }
 
-    class EntityPOIDEquals : IExpression
-    {
-        long entityPOID;
+    //class EntityPOIDEquals : IExpression
+    //{
+    //    long entityPOID;
+    //    Type clrTypeOfEntity;
 
-        public long EntityPOID
-        {
-            get { return entityPOID; }
-        }
+    //    public Type ClrTypeOfEntity
+    //    {
+    //        get { return clrTypeOfEntity; }
+    //    }
 
-        public EntityPOIDEquals(long entityPOID)
-        {
-            this.entityPOID = entityPOID;
-        }
+    //    public long EntityPOID
+    //    {
+    //        get { return entityPOID; }
+    //    }
 
-        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
-        {
-            visitor.VisitEntityPOIDEquals(this);
-        }
+    //    public EntityPOIDEquals(long entityPOID, Type t)
+    //    {
+    //        this.entityPOID = entityPOID;
+    //        this.clrTypeOfEntity = t;
+    //    }
+
+    //    public void AcceptVisitor(IAbsSyntaxVisitor visitor)
+    //    {
+    //        visitor.VisitEntityPOIDEquals(this);
+    //    }
 
 
-        public override string ToString()
-        {
-            return "EntityPOIDEquals(" + entityPOID + ")";
-        }
-    }
+    //    public override string ToString()
+    //    {
+    //        return "EntityPOIDEquals(" + entityPOID + ")";
+    //    }
+    //}
 }
