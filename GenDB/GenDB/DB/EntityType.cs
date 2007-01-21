@@ -13,11 +13,11 @@ namespace GenDB.DB
 
 
         bool persistent;
-        long entityTypePOID;
+        int entityTypePOID;
 
         IEntityType superEntityType;
 
-        Dictionary<long, IProperty> properties;
+        Dictionary<int, IProperty> properties;
         LinkedList<IProperty> allProperties = null;
 
         public IProperty GetProperty(string propertyname)
@@ -82,7 +82,7 @@ namespace GenDB.DB
             }
         }
 
-        public IProperty GetProperty(long propertyPOID)
+        public IProperty GetProperty(int propertyPOID)
         {
             IProperty result;
             if (properties != null && properties.TryGetValue(propertyPOID, out result))
@@ -103,7 +103,7 @@ namespace GenDB.DB
         /// <param name="cstProperty"></param>
         public void AddProperty(IProperty property)
         {
-            if (properties == null) { properties = new Dictionary<long, IProperty>(); }
+            if (properties == null) { properties = new Dictionary<int, IProperty>(); }
             properties.Add(property.PropertyPOID, property);
         }
 
@@ -113,7 +113,7 @@ namespace GenDB.DB
             set { persistent = value; }
         }
 
-        public long EntityTypePOID
+        public int EntityTypePOID
         {
             get { return entityTypePOID; }
             set { entityTypePOID = value; }
