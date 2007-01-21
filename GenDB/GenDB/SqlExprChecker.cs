@@ -113,8 +113,8 @@ namespace GenDB
         //Leaf
         public void VisitCstDateTime(CstDateTime cdt) { return; }
 
-        //Leaf
-        public void VisitEntityPOIDEquals(EntityPOIDEquals epe) { return; }
+        ////Leaf
+        //public void VisitEntityPOIDEquals(EntityPOIDEquals epe) { return; }
         
         public void VisitOPEquals(OP_Equals eq)
         { 

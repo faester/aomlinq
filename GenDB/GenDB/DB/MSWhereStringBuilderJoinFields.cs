@@ -372,12 +372,12 @@ namespace GenDB.DB
             wherePart.Append(cdt.Value.Ticks);
         }
 
-        //Leaf
-        public void VisitEntityPOIDEquals(EntityPOIDEquals epe)
-        {
-            wherePart.Append("e.EntityPOID = ");
-            wherePart.Append(epe.EntityPOID);
-        }
+        ////Leaf
+        //public void VisitEntityPOIDEquals(EntityPOIDEquals epe)
+        //{
+        //    wherePart.Append("e.EntityPOID = ");
+        //    wherePart.Append(epe.EntityPOID);
+        //}
 
         public void VisitExprIsTrue(ExprIsTrue csi)
         {

@@ -78,7 +78,7 @@ namespace GenDB
             IBusinessObject ibo = dataContext.IBOCache.Get(reference.EntityPOID);
             if (ibo != null) { return ibo; }
 
-            return dataContext.GenDB.GetEntity(reference.EntityPOID);
+            return dataContext.GenDB.GetByEntityPOID(reference.EntityPOID);
         }
 
         public IGenCollectionElement Translate(object o)
