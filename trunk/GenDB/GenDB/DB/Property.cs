@@ -60,5 +60,20 @@ namespace GenDB.DB
         {
             return "Property {name = " + propertyName + " " + PropertyType + " }";
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) { return false; }
+            if (!(obj is Property)) { return false; }
+
+            int otherID = (obj as Property).PropertyPOID;
+
+            return (otherID == this.PropertyPOID);
+        }
+
+        public override int GetHashCode()
+        {
+            return (propertyPOID << 16) ^ propertyPOID;
+        }
     }
 }
