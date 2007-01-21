@@ -18,8 +18,8 @@ namespace PerformanceTests
             {
                 dc.DeleteDatabase();
             }
-            dc.CreateDatabase();
-
+            dc.CreateDatabase(); 
+              
             dc.Init();
             dc.DbBatchSize = 200;
 
@@ -39,7 +39,7 @@ namespace PerformanceTests
             long gdbms = 0;
             int repetitions = 10;
 
-            for (int objCount = 5000; objCount <= 20000; objCount += 5000)
+            for (int objCount = 5000; objCount < 5001; objCount += 5000)
             {
                 Console.WriteLine("==========================================================");
                 Console.WriteLine("Writing {0} objects", objCount);
@@ -55,6 +55,7 @@ namespace PerformanceTests
 
                 Console.WriteLine();
                 Console.WriteLine("Now performing read tests");
+
 
                 for (int r = 0; r < repetitions; r++)
                 {

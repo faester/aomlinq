@@ -18,12 +18,12 @@ namespace GenDB
         //    set { dBTag = value; }
         //}
 
-        DBIdentifier knudBoergesBalsam;
+        DBIdentifier dBIdentifier;
 
         public DBIdentifier DBIdentity
         {
-            get { return knudBoergesBalsam; }
-            set { knudBoergesBalsam = value; }
+            get { return dBIdentifier; }
+            set { dBIdentifier = value; }
         }
     }
 }
