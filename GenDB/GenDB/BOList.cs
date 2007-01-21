@@ -44,6 +44,7 @@ namespace GenDB
         List<T> theList = new List<T>();
         bool isReadOnly;
         bool isListPopulated = false;
+        bool hasBeenModified = false;
         MappingType mt;
         CollectionElementConverter cnv = null;
                 
@@ -99,6 +100,12 @@ namespace GenDB
             set { isReadOnly = value; }
         }
 
+        public bool HasBeenModified
+        {
+            get { return hasBeenModified; }
+            set { hasBeenModified = value; }
+        }
+
         public T this[int idx]
         {
             get
@@ -123,18 +130,21 @@ namespace GenDB
         {
             if (!isListPopulated) { this.RetrieveElements(); }
             theList.Insert(idx, item);
+            HasBeenModified=true;
         }
 
         public void RemoveAt(int idx)
         {
             if (!isListPopulated) { this.RetrieveElements(); }
             theList.RemoveAt(idx);
+            HasBeenModified=true;
         }
 
         public void Add(T item)
         {
             if (!isListPopulated) { this.RetrieveElements(); }
             theList.Add(item);
+            HasBeenModified=true;
         }
 
         public void Clear()
@@ -153,11 +163,13 @@ namespace GenDB
         {
             if (!isListPopulated) { this.RetrieveElements(); }
             theList.CopyTo(arr, idx);
+            HasBeenModified=true;
         }
 
         public bool Remove(T item)
         {
             if (!isListPopulated) { this.RetrieveElements(); }
+            HasBeenModified=true;
             return theList.Remove(item);
         }
 
@@ -207,6 +219,7 @@ namespace GenDB
                 ce.ElementIndex = idx;
                 db.Save(ce, thisPOID, mt);
             }
+            HasBeenModified=false;
         }
     }
 
