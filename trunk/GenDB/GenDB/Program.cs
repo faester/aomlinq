@@ -163,18 +163,15 @@ namespace GenDB
 
             int objCount = 10;
 
-            
+            Table<BOList<Person>> tbolist = dcontext.CreateTable<BOList<Person>>();
 
-
-            //Table<BOList<Person>> tbolist = dcontext.CreateTable<BOList<Person>>();
-
-            //foreach (BOList<Person> bol in tbolist)
-            //{
-            //    foreach(Person qwe in bol)
-            //    {
-            //        Console.WriteLine(qwe.Name);
-            //    }
-            //}
+            foreach (BOList<Person> bol in tbolist)
+            {
+                foreach(Person qwe in bol)
+                {
+                    Console.WriteLine(qwe.Name);
+                }
+            }
 
             BOList<Person> bolist = dcontext.BolistFactory.BOListRef <Person>();
             for (int i = 0; i < 10; i++)
@@ -183,22 +180,22 @@ namespace GenDB
                 bolist.Add (p);
             }
 
-            BODictionary<int, Person> bodict = dcontext.BODictionaryFactory.BODictionaryRef<int, Person>();
-            for (int i=0; i<10;i++)
-            {
-                Person p = new Person{Name = "Name"+i};
-                bodict.Add(i, p);
-            }
+            //BODictionary<int, Person> bodict = dcontext.BODictionaryFactory.BODictionaryRef<int, Person>();
+            //for (int i=0; i<10;i++)
+            //{
+            //    Person p = new Person{Name = "Name"+i};
+            //    bodict.Add(i, p);
+            //}
 
-            bodict.SaveElementsToDB();
+            //bodict.SaveElementsToDB();
 
-            bodict.Remove(3);
-            foreach(KeyValuePair<int, Person> kvp in bodict)
-            {
-                Person kp = (Person) kvp.Value;
-                int ks = kvp.Key;
-                Console.WriteLine("Key: {0}, Value: {1}",ks,kp.Name);
-            }
+            //bodict.Remove(3);
+            //foreach(KeyValuePair<int, Person> kvp in bodict)
+            //{
+            //    Person kp = (Person) kvp.Value;
+            //    int ks = kvp.Key;
+            //    Console.WriteLine("Key: {0}, Value: {1}",ks,kp.Name);
+            //}
 
             //tbolist.Add (bolist);
 

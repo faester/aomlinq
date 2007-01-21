@@ -58,21 +58,6 @@ namespace GenDB
             }
         }
 
-        //public IBusinessObject Translate(IEntity ie)
-        //{
-        //    IBusinessObject res = dataContext.IBOCache.Get(ie.EntityPOID);
-        //    if (res == null)
-        //    {
-        //        //IProperty elementTypeProperty = ie.EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
-        //        //long elementEntityTypePOID = ie.GetPropertyValue(elementTypeProperty).LongValue;
-        //        //IEntityType elementEntityType = TypeSystem.GetEntityType (elementEntityTypePOID);
-        //        //Type elementType = TypeSystem.GetClrType(elementEntityType);
-        //        res = (IBusinessObject)instantiator();
-        //        dataContext.IBOCache.Add (res, ie.EntityPOID);
-        //    }
-        //    return res;
-        //}
-
         public IEntity Translate(IBusinessObject ibo)
         {
             //IEntityType elementEntityType = TypeSystem.GetEntityType(elementType);
@@ -84,7 +69,6 @@ namespace GenDB
 
             IPropertyValue pv = elementTypeProperty.CreateNewPropertyValue(e);
 
-            //pv.LongValue = elementEntityType.EntityTypePOID;
             e.EntityType = entityType;
             pv.StringValue = elementType.FullName;
 
