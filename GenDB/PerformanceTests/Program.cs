@@ -38,7 +38,7 @@ namespace PerformanceTests
             long gdbms = 0;
             int repetitions = 10;
 
-            for (int objCount = 5000; objCount <= 110000; objCount += 20000)
+            for (int objCount = 50000; objCount <= 50000; objCount += 20000)
             {
                 Console.WriteLine("==========================================================");
                 Console.WriteLine("Writing {0} objects", objCount);
@@ -67,12 +67,12 @@ namespace PerformanceTests
                     Console.WriteLine();
                 }
 
-                Console.WriteLine("Clearing tables...");
+                //Console.WriteLine("Clearing tables...");
                 
-                long gendbms = gdbtest.PerformClearTest();
-                long dlinqms  = dlinqtest.PerformClearTest();
+                //long gendbms = gdbtest.PerformClearTest();
+                //long dlinqms  = dlinqtest.PerformClearTest();
 
-                Console.WriteLine("Clear times: GenDB {0} ms, DLinq {1} ms", gendbms, dlinqms);
+                //Console.WriteLine("Clear times: GenDB {0} ms, DLinq {1} ms", gendbms, dlinqms);
                 Console.WriteLine("ComObjSize= " + GenDB.DataContext.Instance.CommittedObjectsSize);
             }
 

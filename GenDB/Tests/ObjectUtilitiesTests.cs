@@ -163,7 +163,7 @@ namespace ObjectUtilitiesTests
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(et1, "string"));
         }
 
-        [Test, Ignore("Known to fail")]
+        [Test]
         public void TestCompareBOList()
         {
             BOListFactory blf = dataContext.BolistFactory;
