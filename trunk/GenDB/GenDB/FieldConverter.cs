@@ -155,19 +155,19 @@ namespace GenDB
 
                     int refEntityPOID = ((IConvertible) value).ToInt32(null);
 
-                    IBusinessObject iboVal = this.dataContext.IBOCache.Get(refEntityPOID);
-
-                    if (iboVal == null) 
+                    IBusinessObject iboVal = null;
+                    
+                    if (this.dataContext.IBOCache.TryGet(refEntityPOID, out iboVal))
+                    {
+                        propertySetHandler(ibo, iboVal);
+                    }
+                    else
                     {
                         IExpression where = new OP_Equals(new CstLong(refEntityPOID), CstThis.Instance);
                         // TODO: Kunne nok gøres hurtigere...
                         iboVal = dataContext.GenDB.GetByEntityPOID(refEntityPOID);
                         propertySetHandler(ibo, iboVal);
                         return;
-                    }
-                    else
-                    {
-                        propertySetHandler(ibo, iboVal);
                     }
                 };
             }

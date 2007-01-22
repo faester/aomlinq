@@ -96,30 +96,30 @@ namespace GenDB
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public IBusinessObject Get(long id)
+        public bool TryGet(long id, out IBusinessObject obj)
         {
             IBOCacheElement wr;
-            IBusinessObject result;
             if (!committedObjects.TryGetValue(id, out wr))
             {
-                if (!uncommittedObjects.TryGetValue(id, out result))
+                if (!uncommittedObjects.TryGetValue(id, out obj))
                 {
-                    return null;
+                    return false;
                 }
             }
             else
             {
                 if (!wr.IsAlive) { 
                     committedObjects.Remove(id);
-                    return null;
+                    obj = null;
+                    return false;
                 }
                 else
                 {
-                    result = wr.Target;
+                    obj = wr.Target;
                 }
             }
             retrieved++;
-            return result;
+            return true;
         }
 
         /// <summary>
