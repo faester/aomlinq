@@ -563,7 +563,6 @@ namespace GenDB.DB
             cnn.Open();
             foreach (IEntityType et in entityTypes)
             {
-                Console.WriteLine("Now reading entity type: " + et);
                 LinkedList<IProperty> properties = new LinkedList<IProperty>();
                 IIBoToEntityTranslator translator = dataContext.Translators.GetTranslator(et.EntityTypePOID);
                 StringBuilder selectPart = new StringBuilder("SELECT e.EntityTypePOID, e.EntityPOID ");
@@ -605,17 +604,38 @@ namespace GenDB.DB
                     joinPart.Append(propertyID);
                 }
                 joinPart.Append(" \nWHERE e.EntityTypePOID = " + et.EntityTypePOID);
-                joinPart.Append("\n OPTION (LOOP JOIN, FORCE ORDER)");
+                //joinPart.Append (" OPTION (LOOP JOIN) ");
                 string sqlStr = selectPart.ToString() + joinPart.ToString();
-                Console.WriteLine(sqlStr);
 #if DEBUG
                 Console.Error.WriteLine("****");
                 Console.Error.WriteLine(sqlStr);
                 Console.Error.WriteLine(" -- -- -- -- -- ");
                 Console.Error.WriteLine(conditionWhereString);
 #endif
+                //using (SqlCommand showPlan = new SqlCommand("SET SHOWPLAN_TEXT ON", cnn))
+                //{
+                //    showPlan.ExecuteNonQuery();
+                //    showPlan.CommandText = sqlStr;
+                //    SqlDataReader showplanReader = showPlan.ExecuteReader();
+                    
+                //    while (showplanReader.Read())
+                //    {
+                //        for (int i = 0; i < showplanReader.FieldCount; i++)
+                //        {
+                //            Console.Write(showplanReader[i]);
+                //        }
+                //        Console.WriteLine();
+                //    }
+
+                //    showplanReader.Close();
+
+                //    showPlan.CommandText = "SET SHOWPLAN_TEXT OFF";
+                //    showPlan.ExecuteNonQuery();
+                //}
+
                 SqlCommand cmd = new SqlCommand(sqlStr, cnn);
                 SqlDataReader reader = cmd.ExecuteReader();
+                
                 while (reader.Read())
                 {
                     int entityPOID = reader.GetInt32(1);

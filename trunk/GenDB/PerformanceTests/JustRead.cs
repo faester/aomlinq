@@ -31,17 +31,19 @@ namespace PerformanceTests
                 Console.WriteLine("usage: JustRead [objects] [repetitions]");
             }
 
-            int objCount = args.Length > 0 ? int.Parse(args[0]) : 10000;
+            int objCount = args.Length > 0 ? int.Parse(args[0]) : 100000;
             int repetitions = args.Length > 1 ? int.Parse(args[1]) : 10;
 
             int objectsInDB = tpapt.Count;
             Console.WriteLine("Objects in db: {0}", objectsInDB);
-            if (tpapt.Count < objectsInDB)
+            while (objectsInDB < objCount)
             {
-                Console.WriteLine("Not enough data in GenDB database. Adding 20000 objects.");
+                Console.WriteLine("Database contains {0} objects, but should contain {1} objects. Adding 20000 objects.", objectsInDB, objCount);
                 gdbtest.PerformWriteTest(20000);
+                objectsInDB = tpapt.Count;
             }
 
+            double obsSec = 0;
             long totalMS = 0;
 
             for (int r = 0; r < repetitions; r++)
@@ -52,11 +54,12 @@ namespace PerformanceTests
 
                 gms = gdbtest.PerformReadTest(objCount);
                 Console.WriteLine("GenDB: {0} objs in test. {1} ms. {2} objs/sec", objCount, gms, gms > 0 ? (objCount * 1000) / gms : -1);
+                obsSec += (objCount * 1000) / gms ;
                 totalMS += gms;
             }
 
             Console.WriteLine();
-            Console.WriteLine("Total: {0} ms, {1} objs/sec", totalMS, 1000.0 * (repetitions * objCount) / (double)totalMS );
+            Console.WriteLine("Total: {0} ms, {1} objs/sec", totalMS, obsSec / repetitions );
 
             Console.WriteLine("Press return...");
             Console.ReadLine();
