@@ -439,15 +439,19 @@ namespace GenDB.DB
                     {
                         entityPOID = reader.GetInt32(6);
                         entityTypePOID = reader.GetInt32(0);
-                        result = dataContext.IBOCache.Get(entityPOID);
-                        if (result != null) { return result; }
+                        if (dataContext.IBOCache.TryGet(entityPOID, out result))
+                        {
+                            return result;
+                        }
+                        else
+                        {
+                            translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
+                            iet = DataContext.Instance.TypeSystem.GetEntityType(entityTypePOID);
 
-                        translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
-                        iet = DataContext.Instance.TypeSystem.GetEntityType(entityTypePOID);
-
-                        result = translator.CreateInstanceOfIBusinessObject();
-                        result.DBIdentity = new DBIdentifier(entityPOID, true);
-                        this.dataContext.IBOCache.AddFromDB(result);
+                            result = translator.CreateInstanceOfIBusinessObject();
+                            result.DBIdentity = new DBIdentifier(entityPOID, true);
+                            this.dataContext.IBOCache.AddFromDB(result);
+                        }
                     }
 
                     if (reader[1] != DBNull.Value) // Does any properties exist?
@@ -639,8 +643,8 @@ namespace GenDB.DB
                 while (reader.Read())
                 {
                     int entityPOID = reader.GetInt32(1);
-                    IBusinessObject res = dataContext.IBOCache.Get(entityPOID);
-                    if (res == null)
+                    IBusinessObject res = null;
+                    if (!dataContext.IBOCache.TryGet(entityPOID, out res))
                     {
                         res = translator.CreateInstanceOfIBusinessObject();
                         res.DBIdentity = new DBIdentifier(entityPOID, true);
@@ -750,8 +754,7 @@ namespace GenDB.DB
                             yield return result;
                         }
 
-                        result = dataContext.IBOCache.Get(entityPOID);
-                        returnCachedCopy = result != null;
+                        returnCachedCopy = dataContext.IBOCache.TryGet(entityPOID, out result);
                         if (!returnCachedCopy)
                         {
                             result = translator.CreateInstanceOfIBusinessObject();

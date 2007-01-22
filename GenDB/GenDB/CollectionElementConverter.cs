@@ -75,10 +75,15 @@ namespace GenDB
         {
             if (reference.IsNullReference) { return null; }
 
-            IBusinessObject ibo = dataContext.IBOCache.Get(reference.EntityPOID);
-            if (ibo != null) { return ibo; }
-
-            return dataContext.GenDB.GetByEntityPOID(reference.EntityPOID);
+            IBusinessObject ibo = null;
+            if (dataContext.IBOCache.TryGet(reference.EntityPOID, out ibo))
+            {
+                return ibo;
+            }
+            else
+            {
+                return dataContext.GenDB.GetByEntityPOID(reference.EntityPOID);
+            }
         }
 
         public IGenCollectionElement Translate(object o)
