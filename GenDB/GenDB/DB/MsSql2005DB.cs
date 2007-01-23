@@ -21,6 +21,27 @@ namespace GenDB.DB
             return s.Replace("'", "''");
         }
 
+        #region CONSTS
+        /* ADO.NET opretholder en connection pool. Dette forudsætter at forbindelser 
+         * åbnes og lukkes hver gang de bruges.
+         * http://msdn2.microsoft.com/en-us/library/8xx3tyca.aspx
+         * 
+         * Kan også indsættes i using(){} statement
+         * 
+         * Connection string fungerer i denne forbindelse som nøgle.
+         */
+
+        const string TB_ENTITY_NAME = "Entity";
+        const string TB_ENTITYTYPE_NAME = "EntityType";
+        const string TB_PROPERTYTYPE_NAME = "PropertyType";
+        const string TB_PROPERTY_NAME = "Property";
+        const string TB_PROPERTYVALUE_NAME = "PropertyValue";
+        const string TB_COLLECTION_ELEMENT_NAME = "CollectionElement";
+        const string TB_COLLECTION_KEY_NAME = "CollectionKey";
+
+        const bool WHERE_USING_JOINS = false;
+        #endregion
+
         DataContext dataContext;
         int nextETID = 0;
         bool nextIDsInitialized = false;
@@ -82,26 +103,6 @@ namespace GenDB.DB
             }
         }
 
-        #region CONSTS
-        /* ADO.NET opretholder en connection pool. Dette forudsætter at forbindelser 
-         * åbnes og lukkes hver gang de bruges.
-         * http://msdn2.microsoft.com/en-us/library/8xx3tyca.aspx
-         * 
-         * Kan også indsættes i using(){} statement
-         * 
-         * Connection string fungerer i denne forbindelse som nøgle.
-         */
-
-        const string TB_ENTITY_NAME = "Entity";
-        const string TB_ENTITYTYPE_NAME = "EntityType";
-        const string TB_PROPERTYTYPE_NAME = "PropertyType";
-        const string TB_PROPERTY_NAME = "Property";
-        const string TB_PROPERTYVALUE_NAME = "PropertyValue";
-        const string TB_COLLECTION_ELEMENT_NAME = "CollectionElement";
-        const string TB_COLLECTION_KEY_NAME = "CollectionKey";
-
-        const bool WHERE_USING_JOINS = true;
-        #endregion
 
         internal MsSql2005DB(DataContext dataContext)
         {
@@ -398,7 +399,15 @@ namespace GenDB.DB
             return res;
         }
 
-        public IBusinessObject GetEntity(int entityPOID)
+
+        public IBusinessObject GetByEntityPOID(int entityPOID)
+        {
+            int count = 0;
+            IBusinessObject res = Get(entityPOID);
+            return res;
+        }
+
+        private IBusinessObject Get(int entityPOID)
         {
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
             {
@@ -527,19 +536,6 @@ namespace GenDB.DB
             return willRemove;
         }
 
-        public IBusinessObject GetByEntityPOID(int entityPOID)
-        {
-            int count = 0;
-            IBusinessObject res = null;
-            foreach (IBusinessObject ibo in Where(entityPOID.ToString()))
-            {
-                count++;
-                if (count > 1) { throw new Exception("Internal error. Wrong where string"); }
-                res = ibo;
-            }
-            return res;
-        }
-
 
         public IEnumerable<IBusinessObject> Where(IExpression expression)
         {
@@ -570,9 +566,10 @@ namespace GenDB.DB
                 LinkedList<IProperty> properties = new LinkedList<IProperty>();
                 IIBoToEntityTranslator translator = dataContext.Translators.GetTranslator(et.EntityTypePOID);
                 StringBuilder selectPart = new StringBuilder("SELECT e.EntityTypePOID, e.EntityPOID ");
-                StringBuilder joinPart = new StringBuilder(" FROM Entity e INNER JOIN (");
-                joinPart.Append(conditionWhereString);
-                joinPart.Append(") ew ON ew.EntityPOID = e.EntityPOID ");
+                StringBuilder joinPart = new StringBuilder(" FROM (")
+                                .Append(conditionWhereString)
+                                .Append(") ew INNER JOIN Entity e ");
+                joinPart.Append(" ON ew.EntityPOID = e.EntityPOID ");
                 foreach (IProperty p in et.GetAllProperties)
                 {
                     int propertyID = p.PropertyPOID;
@@ -714,12 +711,14 @@ namespace GenDB.DB
                     "    DoubleValue, " + // 5
                     "    e.EntityPOID, " + // 6
                     "    ReferenceValue " + // 7
-                    " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
-                    " WHERE e.EntityPOID IN (" + entityPoidListQuery + " )" +
-                    " ORDER BY e.EntityPOID"
-                    );
+                    " FROM Entity e INNER JOIN (" + 
+                    entityPoidListQuery +
+                    ") ew ON ew.EntityPOID = e.EntityPOID " +
+                    " LEFT JOIN PropertyValue pv ON pv.EntityPOID = e.EntityPOID " 
+                    + " ORDER BY e.EntityPOID "
+                    , cnn);
 #if DEBUG
-                Console.WriteLine("WHEREBUILDER CONSTRUCTED: " + whereStr);
+                Console.WriteLine("WHEREBUILDER CONSTRUCTED: " + entityPoidListQuery);
                 Console.WriteLine();
                 Console.WriteLine(cmd.CommandText);
 #endif
@@ -810,7 +809,7 @@ namespace GenDB.DB
              * share the same MappingType. 
              * Start by finding that:
              */
-            IBusinessObject ibo = GetEntity(collectionEntityPOID);
+            IBusinessObject ibo = GetByEntityPOID(collectionEntityPOID);
             // TODO: Check below should be superfluous. Kept for debugging db consistency.
             if (ibo == null) { throw new Exception("Internal error in database. Request for unknown collection's elements! " + collectionEntityPOID); }
 
@@ -1141,7 +1140,6 @@ namespace GenDB.DB
                 }
                 catch (SqlException e)
                 {
-                    transaction.Rollback();
                     throw e;
                 }
                 transaction.Commit();

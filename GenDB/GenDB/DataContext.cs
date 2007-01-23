@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using GenDB.DB;
-using System.IO;
 
 namespace GenDB
 {
@@ -140,7 +139,7 @@ namespace GenDB
             set { dbBatchSize = value; }
         } 
 
-        string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI;connection timeout=240";
+        string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI;connection timeout=0";
 
         internal string ConnectStringWithDBName
         {
@@ -148,7 +147,7 @@ namespace GenDB
             set { connectStringWithDBName = value; }
         }
 
-        string connectStringWithoutDBName = "server=(local);Integrated Security=SSPI;connection timeout=240";
+        string connectStringWithoutDBName = "server=(local);Integrated Security=SSPI;connection timeout=0";
 
         internal string ConnectStringWithoutDBName
         {
