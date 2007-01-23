@@ -47,7 +47,8 @@ namespace GenDB
 
         internal int CommittedObjectsSize
         {
-            get { 
+            get
+            {
                 return committedObjects.Count;
             }
         }
@@ -72,7 +73,7 @@ namespace GenDB
         Dictionary<long, IBusinessObject> oldObjects = new Dictionary<long, IBusinessObject>();
 
         LinkedList<IBusinessObject> oldObjectsHotlist = new LinkedList<IBusinessObject>();
- 
+
         private void AddToOldObjects()
         {
 
@@ -108,7 +109,8 @@ namespace GenDB
             }
             else
             {
-                if (!wr.IsAlive) { 
+                if (!wr.IsAlive)
+                {
                     committedObjects.Remove(id);
                     obj = null;
                     return false;
@@ -143,7 +145,7 @@ namespace GenDB
                 ce.Original = null;
             }
             GC.Collect();
-           
+            GC.WaitForPendingFinalizers();
             foreach (IBOCacheElement ce in ll)
             {
                 if (ce.IsAlive)
@@ -228,7 +230,7 @@ namespace GenDB
         {
             if (ibo.DBIdentity.IsPersistent)
             {
-                throw new Exception ("Was already set...");
+                throw new Exception("Was already set...");
             }
 
             ibo.DBIdentity = new DBIdentifier(entityPOID, true);
@@ -269,7 +271,7 @@ namespace GenDB
             if (committedObjects.TryGetValue(id, out obj))
             {
                 IBusinessObject ibo = obj.Original;
-                DBIdentifier newID = new DBIdentifier (ibo.DBIdentity.Value, false);
+                DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
                 obj.Original.DBIdentity = newID;
                 if (obj.Original.DBIdentity.IsPersistent)
                 {
