@@ -19,7 +19,7 @@ namespace PerformanceTests
             }
             dc.CreateDatabase();
             dc.Init();
-            dc.DbBatchSize = 10;
+            dc.DbBatchSize = 1;
 
             ExcelWriter ewGenDB_write = new ExcelWriter("tst.xls", "GenDB_write");
             ExcelWriter ewGenDB_read = new ExcelWriter("tst.xls", "GenDB_read");

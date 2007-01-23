@@ -39,7 +39,7 @@ namespace GenDB.DB
         const string TB_COLLECTION_ELEMENT_NAME = "CollectionElement";
         const string TB_COLLECTION_KEY_NAME = "CollectionKey";
 
-        const bool WHERE_USING_JOINS = false;
+        const bool WHERE_USING_JOINS = true;
         #endregion
 
         DataContext dataContext;
