@@ -792,8 +792,8 @@ namespace GenDB.DB
                     firstPass = false;
                 } // while
 
-
                 if (!reader.IsClosed) { reader.Close(); }
+
                 if (result != null)
                 {
                     yield return result;
