@@ -41,7 +41,7 @@ namespace GenDB
             this.translators = translators;
             this.typeSystem = typeSystem;
             this.iboCache = iboCache;
-
+            
             if (!typeSystem.IsTypeKnown(typeof(T)))
             {
                 typeSystem.RegisterType(typeof(T));

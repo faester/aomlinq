@@ -82,6 +82,7 @@ namespace GenDB
         /// <param name="et"></param>
         internal void RegisterType(IEntityType et)
         {
+
             if (etid2IEt.ContainsKey(et.EntityTypePOID))
             {
                 throw new Exception("Type already registered. (" + et.ToString() + ")");
@@ -326,13 +327,16 @@ namespace GenDB
                 {
                     return BOListEntityType(t);
                 }
+                    // dirty stuff, could'n get GetGenericTypeDefinition to work with dictionaries...help me!
+                else if(t.Name.Substring(0,6)=="BODict")
+                {
+                    throw new Exception("not impl");
+                }
                 //else if(t.GetGenericTypeDefinition() == BODictionaryTranslator.TypeOfBODictionary)
-                //{
-                //    return BODictionaryEntityType(t);
-                //}
+                //{}
                 else 
                 {
-                    throw new NotTranslatableException ("Don't know how to construct IEntityType for type", t);
+                    throw new NotTranslatableException ("Don't know how to construct IEntityType for type", t.GetGenericTypeDefinition());
                 }
             }
             else

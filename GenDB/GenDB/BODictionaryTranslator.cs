@@ -8,7 +8,8 @@ namespace GenDB
 {
     class BODictionaryTranslator : IIBoToEntityTranslator
     {
-        //public static readonly Type TypeOfBODictionary = typeof(BODictionary<>);
+        public static readonly Type TypeOfBODictionary = typeof(BODictionary<int,int>);
+        
         IEntityType entityType;
         IEnumerable<PropertyConverter> fieldConverters;
 
@@ -16,6 +17,8 @@ namespace GenDB
         {
             get {return entityType;}
         }
+
+        private BODictionaryTranslator() { /* empty */}
 
         public IEntity Translate(IBusinessObject ibo)
         {
