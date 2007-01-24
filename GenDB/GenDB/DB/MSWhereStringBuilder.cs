@@ -13,6 +13,7 @@ namespace GenDB.DB
         int currentPropertyNumber = 0;
         TypeSystem typeSystem = null;
         Dictionary<int, IEntityType> entityTypes = null;
+        Dictionary<IProperty, int> properties = null;
 
         private MSWhereStringBuilder() { /* empty */ }
 
@@ -45,8 +46,13 @@ namespace GenDB.DB
             }
         }
 
-        private void AppendEntityTypesHaving(IProperty prop)
+        private void RegisterProperty(IProperty prop)
         {
+            if (!properties.ContainsKey(prop))
+            {
+                properties.Add(prop, 0);
+            }
+            properties[prop] += 1;
             IEntityType et = prop.EntityType;
 
             foreach(IEntityType add in DataContext.Instance.TypeSystem.GetEntityTypesInstanceOf(et))
@@ -55,19 +61,21 @@ namespace GenDB.DB
             }
         }
 
-        // Leaf
-        public void VisitCstThis(CstThis cstThis)
-        {
-            wherePart.Append (" EntityPOID ");
-        }
-
         public void Reset()
         {
             selectPart = new StringBuilder("SELECT DISTINCT e.EntityPOID FROM Entity e");
             wherePart = new StringBuilder();
             joinPart = new StringBuilder();
             entityTypes = new Dictionary<int, IEntityType>();
+            properties = new Dictionary<IProperty, int>();
         }
+
+        // Leaf
+        public void VisitCstThis(CstThis cstThis)
+        {
+            wherePart.Append (" EntityPOID ");
+        }
+
 
         public void Visit(IWhereable clause)
         {
@@ -110,7 +118,7 @@ namespace GenDB.DB
         //Leaf
         public void VisitProperty(CstProperty vp)
         {
-            AppendEntityTypesHaving(vp.Property);
+            RegisterProperty(vp.Property);
 
             string pvName = "pv" + currentPropertyNumber;
             selectPart.Append (", PropertyValue " + pvName);
@@ -212,7 +220,7 @@ namespace GenDB.DB
         //Leaf
         public void VisitNestedReference(NestedReference pro)
         {
-            AppendEntityTypesHaving(pro.CstProperty.Property);
+            RegisterProperty(pro.CstProperty.Property);
             IProperty p = null;
             StringBuilder erefSb = new StringBuilder("'");
             NestedReference currentNRef = pro;

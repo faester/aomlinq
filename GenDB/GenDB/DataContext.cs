@@ -137,7 +137,16 @@ namespace GenDB
         {
             get { return dbBatchSize; }
             set { dbBatchSize = value; }
-        } 
+        }
+
+        private int commandTimeout = 0;
+
+        public int CommandTimeout
+        {
+            get { return commandTimeout; }
+            set { commandTimeout = value; }
+        }
+
 
         string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI;connection timeout=0";
 
