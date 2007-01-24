@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BODictionaryTranslationTests.cs" />
     <Compile Include="BOListTranslationTests.cs" />
     <Compile Include="CacheTests.cs" />
     <Compile Include="ContainsAllPrimitiveTypes.cs" />
