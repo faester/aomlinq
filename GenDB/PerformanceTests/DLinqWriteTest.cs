@@ -15,7 +15,6 @@ namespace PerformanceTests
     }
 
     public class DLinqTest : ReadWriteClearTest
-
     {
         DLinqDB db = null;
         Table<PerfTestAllPrimitiveTypes> table;
@@ -30,14 +29,28 @@ namespace PerformanceTests
             this.ewRead = ewRead;
             this.ewClear = ewClear;
             this.db = new DLinqDB ("server=.;database=dlinqperf;Integrated Security=SSPI");
-            if (db.DatabaseExists())
+            if (!db.DatabaseExists())
             {
-                Console.WriteLine("Deleting DLinq db");
-                db.DeleteDatabase();
+                Console.WriteLine("Creating DLinq db");
+                db.CreateDatabase();
             }
-            db.CreateDatabase();
             table = db.Table;
             db.SubmitChanges();
+        }
+
+        public void InitTests(int objectCount)
+        {
+            int needToAdd = objectCount - table.Count();
+            if (needToAdd > 0)
+            {
+                Console.WriteLine("Adding {0} objects to table", needToAdd);
+                for (int i = 0; i < needToAdd; i++)
+                {
+                    table.Add (new PerfTestAllPrimitiveTypes());
+                }
+                Console.WriteLine("Submitting.");
+                db.SubmitChanges();
+            }
         }
 
         public long PerformAllTests(int objectCount)
@@ -71,7 +84,10 @@ namespace PerformanceTests
                 if (count >= maxReads) { break; }
             }
             long ms = sw.ElapsedMilliseconds;
-            ewRead.WriteInformation(count, ms);
+            if (ewRead != null)
+            {
+                ewRead.WriteInformation(count, ms);
+            }
             return ms;
         }
 

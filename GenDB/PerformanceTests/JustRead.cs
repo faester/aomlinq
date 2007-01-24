@@ -6,62 +6,45 @@ using System.Diagnostics;
 
 namespace PerformanceTests
 {
-    class JustRead
+    class JustRead : ITest
     {
-        static void Main(string[] args)
+        ReadWriteClearTest test = null;
+        IEnumerable<int> objectCounts = null;
+        int recurrences = 0;
+
+        public JustRead(ReadWriteClearTest test, IEnumerable<int> objectCounts, int recurrences)
         {
-            DataContext dc = DataContext.Instance;
+            this.test = test;
+            this.objectCounts = objectCounts;
+            this.recurrences = recurrences;
+        }
 
-            dc.DatabaseName = "justread";
-            if (!dc.DatabaseExists())
-            {
-                dc.CreateDatabase();
-            }
-
-            dc.Init();
-            dc.DbBatchSize = 200;
-
-            GenDBPerfTests<PerfTestAllPrimitiveTypes> gdbtest = 
-                new GenDBPerfTests<PerfTestAllPrimitiveTypes>(null, null, null);
-
-            Table<PerfTestAllPrimitiveTypes> tpapt = DataContext.Instance.CreateTable<PerfTestAllPrimitiveTypes>();
-
-            if (args.Length == 0)
-            {
-                Console.WriteLine("usage: JustRead [objects] [repetitions]");
-            }
-
-            int objCount = args.Length > 0 ? int.Parse(args[0]) : 100000;
-            int repetitions = args.Length > 1 ? int.Parse(args[1]) : 10;
-
-            int objectsInDB = tpapt.Count;
-            Console.WriteLine("Objects in db: {0}", objectsInDB);
-            while (objectsInDB < objCount)
-            {
-                Console.WriteLine("Database contains {0} objects, but should contain {1} objects. Adding 20000 objects.", objectsInDB, objCount);
-                gdbtest.PerformWriteTest(20000);
-                objectsInDB = tpapt.Count;
-            }
-
+        public void PerformTest()
+        {
             double obsSec = 0;
             long totalMS = 0;
+            long totalObjects = 0;
 
-            for (int r = 0; r < repetitions; r++)
+            foreach (int objectCount in objectCounts)
             {
-                long gms = 0;
+                test.InitTests(objectCount);
+                for (int r = 0; r < recurrences; r++)
+                {
+                    long gms = 0;
 
-                if (gms < 0) { break; }
+                    if (gms < 0) { break; }
 
-                gms = gdbtest.PerformReadTest(objCount);
-                Console.WriteLine("GenDB: {0} objs in test. {1} ms. {2} objs/sec", objCount, gms, gms > 0 ? (objCount * 1000) / gms : -1);
-                obsSec += (objCount * 1000) / gms ;
-                totalMS += gms;
+                    gms = test.PerformReadTest(objectCount);
+                    Console.WriteLine("Testing with {0} objects. {1} ms. {2} objs/sec", objectCount, gms, gms > 0 ? (objectCount * 1000) / gms : -1);
+                    obsSec += (objectCount * 1000) / gms;
+                    totalObjects += objectCount;
+                    totalMS += gms;
+                }
             }
 
             Console.WriteLine();
-            Console.WriteLine("Total: {0} ms, {1} objs/sec", totalMS, obsSec / repetitions );
+            Console.WriteLine("Total time used: {0} ms, average {1} objs/sec", totalMS, (totalObjects * 1000.0) / totalMS );
 
-            Console.WriteLine("Press return...");
             Console.ReadLine();
         }
     }

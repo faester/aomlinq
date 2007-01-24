@@ -9,18 +9,44 @@ namespace PerformanceTests
     class GenDBPerfTests<T> : ReadWriteClearTest
         where T : GenDB.IBusinessObject, new()
     {
-        GenDB.DataContext dc = GenDB.DataContext.Instance;
+        GenDB.DataContext dataContext = GenDB.DataContext.Instance;
         GenDB.Table<T> table = GenDB.DataContext.Instance.CreateTable<T>();
         ExcelWriter ewWrite;
         ExcelWriter ewRead;
         ExcelWriter ewClear;
         int lastInsert = 0;
 
-        public GenDBPerfTests(ExcelWriter ewWrite, ExcelWriter ewRead, ExcelWriter ewClear)
+        public GenDBPerfTests(ExcelWriter ewWrite, ExcelWriter ewRead, ExcelWriter ewClear, GenDB.DataContext dataContext)
         {
+            this.dataContext = dataContext;
             this.ewWrite = ewWrite;
             this.ewRead = ewRead;
             this.ewClear = ewClear;
+        }
+
+        public void InitTests(int objectCount)
+        {
+            GenDB.Table<T> table = dataContext.CreateTable<T>();
+            int count = table.Count;
+            bool needCommit = false;
+            Console.WriteLine("Contains {0} objects", count);
+            while (count < objectCount)
+            {
+                needCommit = true;
+                Console.WriteLine("Writing 20000 objects to table.");
+                for (int i = 0; i < 20000; i++)
+                {
+                    table.Add(new T());
+                }
+                dataContext.SubmitChanges();
+                count = table.Count;
+            }
+
+            if (needCommit)
+            {
+                Console.WriteLine("Committing changes.");
+                dataContext.SubmitChanges();
+            }
         }
 
         public long PerformAllTests(int objectCount)
@@ -37,7 +63,7 @@ namespace PerformanceTests
             {
                 table.Add(new T());
             }
-            dc.SubmitChanges();
+            dataContext.SubmitChanges();
             long ms = sw.ElapsedMilliseconds;
             if (ewWrite != null)
             {
@@ -51,9 +77,11 @@ namespace PerformanceTests
             int count = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            bool hasAborted  = false;
-            foreach (T t in table)
+            bool hasAborted = false;
+            IEnumerator<T> iter_T = table.GetEnumerator();
+            while (iter_T.MoveNext())
             {
+                T t = iter_T.Current;
                 count++;
                 if (count >= maxReads)
                 {
@@ -61,6 +89,8 @@ namespace PerformanceTests
                     break;
                 }
             }
+
+            iter_T = null;
 
             if (hasAborted)
             {
@@ -92,7 +122,7 @@ namespace PerformanceTests
             Stopwatch sw = new Stopwatch();
             sw.Start();
             table.Clear();
-            dc.SubmitChanges();
+            dataContext.SubmitChanges();
             long ms = sw.ElapsedMilliseconds;
             if (ewClear != null)
             {
