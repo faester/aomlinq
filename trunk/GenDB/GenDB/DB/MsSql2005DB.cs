@@ -233,19 +233,6 @@ namespace GenDB.DB
         }
         #endregion
 
-        //public IPropertyValue NewPropertyValue()
-        //{
-        //    return new PropertyValue();
-        //}
-
-        /// <summary>
-        /// Returns a new IEntityType instance with 
-        /// correct DBIdentity, name set and no associated
-        /// properties.
-        /// 
-        /// The type is not persisted until it is added to the database.
-        /// </summary>
-        /// <returns></returns>
         public IEntityType NewEntityType()
         {
             IEntityType res = new EntityType(NextETID);
@@ -434,6 +421,7 @@ namespace GenDB.DB
 #endif
 
                 cmd.Connection = cnn;
+                cmd.CommandTimeout = dataContext.CommandTimeout;
                 SqlDataReader reader = cmd.ExecuteReader();
                 IEntityType iet = null;
                 IIBoToEntityTranslator translator = null;
@@ -613,34 +601,15 @@ namespace GenDB.DB
                 Console.Error.WriteLine(" -- -- -- -- -- ");
                 Console.Error.WriteLine(conditionWhereString);
 #endif
-                //using (SqlCommand showPlan = new SqlCommand("SET SHOWPLAN_TEXT ON", cnn))
-                //{
-                //    showPlan.ExecuteNonQuery();
-                //    showPlan.CommandText = sqlStr;
-                //    SqlDataReader showplanReader = showPlan.ExecuteReader();
-                    
-                //    while (showplanReader.Read())
-                //    {
-                //        for (int i = 0; i < showplanReader.FieldCount; i++)
-                //        {
-                //            Console.Write(showplanReader[i]);
-                //        }
-                //        Console.WriteLine();
-                //    }
-
-                //    showplanReader.Close();
-
-                //    showPlan.CommandText = "SET SHOWPLAN_TEXT OFF";
-                //    showPlan.ExecuteNonQuery();
-                //}
-
                 SqlCommand cmd = new SqlCommand(sqlStr, cnn);
+                cmd.CommandTimeout = dataContext.CommandTimeout;
                 SqlDataReader reader = cmd.ExecuteReader();
                 
                 while (reader.Read())
                 {
                     int entityPOID = reader.GetInt32(1);
                     IBusinessObject res = null;
+
                     if (!dataContext.IBOCache.TryGet(entityPOID, out res))
                     {
                         res = translator.CreateInstanceOfIBusinessObject();
@@ -724,6 +693,7 @@ namespace GenDB.DB
 #endif
 
                 cmd.Connection = cnn;
+                cmd.CommandTimeout = dataContext.CommandTimeout;
                 SqlDataReader reader = cmd.ExecuteReader();
                 IEntityType iet = null;
                 IIBoToEntityTranslator translator = null;
@@ -1119,6 +1089,7 @@ namespace GenDB.DB
                 cmd.Connection = cnn;
                 SqlTransaction transaction = cnn.BeginTransaction();
                 cmd.Transaction = transaction;
+                cmd.CommandTimeout = dataContext.CommandTimeout;
                 try
                 {
                     foreach (string insertCommand in llEntityInserts)
@@ -1160,6 +1131,7 @@ namespace GenDB.DB
                 cmd.Connection = cnn;
                 SqlTransaction transaction = cnn.BeginTransaction();
                 cmd.Transaction = transaction;
+                cmd.CommandTimeout = dataContext.CommandTimeout;
 
                 try
                 {
@@ -1533,6 +1505,7 @@ namespace GenDB.DB
             SqlCommand cmd = new SqlCommand();
             cmd.Connection = cnn;
             cmd.Transaction = transaction;
+            cmd.CommandTimeout = dataContext.CommandTimeout;
 
             foreach (string cmdStr in cmdStrings)
             {
