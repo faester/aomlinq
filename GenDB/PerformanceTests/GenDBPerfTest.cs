@@ -51,13 +51,20 @@ namespace PerformanceTests
             int count = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
+            bool hasAborted  = false;
             foreach (T t in table)
             {
                 count++;
                 if (count >= maxReads)
                 {
+                    hasAborted = true;
                     break;
                 }
+            }
+
+            if (hasAborted)
+            {
+                //GC.Collect();
             }
 
             long ms = sw.ElapsedMilliseconds;
