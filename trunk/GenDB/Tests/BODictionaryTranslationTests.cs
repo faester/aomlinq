@@ -12,7 +12,7 @@ namespace BODictionaryTests
     {
         const int ELEMENTS_TO_INSERT = 10;
         const int DICT_SIZE = 10;
-
+         
         DataContext dataContext = DataContext.Instance;
 
         [TestFixtureSetUp]
@@ -49,7 +49,7 @@ namespace BODictionaryTests
         }
 
         [Test]
-        public void TestBODictOfInt()
+        public void TestBODictOfInt() 
         {
             Table<BODictionary<int, int>> table = dataContext.CreateTable<BODictionary<int, int>>();
             table.Clear();

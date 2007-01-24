@@ -72,6 +72,7 @@
     <Compile Include="AbstractBusinessObject.cs" />
     <Compile Include="AbstractSyntax.cs" />
     <Compile Include="BODictionary.cs" />
+    <Compile Include="BODictionaryTranslator.cs" />
     <Compile Include="BOList.cs" />
     <Compile Include="CollectionElementConverter.cs" />
     <Compile Include="DataContext.cs" />
