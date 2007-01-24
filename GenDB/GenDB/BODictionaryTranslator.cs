@@ -9,7 +9,7 @@ namespace GenDB
     class BODictionaryTranslator : IIBoToEntityTranslator
     {
         //public static readonly Type TypeOfBODictionary = typeof(BODictionary<>);
-        
+        //ttet
         IEntityType entityType;
         IEnumerable<FieldConverter> fieldConverters;
 
