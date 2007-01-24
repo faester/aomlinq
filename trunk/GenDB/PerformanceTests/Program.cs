@@ -19,7 +19,7 @@ namespace PerformanceTests
             }
             dc.CreateDatabase();
             dc.Init();
-            dc.DbBatchSize = 1;
+            dc.DbBatchSize = 200;
 
             ExcelWriter ewGenDB_write = new ExcelWriter("tst.xls", "GenDB_write");
             ExcelWriter ewGenDB_read = new ExcelWriter("tst.xls", "GenDB_read");
@@ -35,10 +35,10 @@ namespace PerformanceTests
 
             long dlms = 0;
             long gdbms = 0;
-            int repetitions = 10;
+            int repetitions = 2;
 
-            int[] objcounts = {/* 5000, 20000, 50000, */ 100000, 150000, 200000, 250000, 300000, 350000, 
-                400000, 500000, 750000, 875000, 1000000};
+            int[] objcounts = { /* 500, 5000, 20000, 
+                                 */ 50000, 100000, 150000, 200000, 250000, 300000, 350000 };
 
 
             foreach (int objCount in objcounts)
@@ -50,7 +50,9 @@ namespace PerformanceTests
                     long gms = gdbtest.PerformWriteTest(objCount);
                     Console.WriteLine("GenDB used {0} ms.", gms);
 
-                    Console.Write("GenDB reading objects: ");
+                    Console.WriteLine("Waiting a while to ensure that background jobs are completed.");
+                    int sleep = Math.Min(objCount / 3, 60000);
+                    Thread.Sleep(sleep);
 
                     gms = gdbtest.PerformReadTest(objCount);
                     Console.WriteLine("{0} objs in test took {1} ms. {2} objs/sec", objCount, gms, gms > 0 ? (objCount * 1000) / gms : -1);
@@ -67,6 +69,10 @@ namespace PerformanceTests
                     long dms = dlinqtest.PerformWriteTest(objCount);
                     Console.WriteLine("DLinq used {0} ms", dms);
                     
+                    Console.WriteLine("Waiting a while to ensure that background jobs are completed.");
+                    int sleep = Math.Min(objCount / 3, 60000);
+                    Thread.Sleep(sleep);
+
                     Console.Write("DLinq reading objects: ");
                     dms = dlinqtest.PerformReadTest(objCount);
                     Console.WriteLine("{0} objs in test took {1} ms. {2} objs/sec", objCount, dms, dms > 0 ? (objCount * 1000) / dms : -1);
