@@ -57,7 +57,7 @@ namespace BODictionaryTests
             
             for(int i=0; i<ELEMENTS_TO_INSERT; i++)
             {
-                BODictionary<int, int> bodict = dataContext.BODictionaryFactory.BODictionaryInt<int>();
+                BODictionary<int, int> bodict = dataContext.BODictionaryFactory.BODictionaryInt();
                 for(int j=0;j<DICT_SIZE;j++)
                 {
                     bodict.Add(i,j);
@@ -78,7 +78,7 @@ namespace BODictionaryTests
 
             for(int i=0;i<ELEMENTS_TO_INSERT;i++)
             {
-                BODictionary<int, string> bodict = dataContext.BODictionaryFactory.BODictionaryString<int>();
+                BODictionary<int, string> bodict = dataContext.BODictionaryFactory.BODictionaryString();
                 for(int j=0;j<DICT_SIZE;j++)
                 {
                     bodict.Add(i,"str"+j);
@@ -99,7 +99,7 @@ namespace BODictionaryTests
 
             for(int i=0; i<ELEMENTS_TO_INSERT;i++)
             {
-                BODictionary<int, DateTime> bodict = dataContext.BODictionaryFactory.BODictionaryDateTime<int>();
+                BODictionary<int, DateTime> bodict = dataContext.BODictionaryFactory.BODictionaryDateTime();
                 for(int j=0;j<DICT_SIZE;j++)
                 {
                     bodict.Add(i,DateTime.Now);
