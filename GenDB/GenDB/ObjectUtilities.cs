@@ -166,7 +166,7 @@ namespace GenDB
 
             IBusinessObject clone = trans.CreateInstanceOfIBusinessObject();
 
-            foreach(FieldConverter fc in trans.FieldConverters)
+            foreach(PropertyConverter fc in trans.FieldConverters)
             {
                 fc.PropertySetHandler(clone, fc.PropertyGetHandler(o));
             }
@@ -226,7 +226,7 @@ namespace GenDB
 
             IIBoToEntityTranslator trans = DataContext.Instance.Translators.GetTranslator(t);
 
-            foreach(FieldConverter fc in trans.FieldConverters)
+            foreach(PropertyConverter fc in trans.FieldConverters)
             {
                 object vala = fc.PropertyGetHandler(a);
                 object valb = fc.PropertyGetHandler(b);

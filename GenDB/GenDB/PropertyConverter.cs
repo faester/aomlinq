@@ -10,7 +10,7 @@ namespace GenDB
      * http://www.codeproject.com/csharp/csharpcasts.asp
      * TODO: Rename til PropertyConverter
      */
-    class FieldConverter
+    class PropertyConverter
     {
         PropertyValueSetter pvs;
         PropertySetter propertySetter;
@@ -54,6 +54,12 @@ namespace GenDB
 
         PropertyInfo propertyInfo;
         DataContext dataContext;
+        IProperty property;
+
+        internal IProperty Property
+        {
+            get { return property; }
+        }
 
         long propertyPOID;
 
@@ -63,11 +69,12 @@ namespace GenDB
             set { propertyPOID = value; }
         }
 
-        public FieldConverter(Type t, PropertyInfo propInfo, IProperty property, DataContext dataContext)
+        public PropertyConverter(Type t, PropertyInfo propInfo, IProperty property, DataContext dataContext)
         {
             this.dataContext = dataContext;
             this.propertyInfo = propInfo;
             this.propertyPOID = property.PropertyPOID;
+            this.property = property;
             clrType = t;
             propertySetHandler = DynamicMethodCompiler.CreateSetHandler(t, propInfo);
             propertyGetHandler = DynamicMethodCompiler.CreateGetHandler(t, propInfo);

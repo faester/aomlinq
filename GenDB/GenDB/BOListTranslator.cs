@@ -122,9 +122,20 @@ namespace GenDB
             //
         }
 
-        public IEnumerable<FieldConverter> FieldConverters 
+        public IEnumerable<PropertyConverter> FieldConverters 
         {
-            get { return new FieldConverter[0]; }
+            get { return new PropertyConverter[0]; }
         }
+
+        public PropertyConverter GetPropertyConverter(int propertyPOID)
+        {
+            throw new Exception("Not implemented");
+        }
+
+        public PropertyConverter GetPropertyConverter(IProperty property)
+        {
+            return GetPropertyConverter(property.PropertyPOID);
+        }
+
     }
 }
