@@ -19,15 +19,16 @@ namespace GenDB
             return new BODictionary<K, V>();
         }
 
-        public BODictionary<K, int> BODictionaryInt<K>() {return new BODictionary<K, int>();}
-        public BODictionary<K, string> BODictionaryString<K>() {return new BODictionary<K, string>();}
-        public BODictionary<K, DateTime> BODictionaryDateTime<K>() {return new BODictionary<K, DateTime>();}
-        public BODictionary<K, long> BODictionaryLong<K>() {return new BODictionary<K, long>();}
-        public BODictionary<K, bool> BODictionaryBool<K>() {return new BODictionary<K, bool>();}
-        public BODictionary<K, char> BODictionaryChar<K>() {return new BODictionary<K, char>();}
-        public BODictionary<K, double> BODictionaryDouble<K>() {return new BODictionary<K, double>();}
-        public BODictionary<K, float> BODictionaryFloat<K>() {return new BODictionary<K, float>();}
-    
+        // key kan kun være int da der var for mange kombinationer til at det virkede fornuftigt
+        // at fortsætte denne implementation.
+        public BODictionary<int, int> BODictionaryInt() {return new BODictionary<int, int>();}
+        public BODictionary<int, string> BODictionaryString() {return new BODictionary<int, string>();}
+        public BODictionary<int, DateTime> BODictionaryDateTime() {return new BODictionary<int, DateTime>();}
+        public BODictionary<int, long> BODictionaryLong() {return new BODictionary<int, long>();}
+        public BODictionary<int, bool> BODictionaryBool() {return new BODictionary<int, bool>();}
+        public BODictionary<int, char> BODictionaryChar() {return new BODictionary<int, char>();}
+        public BODictionary<int, double> BODictionaryDouble() {return new BODictionary<int, double>();}
+        public BODictionary<int, float> BODictionaryFloat() {return new BODictionary<int, float>();}
     }
 
     internal class KeyDict<K>
