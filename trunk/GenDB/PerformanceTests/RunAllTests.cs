@@ -1,0 +1,44 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace PerformanceTests
+{
+    class RunAllTests : ITest
+    {
+        ReadWriteClearTest test = null;
+        IEnumerable<int> objectSizes = null;
+        int recurrences = 0;
+
+        public RunAllTests(ReadWriteClearTest test, IEnumerable<int> objectSizes, int recurrences)
+        {
+            this.objectSizes = objectSizes;
+            this.recurrences = recurrences;
+            this.test = test;
+        }
+
+        public void PerformTest()
+        {
+            foreach (int objectCount in objectSizes)
+            {
+                Console.WriteLine ("Running init with object count {0}", objectCount);
+                test.InitTests(objectCount);
+
+                for (int i = 0; i < recurrences; i++)
+                {
+                    Console.Write("Performing write test with {0} objects", objectCount);
+                    long ms = test.PerformWriteTest(objectCount);
+                    Console.WriteLine("{0} ms, {1} objs/sec", (1000.0 * objectCount) / ms);
+
+                    Console.Write("Performing read test with {0} objects", objectCount);
+                    ms = test.PerformReadTest(objectCount);
+                    Console.WriteLine("{0} ms, {1} objs/sec", (1000.0 * objectCount) / ms);
+
+                    Console.Write("Performing clear test with {0} objects", objectCount);
+                    ms = test.PerformClearTest();
+                    Console.WriteLine("{0} ms, {1} objs/sec", (1000.0 * objectCount) / ms);
+                }
+            }
+        }
+    }
+}
