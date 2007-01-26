@@ -18,17 +18,14 @@ namespace PerformanceTests
     {
         DLinqDB db = null;
         Table<PerfTestAllPrimitiveTypes> table;
-        ExcelWriter ewWrite;
-        ExcelWriter ewRead;
-        ExcelWriter ewClear;
+        TestOutput testOutput;
         int lastInsert = 0;
 
-        public DLinqTest(ExcelWriter ewWrite, ExcelWriter ewRead, ExcelWriter ewClear)
+        public DLinqTest(TestOutput testOutput)
         {
-            this.ewWrite = ewWrite;
-            this.ewRead = ewRead;
-            this.ewClear = ewClear;
-            this.db = new DLinqDB ("server=.;database=dlinqperf;Integrated Security=SSPI");
+            this.testOutput = testOutput;
+
+            this.db = new DLinqDB("server=.;database=dlinqperf;Integrated Security=SSPI");
             if (!db.DatabaseExists())
             {
                 Console.WriteLine("Creating DLinq db");
@@ -46,7 +43,7 @@ namespace PerformanceTests
                 Console.WriteLine("Adding {0} objects to table", needToAdd);
                 for (int i = 0; i < needToAdd; i++)
                 {
-                    table.Add (new PerfTestAllPrimitiveTypes());
+                    table.Add(new PerfTestAllPrimitiveTypes());
                 }
                 Console.WriteLine("Submitting.");
                 db.SubmitChanges();
@@ -69,7 +66,6 @@ namespace PerformanceTests
             }
             db.SubmitChanges();
             long ms = sw.ElapsedMilliseconds;
-            ewWrite.WriteInformation(objectsToWrite, sw.ElapsedMilliseconds);
             return ms;
         }
 
@@ -78,16 +74,12 @@ namespace PerformanceTests
             int count = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            foreach(PerfTestAllPrimitiveTypes t in table)
+            foreach (PerfTestAllPrimitiveTypes t in table)
             {
                 count++;
                 if (count >= maxReads) { break; }
             }
             long ms = sw.ElapsedMilliseconds;
-            if (ewRead != null)
-            {
-                ewRead.WriteInformation(count, ms);
-            }
             return ms;
         }
 
@@ -98,7 +90,6 @@ namespace PerformanceTests
             table.RemoveAll(table);
             db.SubmitChanges();
             long ms = sw.ElapsedMilliseconds;
-            ewClear.WriteInformation(lastInsert, ms);
             return ms;
         }
     }

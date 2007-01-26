@@ -12,7 +12,7 @@
     <StartupObject>PerformanceTests.Program</StartupObject>
     <ManifestCertificateThumbprint>924AD8C9263D69DA1492AC25E120B2BEF97A6E2D</ManifestCertificateThumbprint>
     <ManifestKeyFile>PerformanceTests_TemporaryKey.pfx</ManifestKeyFile>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>F:\gendb\</PublishUrl>
@@ -29,6 +29,7 @@
     <CreateWebPageOnPublish>false</CreateWebPageOnPublish>
     <ApplicationVersion>1.0.0.1</ApplicationVersion>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -70,9 +71,11 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunAllTests.cs" />
+    <Compile Include="TestOutput.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PerformanceTests_TemporaryKey.pfx" />
+    <BaseApplicationManifest Include="Properties\app.manifest" />
     <None Include="tst.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

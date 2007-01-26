@@ -11,9 +11,11 @@ namespace PerformanceTests
         ReadWriteClearTest test = null;
         IEnumerable<int> objectCounts = null;
         int recurrences = 0;
+        TestOutput to; 
 
-        public JustRead(ReadWriteClearTest test, IEnumerable<int> objectCounts, int recurrences)
+        public JustRead(ReadWriteClearTest test, IEnumerable<int> objectCounts, int recurrences, TestOutput to)
         {
+            this.to = to;
             this.test = test;
             this.objectCounts = objectCounts;
             this.recurrences = recurrences;
@@ -35,6 +37,7 @@ namespace PerformanceTests
                     if (gms < 0) { break; }
 
                     gms = test.PerformReadTest(objectCount);
+                    to.ReceiveReadTestResult(objectCount, gms);
                     Console.WriteLine("Testing with {0} objects. {1} ms. {2} objs/sec", objectCount, gms, gms > 0 ? (objectCount * 1000) / gms : -1);
                     obsSec += (objectCount * 1000) / gms;
                     totalObjects += objectCount;

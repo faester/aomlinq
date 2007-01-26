@@ -15,6 +15,7 @@ namespace PerformanceTests
             string dbSystem = "G";
             string testType = "R";
             int repetitions = 0;
+            string fileName = null;
             LinkedList<int> objectCounts = new LinkedList<int>();
 
             if (args.Length < 4)
@@ -27,14 +28,25 @@ namespace PerformanceTests
             testType = args[1].ToUpper();
             repetitions = int.Parse(args[2]);
             
+            if (testType == "A")
+            {
+                fileName = "alltests.xls";
+            } 
+            else
+            {
+                fileName = "readtest.xls";
+            }
+
             for(int i = 3; i < args.Length; i++)
             {
                 objectCounts.AddLast(int.Parse(args[i]));
             }
 
+            TestOutput to = new TestOutput (fileName, dbSystem);
+
             if (dbSystem == "D")
             {
-                dbtest = new DLinqTest(null, null, null);
+                dbtest = new DLinqTest(to);
             }
             else if (dbSystem  == "G")
             {
@@ -45,20 +57,20 @@ namespace PerformanceTests
                     dc.CreateDatabase();
                 }
                 dc.Init();
-                dbtest= new GenDBPerfTests<PerfTestAllPrimitiveTypes>(null, null, null, dc);
+                dbtest= new GenDBPerfTests<PerfTestAllPrimitiveTypes>(dc);
             }
             else 
             {
-                Console.WriteLine ("DBSystem should be 'D' (DLinq) og 'G' (GenDB).");
+                Console.WriteLine ("DBSystem should be 'D' (DLinq) or 'G' (GenDB).");
             }
 
             if (testType == "R")
             {
-                theTest = new JustRead (dbtest, objectCounts, repetitions);
+                theTest = new JustRead (dbtest, objectCounts, repetitions, to);
             }
             else if (testType == "A")
             {
-                theTest = new RunAllTests(dbtest, objectCounts, repetitions);
+                theTest = new RunAllTests(dbtest, objectCounts, repetitions, to);
             }
 
             theTest.PerformTest();
