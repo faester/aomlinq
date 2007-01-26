@@ -26,17 +26,18 @@ namespace PerformanceTests
 
                 for (int i = 0; i < recurrences; i++)
                 {
-                    Console.Write("Performing write test with {0} objects", objectCount);
+                    Console.WriteLine("-------");
+                    Console.Write("Performing write test with {0} objects ", objectCount);
                     long ms = test.PerformWriteTest(objectCount);
                     Console.WriteLine("{0} ms, {1} objs/sec", ms, (1000.0 * objectCount) / ms);
                     to.ReceiveWriteTestResult(objectCount, ms);
 
-                    Console.Write("Performing read test with {0} objects", objectCount);
+                    Console.Write("Performing read test with {0} objects ", objectCount);
                     ms = test.PerformReadTest(objectCount);
                     Console.WriteLine("{0} ms, {1} objs/sec", ms, (1000.0 * objectCount) / ms);
                     to.ReceiveReadTestResult(objectCount, ms);
 
-                    Console.Write("Performing clear test with {0} objects", objectCount);
+                    Console.Write("Performing clear test with {0} objects ", objectCount);
                     ms = test.PerformClearTest();
                     Console.WriteLine("{0} ms, {1} objs/sec", ms, (1000.0 * objectCount) / ms);
                     to.ReceiveClearTestResult(objectCount, ms);
