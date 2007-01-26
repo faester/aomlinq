@@ -88,7 +88,6 @@ namespace QueryToSqlTranslationTests
         public void TearDown()
         {
             tableAllPrimitives.Clear();
-            Console.WriteLine(ttp);
             ttp.Clear();
             dataContext.SubmitChanges();
             tableAllPrimitives = null;
