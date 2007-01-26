@@ -13,8 +13,8 @@ namespace PerformanceTests
         public TestOutput(string filename, string prefix)
         {
             readOut = new ExcelWriter(filename, prefix + "_read");
-            writeOut = new ExcelWriter(filename, prefix + "_read");
-            clearOut = new ExcelWriter(filename, prefix + "_read");
+            writeOut = new ExcelWriter(filename, prefix + "_write");
+            clearOut = new ExcelWriter(filename, prefix + "_clear");
         }
 
         public void ReceiveReadTestResult(int objCount, double time)
