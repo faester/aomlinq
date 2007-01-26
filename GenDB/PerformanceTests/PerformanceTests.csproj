@@ -74,8 +74,14 @@
     <Compile Include="TestOutput.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="alltests.xls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="PerformanceTests_TemporaryKey.pfx" />
     <BaseApplicationManifest Include="Properties\app.manifest" />
+    <None Include="read.xls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="tst.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
