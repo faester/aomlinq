@@ -34,7 +34,7 @@ namespace PerformanceTests
             } 
             else
             {
-                fileName = "readtest.xls";
+                fileName = "read.xls";
             }
 
             for(int i = 3; i < args.Length; i++)
@@ -42,6 +42,7 @@ namespace PerformanceTests
                 objectCounts.AddLast(int.Parse(args[i]));
             }
 
+            Console.WriteLine("Output: " + fileName);
             TestOutput to = new TestOutput (fileName, dbSystem);
 
             if (dbSystem == "D")
