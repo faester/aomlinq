@@ -89,7 +89,7 @@ namespace GenDB
             }
             typeSystem = new TypeSystem (this);
             typeSystem.Init();
-
+             
             iboCache = new IBOCache(this);
             bolistFactory = new BOListFactory();
             boDictionaryFactory = new BODictionaryFactory();

@@ -21,7 +21,7 @@ namespace GenDB
 
         // key kan kun være int da der var for mange kombinationer til at det virkede fornuftigt
         // at fortsætte denne implementation af factory.
-        public BODictionary<int, int> BODictionaryInt() {return new BODictionary<int, int>();}
+        public BODictionary<int, V> BODictionaryInt<K, V>() {return new BODictionary<int, V>();}
         public BODictionary<int, string> BODictionaryString() {return new BODictionary<int, string>();}
         public BODictionary<int, DateTime> BODictionaryDateTime() {return new BODictionary<int, DateTime>();}
         public BODictionary<int, long> BODictionaryLong() {return new BODictionary<int, long>();}
@@ -147,14 +147,13 @@ namespace GenDB
             //{
             //    throw new Exception("Attempted to save elements prior to saving the BODictionary");
             //}
-            
             foreach(KeyValuePair<K, V> kvp in dict)
             {
                 keyDict.KeyList.Add(kvp.Key);
                 valueDict.ValueList.Add(kvp.Value);
             }
-            //keyDict.KeyList.SaveElementsToDB();
-            //valueDict.ValueList.SaveElementsToDB();
+            keyDict.KeyList.SaveElementsToDB();
+            valueDict.ValueList.SaveElementsToDB();
             HasBeenModified=false;
         }
 

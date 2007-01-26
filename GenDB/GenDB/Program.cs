@@ -156,10 +156,10 @@ namespace GenDB
         public static void Main(string[] args)
         {
             DataContext dcontext = DataContext.Instance;
-            //if (dcontext.DatabaseExists())
-            //{
-            //    dcontext.DeleteDatabase();
-            //}
+            if (dcontext.DatabaseExists())
+            {
+                dcontext.DeleteDatabase(); 
+            }
             if (!dcontext.DatabaseExists())
             {
                 dcontext.CreateDatabase();
@@ -169,31 +169,36 @@ namespace GenDB
 
             int objCount = 100;
 
-            Table<BOList<Person>> tbolist = dcontext.CreateTable<BOList<Person>>();
+           
 
-            foreach (BOList<Person> bol in tbolist)
-            {
-                foreach(Person qwe in bol)
-                {
-                    Console.WriteLine(qwe.Name);
-                }
-            }
 
-            BOList<Person> bolist = dcontext.BolistFactory.BOListRef <Person>();
-            for (int i = 0; i < 10; i++)
-            {
-                Person p = new Person{Name = i.ToString() + "'"};
-                bolist.Add (p);
-            }
+            //Table<BOList<int>> tt = dcontext.CreateTable<BOList<int>>();
+            //throw new Exception("dd");
 
-            //BODictionary<int, Person> bodict = dcontext.BODictionaryFactory.BODictionaryRef<int, Person>();
-            //for (int i=0; i<10;i++)
+            
+            //BOList<Person> bolist = dcontext.BolistFactory.BOListRef <Person>();
+            //for (int i = 0; i < 10; i++)
             //{
-            //    Person p = new Person{Name = "Name"+i};
-            //    bodict.Add(i, p);
+            //    Person p = new Person{Name = i.ToString() + "'"};
+            //    bolist.Add (p);
             //}
 
-            //bodict.SaveElementsToDB();
+            Table<BODictionary<int, int>> table = dcontext.CreateTable<BODictionary<int, int>>();
+            table.Clear();
+            dcontext.SubmitChanges();
+            
+            BODictionary<int, int> bodict = dcontext.BODictionaryFactory.BODictionaryInt<int,int>();
+            for(int j=0;j<10;j++)
+            {
+                bodict.Add(j,j);
+                bodict.Clear();
+            }
+
+            table.Add(bodict);
+            dcontext.SubmitChanges();
+            GC.Collect();
+    
+
 
             //bodict.Remove(3);
             //foreach(KeyValuePair<int, Person> kvp in bodict)
@@ -205,65 +210,13 @@ namespace GenDB
 
             //tbolist.Add (bolist);
 
-            dcontext.SubmitChanges();
-
-            Table<Person> tp = dcontext.CreateTable<Person>();
-            Person lastPerson = null;
-
-            for (short i = 0; i < objCount; i++)
-            {
-                Car c = new Car();
-                c.Brand = (i - 1).ToString();
-                c.Seets = i%4;
-                if(i%2==0)c.Sunroof = true;
-                Person p = new Person{ Name = "Navn " + i };
-                p.Car = c;
-                if (i % 2 == 0) { p.Sex = Sex.FEMALE; }
-                p.Age = i;
-                p.Spouse = lastPerson;
-                tp.Add (p);
-                lastPerson = p;
-            }
-
-            dcontext.SubmitChanges();
-
-            foreach(Person p in tp)
-            {
-                Console.WriteLine(p);
-            }
-
-            lastPerson = null;
-
-            DateTime t = DateTime.Now;
-            Car cc = new Car();
-
-            Person s_p = new Person{ Name = "SpousePerson", Letter = 'c', Birth = t, Alive=true, Car = cc};
-            s_p.Age = 99;
-            tp.Add (s_p);
-
-            Person p_p = new Person {Name = "NormalPerson", Spouse=s_p, Age=121, Alive=true};
-            tp.Add (p_p);
-
-            Table<Car> cars = dcontext.CreateTable<Car>();
-            for(short i=0;i<objCount;i++)
-            {
-                Car c = new Car{Brand="Brand "+i, Seets=i};
-                if(i%2==0)c.Sunroof = true;
-                cars.Add(c);
-            }
-
-            //IBOCache.FlushToDB();
-            dcontext.SubmitChanges();
-
-            tp.Clear();
-
             //var es = from epp in tp     
             //    //where epp.Car.Motor.HorsePower == "400"
             //    //where epp.Car.Motor.Valve == 6
             //    //where epp.Car.Sunroof==false
-                  //where !(epp.Age!=4)
-                  //select epp;
-            //    //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
+            //      where !(epp.Age!=4)
+            //      select epp;
+                //select new {Age = epp.Age, TestAggregate = tp.Average(v => v.Age)};
 
             //foreach(Person p in es)
             //{
@@ -272,8 +225,8 @@ namespace GenDB
             
             //Console.WriteLine("Size of Table: {0}", es.Count);
             
-            // ******************************
 
+            // Joining
             //int[] ages = {1, 2, 3, 979 };
 
             //var qw = from pers in tp
@@ -294,25 +247,6 @@ namespace GenDB
             //}
             
             Console.ReadLine();
-
-            //Dictionary<int, string> d = new Dictionary<int, string>();
-            //for(int i=0;i<10;i++)
-            //{
-            //    d.Add(i,"Navn"+i);
-            //}
-            //Console.WriteLine("Dictionary: "+d[3]);
-            //string ud ="";
-            //if(d.TryGetValue(4,out ud))
-            //{
-            //    Console.WriteLine(ud);
-            //}
-            //Console.WriteLine("contains key:{0}, contains value:{1}",d.ContainsKey(4),d.ContainsValue("sd"));
-            //d.Remove(3);
-            
-            //foreach(KeyValuePair<int,string> kvp in d)
-            //{
-            //    Console.WriteLine("Key: {0}, Value: {1}",kvp.Key,kvp.Value);
-            //}   
         }
     }
 }
