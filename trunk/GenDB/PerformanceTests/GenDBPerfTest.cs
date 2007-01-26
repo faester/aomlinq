@@ -78,10 +78,9 @@ namespace PerformanceTests
             Stopwatch sw = new Stopwatch();
             sw.Start();
             bool hasAborted = false;
-            IEnumerator<T> iter_T = table.GetEnumerator();
-            while (iter_T.MoveNext())
+
+            foreach (T t in table)
             {
-                T t = iter_T.Current;
                 count++;
                 if (count >= maxReads)
                 {
@@ -89,8 +88,6 @@ namespace PerformanceTests
                     break;
                 }
             }
-
-            iter_T = null;
 
             if (hasAborted)
             {

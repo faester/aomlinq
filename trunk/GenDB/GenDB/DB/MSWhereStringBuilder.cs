@@ -410,7 +410,7 @@ namespace GenDB.DB
         //public void VisitEntityPOIDEquals(EntityPOIDEquals epe)
         //{
         //    IEntityType et = typeSystem.GetEntityType(epe.ClrTypeOfEntity);
-        //    entityTypes[et.EntityTypePOID] = et;
+        //    entityTypeEnumerator[et.EntityTypePOID] = et;
         //    wherePart.Append("e.EntityPOID = ");
         //    wherePart.Append(epe.EntityPOID);
         //}
