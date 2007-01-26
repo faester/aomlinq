@@ -53,7 +53,7 @@ namespace GenDB
                 {
                     MethodInfo setter = clrProperty.GetSetMethod();
                     MethodInfo getter = clrProperty.GetGetMethod();
-                    Console.WriteLine(setter);
+                   
                     if (setter == null || !setter.IsPublic) { throw new NotTranslatableException("Public property has no setter or setter is non-public", clrProperty); }
                     if (getter == null || !getter.IsPublic) { throw new NotTranslatableException("Public property has no getter or getter is non-public", clrProperty); }
                     if (clrProperty.PropertyType.IsArray) { throw new NotTranslatableException("Can not translate arrays.", clrProperty); }
