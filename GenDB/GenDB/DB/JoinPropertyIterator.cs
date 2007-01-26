@@ -22,36 +22,33 @@ namespace GenDB.DB
         IIBoToEntityTranslator translator = null;
         DataTable table;
         SqlCommand cmd = null;
-        bool isDisposed = false;
+        bool hasBeenDisposed = false;
 
         public JoinPropertyIterator(DataContext dataContext, IExpression whereCondition)
         {
-            Console.WriteLine("Newing a " + GetType ());
             Init(dataContext, whereCondition);
         }
 
         ~JoinPropertyIterator()
         {
-            Console.WriteLine(GetType() + " instance destructor invoked.");
-            if (!isDisposed)
+            if (!hasBeenDisposed)
             {
                 Dispose();
             }
-            Console.WriteLine("destructor returning");
         }
 
         public void Dispose()
         {
-            isDisposed = true;
-            Console.Write(GetType().ToString() + " instance is disposing.. ");
+            GC.SuppressFinalize(this);
+            hasBeenDisposed = true;
             entityTypeEnumerator = null;
             properties = null;
             if (reader != null && !reader.IsClosed)
             {
-                reader.Close();
+                cmd.Cancel(); // Allows the reader to return immediately.
+                reader.Dispose();
             }
             cnn.Close();
-            Console.WriteLine(", disposing done");
         }
 
         IEnumerator IEnumerable.GetEnumerator()
