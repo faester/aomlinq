@@ -102,7 +102,6 @@ namespace GenDB.DB
         {
             if (reader != null && !reader.IsClosed)
             {
-                Console.WriteLine("Closing reader ... ");
                 reader.Close();
             }
             if (!entityTypeEnumerator.MoveNext())
