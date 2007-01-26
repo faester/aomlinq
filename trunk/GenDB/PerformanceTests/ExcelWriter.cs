@@ -45,9 +45,9 @@ namespace PerformanceTests
                 cmd.CommandText = "DROP TABLE " + sheetname;
                 cmd.ExecuteNonQuery();
             }
-            catch (OleDbException oex)
+            catch (OleDbException)
             {
-                Console.WriteLine(oex.ToString());
+                /* ignore */
             }
 
             cmd.CommandText = "CREATE TABLE " + sheetname + " (objectCount int, theTime double)";

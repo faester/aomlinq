@@ -11,17 +11,11 @@ namespace PerformanceTests
     {
         GenDB.DataContext dataContext = GenDB.DataContext.Instance;
         GenDB.Table<T> table = GenDB.DataContext.Instance.CreateTable<T>();
-        ExcelWriter ewWrite;
-        ExcelWriter ewRead;
-        ExcelWriter ewClear;
         int lastInsert = 0;
 
-        public GenDBPerfTests(ExcelWriter ewWrite, ExcelWriter ewRead, ExcelWriter ewClear, GenDB.DataContext dataContext)
+        public GenDBPerfTests(GenDB.DataContext dataContext)
         {
             this.dataContext = dataContext;
-            this.ewWrite = ewWrite;
-            this.ewRead = ewRead;
-            this.ewClear = ewClear;
         }
 
         public void InitTests(int objectCount)
@@ -65,10 +59,6 @@ namespace PerformanceTests
             }
             dataContext.SubmitChanges();
             long ms = sw.ElapsedMilliseconds;
-            if (ewWrite != null)
-            {
-                ewWrite.WriteInformation(objectsToWrite, ms);
-            }
             return ms;
         }
 
@@ -89,11 +79,6 @@ namespace PerformanceTests
                 }
             }
 
-            if (hasAborted)
-            {
-                //GC.Collect();
-            }
-
             long ms = sw.ElapsedMilliseconds;
 
             if (count < maxReads)
@@ -106,10 +91,6 @@ namespace PerformanceTests
             }
             else
             {
-                if (ewRead != null)
-                {
-                    ewRead.WriteInformation(count, ms);
-                }
                 return ms;
             }
         }
@@ -121,10 +102,6 @@ namespace PerformanceTests
             table.Clear();
             dataContext.SubmitChanges();
             long ms = sw.ElapsedMilliseconds;
-            if (ewClear != null)
-            {
-                ewClear.WriteInformation(lastInsert, ms);
-            }
             return ms;
         }
     }
