@@ -27,8 +27,9 @@ namespace PerformanceTests
             while (count < objectCount)
             {
                 needCommit = true;
-                Console.WriteLine("Writing 20000 objects to table.");
-                for (int i = 0; i < 20000; i++)
+                int toWrite = objectCount- count ;
+                Console.WriteLine("Writing {0} objects to table.", toWrite);
+                for (int i = 0; i < toWrite; i++)
                 {
                     table.Add(new T());
                 }
