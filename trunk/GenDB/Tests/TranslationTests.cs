@@ -109,7 +109,7 @@ namespace TranslationTests
             tableOfHasVolatileProperty = dc.CreateTable<HasVolatileProperty>();
             tableOfPureIBusinessImpl = dc.CreateTable<PureIBusinessImpl>();
         }
-
+        
         [TestFixtureTearDown]
         public void TestFixtureTearDown()
         {

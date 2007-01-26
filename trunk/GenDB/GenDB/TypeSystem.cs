@@ -257,24 +257,23 @@ namespace GenDB
 
         private IEntityType BODictionaryEntityType(Type clrType)
         {
-            throw new Exception("not implemented");
             IEntityType res = dataContext.GenDB.NewEntityType();
             res.IsDictionary = true;
             res.AssemblyDescription = clrType.Assembly.FullName;
             res.Name = clrType.FullName;
+            
+            IPropertyType pt = dataContext.TypeSystem.GetPropertyType(clrType);
+            IProperty property = dataContext.GenDB.NewProperty();
+            property.EntityType = res;
+            property.PropertyName = TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME;
+            property.PropertyType = pt;
+            res.AddProperty (property);
 
-            //IPropertyType pt = dataContext.TypeSystem.GetPropertyType(clrType);
-            //IProperty property = dataContext.GenDB.NewProperty();
-            //property.EntityType = res;
-            //property.PropertyName = TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME;
-            //property.PropertyType = pt;
-            //res.AddProperty (property);
             if (clrType.BaseType != null)
             {
                 if (!IsTypeKnown(clrType.BaseType)) { RegisterType(clrType.BaseType); }
                 res.SuperEntityType = GetEntityType(clrType.BaseType);
             }
-
             return res;
         }
 
@@ -330,10 +329,8 @@ namespace GenDB
                     // dirty stuff, could'n get GetGenericTypeDefinition to work with dictionaries...help me!
                 else if(t.Name.Substring(0,6)=="BODict")
                 {
-                    throw new Exception("not impl");
+                    return BODictionaryEntityType(t);
                 }
-                //else if(t.GetGenericTypeDefinition() == BODictionaryTranslator.TypeOfBODictionary)
-                //{}
                 else 
                 {
                     throw new NotTranslatableException ("Don't know how to construct IEntityType for type", t.GetGenericTypeDefinition());

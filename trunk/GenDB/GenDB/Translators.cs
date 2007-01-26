@@ -74,9 +74,14 @@ namespace GenDB
                      */
                     return new BOListTranslator(t, dataContext, iet);
                 }
+                // dirty stuff, could'n get GetGenericTypeDefinition to work with dictionaries...help me!
+                else if(t.Name.Substring(0,6)=="BODict")
+                {
+                    return new BODictionaryTranslator(t, dataContext, iet);
+                }
                 else
                 {
-                    throw new NotTranslatableException("Can not translate generic types", t);
+                    throw new NotTranslatableException("Can not translate generic types", t.GetGenericTypeDefinition());
                 }
             }
             else
