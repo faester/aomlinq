@@ -489,7 +489,7 @@ namespace GenDB.DB
 
         public int Count(IWhereable expression)
         {
-            MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
+            MSEntityPOIDListBuilder mswsb = new MSEntityPOIDListBuilder(dataContext.TypeSystem);
             mswsb.Visit(expression);
             string whereStr = mswsb.WhereStr;
 #if DEBUG
@@ -510,7 +510,7 @@ namespace GenDB.DB
 
         public bool ClearWhere(IWhereable expression)
         {
-            MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
+            MSEntityPOIDListBuilder mswsb = new MSEntityPOIDListBuilder(dataContext.TypeSystem);
             mswsb.Visit(expression);
 
             bool willRemove = this.Count(expression) > 0;
@@ -529,140 +529,16 @@ namespace GenDB.DB
         {
             if (WHERE_USING_JOINS)
             {
-                return Where_JoiningFields(expression);
+                return new JoinPropertyIterator(dataContext, expression);            
             }
             else
             {
-                MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
+                MSEntityPOIDListBuilder mswsb = new MSEntityPOIDListBuilder(dataContext.TypeSystem);
                 mswsb.Reset();
                 mswsb.Visit(expression);
                 string whereStr = mswsb.WhereStr;
                 return Where(whereStr);
             }
-        }
-
-        private IEnumerable<IBusinessObject> Where_JoiningFields(IExpression whereCondition)
-        {
-            return new JoinPropertyIterator(dataContext, whereCondition);
-//            MSWhereStringBuilder mswsb = new MSWhereStringBuilder(dataContext.TypeSystem);
-//            mswsb.Visit(whereCondition);
-//            string conditionWhereString = mswsb.WhereStr;
-//            IEnumerable<IEntityType> entityTypes = mswsb.EntityTypes;
-//            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
-//            {
-//                cnn.Open();
-//                foreach (IEntityType et in entityTypes)
-//                {
-//                    LinkedList<IProperty> properties = new LinkedList<IProperty>();
-//                    IIBoToEntityTranslator translator = dataContext.Translators.GetTranslator(et.EntityTypePOID);
-//                    StringBuilder selectPart = new StringBuilder("SELECT e.EntityTypePOID, e.EntityPOID ");
-//                    StringBuilder joinPart = new StringBuilder(" FROM (")
-//                                    .Append(conditionWhereString)
-//                                    .Append(") ew INNER JOIN Entity e ");
-//                    joinPart.Append(" ON ew.EntityPOID = e.EntityPOID ");
-//                    foreach (IProperty p in et.GetAllProperties)
-//                    {
-//                        int propertyID = p.PropertyPOID;
-//                        properties.AddLast(p);
-//                        string pAlias = "p" + propertyID;
-//                        string select = pAlias;
-//                        switch (p.MappingType)
-//                        {
-//                            case MappingType.BOOL:
-//                                select += ".BoolValue"; break;
-//                            case MappingType.DATETIME:
-//                            case MappingType.LONG:
-//                                select += ".LongValue"; break;
-//                            case MappingType.DOUBLE:
-//                                select += ".DoubleValue"; break;
-//                            case MappingType.REFERENCE:
-//                                select += ".ReferenceValue"; break;
-//                            case MappingType.STRING:
-//                                select += ".StringValue"; break;
-//                            default:
-//                                throw new Exception("Don't know how to handle mappingtype: " + p.MappingType);
-
-//                        }
-//                        selectPart.Append(", ");
-//                        selectPart.Append(select);
-//                        joinPart.Append(" INNER JOIN PropertyValue ");
-//                        joinPart.Append(pAlias);
-//                        joinPart.Append(" ON e.EntityPOID = ");
-//                        joinPart.Append(pAlias);
-//                        joinPart.Append(".EntityPOID AND ");
-//                        joinPart.Append(pAlias);
-//                        joinPart.Append(".PropertyPOID = ");
-//                        joinPart.Append(propertyID);
-//                    }
-//                    joinPart.Append(" \nWHERE e.EntityTypePOID = " + et.EntityTypePOID);
-//                    //joinPart.Append (" OPTION (LOOP JOIN) ");
-//                    string sqlStr = selectPart.ToString() + joinPart.ToString();
-//#if DEBUG
-//                Console.Error.WriteLine("****");
-//                Console.Error.WriteLine(sqlStr);
-//                Console.Error.WriteLine(" -- -- -- -- -- ");
-//                Console.Error.WriteLine(conditionWhereString);
-//#endif
-//                    SqlCommand cmd = new SqlCommand(sqlStr, cnn);
-//                    cmd.CommandTimeout = dataContext.CommandTimeout;
-//                    SqlDataReader reader = cmd.ExecuteReader();
-
-//                    while (reader.Read())
-//                    {
-//                        int entityPOID = reader.GetInt32(1);
-//                        IBusinessObject res = null;
-
-//                        if (!dataContext.IBOCache.TryGet(entityPOID, out res))
-//                        {
-//                            res = translator.CreateInstanceOfIBusinessObject();
-//                            res.DBIdentity = new DBIdentifier(entityPOID, true);
-//                            this.dataContext.IBOCache.AddFromDB(res);
-
-//                            int idx = 1;
-//                            foreach (IProperty prop in properties)
-//                            {
-//                                idx++;
-//                                int pid = prop.PropertyPOID;
-//                                switch (prop.MappingType)
-//                                {
-//                                    case MappingType.BOOL:
-//                                        translator.SetProperty(pid, res, reader.GetBoolean(idx)); break;
-//                                    case MappingType.DATETIME:
-//                                        translator.SetProperty(pid, res, new DateTime(reader.GetInt64(idx))); break;
-//                                    case MappingType.DOUBLE:
-//                                        translator.SetProperty(pid, res, reader.GetDouble(idx)); break;
-//                                    case MappingType.LONG:
-//                                        translator.SetProperty(pid, res, reader.GetInt64(idx)); break;
-//                                    case MappingType.REFERENCE:
-//                                        {
-//                                            if (reader[idx] == DBNull.Value)
-//                                            {
-//                                                translator.SetProperty(pid, res, null); break;
-//                                            }
-//                                            else
-//                                            {
-//                                                translator.SetProperty(pid, res, reader.GetInt32(idx)); break;
-//                                            }
-//                                        }
-//                                        break;
-//                                    case MappingType.STRING:
-//                                        if (reader[idx] == DBNull.Value)
-//                                        {
-//                                            translator.SetProperty(pid, res, null); break;
-//                                        }
-//                                        else
-//                                        {
-//                                            translator.SetProperty(pid, res, reader.GetString(idx)); break;
-//                                        }
-//                                    default:
-//                                        throw new Exception("Mapping type not implemented. " + prop.MappingType);
-//                                } // switch
-//                            } // foreach
-//                        } // if (res == null)
-//                        yield return res;
-//                    } // while reader.Read
-//                } // foreach EntityType
-//            }
         }
 
         private IEnumerable<IBusinessObject> Where(string entityPoidListQuery)
@@ -687,11 +563,6 @@ namespace GenDB.DB
                     " LEFT JOIN PropertyValue pv ON pv.EntityPOID = e.EntityPOID " 
                     + " ORDER BY e.EntityPOID "
                     , cnn);
-#if DEBUG
-                Console.WriteLine("WHEREBUILDER CONSTRUCTED: " + entityPoidListQuery);
-                Console.WriteLine();
-                Console.WriteLine(cmd.CommandText);
-#endif
 
                 cmd.Connection = cnn;
                 cmd.CommandTimeout = dataContext.CommandTimeout;
@@ -1516,5 +1387,4 @@ namespace GenDB.DB
         }
         #endregion
     }
-
 }

@@ -18,7 +18,7 @@ namespace GenDB.DB
         SqlDataReader reader = null;
         IEnumerator<IEntityType> entityTypeEnumerator = null;
         IEnumerable<IProperty> properties = null;
-        MSWhereStringBuilder wsb = null;
+        MSEntityPOIDListBuilder wsb = null;
         IIBoToEntityTranslator translator = null;
         DataTable table;
         SqlCommand cmd = null;
@@ -157,7 +157,6 @@ namespace GenDB.DB
                                     translator.SetProperty(pid, res, reader.GetInt32(idx)); break;
                                 }
                             }
-                            break;
                         case MappingType.STRING:
                             if (reader[idx] == DBNull.Value)
                             {
@@ -183,7 +182,7 @@ namespace GenDB.DB
             //cnn = ConnectionPool.NextConnection();
             cnn = new SqlConnection(dataContext.ConnectStringWithDBName);
             cnn.Open();
-            wsb = new MSWhereStringBuilder(dataContext.TypeSystem);
+            wsb = new MSEntityPOIDListBuilder(dataContext.TypeSystem);
             wsb.Visit(whereCondition);
             entityTypeEnumerator = wsb.EntityTypes.GetEnumerator();
             NextEntityType();
@@ -231,8 +230,11 @@ namespace GenDB.DB
                 joinPart.Append(propertyID);
             }
             joinPart.Append(" \nWHERE e.EntityTypePOID = " + et.EntityTypePOID);
+            
             //joinPart.Append (" OPTION (LOOP JOIN) ");
             string sqlStr = selectPart.ToString() + joinPart.ToString();
+
+            Console.WriteLine(sqlStr);            
             return sqlStr;
         } // foreach EntityType
     }
