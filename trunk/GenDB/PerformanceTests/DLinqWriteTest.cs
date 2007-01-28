@@ -25,7 +25,7 @@ namespace PerformanceTests
         {
             this.testOutput = testOutput;
 
-            this.db = new DLinqDB("server=.;database=dlinqperf;Integrated Security=SSPI");
+            this.db = new DLinqDB("server=.;database=dlinqperf;Integrated Security=SSPI;Timeout=0");
             if (!db.DatabaseExists())
             {
                 Console.WriteLine("Creating DLinq db");

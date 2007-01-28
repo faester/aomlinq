@@ -52,7 +52,7 @@ namespace PerformanceTests
             else if (dbSystem  == "G")
             {
                 GenDB.DataContext dc = GenDB.DataContext.Instance;
-                dc.DatabaseName = "perftest";
+                dc.DatabaseName = "perftest" + testType;
                 if (!dc.DatabaseExists())
                 {
                     dc.CreateDatabase();
