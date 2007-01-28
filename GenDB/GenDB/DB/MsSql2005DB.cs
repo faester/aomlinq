@@ -440,7 +440,7 @@ namespace GenDB.DB
                         {
                             return result;
                         }
-                        else
+                        else 
                         {
                             translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
                             iet = DataContext.Instance.TypeSystem.GetEntityType(entityTypePOID);
