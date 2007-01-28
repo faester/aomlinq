@@ -155,6 +155,22 @@ namespace QueryToSqlTranslationTests
         }
 
         [Test]
+        public void TestMultipleConditionsOnOneProperty()
+        {
+            Func<TestPerson, bool> condition = (TestPerson pers) => pers.Name == "Name1" || pers.Name == "Name2";
+
+            var p = from persons in ttp
+                       where condition(persons)
+                        select persons;
+
+            Assert.AreEqual(2, p.Count, "Incorrect number of persons returned.");
+            foreach(var q in p)
+            {
+                Assert.IsTrue(condition(q), "Wrong person returned. Had name '" + q.Name + "'");
+            }
+        }
+
+        [Test]
         public void TestContains()
         {
             var ps = from persons in ttp

@@ -75,6 +75,7 @@
     <Compile Include="DB\EntityType.cs" />
     <Compile Include="DB\GenCollectionElement.cs" />
     <Compile Include="DB\JoinPropertyIterator.cs" />
+    <Compile Include="DB\MSJoinFieldWhereCondition.cs" />
     <Compile Include="DB\Property.cs" />
     <Compile Include="DB\PropertyType.cs" />
     <Compile Include="DB\PropertyValue.cs" />
@@ -90,7 +91,7 @@
     <Compile Include="DB\MsSql2005DB.cs" />
     <Compile Include="SqlExprChecker.cs" />
     <Compile Include="SqlExprTranslator.cs" />
-    <Compile Include="DB\MSWhereStringBuilder.cs" />
+    <Compile Include="DB\MSEntityPOIDListBuilder.cs" />
     <Compile Include="NotTranslatableException.cs" />
     <Compile Include="ObjectUtilities.cs" />
     <Compile Include="Program.cs" />

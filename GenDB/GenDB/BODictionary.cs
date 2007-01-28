@@ -173,8 +173,8 @@ namespace GenDB
         public bool Remove(K key)
         {
             TestPopulateDictionary();
-            return dict.Remove (key);
             HasBeenModified=true;
+            return dict.Remove (key);
         }
 
         public bool TryGetValue(K key, out V value)

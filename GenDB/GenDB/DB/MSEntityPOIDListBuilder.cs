@@ -5,7 +5,7 @@ using GenDB.DB;
 
 namespace GenDB.DB
 {
-    class MSWhereStringBuilder : IAbsSyntaxVisitor
+    class MSEntityPOIDListBuilder : IAbsSyntaxVisitor
     {
         StringBuilder selectPart = null;
         StringBuilder wherePart = null;
@@ -15,9 +15,9 @@ namespace GenDB.DB
         Dictionary<int, IEntityType> entityTypes = null;
         Dictionary<IProperty, int> properties = null;
 
-        private MSWhereStringBuilder() { /* empty */ }
+        private MSEntityPOIDListBuilder() { /* empty */ }
 
-        public MSWhereStringBuilder(TypeSystem typeSystem)
+        public MSEntityPOIDListBuilder(TypeSystem typeSystem)
         {
             this.typeSystem = typeSystem;
             Reset();
@@ -405,15 +405,6 @@ namespace GenDB.DB
         {
             wherePart.Append(cdt.Value.Ticks);
         }
-
-        ////Leaf
-        //public void VisitEntityPOIDEquals(EntityPOIDEquals epe)
-        //{
-        //    IEntityType et = typeSystem.GetEntityType(epe.ClrTypeOfEntity);
-        //    entityTypeEnumerator[et.EntityTypePOID] = et;
-        //    wherePart.Append("e.EntityPOID = ");
-        //    wherePart.Append(epe.EntityPOID);
-        //}
 
         public void VisitExprIsTrue(ExprIsTrue csi)
         {
