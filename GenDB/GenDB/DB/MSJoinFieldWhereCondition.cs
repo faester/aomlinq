@@ -28,6 +28,7 @@ namespace GenDB.DB
         public String WhereStr 
         {
             get {
+                string res = wherePart.ToString();
                 return wherePart.ToString();
             }
         }
@@ -51,12 +52,13 @@ namespace GenDB.DB
         {
             wherePart = new StringBuilder();
             properties = new Dictionary<IProperty, int>();
+            entityTypes = new Dictionary<int, IEntityType>();
         }
 
         // Leaf
         public void VisitCstThis(CstThis cstThis)
         {
-            wherePart.Append (" EntityPOID ");
+            wherePart.Append (" e.EntityPOID ");
         }
 
 
@@ -103,23 +105,23 @@ namespace GenDB.DB
         {
             RegisterProperty(vp.Property);
 
-            string pvName = "pv" + vp.Property.PropertyPOID;
-            wherePart.Append (", PropertyValue " + pvName);
+            string pvName = "p" + vp.Property.PropertyPOID;
+            wherePart.Append (pvName);
             IProperty p = vp.Property;
             switch (p.MappingType )
             {
                 case MappingType.BOOL: 
-                    wherePart.Append(pvName + ".BoolValue "); break;
+                    wherePart.Append(".BoolValue "); break;
                 case MappingType.DATETIME: 
-                    wherePart.Append(pvName + ".LongValue "); break;
+                    wherePart.Append(".LongValue "); break;
                 case MappingType.DOUBLE: 
-                    wherePart.Append(pvName + ".DoubleValue "); break;
+                    wherePart.Append(".DoubleValue "); break;
                 case MappingType.LONG: 
-                    wherePart.Append(pvName + ".LongValue "); break;
+                    wherePart.Append(".LongValue "); break;
                 case MappingType.REFERENCE: 
-                    wherePart.Append(pvName + ".ReferenceValue "); break;
+                    wherePart.Append(".ReferenceValue "); break;
                 case MappingType.STRING: 
-                    wherePart.Append(pvName + ".StringValue "); break;
+                    wherePart.Append(".StringValue "); break;
                 default:
                     throw new Exception("Unknown property mapping."); // Should never happen unless new MappingTypes are introduced
             }
@@ -130,7 +132,7 @@ namespace GenDB.DB
         public void VisitCstString(CstString cs)
         {
             wherePart.Append ('\'');
-            wherePart.Append (cs.Value);
+            wherePart.Append(MsSql2005DB.SqlSanitizeString(cs.Value));
             wherePart.Append ('\'');
             wherePart.Append (' ');
         }
@@ -138,8 +140,9 @@ namespace GenDB.DB
         //Leaf
         public void VisitCstChar(CstChar cs)
         {
+            string charString = MsSql2005DB.SqlSanitizeString(cs.Ch.ToString());
             wherePart.Append ('\'');
-            wherePart.Append (cs.Ch);
+            wherePart.Append (charString);
             wherePart.Append ('\'');
             wherePart.Append (' ');
         }
@@ -172,7 +175,9 @@ namespace GenDB.DB
         //Leaf
         public void VisitCstDouble(CstDouble cd)
         {
-            wherePart.Append(cd.Value);
+
+            string dStr = cd.Value.ToString().Replace(',', '.');
+            wherePart.Append(dStr);
         }
 
         //Leaf
@@ -193,54 +198,50 @@ namespace GenDB.DB
         //Leaf
         public void VisitNestedReference(NestedReference pro)
         {
-            throw new Exception("Not implemented.");
-            //RegisterProperty(pro.CstProperty.Property);
-            //IProperty p = null;
-            //StringBuilder erefSb = new StringBuilder("'");
-            //NestedReference currentNRef = pro;
-            //while (currentNRef.InnerReference != null)
-            //{
-            //    erefSb.Append (currentNRef.CstProperty.Property.PropertyPOID);
-            //    erefSb.Append ('.');
-            //    currentNRef = currentNRef.InnerReference;
-            //}
-            //erefSb.Append ("00000");
-            //erefSb.Append ("'");
-            //p = currentNRef.CstProperty.Property;
-            //string pvName = "pv" + currentPropertyNumber;
-            //selectPart.Append (", PropertyValue " + pvName);
-            
-            //if (currentPropertyNumber > 0)
-            //{
-            //    joinPart.Append(" AND ");
-            //}
-            //joinPart.Append(pvName );
-            //joinPart.Append(".EntityPOID = dbo.fn_lookup_EntityPOID(e.EntityPOID, ");
-            //joinPart.Append(erefSb);
-            //joinPart.Append (") AND ");
-            //joinPart.Append(pvName);
-            //joinPart.Append(".PropertyPOID = ");
-            //joinPart.Append(p.PropertyPOID);
-            //switch (p.MappingType )
-            //{
-            //    case MappingType.BOOL: 
-            //        wherePart.Append(pvName + ".BoolValue "); break;
-            //    case MappingType.DATETIME: 
-            //        wherePart.Append(pvName + ".LongValue "); break;
-            //    case MappingType.DOUBLE: 
-            //        wherePart.Append(pvName + ".DoubleValue "); break;
-            //    case MappingType.LONG: 
-            //        wherePart.Append(pvName + ".LongValue "); break;
-            //    case MappingType.REFERENCE: 
-            //        wherePart.Append(pvName + ".ReferenceValue "); break;
-            //    case MappingType.STRING: 
-            //        wherePart.Append(pvName + ".StringValue "); break;
-            //    default:
-            //        throw new Exception("Unknown property mapping.");
-            //}
-            //wherePart.Append (' ');
+            RegisterProperty(pro.CstProperty.Property);
+            IProperty p = null;
+            StringBuilder erefSb = new StringBuilder("'");
+            NestedReference currentNRef = pro;
+            while (currentNRef.InnerReference != null)
+            {
+                erefSb.Append (currentNRef.CstProperty.Property.PropertyPOID);
+                erefSb.Append ('.');
+                currentNRef = currentNRef.InnerReference;
+            }
+            erefSb.Append ("00000");
+            erefSb.Append ("'");
+            p = currentNRef.CstProperty.Property;
+            string pvName = "nested" + p.PropertyPOID;
 
-            //currentPropertyNumber++;
+            wherePart.Append("(SELECT ");
+            switch (p.MappingType)
+            {
+                case MappingType.BOOL:
+                    wherePart.Append(pvName + ".BoolValue "); break;
+                case MappingType.DATETIME:
+                    wherePart.Append(pvName + ".LongValue "); break;
+                case MappingType.DOUBLE:
+                    wherePart.Append(pvName + ".DoubleValue "); break;
+                case MappingType.LONG:
+                    wherePart.Append(pvName + ".LongValue "); break;
+                case MappingType.REFERENCE:
+                    wherePart.Append(pvName + ".ReferenceValue "); break;
+                case MappingType.STRING:
+                    wherePart.Append(pvName + ".StringValue "); break;
+                default:
+                    throw new Exception("Unknown property mapping.");
+            }
+            wherePart.Append(" FROM PropertyValue ");
+            wherePart.Append(pvName);
+            wherePart.Append(" WHERE ");
+            wherePart.Append(pvName);
+            wherePart.Append(".PropertyPOID = ");
+            wherePart.Append(p.PropertyPOID);
+            wherePart.Append(" AND ");
+            wherePart.Append(pvName);
+            wherePart.Append(".EntityPOID = dbo.fn_lookup_EntityPOID(e.EntityPOID, ");
+            wherePart.Append(erefSb);
+            wherePart.Append(") )");
         }
 
         //Node
