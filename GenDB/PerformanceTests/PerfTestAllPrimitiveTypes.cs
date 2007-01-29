@@ -13,6 +13,7 @@ namespace PerformanceTests
     [Table(Name = "t_PerfTestAllPrimitiveTypes")]
     public class PerfTestAllPrimitiveTypes  : IBusinessObject  
     {
+        static Random rnd = new Random(0);
         DBIdentifier entityPOID;
 
         public DBIdentifier DBIdentity
@@ -21,7 +22,7 @@ namespace PerformanceTests
             set { entityPOID = value; }
         }
 
-        long id;
+        long id = rnd.Next(1000);
         [Column(Id = true, AutoGen = true), Volatile]
         public long Id
         {
@@ -29,7 +30,7 @@ namespace PerformanceTests
             set { id = value; }
         }
 
-        bool boo;
+        bool boo = rnd.Next() % 2 == 0;
         [Column]
         public bool Boo
         {
@@ -46,7 +47,7 @@ namespace PerformanceTests
             set { str = value; }
         }
 
-        DateTime dt = DateTime.Now;
+        DateTime dt = new DateTime(rnd.Next(1900, 2007), rnd.Next(1, 10), rnd.Next(1, 28));
 
         [Column]
         public DateTime Dt
@@ -55,7 +56,7 @@ namespace PerformanceTests
             set { dt = value; }
         }
 
-        float fl;
+        float fl = float.MaxValue / rnd.Next();
 
         [Column(DBType = "float")]
         public float Fl
@@ -64,7 +65,7 @@ namespace PerformanceTests
             set { fl = value; }
         }
 
-        double dbl;
+        double dbl = rnd.NextDouble();
 
         [Column]
         public double Dbl
@@ -82,7 +83,7 @@ namespace PerformanceTests
             set { ch = value; }
         }
 
-        long lng;
+        long lng = rnd.Next(0, 1000);
 
         [Column]
         public long Lng
@@ -91,7 +92,7 @@ namespace PerformanceTests
             set { lng = value; }
         }
 
-        int integer;
+        int integer = rnd.Next();
 
         [Column]
         public int Integer
