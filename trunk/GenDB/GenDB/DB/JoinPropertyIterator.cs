@@ -18,7 +18,7 @@ namespace GenDB.DB
         SqlDataReader reader = null;
         IEnumerator<IEntityType> entityTypeEnumerator = null;
         IEnumerable<IProperty> properties = null;
-        MSEntityPOIDListBuilder wsb = null;
+        MSJoinFieldWhereCondition wsb = null;
         IIBoToEntityTranslator translator = null;
         DataTable table;
         SqlCommand cmd = null;
@@ -48,7 +48,16 @@ namespace GenDB.DB
                 cmd.Cancel(); // Allows the reader to return immediately.
                 reader.Dispose();
             }
-            cnn.Close();
+            if (cnn != null && cnn.State == ConnectionState.Open)
+            {
+                try {
+                    cnn.Close();
+                }
+                catch(InvalidOperationException e)
+                {
+                    Console.Error.WriteLine(e);
+                }
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -182,7 +191,7 @@ namespace GenDB.DB
             //cnn = ConnectionPool.NextConnection();
             cnn = new SqlConnection(dataContext.ConnectStringWithDBName);
             cnn.Open();
-            wsb = new MSEntityPOIDListBuilder(dataContext.TypeSystem);
+            wsb = new MSJoinFieldWhereCondition(dataContext.TypeSystem);
             wsb.Visit(whereCondition);
             entityTypeEnumerator = wsb.EntityTypes.GetEnumerator();
             NextEntityType();
@@ -192,10 +201,7 @@ namespace GenDB.DB
         {
             string conditionWhereString = wsb.WhereStr;
             StringBuilder selectPart = new StringBuilder("SELECT e.EntityTypePOID, e.EntityPOID ");
-            StringBuilder joinPart = new StringBuilder(" FROM (")
-                            .Append(conditionWhereString)
-                            .Append(") ew INNER JOIN Entity e ");
-            joinPart.Append(" ON ew.EntityPOID = e.EntityPOID ");
+            StringBuilder joinPart = new StringBuilder(" FROM Entity e ");
             foreach (IProperty p in properties)
             {
                 int propertyID = p.PropertyPOID;
@@ -213,6 +219,7 @@ namespace GenDB.DB
                     case MappingType.REFERENCE:
                         select += ".ReferenceValue"; break;
                     case MappingType.STRING:
+
                         select += ".StringValue"; break;
                     default:
                         throw new Exception("Don't know how to handle mappingtype: " + p.MappingType);
@@ -230,11 +237,11 @@ namespace GenDB.DB
                 joinPart.Append(propertyID);
             }
             joinPart.Append(" \nWHERE e.EntityTypePOID = " + et.EntityTypePOID);
+            joinPart.Append (" AND ");
+            joinPart.Append (conditionWhereString);
             
             //joinPart.Append (" OPTION (LOOP JOIN) ");
             string sqlStr = selectPart.ToString() + joinPart.ToString();
-
-            Console.WriteLine(sqlStr);            
             return sqlStr;
         } // foreach EntityType
     }

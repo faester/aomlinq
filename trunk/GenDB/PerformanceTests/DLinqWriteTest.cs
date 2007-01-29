@@ -21,11 +21,11 @@ namespace PerformanceTests
         TestOutput testOutput;
         int lastInsert = 0;
 
-        public DLinqTest(TestOutput testOutput)
+        public DLinqTest(TestOutput testOutput, string dbName)
         {
             this.testOutput = testOutput;
 
-            this.db = new DLinqDB("server=.;database=dlinqperf;Integrated Security=SSPI;Timeout=0");
+            this.db = new DLinqDB("server=.;database=" + dbName + ";Integrated Security=SSPI");
             if (!db.DatabaseExists())
             {
                 Console.WriteLine("Creating DLinq db");
