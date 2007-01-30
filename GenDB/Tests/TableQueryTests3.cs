@@ -227,7 +227,23 @@ namespace QueryToSqlTranslationTests
             Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
         }
 
-                [Test]
+        [Test]
+        public void TestPlusStrings()
+        {
+            Table<TestPerson> p = from ta in ttp
+                    where ta.Name + ta.Name == "Name1Name1"
+                    select ta;
+
+            foreach(TestPerson pers in p)
+            {
+                Assert.AreEqual (pers.Name, "Name1Name1", "Error in result.");
+            }
+
+            Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
+        }
+
+
+        [Test]
         public void TestDiv()
         {
             Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
@@ -260,6 +276,7 @@ namespace QueryToSqlTranslationTests
         [Test]
         public void TestAndOperator()
         {
+            /* Burde kunne oversættes alene med BoolAnd(ta.Boo, BoolNot(ta.Boo)) */
             Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
                     where ta.Boo && ta.Boo
                     select ta;
@@ -271,5 +288,39 @@ namespace QueryToSqlTranslationTests
 
             Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
         }
+
+        [Test]
+        public void TestOrOperator()
+        {
+            /* Burde kunne oversættes alene med BoolOr(ta.Boo, ta.Boo)) */
+            Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
+                    where ta.Boo || ta.Boo
+                    select ta;
+
+            foreach(ContainsAllPrimitiveTypes capt in p)
+            {
+                Assert.IsTrue (capt.Boo || capt.Boo, "Error in result.");
+            }
+
+            Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
+        }
+
+
+        [Test]
+        public void TestOrNotOperator()
+        {
+            /* Burde kunne oversættes alene med BoolOr(ta.Boo, BoolNot(ta.Boo)) */
+            Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
+                    where ta.Boo || !ta.Boo
+                    select ta;
+
+            foreach(ContainsAllPrimitiveTypes capt in p)
+            {
+                Assert.IsTrue (capt.Boo || !capt.Boo, "Error in result.");
+            }
+
+            Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
+        }
+
     }
 }
