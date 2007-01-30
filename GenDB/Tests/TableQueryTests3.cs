@@ -196,5 +196,80 @@ namespace QueryToSqlTranslationTests
 
             Assert.AreEqual(1,p.Count,"incorrect number of persons returned");
         }
+
+        [Test]
+        public void TestMultiply()
+        {
+            Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
+                    where ta.Integer * ta.Dbl == 0.2
+                    select ta;
+
+            foreach(ContainsAllPrimitiveTypes capt in p)
+            {
+                Assert.AreEqual (0.2, capt.Integer * capt.Dbl, "Error in result.");
+            }
+
+            Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
+        }
+
+        [Test]
+        public void TestPlus()
+        {
+            Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
+                    where ta.Integer + ta.Dbl == 0.2
+                    select ta;
+
+            foreach(ContainsAllPrimitiveTypes capt in p)
+            {
+                Assert.AreEqual (0.2, capt.Integer + capt.Dbl, "Error in result.");
+            }
+
+            Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
+        }
+
+                [Test]
+        public void TestDiv()
+        {
+            Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
+                    where ta.Integer / ta.Dbl == 0.2
+                    select ta;
+
+            foreach(ContainsAllPrimitiveTypes capt in p)
+            {
+                Assert.AreEqual (0.2, capt.Integer / capt.Dbl, "Error in result.");
+            }
+
+            Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
+        }
+
+        [Test]
+        public void TestMinus()
+        {
+            Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
+                    where ta.Integer - ta.Dbl == 0.2
+                    select ta;
+
+            foreach(ContainsAllPrimitiveTypes capt in p)
+            {
+                Assert.AreEqual (0.2, capt.Integer - capt.Dbl, "Error in result.");
+            }
+
+            Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
+        }
+
+        [Test]
+        public void TestAndOperator()
+        {
+            Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
+                    where ta.Boo && ta.Boo
+                    select ta;
+
+            foreach(ContainsAllPrimitiveTypes capt in p)
+            {
+                Assert.IsTrue (capt.Boo && capt.Boo, "Error in result.");
+            }
+
+            Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
+        }
     }
 }
