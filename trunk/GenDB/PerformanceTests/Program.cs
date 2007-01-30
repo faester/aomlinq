@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.Threading;
+using System.Data.SqlClient;
 
 namespace PerformanceTests
 {
@@ -18,24 +19,24 @@ namespace PerformanceTests
             string fileName = null;
             LinkedList<int> objectCounts = new LinkedList<int>();
 
-            //GenDB.DataContext.Instance.DatabaseName = "knold";
-            //if (!GenDB.DataContext.Instance.DatabaseExists())
-            //{
-            //    GenDB.DataContext.Instance.CreateDatabase();
-            //}
-            //GenDB.DataContext.Instance.Init();
+            GenDB.DataContext.Instance.DatabaseName = "knold";
+            if (!GenDB.DataContext.Instance.DatabaseExists())
+            {
+                GenDB.DataContext.Instance.CreateDatabase();
+            }
+            GenDB.DataContext.Instance.Init();
             
-            //GenDB.Table<PerfTestAllPrimitiveTypes > table = GenDB.DataContext.Instance.CreateTable<PerfTestAllPrimitiveTypes>();
+            GenDB.Table<PerfTestAllPrimitiveTypes > table = GenDB.DataContext.Instance.CreateTable<PerfTestAllPrimitiveTypes>();
 
-            //var q = from p in table
-            //        where p.Boo == true || p.Dbl == 0.2
-            //        select p;
+            var q = from p in table
+                    where p.Dbl * p.Integer == 0.2
+                    select p;
 
-            //foreach(PerfTestAllPrimitiveTypes pt in q)
-            //{
-            //    Console.WriteLine (pt);
-            //}
-            //return;
+            foreach(PerfTestAllPrimitiveTypes pt in q)
+            {
+                Console.WriteLine (pt);
+            }
+            return;
 
             if (args.Length < 4)
             {
