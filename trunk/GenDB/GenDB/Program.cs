@@ -156,26 +156,48 @@ namespace GenDB
         public static void Main(string[] args)
         {
             DataContext dcontext = DataContext.Instance;
-            if (dcontext.DatabaseExists())
+
+            //if (!dcontext.IsInitialized)
+            //{
+            //    dcontext.DeleteDatabase();
+            //    dcontext.CreateDatabase();
+            //}
+
+            //if (!dcontext.DatabaseExists())
+            //{
+            //    dcontext.CreateDatabase();
+            //}
+
+            int objCount = 10;
+ 
+            Table<Person> tp = dcontext.CreateTable<Person>();
+            tp.Clear();
+            dcontext.SubmitChanges();
+
+            for(int i=0;i<objCount;i++)
             {
-                dcontext.DeleteDatabase(); 
+                Person p = new Person{Name = "Name"+1, Age = i};
+                if(i%2==0)
+                    p.Alive=true;
+                tp.Add(p);
             }
-            if (!dcontext.DatabaseExists())
-            {
-                dcontext.CreateDatabase();
-            }
-            dcontext.Init();
-
-
-            int objCount = 100;
-
-           
-
-
-            //Table<BOList<int>> tt = dcontext.CreateTable<BOList<int>>();
-            //throw new Exception("dd");
-
+            dcontext.SubmitChanges();
             
+            var v = from per in tp
+                    where !per.Alive || per.Alive
+                    select per;
+
+            foreach(Person person in v)
+            {
+                ObjectUtilities.PrintOut(person);
+            }
+
+            dcontext.SubmitChanges();
+            
+            Console.WriteLine("Size of table = "+v.Count);
+            Console.WriteLine("Translatable = "+v.ExprFullySqlTranslatable);
+            
+
             //BOList<Person> bolist = dcontext.BolistFactory.BOListRef <Person>();
             //for (int i = 0; i < 10; i++)
             //{
@@ -183,20 +205,20 @@ namespace GenDB
             //    bolist.Add (p);
             //}
 
-            Table<BODictionary<int, int>> table = dcontext.CreateTable<BODictionary<int, int>>();
-            table.Clear();
-            dcontext.SubmitChanges();
+            //Table<BODictionary<int, int>> table = dcontext.CreateTable<BODictionary<int, int>>();
+            //table.Clear();
+            //dcontext.SubmitChanges();
             
-            BODictionary<int, int> bodict = dcontext.BODictionaryFactory.BODictionaryInt<int,int>();
-            for(int j=0;j<10;j++)
-            {
-                bodict.Add(j,j);
-                bodict.Clear();
-            }
+            //BODictionary<int, int> bodict = dcontext.BODictionaryFactory.BODictionaryInt<int,int>();
+            //for(int j=0;j<10;j++)
+            //{
+            //    bodict.Add(j,j);
+            //    bodict.Clear();
+            //}
 
-            table.Add(bodict);
-            dcontext.SubmitChanges();
-            GC.Collect();
+            //table.Add(bodict);
+            //dcontext.SubmitChanges();
+            //GC.Collect();
     
 
 

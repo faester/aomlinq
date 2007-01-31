@@ -415,9 +415,9 @@ namespace GenDB.DB
                     " ORDER BY e.EntityPOID"
                     );
 #if DEBUG
-                Console.WriteLine("WHEREBUILDER CONSTRUCTED: " + whereStr);
-                Console.WriteLine();
-                Console.WriteLine(cmd.CommandText);
+                //Console.WriteLine("WHEREBUILDER CONSTRUCTED: " + whereStr);
+                //Console.WriteLine();
+                //Console.WriteLine(cmd.CommandText);
 #endif
 
                 cmd.Connection = cnn;

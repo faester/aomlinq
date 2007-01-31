@@ -5,7 +5,7 @@
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{9AF38389-51DB-4558-BC94-14A6E0ABF323}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>GenDB</RootNamespace>
     <AssemblyName>GenDB</AssemblyName>
@@ -13,7 +13,7 @@
     </StartupObject>
     <ManifestCertificateThumbprint>2F542EB2546F2E5FE1C1A4ADD8E7AB708D657834</ManifestCertificateThumbprint>
     <ManifestKeyFile>GenDB_TemporaryKey.pfx</ManifestKeyFile>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <PublishUrl>Y:\gendb\</PublishUrl>
     <Install>true</Install>
@@ -29,6 +29,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -105,6 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="GenDB_TemporaryKey.pfx" />
+    <BaseApplicationManifest Include="Properties\app.manifest" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

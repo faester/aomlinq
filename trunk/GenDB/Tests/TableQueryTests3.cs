@@ -278,15 +278,16 @@ namespace QueryToSqlTranslationTests
         {
             /* Burde kunne oversættes alene med BoolAnd(ta.Boo, BoolNot(ta.Boo)) */
             Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
-                    where ta.Boo && ta.Boo
+                    where ta.Boo
                     select ta;
 
             foreach(ContainsAllPrimitiveTypes capt in p)
             {
                 Assert.IsTrue (capt.Boo && capt.Boo, "Error in result.");
             }
-
+            
             Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
+
         }
 
         [Test]
