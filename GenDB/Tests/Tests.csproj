@@ -63,10 +63,6 @@
     <Compile Include="TranslationTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Component Include="lib\nunit.core.dll" />
-    <Component Include="lib\nunit.framework.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\GenDB\GenDB.csproj">
       <Project>{9AF38389-51DB-4558-BC94-14A6E0ABF323}</Project>
       <Name>GenDB</Name>

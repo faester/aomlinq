@@ -314,6 +314,16 @@ namespace GenDB
                         MethodCallExpression m_tmp = (MethodCallExpression) be.Left;
                         left = VisitMethodCall(m_tmp);
                     }
+                    else if(be.Left is MemberExpression)
+                    {
+                        MemberExpression left_me = (MemberExpression)be.Left;
+                        left = DecomposeCompositeMemberExpression(left_me);
+                    }
+                    else if(be.Left is UnaryExpression)
+                    {
+                        UnaryExpression sd = (UnaryExpression) be.Left;
+                        left = VisitBooleanMember((MemberExpression)sd.Operand, false);
+                    }
                     else
                         left = ExprNotTranslatable.Instance;
 
@@ -327,6 +337,20 @@ namespace GenDB
                     {
                         MethodCallExpression m_tmp = (MethodCallExpression) be.Right;
                         right = VisitMethodCall(m_tmp);
+                    }
+                    else if(be.Right is MemberExpression)
+                    {
+                        MemberExpression right_me = (MemberExpression)be.Right;
+                        right = DecomposeCompositeMemberExpression(right_me);
+                    }
+                    else if(be.Right is UnaryExpression)
+                    {
+                        bool boolOp=false;
+                        if(be.Left.NodeType.ToString() != "Not")
+                            boolOp=true;
+
+                        UnaryExpression sd = (UnaryExpression) be.Right;
+                        right = VisitBooleanMember((MemberExpression)sd.Operand, boolOp);
                     }
                     else 
                         right = ExprNotTranslatable.Instance; 
@@ -348,6 +372,20 @@ namespace GenDB
                         MethodCallExpression m_tmp = (MethodCallExpression) be.Left;
                         left = VisitMethodCall(m_tmp);
                     }
+                    else if(be.Left is MemberExpression)
+                    {
+                        MemberExpression left_me = (MemberExpression)be.Left;
+                        left = DecomposeCompositeMemberExpression(left_me);
+                    }
+                    else if(be.Left is UnaryExpression)
+                    {
+                        bool boolOp=false;
+                        if(be.Left.NodeType.ToString() != "Not")
+                            boolOp=true;
+
+                        UnaryExpression sd = (UnaryExpression) be.Left;
+                        left = VisitBooleanMember((MemberExpression)sd.Operand, boolOp);   
+                    }
                     else
                         left = ExprNotTranslatable.Instance;
                    
@@ -359,6 +397,20 @@ namespace GenDB
                     else if(be.Right is MethodCallExpression)
                     {
                         right = VisitMethodCall((MethodCallExpression) be.Right);
+                    }
+                    else if(be.Right is MemberExpression)
+                    {
+                        MemberExpression right_me = (MemberExpression)be.Right;
+                        right = DecomposeCompositeMemberExpression(right_me);
+                    }
+                    else if(be.Right is UnaryExpression)
+                    {
+                        bool boolOp=false;
+                        if(be.Left.NodeType.ToString() != "Not")
+                            boolOp=true;
+
+                        UnaryExpression sd = (UnaryExpression) be.Right;
+                        right = VisitBooleanMember((MemberExpression)sd.Operand, boolOp);
                     }
                     else
                         right = ExprNotTranslatable.Instance;
@@ -425,7 +477,19 @@ namespace GenDB
             else if(expr.NodeType.ToString()=="Not")
             {
                 UnaryExpression ue = (UnaryExpression) expr;
-                return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
+                if(ue.Operand is BinaryExpression)
+                {
+                    return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
+                } 
+                else if(ue.Operand is MemberExpression)
+                {
+                    //return new ExprNot(Vis
+                    throw new Exception("nor implemented");
+                }
+                else 
+                {
+                    throw new Exception("unknown UnaryExpression Operand");
+                }
             }
             else if(expr.NodeType.ToString()=="OrElse")
             {   
@@ -440,6 +504,20 @@ namespace GenDB
             }
             else 
                 return ExprNotTranslatable.Instance;
+        }
+
+        internal IExpression DecomposeCompositeMemberExpression(MemberExpression me)
+        {
+            bool boolOp=false;
+            if(me.NodeType.ToString() != "Not")
+                boolOp=true;
+
+            switch(typeSystem.FindMappingType(me.Type))
+            {
+                case MappingType.BOOL:
+                    return VisitBooleanMember(me, boolOp);
+            }
+            return ExprNotTranslatable.Instance;
         }
 
         internal IExpression DecomposeQueryLE(Expression expr)
