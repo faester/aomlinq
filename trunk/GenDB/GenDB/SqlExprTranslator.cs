@@ -477,19 +477,7 @@ namespace GenDB
             else if(expr.NodeType.ToString()=="Not")
             {
                 UnaryExpression ue = (UnaryExpression) expr;
-                if(ue.Operand is BinaryExpression)
-                {
-                    return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
-                } 
-                else if(ue.Operand is MemberExpression)
-                {
-                    //return new ExprNot(Vis
-                    throw new Exception("nor implemented");
-                }
-                else 
-                {
-                    throw new Exception("unknown UnaryExpression Operand");
-                }
+                return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
             }
             else if(expr.NodeType.ToString()=="OrElse")
             {   
