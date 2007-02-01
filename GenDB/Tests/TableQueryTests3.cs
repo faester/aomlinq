@@ -262,13 +262,18 @@ namespace QueryToSqlTranslationTests
         public void TestDiv()
         {
             Table<ContainsAllPrimitiveTypes> p = from ta in tableAllPrimitives
-                    where ta.Integer / ta.Dbl == 0.2
+                    where ta.Dbl > 0 && ta.Integer / ta.Dbl == ta.Integer
                     select ta;
+
+            bool foundSome = false;
 
             foreach(ContainsAllPrimitiveTypes capt in p)
             {
-                Assert.AreEqual(0.2, capt.Integer / capt.Dbl, "Error in result.");
+                Assert.AreEqual(capt.Integer, capt.Integer / capt.Dbl, "Error in result.");
+                foundSome = true;
             }
+
+            Assert.IsTrue(foundSome, "Did not find any results");
 
             Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
         }
