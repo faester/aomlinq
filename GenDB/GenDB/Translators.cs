@@ -11,7 +11,7 @@ namespace GenDB
         static Type bolistGeneric = typeof(GenDB.BOList<>);
 
         Dictionary<Type, IIBoToEntityTranslator> clrtype2translator = new Dictionary<Type, IIBoToEntityTranslator>();
-        Dictionary<long, IIBoToEntityTranslator> etPOID2translator = new Dictionary<long, IIBoToEntityTranslator>();
+        Dictionary<int, IIBoToEntityTranslator> etPOID2translator = new Dictionary<int, IIBoToEntityTranslator>();
         DataContext dataContext = null;
 
         internal TranslatorSet(DataContext dataContext)
@@ -43,7 +43,7 @@ namespace GenDB
             }
         }
 
-        internal IIBoToEntityTranslator GetTranslator(long entityTypePOID)
+        internal IIBoToEntityTranslator GetTranslator(int entityTypePOID)
         {
             try {
                 return etPOID2translator[entityTypePOID];
