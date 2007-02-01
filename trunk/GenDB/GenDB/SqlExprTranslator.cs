@@ -47,25 +47,22 @@ namespace GenDB
             MemberExpression mTmp;
             NestedReference nref=null;
             NestedReference nTmp=null;
-            //if(size>1)
-            //{
-                for(int i=0; i<size; i++)
+            for(int i=0; i<size; i++)
+            {
+                mTmp=me;
+                Type type = mTmp.Expression.Type;
+                if(!typeSystem.IsTypeKnown(type))
                 {
-                    mTmp=me;
-                    Type type = mTmp.Expression.Type;
-                    if(!typeSystem.IsTypeKnown(type))
-                    {
-                            typeSystem.RegisterType(type);
-                    }
-
-                    IEntityType et = typeSystem.GetEntityType(type);
-                    IProperty prop = et.GetProperty(mTmp.Member.Name);
-                    nref = new NestedReference(nTmp,new CstProperty(prop));
-                    nTmp = nref;
-                    if(mTmp.Expression.NodeType.ToString() == "MemberAccess")
-                        me = (MemberExpression)mTmp.Expression;
+                        typeSystem.RegisterType(type);
                 }
-            //}            
+
+                IEntityType et = typeSystem.GetEntityType(type);
+                IProperty prop = et.GetProperty(mTmp.Member.Name);
+                nref = new NestedReference(nTmp,new CstProperty(prop));
+                nTmp = nref;
+                if(mTmp.Expression.NodeType.ToString() == "MemberAccess")
+                    me = (MemberExpression)mTmp.Expression;
+            }   
             return nref;
         }
 
@@ -73,44 +70,108 @@ namespace GenDB
         {
             ReadOnlyCollection<Expression> roc = mce.Parameters;
             IValue[] parArr= new IValue[2];
-
-            if(roc.Count==2)
+            
+            for(int i=0;i<2;i++)
             {
-                if(roc[0] is MemberExpression)
+                if(roc[i] is MemberExpression)
                 {
-                    MemberExpression tmp = (MemberExpression)roc[0];  
-                    parArr[0] = VisitMemberExpression(tmp);
+                    MemberExpression tmp = (MemberExpression)roc[i];  
+                    parArr[i] = VisitMemberExpression(tmp);
+                }
+                else if(roc[i] is MethodCallExpression)
+                {
+                    if(roc[i].NodeType.ToString()=="MethodCallVirtual")
+                        parArr[i] = ValNotTranslatable.Instance;
+                    else
+                    {
+                        MethodCallExpression mexpr = (MethodCallExpression) roc[i];
+                        parArr[i] = DecomposeMethodCall(mexpr);
+                    }
                     
-                    switch(typeSystem.FindMappingType(roc[1].Type))
+                }
+                else if(roc[i] is ConstantExpression)
+                {
+                    ConstantExpression ce = (ConstantExpression)roc[i];
+                    switch(typeSystem.FindMappingType(roc[i].Type))
                     {
                         case MappingType.STRING:
-                            parArr[1] = new CstString(roc[1].ToString().Trim('"'));
+                            parArr[i] = new CstString(roc[i].ToString().Trim('"'));
                             break;
+
                         case MappingType.DATETIME:
-                            ConstantExpression ce = (ConstantExpression)roc[1];
-                            parArr[1] = new CstDateTime((DateTime)ce.Value);
+                            parArr[i] = new CstDateTime((DateTime)ce.Value);
                             break;
+
+                        case MappingType.LONG:
+                            parArr[i] = new CstLong(System.Convert.ToInt64(ce.Value.ToString()));
+                            break;
+                    
+                        case MappingType.DOUBLE:
+                            parArr[i] = new CstDouble(System.Convert.ToDouble(ce.Value.ToString()));
+                            break;
+                       
                         default:
-                            parArr[1] = ValNotTranslatable.Instance;
+                            parArr[i] = ValNotTranslatable.Instance;
                             break;
                     }
-                        
-                    if(mce.Method.Name=="op_Equality")
-                        return new GenDB.BoolEquals (parArr[0], parArr[1]);
-                    else if(mce.Method.Name=="op_Inequality")
-                        return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
-                    else 
-                        return ExprNotTranslatable.Instance;
                 }
                 else
                 {
                     return GenDB.ExprNotTranslatable.Instance;
                 }
-            } 
-            else
-            {
-                return ExprNotTranslatable.Instance;
             }
+
+            if(mce.Method.Name=="op_Equality")
+                return new GenDB.BoolEquals (parArr[0], parArr[1]);
+            else if(mce.Method.Name=="op_Inequality")
+                return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
+            else 
+                return ExprNotTranslatable.Instance;
+        }
+
+        internal IValue DecomposeMethodCall(MethodCallExpression mce)
+        {
+            IValue l=null, r=null;
+            if(mce.Method.ReturnParameter.Member.Name=="Concat") 
+            {
+                if(mce.Parameters[0] is MemberExpression)
+                {
+                    l = VisitMemberExpression((MemberExpression)mce.Parameters[0]);
+                }
+                else if(mce.Parameters[0] is ConstantExpression)
+                {
+                    ConstantExpression ce = (ConstantExpression) mce.Parameters[0];
+                    if(ce.Type.Name=="String")
+                        l = new GenDB.CstString(ce.Value.ToString());
+                }
+                else if(mce.Parameters[0] is UnaryExpression)
+                {
+                    UnaryExpression ue = (UnaryExpression) mce.Parameters[0];
+                    l = VisitUnaryExpressionValue(ue);
+                }
+
+
+                if(mce.Parameters[1] is MemberExpression)
+                {
+                    r = VisitMemberExpression((MemberExpression)mce.Parameters[1]);
+                }
+                else if(mce.Parameters[1] is ConstantExpression)
+                {
+                    ConstantExpression ce = (ConstantExpression) mce.Parameters[1];
+                    if(ce.Type.Name=="String")
+                        r = new GenDB.CstString(ce.Value.ToString());
+                }
+                else if(mce.Parameters[1] is UnaryExpression)
+                {
+                    UnaryExpression ue = (UnaryExpression) mce.Parameters[1];
+                    r = VisitUnaryExpressionValue(ue);
+                }
+
+            }
+            else
+                throw new Exception("Unknown return parameter: "+mce.Method.ReturnParameter.Member.Name);
+            
+            return new OPPlus(l,r);
         }
 
         internal IValue DecomposeConstant(ConstantExpression ce)
@@ -276,7 +337,6 @@ namespace GenDB
                 {
                     MemberExpression mem = (MemberExpression) un.Operand;
                     parArr[1] = VisitMemberExpression(mem);
-                    //throw new Exception("not implemented");
                 }
                 else
                     throw new Exception("Unknown exception type: "+un.Operand.NodeType.ToString());
