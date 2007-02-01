@@ -81,12 +81,30 @@ namespace GenDB
     #region ArithmeticOperators
     abstract class ArithmeticOperator : IValue
     {
+        static bool IsString(IValue val)
+        {
+            return val is CstString || (val is CstProperty && (val as CstProperty).Property.MappingType == MappingType.STRING);
+        }
+
         IValue left, right;
+        bool leftIsString, rightIsString;
+
+        public bool RightIsString
+        {
+            get { return rightIsString; }
+        }
+
+        public bool LeftIsString
+        {
+            get { return leftIsString; }
+        }
 
         public ArithmeticOperator(IValue left, IValue right)
         {
             this.left = left;
             this.right = right;
+            rightIsString = ArithmeticOperator.IsString (right);
+            leftIsString = ArithmeticOperator.IsString (left);
         }
 
         public IValue Left

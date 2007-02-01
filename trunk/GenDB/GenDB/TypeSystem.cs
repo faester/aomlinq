@@ -7,10 +7,10 @@ using GenDB.DB;
 namespace GenDB
 {
     /// <summary>
-    /// Vedligeholder typebeskrivelser og oversættere til de forskellige klasser.
+    /// Vedligeholder sammenhængen mellem IEntityType-objekter og tilsvarende C#-klasser.
     /// 
-    /// Aktuelt skaber det Exceptions, hvis der ændres index typer index en eksisterende DB.
-    /// Det skal formentlig udbedres, da det index nogen grad fjerner ideen i en generisk
+    /// Aktuelt skaber det Exceptions, hvis der ændres i typer i en eksisterende DB.
+    /// Det skal formentlig udbedres, da det i nogen grad fjerner ideen i en generisk
     /// database. Der skal dog fastlægges en semantik omkring dette, og det er også 
     /// muligt vi skal vælge at acceptere, at databasen skal nulstilles, når man ændrer
     /// i klassehierarkiet. Det er trods alt ikke afgørende for at undersøge, om man 
@@ -435,14 +435,6 @@ namespace GenDB
                 ptid2pt.Add(res.PropertyTypePOID, res);
             }
             return res;
-        }
-    }
-
-    public static class IBOExtensions
-    {
-        public static int GetEntityPOID(this IBusinessObject ibo)
-        {
-            throw new Exception("Hey dummy, this doesn't work!");
         }
     }
 }
