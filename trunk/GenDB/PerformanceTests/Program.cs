@@ -4,6 +4,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Threading;
 using System.Data.SqlClient;
+using GenDB;
 
 namespace PerformanceTests
 {
@@ -18,6 +19,10 @@ namespace PerformanceTests
             int repetitions = 0;
             string fileName = null;
             LinkedList<int> objectCounts = new LinkedList<int>();
+
+            PerfTestAllPrimitiveTypes coocoo = new PerfTestAllPrimitiveTypes();
+
+            Console.WriteLine(coocoo.GetEntityPOID());
 
             GenDB.DataContext.Instance.DatabaseName = "knold";
             if (!GenDB.DataContext.Instance.DatabaseExists())

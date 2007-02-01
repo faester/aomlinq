@@ -432,4 +432,12 @@ namespace GenDB
             return res;
         }
     }
+
+    public static class IBOExtensions
+    {
+        public static int GetEntityPOID(this IBusinessObject ibo)
+        {
+            throw new Exception("Hey dummy, this doesn't work!");
+        }
+    }
 }
