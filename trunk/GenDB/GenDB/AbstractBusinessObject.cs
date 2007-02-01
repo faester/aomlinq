@@ -11,13 +11,6 @@ namespace GenDB
     /// </summary>
     public abstract class AbstractBusinessObject : IBusinessObject
     {
-        //private DBTag dBTag;
-        //public DBTag DBTag
-        //{
-        //    get { return dBTag; }
-        //    set { dBTag = value; }
-        //}
-
         DBIdentifier dBIdentifier;
 
         public DBIdentifier DBIdentity

@@ -6,7 +6,6 @@ using System.Data.SqlClient;
 using System.Data;
 using GenDB;
 
-
 namespace GenDB.DB
 {
     class JoinPropertyIterator : IEnumerator<IBusinessObject>, IEnumerable<IBusinessObject>
