@@ -5,6 +5,10 @@ using GenDB.DB;
 
 namespace GenDB
 {
+    /// <summary>
+    /// Interface for en visitor, der kan behandle et
+    /// udtryk i abstrakt syntaks. 
+    /// </summary>
     interface IAbsSyntaxVisitor
     {
         void Visit(IWhereable clause);
@@ -34,15 +38,20 @@ namespace GenDB
         void VisitArithmeticOperator(ArithmeticOperator oper);
     }
 
+    /// <summary>
+    /// Roden af hierarkiet i den abstrakte syntaks. 
+    /// Definerer kun selve visit-metoden, der benyttes 
+    /// i forbindelse med double-dispatch.
+    /// </summary>
     interface IWhereable
     {
         void AcceptVisitor(IAbsSyntaxVisitor visitor);
     }
 
     /// <summary>
-    /// An operator such as equals, less than etc.
+    /// Beskriver en boolsk operator. 
     /// </summary>
-    interface IBoolOperator : IExpression {}
+    interface IBoolOperator : IExpression { }
 
     /// <summary>
     /// An expression. 
@@ -52,17 +61,17 @@ namespace GenDB
     /// <summary>
     /// Something with a value
     /// </summary>
-    interface IValue : IWhereable { } 
+    interface IValue : IWhereable { }
 
     /// <summary>
     /// Constant values.
     /// </summary>
-    interface IConstant : IValue    {}
+    interface IConstant : IValue { }
 
     /// <summary>
     /// Numerical values. Can be compared using LE, GT etc.
     /// </summary>
-    interface INumerical : IConstant {}
+    interface INumerical : IConstant { }
 
     /// <summary>
     /// String values. More restricted comparison options than numerical.
@@ -70,7 +79,7 @@ namespace GenDB
     interface IStringvalue : IConstant { }
 
     #region ArithmeticOperators
-    abstract class ArithmeticOperator : IValue 
+    abstract class ArithmeticOperator : IValue
     {
         IValue left, right;
 
@@ -80,15 +89,18 @@ namespace GenDB
             this.right = right;
         }
 
-        public IValue Left { 
-            get { return left; } 
-        }
-        
-        public IValue Right { 
-            get { return right; } 
+        public IValue Left
+        {
+            get { return left; }
         }
 
-        public abstract string OperatorSymbol {
+        public IValue Right
+        {
+            get { return right; }
+        }
+
+        public abstract string OperatorSymbol
+        {
             get;
         }
 
@@ -100,8 +112,8 @@ namespace GenDB
 
     class OPMult : ArithmeticOperator
     {
-        public OPMult (IValue left, IValue right) 
-            : base (left, right)
+        public OPMult(IValue left, IValue right)
+            : base(left, right)
         { }
 
         public override string OperatorSymbol
@@ -112,8 +124,8 @@ namespace GenDB
 
     class OPDiv : ArithmeticOperator
     {
-        public OPDiv (IValue left, IValue right) 
-            : base (left, right)
+        public OPDiv(IValue left, IValue right)
+            : base(left, right)
         { }
 
         public override string OperatorSymbol
@@ -125,8 +137,8 @@ namespace GenDB
 
     class OPPlus : ArithmeticOperator
     {
-        public OPPlus (IValue left, IValue right) 
-            : base (left, right)
+        public OPPlus(IValue left, IValue right)
+            : base(left, right)
         { }
 
         public override string OperatorSymbol
@@ -137,8 +149,8 @@ namespace GenDB
 
     class OPMinus : ArithmeticOperator
     {
-        public OPMinus (IValue left, IValue right) 
-            : base (left, right)
+        public OPMinus(IValue left, IValue right)
+            : base(left, right)
         { }
         public override string OperatorSymbol
         {
@@ -158,20 +170,32 @@ namespace GenDB
             set { CstThis.instance = value; }
         }
 
-        public void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitCstThis(this);
         }
 
         public override string ToString()
         {
-           return "CstThis";
+            return "CstThis";
         }
     }
-    
+
+    /// <summary>
+    /// Benyttes til at indikere, at en knude i et Expression-træ ikke 
+    /// kan oversættes til SQL, eller i hvert fald at oversættelsen ikke
+    /// er understøttet af frameworket. 
+    /// 
+    /// SqlExpressionTranslator-objekter indsætter et element af denne 
+    /// type, i den abstrakte syntaks, der produceres når et Expression-træ
+    /// parses, hvorved det bliver muligt at adskille de dele af det oprindelige
+    /// udtryk, der kan oversættes til SQL, og samtidig afgøre, om det efterfølgende
+    /// er nødvendigt at teste resultatsættet fra databasen mod den oprindelige 
+    /// Expression, i form af dens kompilerede Func &gt; T, boolean &lt; -udtryk.
+    /// </summary>
     class ExprNotTranslatable : IExpression
     {
-        private ExprNotTranslatable(){}
+        private ExprNotTranslatable() { }
 
         private static ExprNotTranslatable instance = new ExprNotTranslatable();
 
@@ -180,7 +204,7 @@ namespace GenDB
             get { return instance; }
         }
 
-        
+
 
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
@@ -206,7 +230,7 @@ namespace GenDB
             get { return ExprIsTrue.instance; }
         }
 
-        public void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitExprIsTrue(this);
         }
@@ -229,7 +253,7 @@ namespace GenDB
 
         public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
-            visitor.VisitValNotTranslatable (this);
+            visitor.VisitValNotTranslatable(this);
         }
 
     }
@@ -245,11 +269,11 @@ namespace GenDB
             get { return ExprIsFalse.instance; }
         }
 
-        public void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitExprIsFalse(this);
         }
-        
+
         public override string ToString()
         {
             return "CstIsFalse";
@@ -271,7 +295,7 @@ namespace GenDB
             this.expression = expr;
         }
 
-        public void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitNotExpr(this);
         }
@@ -296,9 +320,9 @@ namespace GenDB
             this.clrType = clrType;
         }
 
-        public void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
-            visitor.VisitInstanceOf (this);
+            visitor.VisitInstanceOf(this);
         }
         public override string ToString()
         {
@@ -338,7 +362,7 @@ namespace GenDB
 
         public override void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
-            visitor.VisitAndExpr (this);
+            visitor.VisitAndExpr(this);
         }
 
         public override string ToString()
@@ -349,7 +373,7 @@ namespace GenDB
 
     class ExprOr : AbsBinaryExpression
     {
-        public ExprOr(IExpression l, IExpression r) : base (l, r) { /* empty */ }
+        public ExprOr(IExpression l, IExpression r) : base(l, r) { /* empty */ }
 
         public override void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
@@ -375,7 +399,7 @@ namespace GenDB
             get { return right; }
         }
 
-        public BinaryOperator (IValue left, IValue right)
+        public BinaryOperator(IValue left, IValue right)
         {
             this.left = left;
             this.right = right;
@@ -384,58 +408,58 @@ namespace GenDB
         public abstract void AcceptVisitor(IAbsSyntaxVisitor visitor);
     }
 
-    class BoolEquals :  BinaryOperator, IBoolOperator
+    class BoolEquals : BinaryOperator, IBoolOperator
     {
         public BoolEquals(IValue left, IValue right) : base(left, right) { }
 
-        public override void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        public override void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitOPEquals(this);
         }
 
         public override string ToString()
         {
-            return "OP_Equals(" + Left.ToString() + ","  + Right.ToString() + ")";
+            return "OP_Equals(" + Left.ToString() + "," + Right.ToString() + ")";
         }
     }
 
     class BoolLessThan : BinaryOperator, IBoolOperator
     {
         public BoolLessThan(IValue left, IValue right) : base(left, right) { }
-        public override void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        public override void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitOPLessThan(this);
         }
         public override string ToString()
         {
-            return "OP_LessThan(" + Left.ToString() + ","  + Right.ToString() + ")";
+            return "OP_LessThan(" + Left.ToString() + "," + Right.ToString() + ")";
         }
     }
 
     class BoolGreaterThan : BinaryOperator, IBoolOperator
     {
         public BoolGreaterThan(IValue left, IValue right) : base(left, right) { }
-        public override void AcceptVisitor (IAbsSyntaxVisitor visitor)
+        public override void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitOPGreaterThan(this);
         }
-                public override string ToString()
+        public override string ToString()
         {
-            return "OP_GreaterThan(" + Left.ToString() + ","  + Right.ToString() + ")";
+            return "OP_GreaterThan(" + Left.ToString() + "," + Right.ToString() + ")";
         }
 
     }
 
     class OP_NotEquals : BinaryOperator, IBoolOperator
     {
-        public OP_NotEquals(IValue left, IValue right) : base (left, right) {}
+        public OP_NotEquals(IValue left, IValue right) : base(left, right) { }
         public override void AcceptVisitor(IAbsSyntaxVisitor visitor)
         {
             visitor.VisitOPNotEquals(this);
         }
-                     public override string ToString()
+        public override string ToString()
         {
-            return "OP_NotEquals(" + Left.ToString() + ","  + Right.ToString() + ")";
+            return "OP_NotEquals(" + Left.ToString() + "," + Right.ToString() + ")";
         }
 
     }
@@ -451,7 +475,7 @@ namespace GenDB
 
         internal IProperty Property
         {
-            get { return property; }    
+            get { return property; }
         }
 
         public CstProperty(IProperty property)
@@ -531,7 +555,7 @@ namespace GenDB
             get { return ch; }
         }
 
-        public CstChar (char ch)
+        public CstChar(char ch)
         {
             this.ch = ch;
         }
@@ -544,14 +568,14 @@ namespace GenDB
         public override string ToString()
         {
             return "CstChar (" + this.ch + ")";
-        }     
+        }
     }
 
     class CstBool : IConstant
     {
         bool value;
 
-        public CstBool (bool value)
+        public CstBool(bool value)
         {
             this.value = value;
         }
@@ -591,7 +615,7 @@ namespace GenDB
         {
             visitor.VisitCstLong(this);
         }
-            public override string ToString()
+        public override string ToString()
         {
             return "CstLong (" + value + ")";
         }
@@ -601,7 +625,7 @@ namespace GenDB
     {
         double value;
 
-        public CstDouble (double value)
+        public CstDouble(double value)
         {
             this.value = value;
         }
@@ -615,7 +639,7 @@ namespace GenDB
         {
             visitor.VisitCstDouble(this);
         }
-            public override string ToString()
+        public override string ToString()
         {
             return "CstDouble (" + value + ")";
         }
@@ -624,7 +648,7 @@ namespace GenDB
     /// <summary>
     /// A reference to an object.
     /// </summary>
-    class VarReference : IValue 
+    class VarReference : IValue
     {
         /// <summary>
         /// Stores the object to test internally, since it may
@@ -635,16 +659,16 @@ namespace GenDB
 
         public IBOReference Value
         {
-            get 
+            get
             {
                 if (reference == null) { return new IBOReference(true); }
                 IBusinessObject referencedObject = !reference.IsAlive ? null : (IBusinessObject)reference.Target;
-                if (referencedObject == null 
+                if (referencedObject == null
                     || !referencedObject.DBIdentity.IsPersistent)
                 {
                     return new IBOReference(true);
                 }
-                else 
+                else
                 {
                     return new IBOReference(referencedObject.DBIdentity);
                 }
@@ -704,7 +728,7 @@ namespace GenDB
             get { return innerReference; }
         }
 
-        public NestedReference (NestedReference inner, CstProperty property)
+        public NestedReference(NestedReference inner, CstProperty property)
         {
             innerReference = inner;
             this.cstProperty = property;
