@@ -168,35 +168,5 @@ namespace BOListTests
             }
             Assert.AreEqual(ELEMENTS_TO_INSERT, listCount, "Wrong number of lists returned.");
         }
-
-
-        [Test]
-        public void TestBODictOfInt()
-        {
-            Table<BODictionary<int, int>> table = dataContext.CreateTable<BODictionary<int, int>>();
-            table.Clear();
-            dataContext.SubmitChanges();
-            for(int i=0;i<ELEMENTS_TO_INSERT;i++)
-            {
-                BODictionary<int,int> bodict = dataContext.BODictionaryFactory.BODictionaryInt<int,int>();
-                for(int j=0;j<LIST_LENGTH;j++)
-                {
-                    bodict.Add(i+j,j);
-                    bodict.Clear();
-                }
-                table.Add(bodict);
-            }
-            //dataContext.SubmitChanges();
-            //GC.Collect();
-            int c=0;
-            foreach(BODictionary<int,int> bodict in table)
-            {
-                //BOList<int> bokeys = (BOList<int>)bodict.Values.Count;
-                Console.WriteLine(bodict.Keys.Count);
-                c++;
-            }
-
-            Assert.IsTrue(true);
-        }
     }
 }
