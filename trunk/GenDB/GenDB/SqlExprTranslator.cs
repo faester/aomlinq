@@ -16,6 +16,13 @@ namespace GenDB
         { }
     }
 
+    public class DivisionByZeroNotAllowedException : Exception
+    {
+        public DivisionByZeroNotAllowedException()
+            : base("Division by zero is no allowed")
+        { }
+    }
+
     internal class SqlExprTranslator
     {
         TypeSystem typeSystem; 
@@ -113,6 +120,86 @@ namespace GenDB
             }
         }
 
+        internal IValue DecomposeConstant(ConstantExpression ce)
+        {
+            switch(typeSystem.FindMappingType(ce.Type))
+                {
+                    case MappingType.BOOL:
+                        return new GenDB.CstBool((bool)ce.Value);
+                    
+                    case MappingType.LONG:
+                        return new CstLong(System.Convert.ToInt64(ce.Value.ToString()));
+                    
+                    case MappingType.DOUBLE:
+                        return new CstDouble(System.Convert.ToDouble(ce.Value.ToString()));
+                    
+                    default:
+                        return ValNotTranslatable.Instance;
+                }
+        }
+
+        internal IValue DecomposeBinaryOperator(BinaryExpression be)
+        {
+            IValue l=null, r=null;
+            if(be.Left is UnaryExpression) 
+            {
+                l = VisitUnaryExpressionValue((UnaryExpression)be.Left);
+            }
+            else if(be.Left is MemberExpression)
+            {
+                l = VisitMemberExpression((MemberExpression) be.Left);
+            }
+            else if(be.Left is ConstantExpression)
+            {
+                int i = Int32.Parse(((ConstantExpression)be.Right).Value.ToString());
+                if(i==0)
+                    throw new DivideByZeroException();
+
+                l = DecomposeConstant((ConstantExpression)be.Left);
+            }
+            else
+                l = ValNotTranslatable.Instance;
+
+            if(be.Right is UnaryExpression) 
+            {
+                r = VisitUnaryExpressionValue((UnaryExpression)be.Right);
+            }
+            else if(be.Right is MemberExpression)
+            {
+                r = VisitMemberExpression((MemberExpression) be.Right);
+            }
+            else if(be.Right is ConstantExpression)
+            {
+                int i = Int32.Parse(((ConstantExpression)be.Right).Value.ToString());
+                if(i==0)
+                    throw new DivideByZeroException();
+                
+                r = DecomposeConstant((ConstantExpression)be.Right);
+            }
+            else
+                r = ValNotTranslatable.Instance;
+
+            string opStr = be.NodeType.ToString();
+            if(opStr=="Add")
+            {
+                return new GenDB.OPPlus(l, r);
+            }
+            else if(opStr=="Subtract")
+            {
+                return new GenDB.OPMinus(l,r);
+            }
+            else if(opStr=="Multiply")
+            {
+                return new GenDB.OPMult(l,r);
+            }
+            else if(opStr=="Divide")
+            {
+                return new GenDB.OPDiv(l,r);
+            }
+            else
+                throw new Exception("what operator?");
+        }
+
         internal IExpression VisitBinaryExpression(BinaryExpression be)
         {
             Expression expr = (Expression) be;
@@ -141,7 +228,7 @@ namespace GenDB
             }
             else if(be.Left is BinaryExpression)
             {
-                left = VisitExpr(be.Left);
+                parArr[0] = DecomposeBinaryOperator((BinaryExpression)be.Left);
             }
             else
                 parArr[0] = ValNotTranslatable.Instance;
@@ -149,6 +236,14 @@ namespace GenDB
             // doing the right side
             if(be.Right.ToString()=="null")
                 parArr[1] = new VarReference(null);
+            else if(be.Right is MemberExpression)
+            {
+                me = (MemberExpression)be.Right;
+                if(IsMemberAPublicField(me))
+                    throw new FieldsNotAllowedInConditionsException();
+                else
+                    parArr[1] = VisitMemberExpression((MemberExpression) be.Right);
+            }
             else if(be.Right is ConstantExpression)
             {
                 switch(typeSystem.FindMappingType(expr.Type))
@@ -245,6 +340,8 @@ namespace GenDB
             }
             else
             {
+                // tmp exception
+                throw new Exception("stop");
                 return ValNotTranslatable.Instance;
             }
         }
@@ -489,6 +586,24 @@ namespace GenDB
             else if(expr.NodeType.ToString()=="MethodCall")
             {
                 return VisitMethodCall((MethodCallExpression)expr);
+            }
+            else if(expr.NodeType.ToString()=="Add") 
+            {
+                BinaryExpression be = (BinaryExpression) expr;
+                return VisitBinaryExpression(be);
+                //return new OPMult(VisitMemberExpression((MemberExpression)be.Left), VisitMemberExpression((MemberExpression)be.Right));
+            }
+            else if(expr.NodeType.ToString()=="Sub")
+            {
+                throw new Exception("not implemented");
+            }
+            else if(expr.NodeType.ToString()=="Div")
+            {
+                throw new Exception("not implemented");
+            }
+            else if(expr.NodeType.ToString()=="Mul")
+            {
+                throw new Exception("not implemented");
             }
             else 
                 return ExprNotTranslatable.Instance;
