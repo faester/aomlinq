@@ -17,9 +17,9 @@ namespace GenDB
         void VisitCstDouble(CstDouble cd);
         void VisitCstReference(VarReference cr);
         void VisitNestedReference(NestedReference pro);
-        void VisitOPEquals(OP_Equals eq);
-        void VisitOPLessThan(OP_LessThan lt);
-        void VisitOPGreaterThan(OP_GreaterThan gt);
+        void VisitOPEquals(BoolEquals eq);
+        void VisitOPLessThan(BoolLessThan lt);
+        void VisitOPGreaterThan(BoolGreaterThan gt);
         void VisitNotExpr(ExprNot expr);
         void VisitAndExpr(ExprAnd expr);
         void VisitOrExpr(ExprOr expr);
@@ -31,6 +31,7 @@ namespace GenDB
         void VisitExprIsFalse(ExprIsFalse valueIsFalse);
         void VisitNotSqlTranslatable(ExprNotTranslatable nts);
         void VisitValNotTranslatable(ValNotTranslatable cst);
+        void VisitArithmeticOperator(ArithmeticOperator oper);
     }
 
     interface IWhereable
@@ -66,8 +67,85 @@ namespace GenDB
     /// <summary>
     /// String values. More restricted comparison options than numerical.
     /// </summary>
-    interface IStringvalue : IConstant {}
+    interface IStringvalue : IConstant { }
 
+    #region ArithmeticOperators
+    abstract class ArithmeticOperator : IValue 
+    {
+        IValue left, right;
+
+        public ArithmeticOperator(IValue left, IValue right)
+        {
+            this.left = left;
+            this.right = right;
+        }
+
+        public IValue Left { 
+            get { return left; } 
+        }
+        
+        public IValue Right { 
+            get { return right; } 
+        }
+
+        public abstract string OperatorSymbol {
+            get;
+        }
+
+        public void AcceptVisitor(IAbsSyntaxVisitor visitor)
+        {
+            visitor.VisitArithmeticOperator(this);
+        }
+    }
+
+    class OPMult : ArithmeticOperator
+    {
+        public OPMult (IValue left, IValue right) 
+            : base (left, right)
+        { }
+
+        public override string OperatorSymbol
+        {
+            get { return "*"; }
+        }
+    }
+
+    class OPDiv : ArithmeticOperator
+    {
+        public OPDiv (IValue left, IValue right) 
+            : base (left, right)
+        { }
+
+        public override string OperatorSymbol
+        {
+            get { return "/"; }
+        }
+    }
+
+
+    class OPPlus : ArithmeticOperator
+    {
+        public OPPlus (IValue left, IValue right) 
+            : base (left, right)
+        { }
+
+        public override string OperatorSymbol
+        {
+            get { return "+"; }
+        }
+    }
+
+    class OPMinus : ArithmeticOperator
+    {
+        public OPMinus (IValue left, IValue right) 
+            : base (left, right)
+        { }
+        public override string OperatorSymbol
+        {
+            get { return "-"; }
+        }
+    }
+    #endregion
 
     class CstThis : IValue
     {
@@ -306,9 +384,9 @@ namespace GenDB
         public abstract void AcceptVisitor(IAbsSyntaxVisitor visitor);
     }
 
-    class OP_Equals :  BinaryOperator, IBoolOperator
+    class BoolEquals :  BinaryOperator, IBoolOperator
     {
-        public OP_Equals(IValue left, IValue right) : base(left, right) { }
+        public BoolEquals(IValue left, IValue right) : base(left, right) { }
 
         public override void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
@@ -321,9 +399,9 @@ namespace GenDB
         }
     }
 
-    class OP_LessThan : BinaryOperator, IBoolOperator
+    class BoolLessThan : BinaryOperator, IBoolOperator
     {
-        public OP_LessThan(IValue left, IValue right) : base(left, right) { }
+        public BoolLessThan(IValue left, IValue right) : base(left, right) { }
         public override void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
             visitor.VisitOPLessThan(this);
@@ -334,9 +412,9 @@ namespace GenDB
         }
     }
 
-    class OP_GreaterThan : BinaryOperator, IBoolOperator
+    class BoolGreaterThan : BinaryOperator, IBoolOperator
     {
-        public OP_GreaterThan(IValue left, IValue right) : base(left, right) { }
+        public BoolGreaterThan(IValue left, IValue right) : base(left, right) { }
         public override void AcceptVisitor (IAbsSyntaxVisitor visitor)
         {
             visitor.VisitOPGreaterThan(this);
@@ -611,7 +689,7 @@ namespace GenDB
     /// 
     /// Dette skal omskrives til en NestedReferenced(new NestedReference(new NestedReference(new NestedReference(null, propertyPOIDofName), propertyPoidOfFather), propertyPOIDOfSpouse)))
     /// </summary>
-    class NestedReference : IWhereable, IValue
+    class NestedReference : IValue
     {
         NestedReference innerReference;
         CstProperty cstProperty;
@@ -642,37 +720,4 @@ namespace GenDB
             return "NestedReference(" + CstProperty + ", inner = " + (innerReference == null ? "null" : innerReference.ToString()) + ")";
         }
     }
-
-    //class EntityPOIDEquals : IExpression
-    //{
-    //    long entityPOID;
-    //    Type clrTypeOfEntity;
-
-    //    public Type ClrTypeOfEntity
-    //    {
-    //        get { return clrTypeOfEntity; }
-    //    }
-
-    //    public long EntityPOID
-    //    {
-    //        get { return entityPOID; }
-    //    }
-
-    //    public EntityPOIDEquals(long entityPOID, Type t)
-    //    {
-    //        this.entityPOID = entityPOID;
-    //        this.clrTypeOfEntity = t;
-    //    }
-
-    //    public void AcceptVisitor(IAbsSyntaxVisitor visitor)
-    //    {
-    //        visitor.VisitEntityPOIDEquals(this);
-    //    }
-
-
-    //    public override string ToString()
-    //    {
-    //        return "EntityPOIDEquals(" + entityPOID + ")";
-    //    }
-    //}
 }

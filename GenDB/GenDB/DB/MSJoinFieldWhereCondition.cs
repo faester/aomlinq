@@ -25,6 +25,11 @@ namespace GenDB.DB
             get { return entityTypes.Values; }
         }
 
+        public IEnumerable<IProperty> Properties
+        {
+            get { return properties.Keys; }
+        }
+
         public String WhereStr 
         {
             get {
@@ -65,6 +70,15 @@ namespace GenDB.DB
         public void Visit(IWhereable clause)
         {
             clause.AcceptVisitor(this);
+        }
+
+        public void VisitArithmeticOperator(ArithmeticOperator ao)
+        {
+            wherePart.Append ('(');
+            Visit(ao.Left);
+            wherePart.Append(ao.OperatorSymbol);
+            Visit(ao.Right);
+            wherePart.Append (')');
         }
 
         public void VisitInstanceOf(ExprInstanceOf instanceOf)
@@ -245,7 +259,7 @@ namespace GenDB.DB
         }
 
         //Node
-        public void VisitOPEquals(OP_Equals eq)
+        public void VisitOPEquals(BoolEquals eq)
         {
             bool leftIsNullReference=false;
             bool rightIsNullReference=false;
@@ -344,14 +358,14 @@ namespace GenDB.DB
         }
 
 
-        public void VisitOPLessThan(OP_LessThan lt)
+        public void VisitOPLessThan(BoolLessThan lt)
         {
             lt.Left.AcceptVisitor(this);
             wherePart.Append ('<');
             lt.Right.AcceptVisitor (this);
         }
 
-        public void VisitOPGreaterThan(OP_GreaterThan gt)
+        public void VisitOPGreaterThan(BoolGreaterThan gt)
         {
             gt.Left.AcceptVisitor(this);
             wherePart.Append ('>');
