@@ -22,6 +22,7 @@ namespace TableTests
             {
                 dataContext.DeleteDatabase();
                 dataContext.CreateDatabase();
+                dataContext.Init();
             }
 
             if (!dataContext.DatabaseExists())

@@ -24,6 +24,16 @@ namespace QueryToSqlTranslationTests
             ttp = null;
         }
 
+        [TestFixtureSetUp]
+        public void TestFixtureSetUp()
+        {
+            if (!dataContext.IsInitialized)
+            {
+                dataContext.Init();
+            }
+        }
+
+
         [SetUp]
         public void TestSetup()
         {
@@ -42,7 +52,7 @@ namespace QueryToSqlTranslationTests
                 TestPerson tp = new TestPerson();
                 tp.Name = "Name" + i.ToString();
                 tp.Age = i;
-                if(i%2==0) tp.GoodLooking=true;
+                if (i % 2 == 0) tp.GoodLooking = true;
                 tp.Spouse = lastPerson;
                 lastPerson = tp;
                 ttp.Add(tp);

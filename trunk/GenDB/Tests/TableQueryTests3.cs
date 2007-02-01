@@ -17,6 +17,17 @@ namespace QueryToSqlTranslationTests
         DataContext dataContext = DataContext.Instance;
         Table<TestPerson> ttp ;
 
+        [TestFixtureSetUp]
+        public void TestFixtureSetUp()
+        {
+            Console.WriteLine("Setting up...:");
+            if (!dataContext.IsInitialized)
+            {
+                Console.WriteLine("*****");
+                dataContext.Init();
+            }
+        }
+
         [TestFixtureTearDown]
         public void FixtureTearDown()
         {
@@ -31,7 +42,6 @@ namespace QueryToSqlTranslationTests
             InitTableOfPersons();
             dataContext.SubmitChanges();
         }
-
 
         public void InitTableOfPersons()
         {
