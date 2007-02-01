@@ -95,7 +95,7 @@ namespace GenDB
                     if (linqFunc(deleteCandidate))
                     {
                         iboCache.Remove(deleteCandidate.DBIdentity);
-                        db.ClearWhere(new OP_Equals (new VarReference(deleteCandidate), CstThis.Instance));
+                        db.ClearWhere(new BoolEquals (new VarReference(deleteCandidate), CstThis.Instance));
                     }
                 }
             }
@@ -112,7 +112,7 @@ namespace GenDB
         {
             if (e == null) { return false;}
             if (e.DBIdentity == 0) { return false; }
-            IExpression where = new OP_Equals(new VarReference(e), CstThis.Instance);
+            IExpression where = new BoolEquals(new VarReference(e), CstThis.Instance);
             foreach (T ibo in db.Where(where))
             {
                 return true;
@@ -148,7 +148,7 @@ namespace GenDB
         {
             if (e == null) { return false;}
             if (e.DBIdentity == 0) { return false; }
-            IWhereable where = new OP_Equals(new VarReference(e), CstThis.Instance);
+            IWhereable where = new BoolEquals(new VarReference(e), CstThis.Instance);
             return db.ClearWhere(where);
         }
 

@@ -77,6 +77,12 @@ namespace GenDB
             }
         }
 
+        public void VisitArithmeticOperator(ArithmeticOperator ao)
+        {
+            Visit(ao.Left);
+            Visit(ao.Right);
+        }
+
         //Leaf
         public void VisitExprIsTrue(ExprIsTrue valueIsTrue){ return; }
 
@@ -116,19 +122,19 @@ namespace GenDB
         ////Leaf
         //public void VisitEntityPOIDEquals(EntityPOIDEquals epe) { return; }
         
-        public void VisitOPEquals(OP_Equals eq)
+        public void VisitOPEquals(BoolEquals eq)
         { 
             Visit(eq.Left);
             Visit(eq.Right);
         }
 
-        public void VisitOPLessThan(OP_LessThan lt)
+        public void VisitOPLessThan(BoolLessThan lt)
         { 
             Visit(lt.Left);
             Visit(lt.Right);
         }
 
-        public void VisitOPGreaterThan(OP_GreaterThan gt)
+        public void VisitOPGreaterThan(BoolGreaterThan gt)
         { 
             Visit(gt.Left);
             Visit(gt.Right);

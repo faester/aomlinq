@@ -96,7 +96,7 @@ namespace GenDB
                     }
                         
                     if(mce.Method.Name=="op_Equality")
-                        return new GenDB.OP_Equals (parArr[0], parArr[1]);
+                        return new GenDB.BoolEquals (parArr[0], parArr[1]);
                     else if(mce.Method.Name=="op_Inequality")
                         return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
                     else 
@@ -202,15 +202,15 @@ namespace GenDB
             string nodeType = expr.NodeType.ToString();
             if(nodeType=="GT")
             {
-                return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
+                return new GenDB.BoolGreaterThan(parArr[0], parArr[1]);
             }
             else if(nodeType=="LT")
             {
-                return new GenDB.OP_LessThan(parArr[0], parArr[1]);
+                return new GenDB.BoolLessThan(parArr[0], parArr[1]);
             }
             else if(nodeType=="EQ")
             {
-                return new GenDB.OP_Equals (parArr[0], parArr[1]);
+                return new GenDB.BoolEquals (parArr[0], parArr[1]);
             }
             else if(nodeType=="NE")
             {
@@ -218,7 +218,7 @@ namespace GenDB
             }
             else if(nodeType=="GE")
             {
-                return new GenDB.OP_GreaterThan(parArr[0], parArr[1]);
+                return new GenDB.BoolGreaterThan(parArr[0], parArr[1]);
             }
             else if(nodeType=="OrElse")
             {

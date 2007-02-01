@@ -236,7 +236,22 @@ namespace QueryToSqlTranslationTests
 
             foreach(TestPerson pers in p)
             {
-                Assert.AreEqual (pers.Name, "Name1Name1", "Error in result.");
+                Assert.AreEqual (pers.Name, "Name1", "Error in result.");
+            }
+
+            Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
+        }
+
+        [Test]
+        public void TestPlusStringInt()
+        {
+            Table<TestPerson> p = from ta in ttp
+                    where ta.Name + ta.Age == "Name88"
+                    select ta;
+
+            foreach(TestPerson pers in p)
+            {
+                Assert.AreEqual (pers.Name, "Name8", "Error in result.");
             }
 
             Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");
@@ -252,7 +267,7 @@ namespace QueryToSqlTranslationTests
 
             foreach(ContainsAllPrimitiveTypes capt in p)
             {
-                Assert.AreEqual (0.2, capt.Integer / capt.Dbl, "Error in result.");
+                Assert.AreEqual(0.2, capt.Integer / capt.Dbl, "Error in result.");
             }
 
             Assert.IsTrue ( p.ExprFullySqlTranslatable , "Expression should be fully SQL-translatable");

@@ -170,7 +170,7 @@ namespace GenDB
                     }
                     else
                     {
-                        IExpression where = new OP_Equals(new CstLong(refEntityPOID), CstThis.Instance);
+                        IExpression where = new BoolEquals(new CstLong(refEntityPOID), CstThis.Instance);
                         // TODO: Kunne nok gøres hurtigere...
                         iboVal = dataContext.GenDB.GetByEntityPOID(refEntityPOID);
                         propertySetHandler(ibo, iboVal);
