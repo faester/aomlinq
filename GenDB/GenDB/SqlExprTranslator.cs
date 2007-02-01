@@ -16,13 +16,6 @@ namespace GenDB
         { }
     }
 
-    public class DivisionByZeroNotAllowedException : Exception
-    {
-        public DivisionByZeroNotAllowedException()
-            : base("Division by zero is no allowed")
-        { }
-    }
-
     internal class SqlExprTranslator
     {
         TypeSystem typeSystem; 
@@ -151,10 +144,6 @@ namespace GenDB
             }
             else if(be.Left is ConstantExpression)
             {
-                int i = Int32.Parse(((ConstantExpression)be.Right).Value.ToString());
-                if(i==0)
-                    throw new DivideByZeroException();
-
                 l = DecomposeConstant((ConstantExpression)be.Left);
             }
             else
@@ -170,10 +159,6 @@ namespace GenDB
             }
             else if(be.Right is ConstantExpression)
             {
-                int i = Int32.Parse(((ConstantExpression)be.Right).Value.ToString());
-                if(i==0)
-                    throw new DivideByZeroException();
-                
                 r = DecomposeConstant((ConstantExpression)be.Right);
             }
             else
@@ -273,17 +258,28 @@ namespace GenDB
             else if(be.Right is UnaryExpression)
             {
                 UnaryExpression un = (UnaryExpression) be.Right;
-                ConstantExpression ce = (ConstantExpression) un.Operand;   
-                IBusinessObject ib;
-                try
+                if(un.Operand is ConstantExpression)
                 {
-                    ib = (IBusinessObject) ce.Value;
-                    parArr[1] = new VarReference(ib);
-                } 
-                catch(Exception)
-                {
-                    return ExprIsFalse.Instance;
+                    ConstantExpression ce = (ConstantExpression) un.Operand;   
+                    IBusinessObject ib;
+                    try
+                    {
+                        ib = (IBusinessObject) ce.Value;
+                        parArr[1] = new VarReference(ib);
+                    } 
+                    catch(Exception)
+                    {
+                        return ExprIsFalse.Instance;
+                    }
                 }
+                else if(un.Operand is MemberExpression)
+                {
+                    MemberExpression mem = (MemberExpression) un.Operand;
+                    parArr[1] = VisitMemberExpression(mem);
+                    //throw new Exception("not implemented");
+                }
+                else
+                    throw new Exception("Unknown exception type: "+un.Operand.NodeType.ToString());
             }
             else if(be.Right is MethodCallExpression)
             {
