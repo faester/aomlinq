@@ -8,24 +8,35 @@ namespace GenDB.DB
 
     /// <summary>
     /// Representation of DB reference to another
-    /// object. We need some way to represent DBNull, 
-    /// since this indicates that the reference is empty.
+    /// object. (Null values are stored as a bool value, since 
+    /// the internal representation of objects are int-based id's
+    /// and it also must be possible to represent null.)
     /// </summary>
     struct IBOReference
     {
         int entityPOID;
 
+        /// <summary>
+        /// Id of the object represented.
+        /// </summary>
         public int EntityPOID
         {
             get { return entityPOID; }
         }
         bool isNullReference;
 
+        /// <summary>
+        /// True if this IBOReference represents a null value. (EntityPOID has unspecified value.)
+        /// </summary>
         public bool IsNullReference
         {
             get { return isNullReference; }
         }
 
+        /// <summary>
+        /// If isNullReference is true, the IBOReference will 
+        /// </summary>
+        /// <param name="isNullReference"></param>
         public IBOReference(bool isNullReference)
         {
             this.isNullReference = isNullReference;

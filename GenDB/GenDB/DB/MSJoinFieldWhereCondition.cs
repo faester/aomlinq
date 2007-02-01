@@ -5,14 +5,47 @@ using GenDB.DB;
 
 namespace GenDB.DB
 {
+    /// <summary>
+    /// Will translate an abstract where condition to a format that can 
+    /// be used with the MSSQL2005-server. 
+    /// <br/>
+    /// The result can be obtained using the WhereStr-property. The string 
+    /// returned by this property is not useful in it selt, but is a part 
+    /// of the query strategy in JoinPropertyIterator.
+    /// <br/>
+    /// The name might be slightly misleading, but alludes to the 
+    /// strategy used to create the query text.
+    /// <br/> 
+    /// (Visitor pattern.)
+    /// </summary>
     class MSJoinFieldWhereCondition : IAbsSyntaxVisitor
     {
+        /// <summary>
+        /// Stores the query expression built by this visitor.
+        /// </summary>
         StringBuilder wherePart = null;
+
+        /// <summary>
+        /// The TypeSystem instance used when building the query.
+        /// It is necessary to have access to the type system in 
+        /// order to make requests for subclasses of a type etc.
+        /// </summary>
         TypeSystem typeSystem = null;
+
+        /// <summary>
+        /// Stores the IEntityType instances that is present in
+        /// the abstract wherecondition.
+        /// </summary>
         Dictionary<int, IEntityType> entityTypes = null;
+
+        /// <summary>
+        /// Stores the IProperty instances that is present in
+        /// the abstract wherecondition.
+        /// </summary>
         Dictionary<IProperty, int> properties = null;
 
         private MSJoinFieldWhereCondition() { /* empty */ }
+
 
         public MSJoinFieldWhereCondition(TypeSystem typeSystem)
         {
@@ -20,16 +53,30 @@ namespace GenDB.DB
             Reset();
         }
 
+        /// <summary>
+        /// Returns the IEntityTypes encountered in the
+        /// last IExpression visited.
+        /// </summary>
         public IEnumerable<IEntityType> EntityTypes
         {
             get { return entityTypes.Values; }
         }
 
+        /// <summary>
+        /// Returns the IProperty instances encountered 
+        /// in the last IExpression visited.
+        /// </summary>
         public IEnumerable<IProperty> Properties
         {
             get { return properties.Keys; }
         }
 
+        /// <summary>
+        /// Returns the SQL-translation of the 
+        /// last visited IExpression.
+        /// References to PropertyValue gets aliases
+        /// p[PropertyPOID].
+        /// </summary>
         public String WhereStr 
         {
             get {
@@ -38,6 +85,12 @@ namespace GenDB.DB
             }
         }
 
+        /// <summary>
+        /// Used internally to store information
+        /// of the IProperty instances encountered
+        /// when visiting nodes/leafs of an IExpression.
+        /// </summary>
+        /// <param name="prop"></param>
         private void RegisterProperty(IProperty prop)
         {
             if (!properties.ContainsKey(prop))
@@ -53,6 +106,13 @@ namespace GenDB.DB
             }
         }
 
+        /// <summary>
+        /// Resets the visitor and prepares it 
+        /// for visiting a new IExpression. Should be 
+        /// called before visiting new IExpressions. 
+        /// Is called by the constructor, so it is not 
+        /// necessary to call it before IExpression visit.
+        /// </summary>
         public void Reset()
         {
             wherePart = new StringBuilder();
@@ -60,24 +120,41 @@ namespace GenDB.DB
             entityTypes = new Dictionary<int, IEntityType>();
         }
 
-        // Leaf
+        /// <summary>
+        /// Leaf. Not ment to be called externally.
+        /// </summary>
+        /// <param name="cstThis"></param>
         public void VisitCstThis(CstThis cstThis)
         {
             wherePart.Append (" e.EntityPOID ");
         }
 
-
+        /// <summary>
+        /// Commences new IExpression visit. 
+        /// Only method to be invoked externally.
+        /// <br/>
+        /// If the clause contains a ValNotTranslatable
+        /// an exception will be thrown.
+        /// </summary>
+        /// <param name="clause"></param>
         public void Visit(IWhereable clause)
         {
             clause.AcceptVisitor(this);
         }
 
+
         public void VisitArithmeticOperator(ArithmeticOperator ao)
         {
+            // MSSql server performs automatic casting of types, but will
+            // attempt to cast to INT, if a VARCHAR is added to an integer.
+            // This does not correspond to the behaviour in C#, so when 
+            // an LINQ Expression uses operator '+' to add a string and a 
+            // numerical value, we must ensure that the numerical is cast
+            // to a VARCHAR.
             bool strCastLeft = false;
             bool strCastRight = false;
 
-            if (ao.LeftIsString ^ ao.RightIsString)
+            if (ao.LeftIsString ^ ao.RightIsString) // If Left and Right are of same mapping type no casts are needed.
             {
                 if (ao.LeftIsString) {
                     strCastRight = true;
@@ -87,7 +164,6 @@ namespace GenDB.DB
                     strCastLeft = true;
                 }
             }
-
 
             wherePart.Append ('(');
             if (strCastLeft) { wherePart.Append ("CAST ("); }
@@ -100,6 +176,10 @@ namespace GenDB.DB
             wherePart.Append (')');
         }
 
+        /// <summary>
+        /// Not ment to be invoked externally. (Node)
+        /// </summary>
+        /// <param name="instanceOf"></param>
         public void VisitInstanceOf(ExprInstanceOf instanceOf)
         {
             IEnumerable<IEntityType> types = typeSystem.GetEntityTypesInstanceOf(instanceOf.ClrType);
@@ -133,7 +213,11 @@ namespace GenDB.DB
             }
         }
 
-        //Leaf
+
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// </summary>
+        /// <param name="vp"></param>
         public void VisitProperty(CstProperty vp)
         {
             RegisterProperty(vp.Property);
@@ -161,7 +245,10 @@ namespace GenDB.DB
             wherePart.Append (' ');
         }
 
-        //Leaf
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// </summary>
+        /// <param name="cs"></param>
         public void VisitCstString(CstString cs)
         {
             wherePart.Append ('\'');
@@ -169,8 +256,11 @@ namespace GenDB.DB
             wherePart.Append ('\'');
             wherePart.Append (' ');
         }
-        
-        //Leaf
+
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// </summary>
+        /// <param name="cs"></param>
         public void VisitCstChar(CstChar cs)
         {
             string charString = MsSql2005DB.SqlSanitizeString(cs.Ch.ToString());
@@ -180,13 +270,19 @@ namespace GenDB.DB
             wherePart.Append (' ');
         }
 
-        //Leaf 
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// </summary>
+        /// <param name="cn"></param>
         public void VisitNotSqlTranslatable(ExprNotTranslatable cn)
         {
             throw new Exception("IWhereable expression contained nodes that was not SQL-translatable.");
         }
 
-        //Leaf
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// </summary>
+        /// <param name="cb"></param>
         public void VisitCstBool(CstBool cb)
         {
             if (cb.Value )
@@ -199,13 +295,21 @@ namespace GenDB.DB
             }
         }
 
-        //Leaf
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// 
+        /// </summary>
+        /// <param name="cl"></param>
         public void VisitCstLong(CstLong cl)
         {
             wherePart.Append(cl.Value);
         }
 
-        //Leaf
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// 
+        /// </summary>
+        /// <param name="cd"></param>
         public void VisitCstDouble(CstDouble cd)
         {
 
@@ -213,7 +317,11 @@ namespace GenDB.DB
             wherePart.Append(dStr);
         }
 
-        //Leaf
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// 
+        /// </summary>
+        /// <param name="cr"></param>
         public void VisitCstReference(VarReference cr)
         {
             if (cr.Value.IsNullReference )
@@ -228,7 +336,11 @@ namespace GenDB.DB
             }
         }
 
-        //Leaf
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// 
+        /// </summary>
+        /// <param name="pro"></param>
         public void VisitNestedReference(NestedReference pro)
         {
             RegisterProperty(pro.CstProperty.Property);
@@ -277,7 +389,11 @@ namespace GenDB.DB
             wherePart.Append(") )");
         }
 
-        //Node
+        /// <summary>
+        /// Not ment to be called externally. (Node)
+        /// 
+        /// </summary>
+        /// <param name="eq"></param>
         public void VisitOPEquals(BoolEquals eq)
         {
             bool leftIsNullReference=false;
@@ -316,6 +432,10 @@ namespace GenDB.DB
             }
         }
         
+        /// <summary>
+        /// Not ment to be called externally. (Node)
+        /// </summary>
+        /// <param name="neq"></param>
         public void VisitOPNotEquals(OP_NotEquals neq)
         {
             bool leftIsNullReference=false;
@@ -368,7 +488,12 @@ namespace GenDB.DB
                 wherePart.Append(" IS NULL ");
             }
         }
-        
+ 
+        /// <summary>
+        /// Not ment to be called externally. (Node)
+        /// 
+        /// </summary>
+        /// <param name="expr"></param>
         public void VisitNotExpr(ExprNot expr)
         {
             wherePart.Append (" NOT ( ");
@@ -376,7 +501,11 @@ namespace GenDB.DB
             wherePart.Append (") ");
         }
 
-
+        /// <summary>
+        /// Not ment to be called externally. (Node)
+        /// 
+        /// </summary>
+        /// <param name="lt"></param>
         public void VisitOPLessThan(BoolLessThan lt)
         {
             lt.Left.AcceptVisitor(this);
@@ -384,6 +513,11 @@ namespace GenDB.DB
             lt.Right.AcceptVisitor (this);
         }
 
+        /// <summary>
+        /// Not ment to be called externally. (Node)
+        /// 
+        /// </summary>
+        /// <param name="gt"></param>
         public void VisitOPGreaterThan(BoolGreaterThan gt)
         {
             gt.Left.AcceptVisitor(this);
@@ -391,6 +525,11 @@ namespace GenDB.DB
             gt.Right.AcceptVisitor (this);
         }
 
+        /// <summary>
+        /// Not ment to be called externally. (Node)
+        /// 
+        /// </summary>
+        /// <param name="expr"></param>
         public void VisitAndExpr(ExprAnd expr)
         {
             wherePart.Append (" (");
@@ -400,6 +539,11 @@ namespace GenDB.DB
             wherePart.Append (") ");
         }
 
+        /// <summary>
+        /// Not ment to be called externally. (Node)
+        /// 
+        /// </summary>
+        /// <param name="expr"></param>
         public void VisitOrExpr(ExprOr expr)
         {
             wherePart.Append (" (");
@@ -408,20 +552,55 @@ namespace GenDB.DB
             expr.Right.AcceptVisitor (this);
             wherePart.Append (") ");
         }
-        
+
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// 
+        /// </summary>
+        /// <param name="cdt"></param>
         public void VisitCstDateTime(CstDateTime cdt)
         {
             wherePart.Append(cdt.Value.Ticks);
         }
 
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// 
+        /// </summary>
+        /// <param name="csi"></param>
         public void VisitExprIsTrue(ExprIsTrue csi)
         {
             wherePart.Append ("1 = 1");
         }
+
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// 
+        /// </summary>
+        /// <param name="csi"></param>
         public void VisitExprIsFalse(ExprIsFalse csi)
         {
             wherePart.Append ("1 = 0");
         }
+
+        /// <summary>
+        /// Not ment to be called externally. (Leaf)
+        /// If this method is called during traversal 
+        /// og the IExpression an Exception will be thrown. 
+        /// <br/>
+        /// The SqlExprTranslator may insert ValNotTranslatable 
+        /// instances in the IExpression generated, if it 
+        /// encounters nodes in the Linq Expression, that it 
+        /// can not map to the IExpression language. In this 
+        /// case these elements should be removed before the
+        /// IExpression is parsed. (The SqlExprChecker can 
+        /// perform the operation of removing untranslatable 
+        /// expression while ensuring, that the result set of 
+        /// the original Linq expression will always be a subset
+        /// of the result set returned by the database constrained
+        /// by the IExpression the SqlExprChecked produces.)
+        /// </summary>
+        /// <param name="csi"></param>
         public void VisitValNotTranslatable(ValNotTranslatable csi)
         {
             throw new Exception("Not SQL-translatable.");
