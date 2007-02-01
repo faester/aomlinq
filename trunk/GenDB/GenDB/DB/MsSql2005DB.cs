@@ -15,6 +15,11 @@ namespace GenDB.DB
      */
     class MsSql2005DB : IGenericDatabase
     {
+        /// <summary>
+        /// Ensures that the string can be inserted in the sql. (For now just removes single quotes)
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         internal static string SqlSanitizeString(string s)
         {
             if (s == null) { return "null"; }
