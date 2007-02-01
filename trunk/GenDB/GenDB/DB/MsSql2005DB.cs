@@ -44,67 +44,71 @@ namespace GenDB.DB
         const string TB_COLLECTION_ELEMENT_NAME = "CollectionElement";
         const string TB_COLLECTION_KEY_NAME = "CollectionKey";
 
-        const bool WHERE_USING_JOINS = false;
+        const bool WHERE_USING_JOINS = true;
         #endregion
 
         DataContext dataContext;
         int nextETID = 0;
-        bool nextIDsInitialized = false;
-        public int NextETID
+        bool nextPOIDsInitialized = false;
+
+        /// <summary>
+        /// Returns the next unused EntityTypePOID
+        /// </summary>
+        public int NextEntityTypePOID
         {
             get
             {
-                if (!nextIDsInitialized)
+                if (!nextPOIDsInitialized)
                 {
-                    InitNextIDs();
-                    nextIDsInitialized = true;
+                    InitNextPOIDs();
+                    nextPOIDsInitialized = true;
                 }
                 return nextETID++;
             }
         }
-        int nextEID = 0;
+        int nextEntityPOID = 0;
 
-        public int NextEID
+        public int NextEntityPOID
         {
             get
             {
-                if (!nextIDsInitialized)
+                if (!nextPOIDsInitialized)
                 {
-                    InitNextIDs();
-                    nextIDsInitialized = true;
+                    InitNextPOIDs();
+                    nextPOIDsInitialized = true;
                 }
-                return nextEID++;
+                return nextEntityPOID++;
             }
         }
 
-        int nextPTID = 0;
+        int nextPropertyTypePOID = 0;
 
-        public int NextPTID
+        public int NextPropertyTypePOID
         {
             get
             {
-                if (!nextIDsInitialized)
+                if (!nextPOIDsInitialized)
                 {
-                    InitNextIDs();
-                    nextIDsInitialized = true;
+                    InitNextPOIDs();
+                    nextPOIDsInitialized = true;
                 }
 
-                return nextPTID++;
+                return nextPropertyTypePOID++;
             }
         }
-        int nextPID = 0;
+        int nextPropertyPOID = 0;
 
-        public int NextPID
+        public int NextPropertyPOID
         {
             get
             {
-                if (!nextIDsInitialized)
+                if (!nextPOIDsInitialized)
                 {
-                    InitNextIDs();
-                    nextIDsInitialized = true;
+                    InitNextPOIDs();
+                    nextPOIDsInitialized = true;
                 }
 
-                return nextPID++;
+                return nextPropertyPOID++;
             }
         }
 
@@ -134,10 +138,6 @@ namespace GenDB.DB
         int collectionElementOperationCount = 0;
         int collectionKeyOperationCount = 0;
 
-        //LinkedList<IEntityType> dirtyEntityTypes = new LinkedList<IEntityType>();
-        //LinkedList<IEntity> dirtyEntities = new LinkedList<IEntity>();
-        //LinkedList<IPropertyType> dirtyPropertyTypes = new LinkedList <IPropertyType>();
-        //LinkedList<IProperty> dirtyProperties = new LinkedList<IProperty>();
         #endregion
 
         #region DB logic
@@ -240,14 +240,14 @@ namespace GenDB.DB
 
         public IEntityType NewEntityType()
         {
-            IEntityType res = new EntityType(NextETID);
+            IEntityType res = new EntityType(NextEntityTypePOID);
             return res;
         }
 
         public IEntity NewEntity()
         {
             IEntity res = new Entity();
-            res.EntityPOID = NextEID;
+            res.EntityPOID = NextEntityPOID;
             return res;
         }
 
@@ -380,14 +380,14 @@ namespace GenDB.DB
         public IPropertyType NewPropertyType()
         {
             IPropertyType res = new PropertyType();
-            res.PropertyTypePOID = NextPTID;
+            res.PropertyTypePOID = NextPropertyTypePOID;
             return res;
         }
 
         public IProperty NewProperty()
         {
             Property res =  new Property();
-            res.PropertyPOID = NextPID;
+            res.PropertyPOID = NextPropertyPOID;
             return res;
         }
 
@@ -1066,7 +1066,7 @@ namespace GenDB.DB
             sbSetKeyInserts.Append(collectionEntityPOID);
         }
 
-        private void InitNextIDs()
+        private void InitNextPOIDs()
         {
             if (DatabaseExists())
             {
@@ -1080,13 +1080,13 @@ namespace GenDB.DB
                     nextETID = int.Parse(cmd.ExecuteScalar().ToString());
 
                     cmd.CommandText = "SELECT CASE WHEN Max(EntityPOID) is null THEN 1 ELSE Max(EntityPOID) + 1 END FROM Entity";
-                    nextEID = int.Parse(cmd.ExecuteScalar().ToString());
+                    nextEntityPOID = int.Parse(cmd.ExecuteScalar().ToString());
 
                     cmd.CommandText = "SELECT CASE WHEN Max(PropertyPOID) is null THEN 0 ELSE Max(PropertyPOID) + 1 END FROM Property";
-                    nextPID = int.Parse(cmd.ExecuteScalar().ToString());
+                    nextPropertyPOID = int.Parse(cmd.ExecuteScalar().ToString());
 
                     cmd.CommandText = "SELECT CASE WHEN Max(PropertyTypePOID) is null THEN 0 ELSE Max(PropertyTypePOID) + 1 END FROM PropertyType";
-                    nextPTID = int.Parse(cmd.ExecuteScalar().ToString());
+                    nextPropertyTypePOID = int.Parse(cmd.ExecuteScalar().ToString());
 
                     cnn.Close();
                 }

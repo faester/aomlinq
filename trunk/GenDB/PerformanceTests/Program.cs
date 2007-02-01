@@ -20,28 +20,24 @@ namespace PerformanceTests
             string fileName = null;
             LinkedList<int> objectCounts = new LinkedList<int>();
 
-            PerfTestAllPrimitiveTypes coocoo = new PerfTestAllPrimitiveTypes();
-
-            Console.WriteLine(coocoo.GetEntityPOID());
-
-            GenDB.DataContext.Instance.DatabaseName = "knold";
-            if (!GenDB.DataContext.Instance.DatabaseExists())
-            {
-                GenDB.DataContext.Instance.CreateDatabase();
-            }
-            GenDB.DataContext.Instance.Init();
+            //GenDB.DataContext.Instance.DatabaseName = "knold";
+            //if (!GenDB.DataContext.Instance.DatabaseExists())
+            //{
+            //    GenDB.DataContext.Instance.CreateDatabase();
+            //}
+            //GenDB.DataContext.Instance.Init();
             
-            GenDB.Table<PerfTestAllPrimitiveTypes > table = GenDB.DataContext.Instance.CreateTable<PerfTestAllPrimitiveTypes>();
+            //GenDB.Table<PerfTestAllPrimitiveTypes > table = GenDB.DataContext.Instance.CreateTable<PerfTestAllPrimitiveTypes>();
 
-            var q = from p in table
-                    where p.Dbl * p.Integer == 0.2
-                    select p;
+            //var q = from p in table
+            //        where p.Dbl * p.Integer == 0.2
+            //        select p;
 
-            foreach(PerfTestAllPrimitiveTypes pt in q)
-            {
-                Console.WriteLine (pt);
-            }
-            return;
+            //foreach(PerfTestAllPrimitiveTypes pt in q)
+            //{
+            //    Console.WriteLine (pt);
+            //}
+            //return;
 
             if (args.Length < 4)
             {
