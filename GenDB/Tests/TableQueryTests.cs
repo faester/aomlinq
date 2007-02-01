@@ -108,8 +108,7 @@ namespace QueryToSqlTranslationTests
         {
             if (!dataContext.IsInitialized)
             {
-                dataContext.DeleteDatabase();
-                dataContext.CreateDatabase();
+                dataContext.Init();
             }
 
             if (!dataContext.DatabaseExists())

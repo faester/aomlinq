@@ -56,8 +56,7 @@ namespace IBOCache
         {
             if (!dc.IsInitialized)
             {
-                dc.DeleteDatabase();
-                dc.CreateDatabase();
+                dc.Init();
             }
 
             table = dc.CreateTable<CacheTestObject>();

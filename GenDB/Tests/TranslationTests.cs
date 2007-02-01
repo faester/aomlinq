@@ -104,8 +104,9 @@ namespace TranslationTests
             {
                 dc.DeleteDatabase();
                 dc.CreateDatabase();
+                dc.Init();
             }
-            dc = DataContext.Instance;
+
             tableOfHasVolatileProperty = dc.CreateTable<HasVolatileProperty>();
             tableOfPureIBusinessImpl = dc.CreateTable<PureIBusinessImpl>();
         }
@@ -118,7 +119,7 @@ namespace TranslationTests
             tableOfShouldFailNoSetter = null;
             tableOfHasVolatileProperty = null;
             tableOfPureIBusinessImpl = null;
-            GC.Collect();
+            
             Console.Error.WriteLine("IBOCache size is now: " + DataContext.Instance.CommittedObjectsSize);
         }
 
