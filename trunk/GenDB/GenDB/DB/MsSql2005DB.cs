@@ -146,7 +146,6 @@ namespace GenDB.DB
         /// </summary>
         public void CreateDatabase()
         {
-            Console.WriteLine("Creating database.");
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
             {
                 cnn.Open();
@@ -200,7 +199,6 @@ namespace GenDB.DB
         /// <returns></returns>
         public bool DatabaseExists()
         {
-            Console.WriteLine("Checking if database exists.");
             using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
             {
                 cnn.Open();
@@ -418,11 +416,6 @@ namespace GenDB.DB
                     " WHERE e.EntityPOID = " + entityPOID +
                     " ORDER BY e.EntityPOID"
                     );
-#if DEBUG
-                //Console.WriteLine("WHEREBUILDER CONSTRUCTED: " + whereStr);
-                //Console.WriteLine();
-                //Console.WriteLine(cmd.CommandText);
-#endif
 
                 cmd.Connection = cnn;
                 cmd.CommandTimeout = dataContext.CommandTimeout;

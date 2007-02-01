@@ -4,18 +4,15 @@ using System.Text;
 
 namespace GenDB.DB
 {
+    /// <summary>
+    /// Implementation of the IEntity interface.
+    /// </summary>
     internal class Entity : IEntity
     {
         IEntityType entityType;
         int entityPOID;
         Dictionary<long, IPropertyValue> propertyValues = new Dictionary<long, IPropertyValue>();
         bool existsInDatabase;
-
-        public bool ExistsInDatabase
-        {
-            get { return existsInDatabase; }
-            set { existsInDatabase = value; }
-        }
 
         public int EntityPOID
         {
