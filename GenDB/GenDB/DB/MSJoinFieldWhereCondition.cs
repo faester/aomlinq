@@ -74,10 +74,29 @@ namespace GenDB.DB
 
         public void VisitArithmeticOperator(ArithmeticOperator ao)
         {
+            bool strCastLeft = false;
+            bool strCastRight = false;
+
+            if (ao.LeftIsString ^ ao.RightIsString)
+            {
+                if (ao.LeftIsString) {
+                    strCastRight = true;
+                }
+                else
+                {
+                    strCastLeft = true;
+                }
+            }
+
+
             wherePart.Append ('(');
+            if (strCastLeft) { wherePart.Append ("CAST ("); }
             Visit(ao.Left);
+            if (strCastLeft) { wherePart.Append (" AS VARCHAR(MAX))"); }
             wherePart.Append(ao.OperatorSymbol);
+            if (strCastRight) { wherePart.Append ("CAST ("); }
             Visit(ao.Right);
+            if (strCastRight) { wherePart.Append (" AS VARCHAR(MAX))"); }
             wherePart.Append (')');
         }
 

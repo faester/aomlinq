@@ -389,7 +389,6 @@ namespace GenDB.DB
 
         public IBusinessObject GetByEntityPOID(int entityPOID)
         {
-            int count = 0;
             IBusinessObject res = Get(entityPOID);
             return res;
         }
@@ -479,11 +478,8 @@ namespace GenDB.DB
                     } // if
                     firstPass = false;
                 } // while
-
-                return result;
-
                 if (!reader.IsClosed) { reader.Close(); }
-
+                return result;
             }
         }
 
