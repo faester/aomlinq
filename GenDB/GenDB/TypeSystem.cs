@@ -82,7 +82,6 @@ namespace GenDB
         /// <param name="et"></param>
         internal void RegisterType(IEntityType et)
         {
-
             if (etid2IEt.ContainsKey(et.EntityTypePOID))
             {
                 throw new Exception("Type already registered. (" + et.ToString() + ")");
@@ -176,6 +175,11 @@ namespace GenDB
         internal bool IsTypeKnown(Type t)
         {
             return type2IEt.ContainsKey(t);
+        }
+
+        internal bool IsTypeKnown(IEntityType et)
+        {
+            return etid2IEt.ContainsKey(et.EntityTypePOID);
         }
 
         /// <summary>
@@ -312,6 +316,7 @@ namespace GenDB
                 {
                     IEntityType set = ConstructEntityType(superType);
                     RegisterType(set);
+                    dataContext.Translators.RegisterTranslator(superType, set);
                     et.SuperEntityType = set;
                 }
             }
