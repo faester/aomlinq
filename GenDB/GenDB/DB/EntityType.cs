@@ -4,6 +4,9 @@ using System.Text;
 
 namespace GenDB.DB
 {
+    /// <summary>
+    /// Implementation of the IEntityType interface.
+    /// </summary>
     internal class EntityType : IEntityType
     {
         string name;
@@ -18,6 +21,7 @@ namespace GenDB.DB
         IEntityType superEntityType;
 
         Dictionary<int, IProperty> properties;
+        Dictionary<string, int> propertyNameToIDTranslation;
         LinkedList<IProperty> allProperties = null;
 
         public EntityType(int entityTypePOID)
@@ -26,14 +30,17 @@ namespace GenDB.DB
         }
 
         public IProperty GetProperty(string propertyname)
-        {
-            foreach (IProperty p in properties.Values)
+        { 
+            int id;
+            if (propertyNameToIDTranslation.TryGetValue(propertyname, out id))
             {
-                if (p.PropertyName == propertyname)
-                {
-                    return p;
-                }
+                return properties[id];
             }
+            else if (superEntityType != null)
+            {
+                return superEntityType.GetProperty (propertyname);
+            }
+
             return null;
         }
 
@@ -101,15 +108,14 @@ namespace GenDB.DB
             }
         }
 
-        /// <summary>
-        /// Adds cstProperty to this entity type. 
-        /// Insertion of duplicates are not checked.
-        /// </summary>
-        /// <param name="cstProperty"></param>
         public void AddProperty(IProperty property)
         {
-            if (properties == null) { properties = new Dictionary<int, IProperty>(); }
+            if (properties == null) { 
+                properties = new Dictionary<int, IProperty>(); 
+               propertyNameToIDTranslation = new Dictionary<string, int>();
+            }
             properties.Add(property.PropertyPOID, property);
+            propertyNameToIDTranslation.Add (property.PropertyName, property.PropertyPOID);
         }
 
         public bool ExistsInDatabase
