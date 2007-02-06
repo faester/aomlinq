@@ -23,12 +23,13 @@ namespace PerformanceTests
         }
 
         long id = rnd.Next(1000);
-        [Column(Id = true, AutoGen = true), Volatile]
-        public long Id
-        {
-            get { return id; }
-            set { id = value; }
-        }
+
+        //[Column (Id = true, AutoGen = true), Volatile]
+        //public long Id
+        //{
+        //    get { return id; }
+        //    set { id = value; }
+        //}
 
         bool boo = rnd.Next() % 2 == 0;
         [Column]

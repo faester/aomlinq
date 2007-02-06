@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using GenDB.DB;
-using System.Query;
+using System.Linq;
 
 namespace GenDB
 {

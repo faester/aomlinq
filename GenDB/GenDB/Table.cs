@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Text;
-using System.Query;
-using System.Expressions;
+using System.Linq;
+using System.Linq.Expressions;
 using GenDB.DB;
 
 namespace GenDB

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.11209</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BD87ED43-B228-47DE-9679-F097E47E0381}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -39,12 +39,14 @@
       <HintPath>lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Query" />
-    <Reference Include="System.Data.DLinq" />
-    <Reference Include="System.Data.Extensions" />
-    <Reference Include="System.Xml.XLinq" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v3.5.11209\System.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.Linq, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v3.5.11209\System.Data.Linq.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BODictionaryTranslationTests.cs" />
@@ -68,5 +70,6 @@
       <Name>GenDB</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
+  <!--  <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" /> -->
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

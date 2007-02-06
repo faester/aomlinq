@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Text;
-using System.Query;
-using System.Expressions;
+using System.Linq;
 using GenDB.DB;
 
 namespace GenDB
