@@ -2,11 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Query;
+using System.Linq;
 using System.Xml.XLinq;
 using System.Data.DLinq;
 using System.Data.SqlClient;
-using System.Expressions;
 using System.Reflection;
 using GenDB.DB;
 

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Data.DLinq;
 using System.Diagnostics;
-using System.Query;
-using System.Expressions;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace PerformanceTests
 {
@@ -26,11 +26,11 @@ namespace PerformanceTests
             this.testOutput = testOutput;
 
             this.db = new DLinqDB("server=.;database=" + dbName + ";Integrated Security=SSPI");
-            if (!db.DatabaseExists())
-            {
-                Console.WriteLine("Creating DLinq db");
-                db.CreateDatabase();
-            }
+            //if (!db.DatabaseExists())
+            //{
+            //    Console.WriteLine("Creating DLinq db");
+            //    db.CreateDatabase();
+            //}
             table = db.Table;
             db.SubmitChanges();
         }

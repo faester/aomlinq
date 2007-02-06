@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Query;
+using System.Linq;
 using GenDB;
 
 namespace Tests

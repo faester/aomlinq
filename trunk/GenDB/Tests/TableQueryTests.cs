@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
-using System.Query;
+using System.Linq;
 using System.Xml.XLinq;
-using System.Expressions;
+using System.Linq.Expressions;
 using GenDB;
 using CommonTestObjects;
 

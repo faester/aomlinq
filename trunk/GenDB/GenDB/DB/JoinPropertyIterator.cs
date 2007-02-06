@@ -19,7 +19,7 @@ namespace GenDB.DB
         IEnumerable<IProperty> properties = null;
         MSJoinFieldWhereCondition wsb = null;
         IIBoToEntityTranslator translator = null;
-        DataTable table;
+        //DataTable table;
         SqlCommand cmd = null;
         bool hasBeenDisposed = false;
 

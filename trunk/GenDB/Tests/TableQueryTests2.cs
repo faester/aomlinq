@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB;
 using NUnit.Framework;
-using System.Query;
-using System.Expressions;
+using System.Linq;
+using System.Linq.Expressions;
 using CommonTestObjects;
 
 namespace QueryToSqlTranslationTests
