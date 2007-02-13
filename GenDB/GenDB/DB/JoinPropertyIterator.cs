@@ -22,6 +22,7 @@ namespace GenDB.DB
         //DataTable table;
         SqlCommand cmd = null;
         bool hasBeenDisposed = false;
+        bool hasResultsUponInit = false;
 
         public JoinPropertyIterator(DataContext dataContext, IExpression whereCondition)
         {
@@ -81,17 +82,16 @@ namespace GenDB.DB
 
         public bool MoveNext()
         {
-            if (reader.Read())
+            if (reader.Read()) // Any more records?
             {
-                current = Next();
+                current = Next(); // If so translate
                 return true;
             }
-            else
+            else // No more records. 
             {
-                if (NextEntityType())
+                if (NextEntityType()) // Test if any exists on another type in the hierarchy
                 {
-                    current = Next();
-                    return true;
+                    return MoveNext();
                 }
                 else
                 {
@@ -108,24 +108,21 @@ namespace GenDB.DB
 
         private bool NextEntityType()
         {
-            if (reader != null && !reader.IsClosed)
-            {
-                reader.Close();
-            }
-            if (!entityTypeEnumerator.MoveNext())
-            {
-                return false;
-            }
-            else
-            {
-                IEntityType et = entityTypeEnumerator.Current;
-                properties = et.GetAllProperties;
-                cmd = new SqlCommand(ConstructSqlString(properties, et), cnn);
-                cmd.CommandTimeout = dataContext.CommandTimeout;
-                reader = cmd.ExecuteReader();
-                translator = dataContext.Translators.GetTranslator(et.EntityTypePOID);
-                return true;
-            }
+            if (reader != null && !reader.IsClosed) { reader.Close(); }
+
+            if (!entityTypeEnumerator.MoveNext()) { return false; }
+
+            IEntityType et = entityTypeEnumerator.Current;
+            Console.WriteLine("Now considering type : " + et);
+            properties = et.GetAllProperties;
+            cmd = new SqlCommand(ConstructSqlString(properties, et), cnn);
+            cmd.CommandTimeout = dataContext.CommandTimeout;
+            reader = cmd.ExecuteReader();
+
+            //Console.WriteLine("Reader: {0}, {1}", reader.IsClosed, reader.HasRows);
+
+            translator = dataContext.Translators.GetTranslator(et.EntityTypePOID);
+            return true;
         }
 
         private IBusinessObject Next()
@@ -136,7 +133,7 @@ namespace GenDB.DB
             if (!dataContext.IBOCache.TryGet(entityPOID, out res))
             {
                 res = translator.CreateInstanceOfIBusinessObject();
-                res.DBIdentity = new DBIdentifier(entityPOID, true);
+                res.DBIdentity = DBIdentifier.NewInstance(entityPOID, true);
                 this.dataContext.IBOCache.AddFromDB(res);
 
                 int idx = 1;
@@ -193,7 +190,7 @@ namespace GenDB.DB
             wsb = new MSJoinFieldWhereCondition(dataContext.TypeSystem);
             wsb.Visit(whereCondition);
             entityTypeEnumerator = wsb.EntityTypes.GetEnumerator();
-            NextEntityType();
+            hasResultsUponInit = NextEntityType();
         }
 
         string ConstructSqlString(IEnumerable<IProperty> properties, IEntityType et)
