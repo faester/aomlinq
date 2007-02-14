@@ -133,7 +133,7 @@ namespace GenDB.DB
             if (!dataContext.IBOCache.TryGet(entityPOID, out res))
             {
                 res = translator.CreateInstanceOfIBusinessObject();
-                res.DBIdentity = DBIdentifier.NewInstance(entityPOID, true);
+                res.DBIdentity = new DBIdentifier(entityPOID, true);
                 this.dataContext.IBOCache.AddFromDB(res);
 
                 int idx = 1;
