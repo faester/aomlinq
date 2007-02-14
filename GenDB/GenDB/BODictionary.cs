@@ -131,6 +131,7 @@ namespace GenDB
             var k = from m in mappings
                     where m.DictionaryId == DBIdentity.Value
                     select m;
+            ValueType vt;
         }
 
 
