@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Data.SqlClient;
 using System.Data;
-using System.Linq;
+using System.Query;
 using GenDB.DB;
 
 namespace GenDB.DB
@@ -652,7 +652,7 @@ namespace GenDB.DB
             Type elementType = ibo.GetType().GetGenericArguments()[0];
 
             // Find mapping type for the elements.
-            MappingType mapping = dataContext.TypeSystem.FindMappingType(elementType);
+            MappingType mapping = TypeSystem.FindMappingType(elementType);
 
             LinkedList<IGenCollectionElement> res = new LinkedList<IGenCollectionElement>();
 

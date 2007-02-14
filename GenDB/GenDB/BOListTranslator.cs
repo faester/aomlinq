@@ -19,7 +19,7 @@ namespace GenDB
     class BOListTranslator : IIBoToEntityTranslator
     {
         public static readonly Type TypeOfBOList = typeof(BOList<>);
-
+        
         DataContext dataContext;
         InstantiateObjectHandler instantiator;
         bool elementIsIBusinessObject = true;
@@ -41,7 +41,8 @@ namespace GenDB
         public BOListTranslator(Type t, DataContext dataContext, IEntityType bolistEntityType)
         {
             this.clrType = t;
-            if (!clrType.IsGenericType || clrType.GetGenericTypeDefinition() != TypeOfBOList)
+            Type genericType = clrType.GetGenericTypeDefinition();
+            if (!clrType.IsGenericType || genericType != TypeOfBOList)
             {
                 throw new NotTranslatableException("Internal error. BOList translator was invoked on wrong type. (Should be BOList<>)", t);
             }
@@ -51,7 +52,7 @@ namespace GenDB
             elementIsIBusinessObject = elementType.GetInterface(typeof(IBusinessObject).FullName) != null;
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
             bolistEntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).PropertyType.MappingType = 
-                dataContext.TypeSystem.FindMappingType(elementType);
+                TypeSystem.FindMappingType(elementType);
             if (elementIsIBusinessObject  && ! dataContext.TypeSystem.IsTypeKnown (elementType))
             {
                 dataContext.TypeSystem.RegisterType(elementType);

@@ -26,21 +26,6 @@ namespace GenDB
             return new Table<T>(GenDB, Translators, TypeSystem, IBOCache);
         }
 
-        BOListFactory bolistFactory;
-
-        public BOListFactory BolistFactory
-        {
-            get { return bolistFactory; }
-            set { bolistFactory = value; }
-        }
-
-        BODictionaryFactory boDictionaryFactory;
-        public BODictionaryFactory BODictionaryFactory
-        {
-            get{return boDictionaryFactory;}
-            set{boDictionaryFactory=value;}
-        }
-
         public static DataContext Instance
         {
             get { return DataContext.instance; }
@@ -91,8 +76,6 @@ namespace GenDB
             typeSystem.Init();
              
             iboCache = new IBOCache(this);
-            bolistFactory = new BOListFactory();
-            boDictionaryFactory = new BODictionaryFactory();
             isInitialized = true;
         }
 

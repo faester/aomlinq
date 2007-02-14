@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.Reflection;
-using System.Linq;
-using System.Linq.Expressions;
+using System.Query;
+using System.Expressions;
 using GenDB.DB;
 
 namespace GenDB
@@ -36,7 +36,7 @@ namespace GenDB
             int c=0;
             for(int i=0; i<analyseThis.Length;i++)
             {
-                if(analyseThis.ElementAt(i)=='.')
+                if (analyseThis[i] == '.')
                     c++;
             }
             return c;
@@ -68,7 +68,7 @@ namespace GenDB
 
         internal IExpression VisitMethodCall(MethodCallExpression mce)
         {
-            ReadOnlyCollection<Expression> roc = mce.Arguments;
+            ReadOnlyCollection<Expression> roc = mce.Parameters;
             IValue[] parArr= new IValue[2];
             
             for(int i=0;i<2;i++)
@@ -92,7 +92,7 @@ namespace GenDB
                 else if(roc[i] is ConstantExpression)
                 {
                     ConstantExpression ce = (ConstantExpression)roc[i];
-                    switch(typeSystem.FindMappingType(roc[i].Type))
+                    switch(TypeSystem.FindMappingType(roc[i].Type))
                     {
                         case MappingType.STRING:
                             parArr[i] = new CstString(roc[i].ToString().Trim('"'));
@@ -134,36 +134,36 @@ namespace GenDB
             IValue l=null, r=null;
             if(mce.Method.ReturnParameter.Member.Name=="Concat") 
             {
-                if(mce.Arguments[0] is MemberExpression)
+                if(mce.Parameters[0] is MemberExpression)
                 {
-                    l = VisitMemberExpression((MemberExpression)mce.Arguments[0]);
+                    l = VisitMemberExpression((MemberExpression)mce.Parameters[0]);
                 }
-                else if(mce.Arguments[0] is ConstantExpression)
+                else if(mce.Parameters[0] is ConstantExpression)
                 {
-                    ConstantExpression ce = (ConstantExpression) mce.Arguments[0];
+                    ConstantExpression ce = (ConstantExpression) mce.Parameters[0];
                     if(ce.Type.Name=="String")
                         l = new GenDB.CstString(ce.Value.ToString());
                 }
-                else if(mce.Arguments[0] is UnaryExpression)
+                else if(mce.Parameters[0] is UnaryExpression)
                 {
-                    UnaryExpression ue = (UnaryExpression) mce.Arguments[0];
+                    UnaryExpression ue = (UnaryExpression) mce.Parameters[0];
                     l = VisitUnaryExpressionValue(ue);
                 }
 
 
-                if(mce.Arguments[1] is MemberExpression)
+                if(mce.Parameters[1] is MemberExpression)
                 {
-                    r = VisitMemberExpression((MemberExpression)mce.Arguments[1]);
+                    r = VisitMemberExpression((MemberExpression)mce.Parameters[1]);
                 }
-                else if(mce.Arguments[1] is ConstantExpression)
+                else if(mce.Parameters[1] is ConstantExpression)
                 {
-                    ConstantExpression ce = (ConstantExpression) mce.Arguments[1];
+                    ConstantExpression ce = (ConstantExpression) mce.Parameters[1];
                     if(ce.Type.Name=="String")
                         r = new GenDB.CstString(ce.Value.ToString());
                 }
-                else if(mce.Arguments[1] is UnaryExpression)
+                else if(mce.Parameters[1] is UnaryExpression)
                 {
-                    UnaryExpression ue = (UnaryExpression) mce.Arguments[1];
+                    UnaryExpression ue = (UnaryExpression) mce.Parameters[1];
                     r = VisitUnaryExpressionValue(ue);
                 }
 
@@ -176,7 +176,7 @@ namespace GenDB
 
         internal IValue DecomposeConstant(ConstantExpression ce)
         {
-            switch(typeSystem.FindMappingType(ce.Type))
+            switch(TypeSystem.FindMappingType(ce.Type))
                 {
                     case MappingType.BOOL:
                         return new GenDB.CstBool((bool)ce.Value);
@@ -292,10 +292,10 @@ namespace GenDB
             }
             else if(be.Right is ConstantExpression)
             {
-                switch(typeSystem.FindMappingType(expr.Type))
+                switch(TypeSystem.FindMappingType(expr.Type))
                 {
                 case MappingType.BOOL:
-                    switch(typeSystem.FindMappingType(be.Right.Type))
+                    switch(TypeSystem.FindMappingType(be.Right.Type))
                     {
                         case MappingType.BOOL:
                             ConstantExpression ce = (ConstantExpression)be.Right;
@@ -612,7 +612,7 @@ namespace GenDB
                 else if(lambda.Body is MemberExpression)
                 {
                     MemberExpression me = (MemberExpression)lambda.Body;
-                    switch(typeSystem.FindMappingType(me.Type))
+                    switch(TypeSystem.FindMappingType(me.Type))
                     {
                         case MappingType.BOOL:
                             return VisitBooleanMember(me, true);
@@ -671,7 +671,7 @@ namespace GenDB
             if(me.NodeType.ToString() != "Not")
                 boolOp=true;
 
-            switch(typeSystem.FindMappingType(me.Type))
+            switch(TypeSystem.FindMappingType(me.Type))
             {
                 case MappingType.BOOL:
                     return VisitBooleanMember(me, boolOp);
@@ -683,14 +683,14 @@ namespace GenDB
         {
             LambdaExpression lambda = (LambdaExpression) expr;
             BinaryExpression be = (BinaryExpression)lambda.Body;
-            UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.GreaterThan(be.Left,be.Right), expr.Type);
+            UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.GT(be.Left,be.Right), expr.Type);
             return VisitExpr(ue);
         }
 
         internal IExpression DecomposeQueryLE(UnaryExpression ue)
         {
             BinaryExpression operand = (BinaryExpression)ue.Operand;
-            BinaryExpression be = MakeBinaryExpression(ExpressionType.GreaterThan, operand.Left, operand.Right);
+            BinaryExpression be = MakeBinaryExpression(ExpressionType.GT, operand.Left, operand.Right);
             return VisitBinaryExpression(be);
         }
 
@@ -698,14 +698,14 @@ namespace GenDB
         {
             LambdaExpression lambda = (LambdaExpression) expr;
             BinaryExpression be = (BinaryExpression)lambda.Body;
-            UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.LessThan(be.Left,be.Right), expr.Type);
+            UnaryExpression ue = MakeUnaryExpression(ExpressionType.Not, BinaryExpression.LT(be.Left,be.Right), expr.Type);
             return VisitExpr(ue);
         }
 
         internal IExpression DecomposeQueryGE(UnaryExpression ue)
         {
             BinaryExpression operand = (BinaryExpression)ue.Operand;
-            BinaryExpression be = MakeBinaryExpression(ExpressionType.LessThan, operand.Left, operand.Right);
+            BinaryExpression be = MakeBinaryExpression(ExpressionType.LT, operand.Left, operand.Right);
             return VisitBinaryExpression(be);
         }
 
@@ -787,33 +787,33 @@ namespace GenDB
                     {
                         return Expression.Divide(left, right);
                     }
-                case ExpressionType.Equal:
+                case ExpressionType.EQ:
                     {
-                        return Expression.Equal(left, right);
+                        return Expression.EQ(left, right);
                     }
-                case ExpressionType.GreaterThan:
+                case ExpressionType.GT:
                     {
-                        return Expression.GreaterThan(left, right);
+                        return Expression.GT(left, right);
                     }
-                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.GE:
                     {
-                        return Expression.GreaterThanOrEqual(left, right);
+                        return Expression.GE(left, right);
                     }
-                case ExpressionType.ArrayIndex:
+                case ExpressionType.Index:
                     {
-                        return Expression.ArrayIndex(left, right);
+                        return Expression.Index(left, right);
                     }
-                case ExpressionType.LessThanOrEqual:
+                case ExpressionType.LE:
                     {
-                        return Expression.LessThanOrEqual(left, right);
+                        return Expression.LE(left, right);
                     }
-                case ExpressionType.LeftShift:
+                case ExpressionType.LShift:
                     {
-                        return Expression.LeftShift(left, right);
+                        return Expression.LShift(left, right);
                     }
-                case ExpressionType.LessThan:
+                case ExpressionType.LT:
                     {
-                        return Expression.LessThan(left, right);
+                        return Expression.LT(left, right);
                     }
                 case ExpressionType.Modulo:
                     {
@@ -827,9 +827,9 @@ namespace GenDB
                     {
                         return Expression.MultiplyChecked(left, right);
                     }
-                case ExpressionType.NotEqual:
+                case ExpressionType.NE:
                     {
-                        return Expression.NotEqual(left, right);
+                        return Expression.NE(left, right);
                     }
                 case ExpressionType.Or:
                     {
@@ -839,9 +839,9 @@ namespace GenDB
                     {
                         return Expression.OrElse(left, right);
                     }
-                case ExpressionType.RightShift:
+                case ExpressionType.RShift:
                     {
-                        return Expression.RightShift(left, right);
+                        return Expression.RShift(left, right);
                     }
                 case ExpressionType.Subtract:
                     {
@@ -862,15 +862,15 @@ namespace GenDB
             {
                 switch (type1)
                 {
-                    case ExpressionType.TypeAs:
+                    case ExpressionType.As:
                         {
-                            return Expression.TypeAs(operand, type);
+                            return Expression.As(operand, type);
                         }
                     case ExpressionType.And:
                         {
                             goto Label_0093;
                         }
-                    case ExpressionType.NotEqual:
+                    case ExpressionType.NE: // NOT?????
                         {
                             return Expression.Not(operand);
                         }
@@ -886,9 +886,9 @@ namespace GenDB
             }
             else if (type1 <= ExpressionType.Negate)
             {
-                if (type1 == ExpressionType.ArrayLength)
+                if (type1 == ExpressionType.Len)
                 {
-                    return Expression.ArrayLength(operand);
+                    return Expression.Len(operand);
                 }
                 if (type1 == ExpressionType.Negate)
                 {

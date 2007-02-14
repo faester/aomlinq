@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.Reflection;
-using System.Linq;
+using System.Query;
 using GenDB.DB;
-using System.Linq.Expressions;
+using System.Expressions;
 
 namespace GenDB
 {

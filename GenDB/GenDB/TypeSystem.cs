@@ -323,16 +323,16 @@ namespace GenDB
             return et;
         }
 
-        public  IEntityType ConstructEntityType(Type t)
+        public IEntityType ConstructEntityType(Type t)
         {
             if (t.IsGenericType ) 
             {
-                if (t.GetGenericTypeDefinition() == BOListTranslator.TypeOfBOList)
+                Type genericType = t.GetGenericTypeDefinition();
+                if (genericType == BOListTranslator.TypeOfBOList)
                 {
                     return BOListEntityType(t);
                 }
-                    // dirty stuff, could'n get GetGenericTypeDefinition to work with dictionaries...help me!
-                else if(t.Name.Substring(0,6)=="BODict")
+                else if(genericType == BODictionaryTranslator.TypeOfBODictionary)
                 {
                     return BODictionaryEntityType(t);
                 }
@@ -347,7 +347,7 @@ namespace GenDB
             }
         }
 
-        public MappingType FindMappingType(Type t)
+        public static MappingType FindMappingType(Type t)
         {
             if (t == null) { throw new NullReferenceException("Type t"); }
             if (t.IsEnum)
