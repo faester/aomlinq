@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
+using System.Query;
 using GenDB;
 using CommonTestObjects;
 
@@ -43,15 +44,59 @@ namespace BODictionaryTests
             dataContext.SubmitChanges();
         }
 
-        public void BODictOfContainsAllPrimitives()
+
+        private void InsertTest<K, V>(Func<K, V> mapping, Func<int, K> keyCreator)
         {
-            
+            Table<BODictionary<K, V>> table = dataContext.CreateTable<BODictionary<K, V>>();
+
+            table.Clear();
+            dataContext.SubmitChanges();
+
+            for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
+            {
+                BODictionary<K, V> dict = new BODictionary<K, V>();
+                for (int j = 0; j < DICT_SIZE; j++)
+                {
+                    K k = keyCreator(j);
+                    dict[k] = mapping(k);
+                }
+                table.Add(dict);
+            }
+
+            dataContext.SubmitChanges();
+            GC.Collect();
+            dataContext.SubmitChanges();
+        }
+
+        private void RetrieveTest<K, V>(Func<K, V> mapping, Func<K, int> keyToInt)
+        {
+            Table<BODictionary<K, V>> table = dataContext.CreateTable<BODictionary<K, V>>();
+
+            int foundDicts = 0;
+
+            foreach(BODictionary<K, V> dict in table)
+            {
+                foundDicts++;
+                Dictionary<int, bool> foundValues = new Dictionary<int, bool>();
+                for (int j = 0; j < DICT_SIZE; j++) { foundValues[j] = false; }
+
+                foreach(KeyValuePair<K, V> kvp in dict)
+                {
+                    V constructedValue= mapping(kvp.Key);
+                    Assert.AreEqual (constructedValue, kvp.Value, "Wrong value for key");
+                    foundValues[keyToInt(kvp.Key)] = true;
+                }
+
+                for (int j = 0; j < DICT_SIZE; j++) { Assert.IsTrue(foundValues[j], "Missing key corresponding to integer shown"); }
+                Assert.AreEqual(ELEMENTS_TO_INSERT, foundValues.Count, "Some wrong elemens was returned.");
+            }
+
+            Assert.AreEqual(ELEMENTS_TO_INSERT, foundDicts, "Wrong number of dictionaries returned");
         }
 
         [Test]
         public void TestBODictOfInt() 
         {
-            Assert.IsTrue(true);
             Table<BODictionary<int, int>> table = dataContext.CreateTable<BODictionary<int, int>>();
             table.Clear();
             dataContext.SubmitChanges();
@@ -166,5 +211,20 @@ namespace BODictionaryTests
 
             Assert.AreEqual (ELEMENTS_TO_INSERT, foundDicts, "Wrong number of dictionaries found in table.");
         }
+
+        [Test]
+        public void TestBODictOfTestPersonInt()
+        {
+            this.InsertTest<TestPerson, int>((TestPerson t) => t.Age, (int i) => new TestPerson{Age = i});
+        }
+
+        [Test]
+        public void TestBODictOfTestPersonIntRetrieve()
+        {
+            Func<TestPerson, int> m = (TestPerson t) => t.Age;
+            this.RetrieveTest<TestPerson, int>(m, m);
+        }
+
+    
     }
 }

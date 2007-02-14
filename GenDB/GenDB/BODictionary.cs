@@ -40,47 +40,6 @@ namespace GenDB
         }
     }
 
-    //internal class KeyList<K> : AbstractBusinessObject
-    //{
-    //    BOList<K> keyList = new BOList<K>();
-    //    int dBIdentifier;
-
-    //    public KeyList() 
-    //    {
-    //        dBIdentifier=keyList.DBIdentity.Value;
-    //    }
-
-    //    public BOList<K> KeyList
-    //    {
-    //        get{return keyList;}
-    //        set{keyList=value;}
-    //    }
-
-    //    public int DBIdentifier
-    //    {
-    //        get{return dBIdentifier;}
-    //    }
-    //}
-
-    internal class InternalList<V> : AbstractBusinessObject
-    {
-        BOList<V> valueList = new BOList<V>();
-
-        public InternalList() { }
-
-        public V this[int i]
-        {
-            get { return valueList[i]; }
-            set { valueList[i] = value; }
-        }
-
-        public BOList<V> ValueList
-        {
-            get{return valueList;}
-            set{valueList=value;}
-        }
-    }
-
     /// <summary>
     /// Gem typerne for K og V som properties på objektet og giv disse faste 
     /// navne index TypeSystem
@@ -91,6 +50,8 @@ namespace GenDB
     public sealed class BODictionary<K, V> : AbstractBusinessObject, IDictionary<K, V>, IDBSaveableCollection
     {
         static Table<DictKeyValueMapping> mappings = DataContext.Instance.CreateTable<DictKeyValueMapping>();
+        static Table<BOList<K>> keyLists = DataContext.Instance.CreateTable<BOList<K>>();
+        static Table<BOList<V>> valueLists = DataContext.Instance.CreateTable<BOList<V>>();
 
         Dictionary<K, V> dict = new Dictionary<K,V>();
         DictKeyValueMapping mapping = null;
@@ -99,19 +60,10 @@ namespace GenDB
         bool isReadOnly = false;
         bool hasBeenModified = false;
 
-        MappingType mt_key;
-        MappingType mt_value;
-        CollectionElementConverter cnv_key = null;
-        CollectionElementConverter cnv_value = null;
-
         /// <summary>
         /// </summary>
         public BODictionary()
         {
-            mt_key = TypeSystem.FindMappingType(typeof(K));
-            mt_value = TypeSystem.FindMappingType(typeof(V));
-            cnv_key = new CollectionElementConverter(mt_key, DataContext.Instance, typeof(K));
-            cnv_value = new CollectionElementConverter(mt_value, DataContext.Instance, typeof(V));
         }
 
         public bool IsReadOnly
@@ -128,12 +80,20 @@ namespace GenDB
 
         private void PopulateDictionary()
         {
-            var k = from m in mappings
-                    where m.DictionaryId == DBIdentity.Value
-                    select m;
-            ValueType vt;
-        }
+            if (!DBIdentity.IsPersistent) { return; }
 
+            var k = (from m in mappings
+                    where m.DictionaryId == DBIdentity.Value
+                    select m).First();
+
+            BOList<V> values = (BOList<V>)DataContext.Instance.GenDB.GetByEntityPOID (k.ValueListId);
+            BOList<K> keys = (BOList<K>)DataContext.Instance.GenDB.GetByEntityPOID (k.KeyListId);
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                dict[keys[i]] = values[i];
+            }
+        }
 
         private void TestPopulateDictionary()
         {
@@ -150,27 +110,6 @@ namespace GenDB
             {
                 return;
             }
-
-            InternalList<K> keyList = new InternalList<K>();
-            InternalList<V> valueList = new InternalList<V>();
-
-            //if (!DBIdentity.IsPersistent)
-            //{
-            //    throw new Exception("Attempted to save elements prior to saving the BODictionary");
-            //}
-            //foreach(KeyValuePair<K, V> kvp in dict)
-            //{
-            //    keyList.Add(kvp.Key);
-            //    valueList.Add(kvp.Value);
-            //}
-            //keyList.SaveElementsToDB();
-            //valueList.SaveElementsToDB();
-
-            //mapping.KeyListId = keyList.DBIdentity;
-            //mapping.ValueListId = valueList.DBIdentity;
-            //mapping.DBIdentity = this.DBIdentity;
-
-            //HasBeenModified=false;
         }
 
         public bool ContainsKey(K key)
@@ -218,7 +157,6 @@ namespace GenDB
                 TestPopulateDictionary();
                 return dict.Keys;
             }
-            set{return;}
         }
 
         public ICollection<V> Values
@@ -227,7 +165,6 @@ namespace GenDB
                 TestPopulateDictionary();
                 return dict.Values;
             }
-            set{return;}
         }
 
         public void Add(KeyValuePair<K, V> kvp)
