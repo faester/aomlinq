@@ -3,15 +3,52 @@ using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 using GenDB;
-using System.Linq;
-using System.Linq.Expressions;
 using CommonTestObjects;
+using System.Query;
 
 namespace TableTests
 {
     [TestFixture]
     public class TableTests
     {
+        class Car : AbstractBusinessObject
+        {
+            string brand = "Volvo";
+
+            public string Brand
+            {
+                get { return brand; }
+                set { brand = value; }
+            }
+
+            CarOwner owner;
+
+            public CarOwner Owner
+            {
+                get { return owner; }
+                set
+                { 
+                    owner = value; 
+                }
+            }
+        }
+
+        class CarOwner : TestPerson
+        {
+            Car car;
+
+            public Car Car
+            {
+                get { return car; }
+                set
+                {
+                    car = value;
+                }
+            }
+        }
+
+        Table<CarOwner> t_carOwners = null;
+        Table<Car> t_cars = null;
         Table<TestPerson> tpt = null;
         TestPerson personToRemove = new TestPerson { Name = "I am the one to remove." };
         DataContext dataContext = DataContext.Instance;
@@ -20,7 +57,7 @@ namespace TableTests
         {
             if (!dataContext.IsInitialized)
             {
-                dataContext.DeleteDatabase();
+                if (dataContext.DatabaseExists()) { dataContext.DeleteDatabase(); }
                 dataContext.CreateDatabase();
                 dataContext.Init();
             }
@@ -34,6 +71,7 @@ namespace TableTests
         [SetUp]
         public void SetUp()
         {
+            Console.WriteLine("TABLE TEST SETUP *********************************");
             tpt = dataContext.CreateTable<TestPerson>();
 
             tpt.Clear();
@@ -49,7 +87,22 @@ namespace TableTests
             tpt.Add (new TestPerson {Name = "Svend"});
             tpt.Add (personToRemove);
 
+            Car c = new Car { Brand = "TestBrand" };
+            CarOwner caro = new CarOwner();
+            caro.Name = "Imbecil tosse!";
+            caro.Car = c;
+            c.Owner = caro;
+
+            t_carOwners = dataContext.CreateTable<CarOwner>();
+            t_cars = dataContext.CreateTable<Car>();
+
+            t_cars.Add(c);
+            t_carOwners.Add (caro);
+
             dataContext.SubmitChanges();
+
+            Console.WriteLine("Car has " + c.DBIdentity);
+            Console.WriteLine("CarOwner " + caro.DBIdentity);
         }
 
         [Test]
@@ -67,7 +120,10 @@ namespace TableTests
         [Test]
         public void TestCanClearOnPersistedType()
         {
+            GC.Collect();
             tpt.Clear();
+            t_carOwners.Clear();
+            t_cars.Clear();
             dataContext.SubmitChanges();
 
             Assert.AreEqual(0, tpt.Count, "Table is not empty after clear.");
@@ -81,14 +137,14 @@ namespace TableTests
             TestPerson p2 = new TestPerson();
             TestPerson p3 = new TestPerson();
 
-            tpt.Add (p1);
-            tpt.Add (p2);
+            tpt.Add(p1);
+            tpt.Add(p2);
 
             dataContext.SubmitChanges();
 
-            Assert.IsTrue (tpt.Contains(p1), "Wrong result. False negative");
-            Assert.IsFalse (tpt.Contains(p3), "Wrong result. False positive");
-            Assert.IsFalse (tpt.Contains (null), "Wrong result. ");
+            Assert.IsTrue(tpt.Contains(p1), "Wrong result. False negative");
+            Assert.IsFalse(tpt.Contains(p3), "Wrong result. False positive");
+            Assert.IsFalse(tpt.Contains(null), "Wrong result. ");
         }
 
         [Test, ExpectedException(typeof(NullReferenceException))]
@@ -111,7 +167,7 @@ namespace TableTests
             Assert.AreEqual (0, c, "Error in filtered result.");
 
             c = tpt.Count;
-            Assert.AreEqual (9, c, "Error in unfiltered result.");
+            Assert.AreEqual (10, c, "Error in unfiltered result.");
 
             Table<TestPerson> filtered = from person in tpt where person.Name == "Per" select person;
             Assert.AreEqual (4, filtered.Count, "Filtered table returned wrong number of instances.");
@@ -136,6 +192,22 @@ namespace TableTests
             dataContext.SubmitChanges();
 
             Assert.IsFalse (tpt.Contains(personToRemove), "Table still contained removed person after remove was comitted.");
+        }
+
+        [Test]
+        public void TestReferenceAfterDelete()
+        {
+            t_cars.Clear();
+            dataContext.SubmitChanges();
+
+            bool found = false;
+
+            foreach (CarOwner caro in t_carOwners)
+            {
+                found = true;
+                Assert.IsTrue(caro.Car.Brand == "TestBrand", "Error in persisting car");
+            }
+            Assert.IsTrue(found, "No elements found");
         }
     }
 }
