@@ -1,17 +1,19 @@
 using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Text;
-using System.Data.DLinq;
 using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
+using System.Query;
+using System.Data.DLinq;
+using System.Expressions;
 
 namespace PerformanceTests
 {
-    public class DLinqDB : DataContext
+    public class DLinqDB : DataContext 
     {
-        public DLinqDB(string cnnstr) : base(cnnstr) { }
         public Table<PerfTestAllPrimitiveTypes> Table;
+        public DLinqDB(string cnnstr)
+            : base(cnnstr) { }
     }
 
     public class DLinqTest : ReadWriteClearTest
@@ -32,12 +34,13 @@ namespace PerformanceTests
             //    db.CreateDatabase();
             //}
             table = db.Table;
-            db.SubmitChanges();
+            
         }
 
         public void InitTests(int objectCount)
         {
-            int needToAdd = objectCount - table.Count();
+            int count = Sequence.Count(table);
+            int needToAdd = objectCount - count;
             if (needToAdd > 0)
             {
                 Console.WriteLine("Adding {0} objects to table", needToAdd);

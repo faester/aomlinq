@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.11209</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{FEEAE58B-C7CE-4472-9CD5-FD870B3874B4}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -58,15 +58,10 @@
       <HintPath>..\Tests\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v3.5.11209\System.Core.dll</HintPath>
-    </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.Linq, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v3.5.11209\System.Data.Linq.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Data.DLinq, Version=1.0.2319.19044, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="System.Query, Version=1.0.2319.19041, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="System.Transactions" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interface1.cs" />
