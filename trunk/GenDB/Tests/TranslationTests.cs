@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB;
 using NUnit.Framework;
-using System.Linq;
+using System.Query;
 using CommonTestObjects;
 
 namespace TranslationTests

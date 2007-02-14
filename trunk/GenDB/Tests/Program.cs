@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Linq;
+using System.Query;
 using GenDB;
 
 namespace Tests
@@ -86,7 +86,7 @@ namespace Tests
 
             Table<BOList<int>> tbi = dataContext.CreateTable<BOList<int>>();
 
-            BOList<int> bi = dataContext.BolistFactory.BOListInt();
+            BOList<int> bi = new BOList<int>();
 
             for (int i = 10; i > 0; i--)
             {
@@ -110,7 +110,7 @@ namespace Tests
                 Console.WriteLine();
             }
 
-            BOList<TestlistElement> lp = dataContext.BolistFactory.BOListRef<TestlistElement>();
+            BOList<TestlistElement> lp = new BOList<TestlistElement>();
 
             for (int i = 0; i < 5; i++)
             {

@@ -2,14 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using GenDB.DB;
-using System.Linq;
 
 namespace GenDB
 {
     class TranslatorSet
     {
-        static Type bolistGeneric = typeof(GenDB.BOList<>);
-
         Dictionary<Type, IIBoToEntityTranslator> clrtype2translator = new Dictionary<Type, IIBoToEntityTranslator>();
         Dictionary<int, IIBoToEntityTranslator> etPOID2translator = new Dictionary<int, IIBoToEntityTranslator>();
         DataContext dataContext = null;
@@ -65,7 +62,8 @@ namespace GenDB
         {
             if (t.IsGenericType)
             {
-                if (t.GetGenericTypeDefinition() == bolistGeneric)
+                Type genericType = t.GetGenericTypeDefinition();
+                if (genericType == BOListTranslator.TypeOfBOList)
                 {
                     /*
                      * Ved depersistering skal der ses på om IsList er sat. 
@@ -75,7 +73,7 @@ namespace GenDB
                     return new BOListTranslator(t, dataContext, iet);
                 }
                 // dirty stuff, could'n get GetGenericTypeDefinition to work with dictionaries...help me!
-                else if(t.Name.Substring(0,6)=="BODict")
+                else if(genericType == BODictionaryTranslator.TypeOfBODictionary)
                 {
                     return new BODictionaryTranslator(t, dataContext, iet);
                 }

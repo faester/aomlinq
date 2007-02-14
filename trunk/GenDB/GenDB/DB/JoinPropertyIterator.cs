@@ -113,13 +113,10 @@ namespace GenDB.DB
             if (!entityTypeEnumerator.MoveNext()) { return false; }
 
             IEntityType et = entityTypeEnumerator.Current;
-            Console.WriteLine("Now considering type : " + et);
             properties = et.GetAllProperties;
             cmd = new SqlCommand(ConstructSqlString(properties, et), cnn);
             cmd.CommandTimeout = dataContext.CommandTimeout;
             reader = cmd.ExecuteReader();
-
-            //Console.WriteLine("Reader: {0}, {1}", reader.IsClosed, reader.HasRows);
 
             translator = dataContext.Translators.GetTranslator(et.EntityTypePOID);
             return true;

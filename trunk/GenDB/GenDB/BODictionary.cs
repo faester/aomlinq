@@ -3,75 +3,81 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB.DB;
 using System.Collections;
+using System.Query;
+using System.Expressions;
 
 namespace GenDB
 {
-
-    public class BODictionaryFactory
+    /// <summary>
+    /// Used internally in the BODictionary to keep track of 
+    /// how the keys/values are mapped to the BODictionary 
+    /// in the database.
+    /// </summary>
+    internal class DictKeyValueMapping : AbstractBusinessObject
     {
-        internal BODictionaryFactory()
+        int keyListId;
+
+        public int KeyListId
         {
+            get { return keyListId; }
+            set { keyListId = value; }
         }
 
-        public BODictionary<K, V> BODictionaryRef<K, V>()
-            where V : IBusinessObject
+        int valueListId;
+
+        public int ValueListId
         {
-            return new BODictionary<K, V>();
+            get { return valueListId; }
+            set { valueListId = value; }
         }
 
-        // key kan kun være int da der var for mange kombinationer til at det virkede fornuftigt
-        // at fortsætte denne implementation af factory.
-        public BODictionary<int, V> BODictionaryInt<K, V>() {return new BODictionary<int, V>();}
-        public BODictionary<int, string> BODictionaryString() {return new BODictionary<int, string>();}
-        public BODictionary<int, DateTime> BODictionaryDateTime() {return new BODictionary<int, DateTime>();}
-        public BODictionary<int, long> BODictionaryLong() {return new BODictionary<int, long>();}
-        public BODictionary<int, bool> BODictionaryBool() {return new BODictionary<int, bool>();}
-        public BODictionary<int, char> BODictionaryChar() {return new BODictionary<int, char>();}
-        public BODictionary<int, double> BODictionaryDouble() {return new BODictionary<int, double>();}
-        public BODictionary<int, float> BODictionaryFloat() {return new BODictionary<int, float>();}
-    }
+        int dictionaryId;
 
-    internal class KeyDict<K>
-    {
-        BOList<K> keyList = new BOList<K>();
-        int dBIdentifier;
-
-        public KeyDict() 
+        public int DictionaryId
         {
-            dBIdentifier=keyList.DBIdentity.Value;
-        }
-
-        public BOList<K> KeyList
-        {
-            get{return keyList;}
-            set{keyList=value;}
-        }
-
-        public int DBIdentifier
-        {
-            get{return dBIdentifier;}
+            get { return dictionaryId; }
+            set { dictionaryId = value; }
         }
     }
 
-    internal class ValueDict<V>
+    //internal class KeyList<K> : AbstractBusinessObject
+    //{
+    //    BOList<K> keyList = new BOList<K>();
+    //    int dBIdentifier;
+
+    //    public KeyList() 
+    //    {
+    //        dBIdentifier=keyList.DBIdentity.Value;
+    //    }
+
+    //    public BOList<K> KeyList
+    //    {
+    //        get{return keyList;}
+    //        set{keyList=value;}
+    //    }
+
+    //    public int DBIdentifier
+    //    {
+    //        get{return dBIdentifier;}
+    //    }
+    //}
+
+    internal class InternalList<V> : AbstractBusinessObject
     {
         BOList<V> valueList = new BOList<V>();
-        int dBIdentifier;
 
-        public ValueDict()
+        public InternalList() { }
+
+        public V this[int i]
         {
-            dBIdentifier=valueList.DBIdentity.Value;
+            get { return valueList[i]; }
+            set { valueList[i] = value; }
         }
 
         public BOList<V> ValueList
         {
             get{return valueList;}
             set{valueList=value;}
-        }
-
-        public int DBIdentifier
-        {
-            get{return dBIdentifier;}
         }
     }
 
@@ -82,30 +88,28 @@ namespace GenDB
     /// </summary>
     /// <typeparam name="K"></typeparam>
     /// <typeparam name="V"></typeparam>
-    
     public sealed class BODictionary<K, V> : AbstractBusinessObject, IDictionary<K, V>, IDBSaveableCollection
     {
-        Dictionary<K, V> dict = new Dictionary<K,V>();
+        static Table<DictKeyValueMapping> mappings = DataContext.Instance.CreateTable<DictKeyValueMapping>();
 
-        KeyDict<K> keyDict = new KeyDict<K>();
-        ValueDict<V> valueDict = new ValueDict<V>();
+        Dictionary<K, V> dict = new Dictionary<K,V>();
+        DictKeyValueMapping mapping = null;
 
         bool isDictionaryPopulated = false;
         bool isReadOnly = false;
         bool hasBeenModified = false;
+
         MappingType mt_key;
         MappingType mt_value;
         CollectionElementConverter cnv_key = null;
         CollectionElementConverter cnv_value = null;
 
         /// <summary>
-        /// Hide constructor to prevent instantiation 
-        /// of unrestricted type parameter.
         /// </summary>
-        internal BODictionary()
+        public BODictionary()
         {
-            mt_key = DataContext.Instance.TypeSystem.FindMappingType(typeof(K));
-            mt_value = DataContext.Instance.TypeSystem.FindMappingType(typeof(V));
+            mt_key = TypeSystem.FindMappingType(typeof(K));
+            mt_value = TypeSystem.FindMappingType(typeof(V));
             cnv_key = new CollectionElementConverter(mt_key, DataContext.Instance, typeof(K));
             cnv_value = new CollectionElementConverter(mt_value, DataContext.Instance, typeof(V));
         }
@@ -124,7 +128,9 @@ namespace GenDB
 
         private void PopulateDictionary()
         {
-            //throw new Exception("Not implemented");
+            var k = from m in mappings
+                    where m.DictionaryId == DBIdentity.Value
+                    select m;
         }
 
 
@@ -143,18 +149,27 @@ namespace GenDB
             {
                 return;
             }
+
+            InternalList<K> keyList = new InternalList<K>();
+            InternalList<V> valueList = new InternalList<V>();
+
             //if (!DBIdentity.IsPersistent)
             //{
             //    throw new Exception("Attempted to save elements prior to saving the BODictionary");
             //}
-            foreach(KeyValuePair<K, V> kvp in dict)
-            {
-                keyDict.KeyList.Add(kvp.Key);
-                valueDict.ValueList.Add(kvp.Value);
-            }
-            keyDict.KeyList.SaveElementsToDB();
-            valueDict.ValueList.SaveElementsToDB();
-            HasBeenModified=false;
+            //foreach(KeyValuePair<K, V> kvp in dict)
+            //{
+            //    keyList.Add(kvp.Key);
+            //    valueList.Add(kvp.Value);
+            //}
+            //keyList.SaveElementsToDB();
+            //valueList.SaveElementsToDB();
+
+            //mapping.KeyListId = keyList.DBIdentity;
+            //mapping.ValueListId = valueList.DBIdentity;
+            //mapping.DBIdentity = this.DBIdentity;
+
+            //HasBeenModified=false;
         }
 
         public bool ContainsKey(K key)

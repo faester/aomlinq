@@ -52,7 +52,7 @@ namespace BOListTests
 
             for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
             {
-                BOList<ContainsAllPrimitiveTypes> bolist = dataContext.BolistFactory.BOListRef<ContainsAllPrimitiveTypes>();
+                BOList<ContainsAllPrimitiveTypes> bolist = new BOList<ContainsAllPrimitiveTypes>();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
                     bolist.Add(new ContainsAllPrimitiveTypes { Integer = j });
@@ -83,7 +83,7 @@ namespace BOListTests
 
             for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
             {
-                BOList<int> bolist = dataContext.BolistFactory.BOListInt();
+                BOList<int> bolist = new BOList<int>();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
                     bolist.Add(j);
@@ -114,7 +114,7 @@ namespace BOListTests
 
             for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
             {
-                BOList<string> bolist = dataContext.BolistFactory.BOListString();
+                BOList<string> bolist = new BOList<string>();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
                     bolist.Add(j.ToString());
@@ -146,7 +146,7 @@ namespace BOListTests
 
             for (int i = 0; i < ELEMENTS_TO_INSERT; i++)
             {
-                BOList<DateTime> bolist = dataContext.BolistFactory.BOListDateTime();
+                BOList<DateTime> bolist = new BOList<DateTime>();
                 for (int j = 0; j < LIST_LENGTH; j++)
                 {
                     bolist.Add(new DateTime(j));

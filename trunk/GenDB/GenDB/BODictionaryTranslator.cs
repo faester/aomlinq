@@ -8,7 +8,7 @@ namespace GenDB
 {
     class BODictionaryTranslator : IIBoToEntityTranslator
     {
-        //public static readonly Type TypeOfBODictionary = typeof(BODictionary<K,V>);
+        public static readonly Type TypeOfBODictionary = typeof(BODictionary<,>);
         
         DataContext dataContext;
         InstantiateObjectHandler instantiator;
@@ -41,7 +41,7 @@ namespace GenDB
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
             
             bodictEntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).PropertyType.MappingType = 
-                dataContext.TypeSystem.FindMappingType(elementType);
+                TypeSystem.FindMappingType(elementType);
             if (elementIsIBusinessObject  && ! dataContext.TypeSystem.IsTypeKnown (elementType))
             {
                 dataContext.TypeSystem.RegisterType(elementType);

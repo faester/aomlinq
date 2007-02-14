@@ -166,10 +166,9 @@ namespace ObjectUtilitiesTests
         [Test, Ignore("Known to fail.")]
         public void TestCompareBOList()
         {
-            BOListFactory blf = dataContext.BolistFactory;
-            BOList<int> boOrig = blf.BOListInt();
-            BOList<int> boSame = blf.BOListInt();
-            BOList<int> boOther = blf.BOListInt();
+            BOList<int> boOrig = new BOList<int>();
+            BOList<int> boSame = new BOList<int>();
+            BOList<int> boOther = new BOList<int>();
 
             for (int i = 0; i < 10; i++)
             {
@@ -181,10 +180,9 @@ namespace ObjectUtilitiesTests
             Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boOrig), "BOList compare to self returned false.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BOList compare to other with same contents returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boOther), "BOList compare to completely different BOList returned true.");
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, blf.BOListLong()), "BOList compare to something else returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, new BOList<long>()), "BOList compare to something else returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, null), "BOList compare to null returned true.");
 
-            blf = null;
             boOrig = null;
             boSame = null; 
             boOther = null;

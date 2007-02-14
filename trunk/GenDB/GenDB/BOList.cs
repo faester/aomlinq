@@ -7,34 +7,27 @@ using System.Collections;
 namespace GenDB
 {
 
-    public class BOListFactory
-    {
-        internal BOListFactory()
-        {
-        }
-
-        public BOList<T> BOListRef<T>()
-            where T : IBusinessObject
-        {
-            return new BOList<T>();
-        }
-
-        public BOList<int> BOListInt() { return new BOList<int>(); }
-        public BOList<string> BOListString() { return new BOList<string>(); }
-        public BOList<DateTime> BOListDateTime() { return new BOList<DateTime>(); }
-        public BOList<long> BOListLong() { return new BOList<long>(); }
-        public BOList<bool> BOListBool() { return new BOList<bool>(); }
-        public BOList<char> BOListChar() { return new BOList<char>(); }
-        public BOList<double> BOListDouble() { return new BOList<double>(); }
-        public BOList<float> BOListFloat() { return new BOList<float>(); }
-    }
-
     /// <summary>
     /// BOList has identical functionality to a regular list, but 
-    /// can be stored in the generic db system. This type can not 
-    /// be instantiated, since there are no restrictions on the 
-    /// parameters, and the GenDB system only supports storage of 
-    /// reference types, if they implement IBusinessObject.
+    /// can be stored in the generic db system. Elements are retrieved
+    /// lazely, that is, upon first attempt to traverse them or access an 
+    /// indexed element.
+    /// 
+    /// There are some problem with the generic type specifications: We 
+    /// want to allow only lists of either primitive elements (+ string 
+    /// and Datatime) or IBusinessObjects, but this can not be expressed 
+    /// with C# generic type constraints.
+    /// 
+    /// Thus it is in fact possible to instantiate BOList object, that will 
+    /// cause exceptions, if one attempts to store them in the db. We have 
+    /// considered using various workarounds (constrained factory methods, 
+    /// making the list internal and providing public subclasses specialized
+    /// for each primitive and one for all IBusinessObject's etc). We did 
+    /// how ever decide to refrain from the compiler type checking, since 
+    /// the introduction of a number of new types would make it much more
+    /// inconvenient to use the class on the applicatoin side.
+    /// 
+    /// The above considerations are even more appropriate for the BODictionary.
     /// 
     /// To create instances, use the BOListFactory
     /// </summary>
@@ -47,15 +40,14 @@ namespace GenDB
         bool hasBeenModified = false;
         MappingType mt;
         CollectionElementConverter cnv = null;
-                
          
         /// <summary>
         /// Hide constructor to prevent instantiation 
         /// of unrestricted type parameter.
         /// </summary>
-        internal BOList()
+        public BOList()
         {
-            mt = DataContext.Instance.TypeSystem.FindMappingType(typeof(T));
+            mt = TypeSystem.FindMappingType(typeof(T));
             cnv = new CollectionElementConverter(mt, DataContext.Instance, typeof(T));
         }
 
@@ -222,5 +214,4 @@ namespace GenDB
             HasBeenModified=false;
         }
     }
-
 }
