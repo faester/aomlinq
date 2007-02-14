@@ -268,19 +268,21 @@ namespace GenDB
         internal void Remove(long id)
         {
             IBOCacheElement obj = null;
+            IBusinessObject ibo = null;
             if (committedObjects.TryGetValue(id, out obj))
             {
-                IBusinessObject ibo = obj.Original;
+                ibo = obj.Original;
                 DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
                 obj.Original.DBIdentity = newID;
-                if (obj.Original.DBIdentity.IsPersistent)
-                {
-                    throw new Exception("Internal error in DBIdentity");
-                }
             }
 
-            //committedObjects.Remove(id);
-            uncommittedObjects.Remove(id);
+            // Indicate that object is no longer under cache control
+            if (uncommittedObjects.TryGetValue(id, out ibo))
+            {
+                DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
+                ibo.DBIdentity = newID;
+                uncommittedObjects.Remove(id);
+            }
         }
     }
 }
