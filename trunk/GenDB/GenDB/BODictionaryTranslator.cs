@@ -14,8 +14,9 @@ namespace GenDB
         InstantiateObjectHandler instantiator;
         bool elementIsIBusinessObject = true;
         IEntityType entityType;
-        Type clrType; // The Type of objects translatable by this translator (some BOList<> type)
-        Type elementType; // Type (typeof(T)) parameter of translatable BOList<T> entities.
+        Type clrType; // The Type of objects translatable by this translator (some Dictionary<,> type)
+        Type elementType; // Type (typeof(V)) parameter of translatable BODictionary<K, V> V-entities.
+        Type keyType; // Type (typeof(K)) parameter of translatable BODictionary<K, V> K-entities.
 
         IEnumerable<PropertyConverter> fieldConverters;
 
@@ -36,7 +37,8 @@ namespace GenDB
 
             this.dataContext = dataContext;
             this.entityType = bodictEntityType;
-            elementType = clrType.GetGenericArguments()[0];
+            keyType = clrType.GetGenericArguments()[0];
+            elementType = clrType.GetGenericArguments()[1];
             elementIsIBusinessObject = elementType.GetInterface(typeof(IBusinessObject).FullName) != null;
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
             
@@ -55,13 +57,16 @@ namespace GenDB
             IEntity e = null;
             e = dataContext.GenDB.NewEntity();
 
-            //// The mapping type for the elements are stored in this cstProperty. No other values are relevant.
+            //// The mapping type for the elements are stored in this cstProperty. 
             IProperty elementTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
+            IProperty keyTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_KEY_PROPERTY_NAME);
 
-            IPropertyValue pv = elementTypeProperty.CreateNewPropertyValue(e);
+            IPropertyValue elementValue = elementTypeProperty.CreateNewPropertyValue(e);
+            IPropertyValue keyValue = keyTypeProperty.CreateNewPropertyValue(e);
 
             e.EntityType = entityType;
-            pv.StringValue = elementType.FullName;
+            elementValue.StringValue = elementType.FullName;
+            keyValue.StringValue = keyType.FullName;
 
             if (ibo.DBIdentity.IsPersistent) 
             { 

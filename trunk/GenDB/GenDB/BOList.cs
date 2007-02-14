@@ -6,12 +6,12 @@ using System.Collections;
 
 namespace GenDB
 {
-
     /// <summary>
     /// BOList has identical functionality to a regular list, but 
     /// can be stored in the generic db system. Elements are retrieved
-    /// lazely, that is, upon first attempt to traverse them or access an 
-    /// indexed element.
+    /// lazely, that is, upon first attempt to traverse the collection
+    /// or access an indexed element. When one of these operations are
+    /// performed, all elements are retrieved.
     /// 
     /// There are some problem with the generic type specifications: We 
     /// want to allow only lists of either primitive elements (+ string 
@@ -25,7 +25,7 @@ namespace GenDB
     /// for each primitive and one for all IBusinessObject's etc). We did 
     /// how ever decide to refrain from the compiler type checking, since 
     /// the introduction of a number of new types would make it much more
-    /// inconvenient to use the class on the applicatoin side.
+    /// inconvenient to use the class on the application side.
     /// 
     /// The above considerations are even more appropriate for the BODictionary.
     /// 
@@ -51,10 +51,14 @@ namespace GenDB
             cnv = new CollectionElementConverter(mt, DataContext.Instance, typeof(T));
         }
 
+        ///<summary>
+        ///Set indexed element. Will enhance list to ensure capacity 
+        ///to store element. The method is private, and is only used 
+        ///when retrieving values from db.
+        ///</summary>
         private void Set(int idx, T t)
         {
-            if (theList.Count <= idx)
-            {
+            if (theList.Count <= idx) {
                 for (int i = theList.Count; i <= idx; i++)
                 {
                     theList.Add(default(T));
@@ -71,10 +75,9 @@ namespace GenDB
             /* 
              * Elements can only exist in the DB
              * if this BOList element has been 
-             * persisted. Hence if DBTag is null, 
-             * there is nothing to load.
+             * persisted. Hence if IsPersistent 
+             * is false, there is nothing to load.
              */
-            
             if (DBIdentity.IsPersistent)
             {
                 foreach (IGenCollectionElement ce in DataContext.Instance.GenDB.AllElements(DBIdentity))
