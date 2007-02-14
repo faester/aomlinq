@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB;
 using NUnit.Framework;
-using System.Linq;
-using System.Linq.Expressions;
 using CommonTestObjects;
 
 namespace QueryToSqlTranslationTests
@@ -378,6 +376,8 @@ namespace QueryToSqlTranslationTests
                 Assert.IsTrue(person.Spouse.GoodLooking, "this person should have been good-looking");
             }
         }
+
+
 
         [Test]
         public void TestLessThan()
