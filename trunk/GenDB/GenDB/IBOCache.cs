@@ -191,7 +191,7 @@ namespace GenDB
                 foreach (IBusinessObject ibo in tmpUncomitted.Values)
                 {
                     IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
-                    trans.SaveToDB(dataContext.GenDB, ibo);
+                    trans.SaveToDB(ibo);
                     AddToCommitted(ibo);
                 }
             }
@@ -207,7 +207,7 @@ namespace GenDB
                     {
                         IBusinessObject ibo = ce.Original;
                         IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
-                        trans.SaveToDB(dataContext.GenDB, ibo);
+                        trans.SaveToDB(ibo);
 
                         ce.ClearDirtyBit();
                     }

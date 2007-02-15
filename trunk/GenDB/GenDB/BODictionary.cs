@@ -8,12 +8,34 @@ using System.Expressions;
 
 namespace GenDB
 {
+    public abstract class IDictionaryStub : AbstractBusinessObject, IDBSaveableCollection
+    {
+        DictKeyValueMapping mapping = null;
+        
+        public DictKeyValueMapping Mapping
+        {
+            get { return mapping; }
+            set { mapping = value; }
+        }
+
+        public abstract void SaveElementsToDB();
+
+        bool hasBeenModified = false;
+        
+        [Volatile]
+        public bool HasBeenModified
+        {
+            get { return hasBeenModified; }
+            set { hasBeenModified = value; }
+        }
+    }
+
     /// <summary>
     /// Used internally in the BODictionary to keep track of 
     /// how the keys/values are mapped to the BODictionary 
     /// in the database.
     /// </summary>
-    internal class DictKeyValueMapping : AbstractBusinessObject
+    public class DictKeyValueMapping : AbstractBusinessObject
     {
         int keyListId;
 
@@ -47,35 +69,27 @@ namespace GenDB
     /// </summary>
     /// <typeparam name="K"></typeparam>
     /// <typeparam name="V"></typeparam>
-    public sealed class BODictionary<K, V> : AbstractBusinessObject, IDictionary<K, V>, IDBSaveableCollection
-    {
+    public sealed class BODictionary<K, V> : IDictionaryStub, IDictionary<K, V>    {
         static Table<DictKeyValueMapping> mappings = DataContext.Instance.CreateTable<DictKeyValueMapping>();
         static Table<BOList<K>> keyLists = DataContext.Instance.CreateTable<BOList<K>>();
         static Table<BOList<V>> valueLists = DataContext.Instance.CreateTable<BOList<V>>();
+        IIBoToEntityTranslator superTranslator = null;
 
         Dictionary<K, V> dict = new Dictionary<K,V>();
-        DictKeyValueMapping mapping = null;
+        BOList<K> keys = null;
+        BOList<V> values = null;
 
         bool isDictionaryPopulated = false;
         bool isReadOnly = false;
-        bool hasBeenModified = false;
 
         /// <summary>
         /// </summary>
-        public BODictionary()
-        {
-        }
+        public BODictionary() { }
 
         public bool IsReadOnly
         {
             get { return isReadOnly; }
             set { isReadOnly = value; }
-        }
-
-        public bool HasBeenModified
-        {
-            get { return hasBeenModified; }
-            set { hasBeenModified = value; }
         }
 
         private void PopulateDictionary()
@@ -88,6 +102,9 @@ namespace GenDB
 
             BOList<V> values = (BOList<V>)DataContext.Instance.GenDB.GetByEntityPOID (k.ValueListId);
             BOList<K> keys = (BOList<K>)DataContext.Instance.GenDB.GetByEntityPOID (k.KeyListId);
+
+            if (values == null) { throw new NullReferenceException("values"); }
+            if (keys == null) { throw new NullReferenceException("keys"); }
 
             for (int i = 0; i < values.Count; i++)
             {
@@ -104,12 +121,64 @@ namespace GenDB
             }
         }
 
-        public void SaveElementsToDB()
+        public override void SaveElementsToDB()
         {
             if (!isDictionaryPopulated)
             {
                 return;
             }
+
+            BOList<K> keys;
+            BOList<V> values;
+            if (Mapping == null)
+            {
+                Mapping = new DictKeyValueMapping();
+                keys = new BOList<K>();
+                values = new BOList<V>();
+            }
+            else
+            {
+                keys = (BOList<K>)DataContext.Instance.GenDB.GetByEntityPOID(Mapping.KeyListId);
+                values = (BOList<V>)DataContext.Instance.GenDB.GetByEntityPOID(Mapping.ValueListId);
+                if (keys == null || values == null) 
+                {
+                    keys = new BOList<K>();
+                    values = new BOList<V>();
+                }
+            }
+
+            values.Clear();
+            keys.Clear();
+
+            int idx = 0;
+            foreach(KeyValuePair <K, V> kvp in dict)
+            {
+                values.Add(kvp.Value);
+                keys.Add(kvp.Key);
+                idx++;
+            }
+
+            TypeSystem ts = DataContext.Instance.TypeSystem;
+
+            if (!ts.IsTypeKnown(typeof(BOList<V>)))
+            {
+                ts.RegisterType(typeof(BOList<V>));
+            }
+            if (!ts.IsTypeKnown(typeof(BOList<K>)))
+            {
+                ts.RegisterType(typeof(BOList<K>));
+            }
+            
+
+            IIBoToEntityTranslator vt = DataContext.Instance.Translators.GetTranslator(values.GetType());
+            IIBoToEntityTranslator kt = DataContext.Instance.Translators.GetTranslator(keys.GetType());
+
+            vt.SaveToDB(values);
+            kt.SaveToDB(keys);
+
+            Mapping.KeyListId = keys.DBIdentity;
+            Mapping.ValueListId = values.DBIdentity;
+            Mapping.DictionaryId = DBIdentity;
         }
 
         public bool ContainsKey(K key)
@@ -146,11 +215,12 @@ namespace GenDB
             }
             set { 
                 TestPopulateDictionary();
-                dict[key] = value;
                 HasBeenModified=true;
+                dict[key] = value;
             }
         }
 
+        [Volatile]
         public ICollection<K> Keys
         {
             get { 
@@ -159,6 +229,7 @@ namespace GenDB
             }
         }
 
+        [Volatile]
         public ICollection<V> Values
         {
             get { 
@@ -219,6 +290,7 @@ namespace GenDB
             }
         }
 
+        [Volatile]
         public int Count
         {
             get { 
