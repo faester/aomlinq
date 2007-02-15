@@ -318,6 +318,8 @@ namespace GenDB
             BODictionary<K, V> that = (obj as BODictionary <K, V>);
             if (that == null) { return false; }
 
+            if (that.Count != this.Count) { return false; }
+
             foreach(KeyValuePair <K, V> kvp in this)
             {
                 V otherValue;
