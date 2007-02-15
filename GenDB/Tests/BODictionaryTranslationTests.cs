@@ -13,7 +13,8 @@ namespace BODictionaryTests
     {
         const int ELEMENTS_TO_INSERT = 10;
         const int DICT_SIZE = 10;
-         
+        Table<BOList<int>> ti = null;
+        Table<BOList<TestPerson>> ttp = null;
         DataContext dataContext = DataContext.Instance;
 
         [TestFixtureSetUp]
@@ -36,6 +37,14 @@ namespace BODictionaryTests
                 Console.WriteLine("Configuration.RebuildDatabase should be set to true prior to running the tests.");
                 throw e;
             }
+
+            ti = dataContext.CreateTable<BOList<int>>();
+            ttp = dataContext.CreateTable<BOList<TestPerson>>();
+
+            ti.Clear();
+            ttp.Clear();
+
+            dataContext.SubmitChanges();
         }
 
         [TestFixtureTearDown]
@@ -181,6 +190,11 @@ namespace BODictionaryTests
             this.RetrieveTest<TestPerson, int>(m, m);
         }
 
-    
+        [Test]
+        public void ZTestIfBOListsAreCreated()
+        {
+            Assert.AreEqual(0, ti.Count, "BOList<int> created during dictionary tests");
+            Assert.AreEqual(0, ttp.Count, "BOList<TestPerson> created during dictionary tests");
+        }
     }
 }

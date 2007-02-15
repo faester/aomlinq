@@ -68,6 +68,11 @@ namespace IBOCache
                 table.Add (cto);
                 keepInstances.AddLast(cto);
             }
+
+            var ttp = dc.CreateTable<TestPerson>();
+            ttp.Clear();
+            dc.SubmitChanges();
+
         }
 
         [SetUp]
@@ -160,7 +165,7 @@ namespace IBOCache
             int count = 0;
             TestPerson spouse = head.Spouse;
 
-            while(spouse != head)
+            while(spouse != head && spouse != null)
             {
                 count++;
                 first = false;
