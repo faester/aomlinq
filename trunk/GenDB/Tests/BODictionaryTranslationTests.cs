@@ -126,7 +126,7 @@ namespace BODictionaryTests
                 BODictionary<int, string> bodict = new BODictionary<int, string>();
                 for(int j=0;j<DICT_SIZE;j++)
                 {
-                    bodict.Add(i+j,"str"+j);
+                    bodict.Add(j, "str" + j);
                 }
                 table.Add(bodict);
             }
@@ -175,7 +175,7 @@ namespace BODictionaryTests
                 BODictionary<int, TestPerson> bodict = new BODictionary<int, TestPerson>();
                 for(int j=0;j<DICT_SIZE;j++)
                 {
-                    bodict.Add(i + j, new TestPerson { Name = j.ToString() });
+                    bodict.Add(j, new TestPerson { Name = j.ToString() });
                 }
                 table.Add(bodict);
             }
