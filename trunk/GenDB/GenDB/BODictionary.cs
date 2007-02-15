@@ -311,5 +311,20 @@ namespace GenDB
         {
             return GetEnumerator();
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) { return false; }
+            BODictionary<K, V> that = (obj as BODictionary <K, V>);
+            if (that == null) { return false; }
+
+            foreach(KeyValuePair <K, V> kvp in this)
+            {
+                V otherValue;
+                if (!that.TryGetValue(kvp.Key, out otherValue)) { return false; }
+                if (!kvp.Value.Equals (otherValue)) { return false;}
+            }
+            return true;
+        }
     }
 }
