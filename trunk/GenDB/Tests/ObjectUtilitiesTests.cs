@@ -163,7 +163,7 @@ namespace ObjectUtilitiesTests
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(et1, "string"));
         }
 
-        [Test, Ignore("Known to fail.")]
+        [Test /* , Ignore("Known to fail.") */]
         public void TestCompareBOList()
         {
             BOList<int> boOrig = new BOList<int>();
@@ -178,7 +178,7 @@ namespace ObjectUtilitiesTests
             }
 
             Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boOrig), "BOList compare to self returned false.");
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BOList compare to other with same contents returned true.");
+            Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BOList compare to other with same contents returned false.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boOther), "BOList compare to completely different BOList returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, new BOList<long>()), "BOList compare to something else returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, null), "BOList compare to null returned true.");
@@ -188,25 +188,25 @@ namespace ObjectUtilitiesTests
             boOther = null;
         }
 
-        [Test, Ignore("Known to fail")]
+        [Test /* , Ignore("Known to fail") */]
         public void TestCompareBODictionaries()
         {
-            //BODictionary<int, int> boOrig = new BODictionary<int, int>();
-            //BODictionary<int, int> boSame = new BODictionary<int, int> ();
-            //BODictionary<int, int>  boOther = new BODictionary<int, int> ();
+            BODictionary<int, int> boOrig = new BODictionary<int, int>();
+            BODictionary<int, int> boSame = new BODictionary<int, int>();
+            BODictionary<int, int> boOther = new BODictionary<int, int>();
 
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    boOrig.Add(i, i * 2);
-            //    boSame.Add(i, i * 2);
-            //    boOther.Add(i * 29, -1);
-            //}
+            for (int i = 0; i < 10; i++)
+            {
+                boOrig.Add(i, i * 2);
+                boSame.Add(i, i * 2);
+                boOther.Add(i * 29, -1);
+            }
 
-            //Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boOrig), "BODictionary compare to self returned false.");
-            //Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BODictionary compare to other with same contents returned true.");
-            //Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boOther), "BODictionary compare to completely different BODictionary returned true.");
-            //Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, new TestPerson()), "BODictionary compare to something else returned true.");
-            //Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, null), "BODictionary compare to null returned true.");
+            Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boOrig), "BODictionary compare to self returned false.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BODictionary compare to other with same contents returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boOther), "BODictionary compare to completely different BODictionary returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, new TestPerson()), "BODictionary compare to something else returned true.");
+            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, null), "BODictionary compare to null returned true.");
         }
 
         [Test]

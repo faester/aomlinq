@@ -69,7 +69,8 @@ namespace GenDB
     /// </summary>
     /// <typeparam name="K"></typeparam>
     /// <typeparam name="V"></typeparam>
-    public sealed class BODictionary<K, V> : IDictionaryStub, IDictionary<K, V>    {
+    public sealed class BODictionary<K, V> : IDictionaryStub, IDictionary<K, V>    
+    {
         static Table<DictKeyValueMapping> mappings = DataContext.Instance.CreateTable<DictKeyValueMapping>();
         static Table<BOList<K>> keyLists = DataContext.Instance.CreateTable<BOList<K>>();
         static Table<BOList<V>> valueLists = DataContext.Instance.CreateTable<BOList<V>>();
