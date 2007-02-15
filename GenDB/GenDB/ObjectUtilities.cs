@@ -59,7 +59,7 @@ namespace GenDB
 
         private static void PrintObject(object o, TextWriter output, int indentLevel)
         {
-            if (indentLevel > MAX_INDENT_LEVEL) 
+            if (indentLevel > MAX_INDENT_LEVEL)
             {
                 output.WriteLine(Indent(indentLevel) + "...");
                 return;
@@ -72,7 +72,7 @@ namespace GenDB
             }
 
             Type t = o.GetType();
-            
+
             if (!o.GetType().IsPublic) { prefix = '-'; }
 
             IEnumerable<FieldInfo> staticFields = GetFieldsRecurse(t, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
@@ -84,7 +84,7 @@ namespace GenDB
             PrintFields(o, localNonPubFields, output, indentLevel + 1);
         }
 
-        private static IEnumerable<FieldInfo> GetFieldsRecurse (Type t, BindingFlags bflags)
+        private static IEnumerable<FieldInfo> GetFieldsRecurse(Type t, BindingFlags bflags)
         {
             LinkedList<FieldInfo> fields = new LinkedList<FieldInfo>();
 
@@ -94,7 +94,7 @@ namespace GenDB
             }
             if (t.BaseType != null)
             {
-                foreach (FieldInfo fi in GetFieldsRecurse(t.BaseType, bflags ))
+                foreach (FieldInfo fi in GetFieldsRecurse(t.BaseType, bflags))
                 {
                     fields.AddLast(fi);
                 }
@@ -104,7 +104,7 @@ namespace GenDB
 
         private static void PrintFields(object o, IEnumerable<FieldInfo> fields, TextWriter output, int indentLevel)
         {
-            string indentString = Indent (indentLevel);
+            string indentString = Indent(indentLevel);
             foreach (FieldInfo fi in fields)
             {
                 Type fieldType = fi.FieldType;
@@ -113,11 +113,11 @@ namespace GenDB
                 if (fi.IsPublic) { prefix += "+"; } else { prefix += "-"; }
 
                 object value = fi.GetValue(o);
-                output.Write (indentString + prefix + fi.FieldType.Name + " " + fi.Name);
+                output.Write(indentString + prefix + fi.FieldType.Name + " " + fi.Name);
 
-                if (fi.FieldType.IsValueType  )
+                if (fi.FieldType.IsValueType)
                 {
-                    output.WriteLine (" = " + value); 
+                    output.WriteLine(" = " + value);
                 }
                 else if (fi.FieldType == typeof(string))
                 {
@@ -130,14 +130,14 @@ namespace GenDB
                         output.WriteLine(" = \"" + value + "\"");
                     }
                 }
-                else if (fi.FieldType.IsArray )
+                else if (fi.FieldType.IsArray)
                 {
-                    output.WriteLine (" IS ARRAY!");
+                    output.WriteLine(" IS ARRAY!");
                 }
-                else 
+                else
                 {
-                    output.WriteLine ();
-                    PrintObject (value, output, indentLevel + 1);
+                    output.WriteLine();
+                    PrintObject(value, output, indentLevel + 1);
                 }
             } // foreach
         } // method
@@ -165,7 +165,7 @@ namespace GenDB
 
             IBusinessObject clone = trans.CreateInstanceOfIBusinessObject();
 
-            foreach(PropertyConverter fc in trans.FieldConverters)
+            foreach (PropertyConverter fc in trans.FieldConverters)
             {
                 fc.PropertySetHandler(clone, fc.PropertyGetHandler(o));
             }
@@ -201,7 +201,7 @@ namespace GenDB
             }
 
             Type t = a.GetType();
-            if (b.GetType () != t)
+            if (b.GetType() != t)
             {
                 return false;
             }
@@ -213,19 +213,19 @@ namespace GenDB
 
             IIBoToEntityTranslator trans = DataContext.Instance.Translators.GetTranslator(t);
 
-            foreach(PropertyConverter fc in trans.FieldConverters)
+            foreach (PropertyConverter fc in trans.FieldConverters)
             {
                 object vala = fc.PropertyGetHandler(a);
                 object valb = fc.PropertyGetHandler(b);
 
-                if (fc.ReferenceCompare )
+                if (fc.ReferenceCompare)
                 {
                     if (!Object.ReferenceEquals(vala, valb))
                     {
                         return false;
                     }
                 }
-                else 
+                else
                 {
                     if (vala == null && valb == null)
                     {

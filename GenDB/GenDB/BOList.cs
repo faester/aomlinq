@@ -32,7 +32,146 @@ namespace GenDB
     /// To create instances, use the BOListFactory
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class BOList<T> : AbstractBusinessObject, IList<T>, IDBSaveableCollection
+    public class BOList <T> : IList<T>, IDBSaveableCollection, IBusinessObject
+    {
+        DBIdentifier dbid;
+
+        [Volatile]
+        InternalList<T> theList = new InternalList<T>();
+
+        #region IList<T> Members
+
+        public int IndexOf(T item)
+        {
+            return theList.IndexOf(item);
+        }
+
+        public void Insert(int index, T item)
+        {
+            theList.Insert(index, item);
+        }
+
+        public void RemoveAt(int index)
+        {
+            theList.RemoveAt(index);
+        }
+
+        public T this[int index]
+        {
+            get
+            {
+                return theList[index];
+            }
+            set
+            {
+                theList[index] = value;
+            }
+        }
+
+        #endregion
+
+        #region ICollection<T> Members
+
+        public void Add(T item)
+        {
+            theList.Add(item);
+        }
+
+        public void Clear()
+        {
+            theList.Clear();
+        }
+
+        public bool Contains(T item)
+        {
+            return theList.Contains(item);
+        }
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+           theList.CopyTo(array, arrayIndex);
+        }
+
+        public int Count
+        {
+            get { return theList.Count; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return theList.IsReadOnly; }
+        }
+
+        public bool Remove(T item)
+        {
+            return theList.Remove(item);
+        }
+
+        #endregion
+
+        #region IEnumerable<T> Members
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return theList.GetEnumerator();
+        }
+
+        #endregion
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return theList.GetEnumerator();
+        }
+
+
+        #region IDBSaveableCollection Members
+
+        public void SaveElementsToDB()
+        {
+            theList.SaveElementsToDB();
+        }
+
+        public bool HasBeenModified
+        {
+            get
+            {
+                return theList.HasBeenModified;
+            }
+            set
+            {
+                theList.HasBeenModified = value;
+            }
+        }
+        #endregion
+
+        #region IBusinessObject Members
+
+        public DBIdentifier DBIdentity
+        {
+            get
+            {
+                return dbid;
+            }
+            set
+            {
+                dbid = value;
+                theList.DBIdentity = value;
+            }
+        }
+
+        #endregion
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) { return false; }
+            if (!(obj is BOList<T>)) { return false; }
+            BOList<T> that = (obj as BOList<T>);
+            return that.theList.Equals(this.theList);
+        }
+    }
+
+
+    internal sealed class InternalList<T> : AbstractBusinessObject, IList<T>, IDBSaveableCollection
     {
         List<T> theList = new List<T>();
         bool isReadOnly;
@@ -45,7 +184,7 @@ namespace GenDB
         /// Hide constructor to prevent instantiation 
         /// of unrestricted type parameter.
         /// </summary>
-        public BOList()
+        public InternalList()
         {
             mt = TypeSystem.FindMappingType(typeof(T));
             cnv = new CollectionElementConverter(mt, DataContext.Instance, typeof(T));
@@ -191,8 +330,8 @@ namespace GenDB
         public override bool Equals(object obj)
         {
             if (obj == null) { return false; }
-            if (!(obj is BOList<T>)) { return false; }
-            BOList<T> that = (obj as BOList<T>);
+            if (!(obj is InternalList<T>)) { return false; }
+            InternalList<T> that = (obj as InternalList<T>);
 
             if (that.Count != this.Count) { return false; }
 

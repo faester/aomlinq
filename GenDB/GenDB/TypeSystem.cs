@@ -260,7 +260,8 @@ namespace GenDB
             property.PropertyName = TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME;
             property.PropertyType = pt;
             res.AddProperty (property);
-            if (clrType.BaseType != null)
+            //TODO: Below needed?
+            if (clrType.BaseType != null && clrType.BaseType != typeof(object))
             {
                 if (!IsTypeKnown(clrType.BaseType)) { RegisterType(clrType.BaseType); }
                 res.SuperEntityType = GetEntityType(clrType.BaseType);
@@ -347,7 +348,7 @@ namespace GenDB
             if (t.IsGenericType ) 
             {
                 Type genericType = t.GetGenericTypeDefinition();
-                if (genericType == BOListTranslator.TypeOfBOList)
+                if (genericType == BOListTranslator.TypeOfBOList || genericType == BOListTranslator.TypeOfInternalList)
                 {
                     return BOListEntityType(t);
                 }

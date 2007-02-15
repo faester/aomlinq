@@ -12,8 +12,12 @@ namespace GenDB
 
         public static void CheckIBusinessObjectTranslatability(Type t)
         {
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == BOListTranslator.TypeOfBOList) { return; }
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == BODictionaryTranslator.TypeOfBODictionary) { return; }
+            if (t.IsGenericType)
+            {
+                if (t.GetGenericTypeDefinition() == BOListTranslator.TypeOfBOList) { return; }
+                if (t.GetGenericTypeDefinition() == BOListTranslator.TypeOfInternalList) { return; }
+                if (t.GetGenericTypeDefinition() == BODictionaryTranslator.TypeOfBODictionary) { return; }
+            }
 
 
             ConstructorInfo cnf = t.GetConstructor (new Type[0]);
@@ -26,7 +30,9 @@ namespace GenDB
         public static void CheckObjectTypeTranslateability(Type t)
         {
             Type hasIBO = t.GetInterface(IBO_NAME);
-            if (hasIBO == null) { throw new NotTranslatableException("Reference types must implement IBusinessObject.", t); }
+            if (hasIBO == null) { 
+                throw new NotTranslatableException("Reference types must implement IBusinessObject.", t); 
+            }
         }
 
         public static bool ImplementsIBusinessObject(Type t)
