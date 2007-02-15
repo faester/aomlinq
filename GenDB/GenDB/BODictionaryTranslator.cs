@@ -9,16 +9,19 @@ namespace GenDB
     class BODictionaryTranslator : IIBoToEntityTranslator
     {
         public static readonly Type TypeOfBODictionary = typeof(BODictionary<,>);
-        
+        public static readonly string MAPPING_PROPERTY_NAME = "Mapping";
         DataContext dataContext;
         InstantiateObjectHandler instantiator;
         bool elementIsIBusinessObject = true;
         IEntityType entityType;
         Type clrType; // The Type of objects translatable by this translator (some Dictionary<,> type)
-        Type elementType; // Type (typeof(V)) parameter of translatable BODictionary<K, V> V-entities.
-        Type keyType; // Type (typeof(K)) parameter of translatable BODictionary<K, V> K-entities.
+        //Type elementType; // Type (typeof(V)) parameter of translatable BODictionary<K, V> V-entities.
+        //Type keyType; // Type (typeof(K)) parameter of translatable BODictionary<K, V> K-entities.
 
         IEnumerable<PropertyConverter> fieldConverters;
+
+        IIBoToEntityTranslator superTranslator;
+
 
         public IEntityType EntityType
         {
@@ -27,57 +30,45 @@ namespace GenDB
 
         private BODictionaryTranslator() { /* empty */}
 
+
         public BODictionaryTranslator(Type t, DataContext dataContext, IEntityType bodictEntityType)
         {
             this.clrType = t;
-            if (!clrType.IsGenericType || clrType.Name.Substring(0,6) != "BODict" /*clrType.GetGenericTypeDefinition() != TypeOfBODictionary*/ )
-            {
-                throw new NotTranslatableException("Internal error. BOList translator was invoked on wrong type. (Should be BOList<>)", t);
+            if (!clrType.IsGenericType || clrType.GetGenericTypeDefinition() != TypeOfBODictionary)
+            { // Strictly for debugging. Should be guaranteed elsewhere.
+                throw new NotTranslatableException("Internal error. BODictionary translator was invoked on wrong type. (Should be BOList<>)", t);
             }
 
             this.dataContext = dataContext;
             this.entityType = bodictEntityType;
-            keyType = clrType.GetGenericArguments()[0];
-            elementType = clrType.GetGenericArguments()[1];
-            elementIsIBusinessObject = elementType.GetInterface(typeof(IBusinessObject).FullName) != null;
+
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
             
-            bodictEntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).PropertyType.MappingType = 
-                TypeSystem.FindMappingType(elementType);
-            if (elementIsIBusinessObject  && ! dataContext.TypeSystem.IsTypeKnown (elementType))
+            if (bodictEntityType.SuperEntityType != null)
             {
-                dataContext.TypeSystem.RegisterType(elementType);
+                superTranslator = dataContext.Translators.GetTranslator(bodictEntityType.SuperEntityType.EntityTypePOID);
             }
         }
 
         public IEntity Translate(IBusinessObject ibo)
         {
-            //throw new Exception("not implemented");
-            ////IEntityType elementEntityType = TypeSystem.GetEntityType(elementType);
-            IEntity e = null;
-            e = dataContext.GenDB.NewEntity();
+            IEntity res = dataContext.GenDB.NewEntity();
 
-            //// The mapping type for the elements are stored in this cstProperty. 
-            IProperty elementTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
-            IProperty keyTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_KEY_PROPERTY_NAME);
-
-            IPropertyValue elementValue = elementTypeProperty.CreateNewPropertyValue(e);
-            IPropertyValue keyValue = keyTypeProperty.CreateNewPropertyValue(e);
-
-            e.EntityType = entityType;
-            elementValue.StringValue = elementType.FullName;
-            keyValue.StringValue = keyType.FullName;
-
-            if (ibo.DBIdentity.IsPersistent) 
-            { 
-                e.EntityPOID = ibo.DBIdentity; 
+            // Drop the db-created DBIdentity if element is persistent.
+            if (ibo.DBIdentity.IsPersistent)
+            {
+                res.EntityPOID = ibo.DBIdentity;
             }
             else
-            { 
-                dataContext.IBOCache.Add(ibo, e.EntityPOID);
+            { // Not persistent. Add it to cache/db, and assign tag
+                dataContext.IBOCache.Add(ibo, res.EntityPOID);
             }
 
-            return e;
+            res.EntityType = entityType;
+ 
+            SetValues(ibo, res);
+
+            return res;
         }
 
         /// <summary>
@@ -85,28 +76,34 @@ namespace GenDB
         /// </summary>
         /// <param name="ie"></param>
         /// <param name="res"></param>
-        public void SetValues(IBusinessObject ibo, IEntity ie) { /* empty */ }
+        public void SetValues(IBusinessObject ibo, IEntity ie) 
+        {
+            if (superTranslator != null)
+            {
+                superTranslator.SetValues(ibo, ie);
+            }
+        }
 
         /// <summary>
         /// No action. (Handled internally by the BOList it self)
         /// </summary>
         /// <param name="ie"></param>
         /// <param name="res"></param>
-        public void SetValues(IEntity ie, IBusinessObject ibo) { /* empty */ }
+        public void SetValues(IEntity ie, IBusinessObject ibo) {             
+        }
 
-        public void SaveToDB(IGenericDatabase db, IBusinessObject ibo)
+        public void SaveToDB(IBusinessObject ibo)
         {
             //throw new Exception("not implemented");
             Type t = ibo.GetType();
-            if (!ibo.GetType().IsGenericType || t.Name.Substring(0,6)!="BODict" /*ibo.GetType().GetGenericTypeDefinition() != TypeOfBOList*/ )
+            if (!t.IsGenericType || t.GetGenericTypeDefinition() != TypeOfBODictionary )
             {
                 throw new NotTranslatableException("Internal error: BOListTranslator can not translate Type ", ibo.GetType());
             }
             IEntity e = Translate(ibo);
             dataContext.GenDB.Save (e);
 
-            IDBSaveableCollection saveable = (IDBSaveableCollection)ibo;
-            saveable.SaveElementsToDB();
+            (ibo as IDBSaveableCollection).SaveElementsToDB();
         }
 
         public IBusinessObject CreateInstanceOfIBusinessObject()
@@ -121,7 +118,6 @@ namespace GenDB
 
         public IEnumerable<PropertyConverter> FieldConverters
         {
-            
             get { return new PropertyConverter[0]; }
         }
         public PropertyConverter GetPropertyConverter(int propertyPOID)

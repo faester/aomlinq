@@ -21,8 +21,6 @@ namespace GenDB
     /// IBOTranslator should be stored in a hash table with types as key.
     /// (Or be instantiated anew for each type, which is of course less effective
     /// due to instantiation time.)
-    /// The IBOTranslator got its name because it uses delegates for translation, 
-    /// rather than reflection. Might be misleading.
     /// </summary>
     class IBOTranslator : IIBoToEntityTranslator
     {
@@ -100,10 +98,10 @@ namespace GenDB
             Init();
         }
 
-        public void SaveToDB(IGenericDatabase db, IBusinessObject ibo)
+        public void SaveToDB(IBusinessObject ibo)
         {
             IEntity e = this.Translate(ibo);
-            db.Save(e);
+            this.dataContext.GenDB.Save(e);
         }
 
         public PropertyConverter GetPropertyConverter(int propertyPOID)

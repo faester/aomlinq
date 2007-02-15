@@ -65,7 +65,7 @@ namespace GenDB
                typeSystem.RegisterType(t);
             }
             IIBoToEntityTranslator trans = translators.GetTranslator(t);
-            trans.SaveToDB(db, ibo);
+            trans.SaveToDB(ibo);
         }
 
         /// <summary>

@@ -259,28 +259,37 @@ namespace GenDB
             return res;
         }
 
-        private IEntityType BODictionaryEntityType(Type clrType)
+        /// <summary>
+        /// Makes the entity type given suitable for storing
+        /// dictionaries. No properties should be set in advance
+        /// but the IEntityTypePOID should be set to a legal 
+        /// value in the calling method. 
+        /// </summary>
+        /// <param name="et"></param>
+        /// <returns></returns>
+        public IEntityType ConstructBODictEntityType(Type t)
         {
-            IEntityType res = dataContext.GenDB.NewEntityType();
-            res.IsDictionary = true;
-            res.AssemblyDescription = clrType.Assembly.FullName;
-            res.Name = clrType.FullName;
-            
-            IPropertyType pt = dataContext.TypeSystem.GetPropertyType(clrType);
-            IProperty property = dataContext.GenDB.NewProperty();
-            property.EntityType = res;
-            property.PropertyName = TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME;
-            property.PropertyType = pt;
-            res.AddProperty (property);
+            IEntityType et = DataContext.Instance.GenDB.NewEntityType();
+            et.Name = t.FullName;
+            et.IsDictionary = true;
+            et.AssemblyDescription = t.Assembly.FullName;
 
-            if (clrType.BaseType != null)
+            Type baseType = t.BaseType;
+            if (baseType != null)
             {
-                if (!IsTypeKnown(clrType.BaseType)) { RegisterType(clrType.BaseType); }
-                res.SuperEntityType = GetEntityType(clrType.BaseType);
+                if (!IsTypeKnown(baseType)) { RegisterType(baseType); }
+                et.SuperEntityType = GetEntityType(t.BaseType);
             }
-            return res;
+
+            return et;
         }
 
+
+        /// <summary>
+        /// TODO: Bør flyttes til translators
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
         private IEntityType IBOEntityType(Type t)
         {
             IEntityType et = dataContext.GenDB.NewEntityType();
@@ -334,7 +343,7 @@ namespace GenDB
                 }
                 else if(genericType == BODictionaryTranslator.TypeOfBODictionary)
                 {
-                    return BODictionaryEntityType(t);
+                    return ConstructBODictEntityType(t);
                 }
                 else 
                 {

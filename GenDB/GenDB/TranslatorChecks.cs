@@ -12,9 +12,9 @@ namespace GenDB
 
         public static void CheckIBusinessObjectTranslatability(Type t)
         {
-            //MappingType mt = TypeSystem.FindMappingType(t);
-
             if (t.IsGenericType && t.GetGenericTypeDefinition() == BOListTranslator.TypeOfBOList) { return; }
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == BODictionaryTranslator.TypeOfBODictionary) { return; }
+
 
             ConstructorInfo cnf = t.GetConstructor (new Type[0]);
 

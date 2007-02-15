@@ -32,6 +32,6 @@ namespace GenDB
         /// </summary>
         /// <param name="db"></param>
         /// <param name="res"></param>
-        void SaveToDB(IGenericDatabase db, IBusinessObject ibo);
+        void SaveToDB(IBusinessObject ibo);
     }
 }
