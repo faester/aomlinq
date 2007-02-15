@@ -203,7 +203,7 @@ namespace ObjectUtilitiesTests
             }
 
             Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boOrig), "BODictionary compare to self returned false.");
-            Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BODictionary compare to other with same contents returned true.");
+            Assert.IsTrue(ObjectUtilities.TestFieldEquality(boOrig, boSame), "BODictionary compare to other with same contents returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, boOther), "BODictionary compare to completely different BODictionary returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, new TestPerson()), "BODictionary compare to something else returned true.");
             Assert.IsFalse(ObjectUtilities.TestFieldEquality(boOrig, null), "BODictionary compare to null returned true.");
