@@ -95,73 +95,29 @@ namespace BODictionaryTests
         }
 
         [Test]
-        public void TestBODictOfInt() 
+        public void TestBODictOfIntInt() 
         {
-            Table<BODictionary<int, int>> table = dataContext.CreateTable<BODictionary<int, int>>();
-            table.Clear();
-            dataContext.SubmitChanges();
-            
-            for(int i=0; i<ELEMENTS_TO_INSERT; i++)
-            {
-                BODictionary<int, int> bodict = new BODictionary<int,int>();
-                for(int j=0;j<DICT_SIZE;j++)
-                {
-                    bodict.Add(i+j,j);
-                }
-                table.Add(bodict);
-            }
-            dataContext.SubmitChanges();
-            GC.Collect();
+            InsertTest<int, int>(i => i, i=> i);
         }
 
         [Test]
-        public void TestBODictOfString()
+        public void TestBODictOfIntIntRetrieve() 
         {
-            Table<BODictionary<int, string>> table = dataContext.CreateTable<BODictionary<int, string>>();
-            table.Clear();
-            dataContext.SubmitChanges();
-
-            for(int i=0;i<ELEMENTS_TO_INSERT;i++)
-            {
-                BODictionary<int, string> bodict = new BODictionary<int, string>();
-                for(int j=0;j<DICT_SIZE;j++)
-                {
-                    bodict.Add(j, "str" + j);
-                }
-                table.Add(bodict);
-            }
-            dataContext.SubmitChanges();
-            GC.Collect();
+            RetrieveTest<int, int>(i => i, i => i);
         }
 
         [Test]
-        public void TestBODictOfStringRetrieve()
+        public void TestBODictOfIntString()
         {
-            Table<BODictionary<int, string>> table = dataContext.CreateTable<BODictionary<int, string>>();
-
-            int dictsFound = 0;
-
-            foreach(BODictionary<int, string> dict in table)
-            {
-                dictsFound++;
-                Dictionary<int, bool> foundValues = new Dictionary<int, bool>();
-                for (int j = 0; j < DICT_SIZE; j++) { foundValues[j] = false; } // Values that should be found.
-
-                foreach(KeyValuePair<int, string> kvp in dict)
-                {
-                    int k = kvp.Key;
-                    string v = kvp.Value;
-                    foundValues[k] = true;
-                    Assert.AreEqual("str"+k, v, "Wrong key/value-correspondence");
-                }
-
-                for (int j = 0; j < DICT_SIZE; j++) { Assert.IsTrue(dict.ContainsKey(j), "Missing element: " + j); }
-
-                Assert.AreEqual(DICT_SIZE, foundValues.Count, "Wrong keys found");
-            }
-
-            Assert.AreEqual(ELEMENTS_TO_INSERT, dictsFound, "Wrong number of dictionaries in table.");
+            InsertTest<int, string>(i => i.ToString(), i => i);
         }
+
+        [Test]
+        public void TestBODictOfIntStringRetrieve()
+        {
+            RetrieveTest<int, string>(i => i.ToString(), i => i);
+        }
+
 
         [Test]
         public void TestBODictOfIntTestPerson()
