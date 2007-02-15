@@ -56,10 +56,12 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Query, Version=1.0.2319.19041, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractBusinessObject.cs" />
     <Compile Include="AbstractSyntax.cs" />
+    <Compile Include="BaseTranslator.cs" />
     <Compile Include="BODictionary.cs" />
     <Compile Include="BODictionaryTranslator.cs" />
     <Compile Include="BOList.cs" />
@@ -110,8 +112,8 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-	<Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" /> 
-	<!--  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" /> -->
+  <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
+  <!--  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" /> -->
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>

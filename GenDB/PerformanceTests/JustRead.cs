@@ -47,8 +47,6 @@ namespace PerformanceTests
 
             Console.WriteLine();
             Console.WriteLine("Total time used: {0} ms, average {1} objs/sec", totalMS, (totalObjects * 1000.0) / totalMS );
-
-            Console.ReadLine();
         }
     }
 }
