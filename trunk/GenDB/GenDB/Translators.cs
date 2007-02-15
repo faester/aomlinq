@@ -63,7 +63,7 @@ namespace GenDB
             if (t.IsGenericType)
             {
                 Type genericType = t.GetGenericTypeDefinition();
-                if (genericType == BOListTranslator.TypeOfBOList)
+                if (genericType == BOListTranslator.TypeOfBOList || genericType == BOListTranslator.TypeOfInternalList)
                 {
                     /*
                      * Ved depersistering skal der ses på om IsList er sat. 

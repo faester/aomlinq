@@ -72,13 +72,13 @@ namespace GenDB
     public sealed class BODictionary<K, V> : IDictionaryStub, IDictionary<K, V>    
     {
         static Table<DictKeyValueMapping> mappings = DataContext.Instance.CreateTable<DictKeyValueMapping>();
-        static Table<BOList<K>> keyLists = DataContext.Instance.CreateTable<BOList<K>>();
-        static Table<BOList<V>> valueLists = DataContext.Instance.CreateTable<BOList<V>>();
+        static Table<InternalList<K>> keyLists = DataContext.Instance.CreateTable<InternalList<K>>();
+        static Table<InternalList<V>> valueLists = DataContext.Instance.CreateTable<InternalList<V>>();
         IIBoToEntityTranslator superTranslator = null;
 
         Dictionary<K, V> dict = new Dictionary<K,V>();
-        BOList<K> keys = null;
-        BOList<V> values = null;
+        InternalList<K> keys = null;
+        InternalList<V> values = null;
 
         bool isDictionaryPopulated = false;
         bool isReadOnly = false;
@@ -101,8 +101,8 @@ namespace GenDB
                     where m.DictionaryId == DBIdentity.Value
                     select m).First();
 
-            BOList<V> values = (BOList<V>)DataContext.Instance.GenDB.GetByEntityPOID (k.ValueListId);
-            BOList<K> keys = (BOList<K>)DataContext.Instance.GenDB.GetByEntityPOID (k.KeyListId);
+            InternalList<V> values = (InternalList<V>)DataContext.Instance.GenDB.GetByEntityPOID (k.ValueListId);
+            InternalList<K> keys = (InternalList<K>)DataContext.Instance.GenDB.GetByEntityPOID (k.KeyListId);
 
             if (values == null) { throw new NullReferenceException("values"); }
             if (keys == null) { throw new NullReferenceException("keys"); }
@@ -129,22 +129,22 @@ namespace GenDB
                 return;
             }
 
-            BOList<K> keys;
-            BOList<V> values;
+            InternalList<K> keys;
+            InternalList<V> values;
             if (Mapping == null)
             {
                 Mapping = new DictKeyValueMapping();
-                keys = new BOList<K>();
-                values = new BOList<V>();
+                keys = new InternalList<K>();
+                values = new InternalList<V>();
             }
             else
             {
-                keys = (BOList<K>)DataContext.Instance.GenDB.GetByEntityPOID(Mapping.KeyListId);
-                values = (BOList<V>)DataContext.Instance.GenDB.GetByEntityPOID(Mapping.ValueListId);
+                keys = (InternalList<K>)DataContext.Instance.GenDB.GetByEntityPOID(Mapping.KeyListId);
+                values = (InternalList<V>)DataContext.Instance.GenDB.GetByEntityPOID(Mapping.ValueListId);
                 if (keys == null || values == null) 
                 {
-                    keys = new BOList<K>();
-                    values = new BOList<V>();
+                    keys = new InternalList<K>();
+                    values = new InternalList<V>();
                 }
             }
 
@@ -161,13 +161,13 @@ namespace GenDB
 
             TypeSystem ts = DataContext.Instance.TypeSystem;
 
-            if (!ts.IsTypeKnown(typeof(BOList<V>)))
+            if (!ts.IsTypeKnown(typeof(InternalList<V>)))
             {
-                ts.RegisterType(typeof(BOList<V>));
+                ts.RegisterType(typeof(InternalList<V>));
             }
-            if (!ts.IsTypeKnown(typeof(BOList<K>)))
+            if (!ts.IsTypeKnown(typeof(InternalList<K>)))
             {
-                ts.RegisterType(typeof(BOList<K>));
+                ts.RegisterType(typeof(InternalList<K>));
             }
             
 
