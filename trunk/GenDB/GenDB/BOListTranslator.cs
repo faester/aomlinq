@@ -16,41 +16,29 @@ namespace GenDB
     /// This responsibility is left to the collections.
     /// TODO: Everything ;)
     /// </summary>
-    class BOListTranslator : IIBoToEntityTranslator
+    class BOListTranslator : BaseTranslator
     {
         public static readonly Type TypeOfBOList = typeof(BOList<>);
         
-        DataContext dataContext;
-        InstantiateObjectHandler instantiator;
         bool elementIsIBusinessObject = true;
-        IEntityType entityType;
-        Type clrType; // The Type of objects translatable by this translator (some BOList<> type)
+        //IEntityType entityType;
         Type elementType; // Type (typeof(T)) parameter of translatable BOList<T> entities.
-
-        public IEntityType EntityType
-        {
-            get { return entityType; }
-        }
-
-        private BOListTranslator() { /* empty */ }
 
         /// <summary>
         /// If entityType is null, a new IEntityType instance will be created
         /// </summary>
         /// <param name="t"></param>
         public BOListTranslator(Type t, DataContext dataContext, IEntityType bolistEntityType)
+            : base(t, bolistEntityType, dataContext)
         {
-            this.clrType = t;
-            Type genericType = clrType.GetGenericTypeDefinition();
-            if (!clrType.IsGenericType || genericType != TypeOfBOList)
+            Type genericType = t.GetGenericTypeDefinition();
+            if (!t.IsGenericType || genericType != TypeOfBOList)
             {
                 throw new NotTranslatableException("Internal error. BOList translator was invoked on wrong type. (Should be BOList<>)", t);
             }
-            this.dataContext = dataContext;
-            this.entityType = bolistEntityType;
-            elementType = clrType.GetGenericArguments()[0];
+            elementType = t.GetGenericArguments()[0];
             elementIsIBusinessObject = elementType.GetInterface(typeof(IBusinessObject).FullName) != null;
-            instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (clrType);
+            instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler (t);
             bolistEntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME).PropertyType.MappingType = 
                 TypeSystem.FindMappingType(elementType);
             if (elementIsIBusinessObject  && ! dataContext.TypeSystem.IsTypeKnown (elementType))
@@ -59,18 +47,18 @@ namespace GenDB
             }
         }
 
-        public IEntity Translate(IBusinessObject ibo)
+        public new IEntity Translate(IBusinessObject ibo)
         {
             //IEntityType elementEntityType = TypeSystem.GetEntityType(elementType);
             IEntity e = null;
             e = dataContext.GenDB.NewEntity();
 
             // The mapping type for the elements are stored in this cstProperty. No other values are relevant.
-            IProperty elementTypeProperty = entityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
+            IProperty elementTypeProperty = EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
 
             IPropertyValue pv = elementTypeProperty.CreateNewPropertyValue(e);
 
-            e.EntityType = entityType;
+            e.EntityType = EntityType;
             pv.StringValue = elementType.FullName;
 
             if (ibo.DBIdentity.IsPersistent) 
@@ -85,21 +73,7 @@ namespace GenDB
             return e;
         }
 
-        /// <summary>
-        /// No action. (Handled internally by the BOList it self)
-        /// </summary>
-        /// <param name="ie"></param>
-        /// <param name="res"></param>
-        public void SetValues(IBusinessObject ibo, IEntity ie) { /* empty */ }
-
-        /// <summary>
-        /// No action. (Handled internally by the BOList it self)
-        /// </summary>
-        /// <param name="ie"></param>
-        /// <param name="res"></param>
-        public void SetValues(IEntity ie, IBusinessObject ibo) { /* empty */ }
-
-        public void SaveToDB(IBusinessObject ibo)
+        public override void SaveToDB(IBusinessObject ibo)
         {
             Type t = ibo.GetType();
             if (!ibo.GetType().IsGenericType || ibo.GetType().GetGenericTypeDefinition() != TypeOfBOList)
@@ -113,30 +87,13 @@ namespace GenDB
             saveable.SaveElementsToDB();
         }
 
-        public IBusinessObject CreateInstanceOfIBusinessObject()
+        protected override PropertyInfo[] GetPropertiesToTranslate()
         {
-            return (IBusinessObject)instantiator();
+            return new PropertyInfo[0];
         }
 
-        public void SetProperty(long propertyPoid, IBusinessObject ibo, object obj)
+        public override void SetProperty(long propertyPOID, IBusinessObject obj, object propertyValue)
         {
-            //
         }
-
-        public IEnumerable<PropertyConverter> FieldConverters 
-        {
-            get { return new PropertyConverter[0]; }
-        }
-
-        public PropertyConverter GetPropertyConverter(int propertyPOID)
-        {
-            throw new Exception("Not implemented");
-        }
-
-        public PropertyConverter GetPropertyConverter(IProperty property)
-        {
-            return GetPropertyConverter(property.PropertyPOID);
-        }
-
     }
 }

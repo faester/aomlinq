@@ -4,6 +4,8 @@ using System.Text;
 using NUnit.Framework;
 using GenDB;
 using CommonTestObjects;
+using System.Query;
+using System.Expressions;
 
 namespace BOListTests
 {
@@ -25,7 +27,7 @@ namespace BOListTests
             }
             try
             {
-                if (!dataContext.DatabaseExists())
+                if (!dataContext.DatabaseExists()) 
                 {
                     dataContext.CreateDatabase();
                 }

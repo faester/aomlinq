@@ -172,11 +172,21 @@ namespace GenDB
             return type2IEt[t].Target;
         }
 
+        /// <summary>
+        /// Returns true if Type t has been registered. False otherwise.
+        /// </summary>
+        /// <param name="t">Type to test</param>
+        /// <returns></returns>
         internal bool IsTypeKnown(Type t)
         {
             return type2IEt.ContainsKey(t);
         }
 
+        /// <summary>
+        /// Returns true if IEntityType 'et' has been registered. False otherwise.
+        /// </summary>
+        /// <param name="et"></param>
+        /// <returns></returns>
         internal bool IsTypeKnown(IEntityType et)
         {
             return etid2IEt.ContainsKey(et.EntityTypePOID);
