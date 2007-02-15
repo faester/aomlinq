@@ -54,7 +54,6 @@ namespace GenDB
 
         protected void Init()
         {
-            CheckTranslatability();
             fields = GetPropertiesToTranslate();
             GetPropertiesToTranslate();
             InitPropertyTranslators();
@@ -66,9 +65,6 @@ namespace GenDB
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         private void InitSuperTranslator()
         {
             if (entityType.SuperEntityType != null)
@@ -111,18 +107,9 @@ namespace GenDB
 
         protected abstract PropertyInfo[] GetPropertiesToTranslate();
 
-        /// <summary>
-        /// Checks if Type and fields are translatable.
-        /// </summary>
-        private void CheckTranslatability()
-        {
-            //TranslatorChecks.CheckObjectTypeTranslateability(t);
-            //PropertyInfo[] allFields = t.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Static
-            //    | BindingFlags.Public | BindingFlags.Instance);
-            //TranslatorChecks.CheckPropertyTranslatability(allFields);
-        }
 
-        private void InitPropertyTranslators()
+        
+    private void InitPropertyTranslators()
         {
             foreach (PropertyInfo clrProperty in fields)
             {

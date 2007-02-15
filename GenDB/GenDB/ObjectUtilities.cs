@@ -170,26 +170,6 @@ namespace GenDB
                 fc.PropertySetHandler(clone, fc.PropertyGetHandler(o));
             }
 
-            //FieldInfo[] fields = t.GetFields (
-            //    BindingFlags.Instance
-            //| BindingFlags.Public
-            //| BindingFlags.NonPublic
-            //);
-
-            //InstantiateObjectHandler inst = DynamicMethodCompiler.CreateInstantiateObjectHandler(t);
-            ////ConstructorInfo cinf = t.GetConstructor(EMPTY_TYPE_ARRAY);
-            //IBusinessObject clone = (IBusinessObject)inst();
-
-            //foreach (FieldInfo f in fields)
-            //{
-            //    Attribute v = Volatile.GetCustomAttribute(f, typeof(Volatile));
-
-            //    if (f.FieldType != typeof(DBIdentifier) && v == null)
-            //    {
-            //        object fv = f.GetValue(o);
-            //        f.SetValue(clone, fv);
-            //    }
-            //}
             return clone;
         }
 
@@ -202,6 +182,9 @@ namespace GenDB
         /// not tested, since the method is ment to be used to 
         /// determine if an object needs to be rewritten to the
         /// database. 
+        /// <p>In general this is a method used internally in the 
+        /// persistence framework, and behaviour will probably not
+        /// suit any other needs.</p>
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
@@ -221,6 +204,11 @@ namespace GenDB
             if (b.GetType () != t)
             {
                 return false;
+            }
+
+            if (t.IsGenericType) // Generic types can only be our own collections. They should be comparable using .Equals.
+            {
+                return a.Equals(b);
             }
 
             IIBoToEntityTranslator trans = DataContext.Instance.Translators.GetTranslator(t);

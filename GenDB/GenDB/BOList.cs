@@ -188,6 +188,21 @@ namespace GenDB
             return GetEnumerator();
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj == null) { return false; }
+            if (!(obj is BOList<T>)) { return false; }
+            BOList<T> that = (obj as BOList<T>);
+
+            if (that.Count != this.Count) { return false; }
+
+            for (int i = 0; i < Count; i++)
+            {
+                if (!that[i].Equals(this[i])) { return false; }
+            }
+            return true;
+        }
+
         /// <summary>
         /// Saves the elements to the database. This is handled 
         /// internally, why the public access modifier imposes
