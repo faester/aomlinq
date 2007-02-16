@@ -17,7 +17,7 @@ namespace Tests
 
             public Person Spouse
             {
-                get { return spouse; }
+                get { return spouse; } 
                 set { spouse = value; }
             }
 

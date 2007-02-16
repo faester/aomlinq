@@ -10,7 +10,6 @@ using GenDB.DB;
 namespace GenDB
 {
     public enum Sex { MALE, FEMALE, NEUTER };
-
     class Program
     {
         static int nextID = 0;
