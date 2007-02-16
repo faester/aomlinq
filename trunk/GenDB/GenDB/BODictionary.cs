@@ -97,7 +97,7 @@ namespace GenDB
         {
             if (!DBIdentity.IsPersistent) { return; }
 
-            var k = (from m in mappings
+            var k = (from m in mappings 
                     where m.DictionaryId == DBIdentity.Value
                     select m).First();
 
