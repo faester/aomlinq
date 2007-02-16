@@ -224,7 +224,7 @@ namespace BODictionaryTests
                 select b;
 
             Assert.AreEqual(ELEMENTS_TO_INSERT/2,v.Count(),"There should be "+(ELEMENTS_TO_INSERT/2)
-                +" TestPersons with twice as old Spouses");
+                +" TestPersons with twice as old Spouse");
         }
     }
 }
