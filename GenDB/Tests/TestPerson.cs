@@ -38,5 +38,13 @@ namespace CommonTestObjects
             get { return spouse; }
             set { spouse = value; }
         }
+
+        BODictionary<int, TestPerson> friends;
+
+        public BODictionary<int, TestPerson> Friends
+        {
+            get {return friends;}
+            set {friends = value;}
+        }
     }
 }

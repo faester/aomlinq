@@ -127,7 +127,6 @@ namespace BODictionaryTests
             RetrieveTest<int, string>(i => i.ToString(), i => i);
         }
 
-
         [Test]
         public void TestBODictOfIntTestPerson()
         {
@@ -195,6 +194,37 @@ namespace BODictionaryTests
         {
             Assert.AreEqual(0, ti.Count, "BOList<int> created during dictionary tests");
             Assert.AreEqual(0, ttp.Count, "BOList<TestPerson> created during dictionary tests");
+        }
+
+        [Test]
+        public void TestBODictSimpleQuery()
+        {   
+            BODictionary<int, TestPerson> bodict = new BODictionary<int, TestPerson>();
+            for(int i=0;i<ELEMENTS_TO_INSERT;i++)
+            {
+                TestPerson tp = new TestPerson{Age = i, Name = "Name"+i};
+                if(i%2==0)
+                {
+                    tp.Spouse = new TestPerson{Age = i*2, Name = "Spouse"+i};
+                }
+                bodict[i]  = tp;
+            }
+
+            var v = from b in bodict
+                    where b.Value.Name == "Name2"
+                    select b;
+
+            Assert.AreEqual(1,v.Count(),"bodict should only contain 1");
+
+            KeyValuePair<int, TestPerson> k = v.ElementAt(0);
+            Assert.AreEqual(2,k.Value.Age,"TestPerson Age should equal 2");
+
+            v = from b in bodict
+                where b.Value.Spouse != null && b.Value.Spouse.Age == b.Value.Age*2
+                select b;
+
+            Assert.AreEqual(ELEMENTS_TO_INSERT/2,v.Count(),"There should be "+(ELEMENTS_TO_INSERT/2)
+                +" TestPersons with twice as old Spouses");
         }
     }
 }

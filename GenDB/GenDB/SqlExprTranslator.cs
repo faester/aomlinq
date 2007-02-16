@@ -87,7 +87,6 @@ namespace GenDB
                         MethodCallExpression mexpr = (MethodCallExpression) roc[i];
                         parArr[i] = DecomposeMethodCall(mexpr);
                     }
-                    
                 }
                 else if(roc[i] is ConstantExpression)
                 {
