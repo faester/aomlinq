@@ -172,5 +172,41 @@ namespace BOListTests
         }
 
 
+
+        [Test]
+        public void TestBOListSimpleQuery()
+        {
+            // ** not used
+            Table<BOList<TestPerson>> table = dataContext.CreateTable<BOList<TestPerson>>();
+            table.Clear();
+            dataContext.SubmitChanges();
+            // **
+
+            BOList<TestPerson> bolist = new BOList<TestPerson>();
+
+            for(int i=0;i<ELEMENTS_TO_INSERT;i++)
+            {
+                TestPerson tp = new TestPerson{Age = i, Name = "Name"+i};
+                if(i%2==0)
+                    tp.Spouse = new TestPerson{Age = i*2, Name = "Spouse"+i};
+
+                bolist.Add(tp);
+            }
+
+            var v = from b in bolist
+                    where b.Age == 3
+                    select b;
+
+            Assert.AreEqual(1,v.Count(),"bolist should contain only 1 TestPerson");
+
+
+            v = from b in bolist
+                where b.Spouse != null && b.Spouse.Age == b.Age*2
+                select b;
+            
+            Assert.AreEqual(ELEMENTS_TO_INSERT/2,v.Count(),"There should be "+(ELEMENTS_TO_INSERT/2)
+                +" TestPersons with twice as old Spouse");
+
+        }
     }
 }
