@@ -188,7 +188,9 @@ namespace BOListTests
             {
                 TestPerson tp = new TestPerson{Age = i, Name = "Name"+i};
                 if(i%2==0)
+                {
                     tp.Spouse = new TestPerson{Age = i*2, Name = "Spouse"+i};
+                }
 
                 bolist.Add(tp);
             }
