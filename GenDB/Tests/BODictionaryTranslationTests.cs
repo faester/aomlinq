@@ -200,12 +200,23 @@ namespace BODictionaryTests
         public void TestBODictSimpleQuery()
         {   
             BODictionary<int, TestPerson> bodict = new BODictionary<int, TestPerson>();
+           
+
             for(int i=0;i<ELEMENTS_TO_INSERT;i++)
             {
                 TestPerson tp = new TestPerson{Age = i, Name = "Name"+i};
                 if(i%2==0)
                 {
                     tp.Spouse = new TestPerson{Age = i*2, Name = "Spouse"+i};
+
+                    KeyValuePair<int, TestPerson>[] ka = bodict.ToArray();
+                    BODictionary<int, TestPerson> botmp = new BODictionary<int, TestPerson>();
+
+                    for(int j=0;j<ka.Count();j++)
+                    {
+                        botmp[ka[j].Key]=ka[j].Value;
+                    }
+                    tp.Friends = botmp;
                 }
                 bodict[i]  = tp;
             }
@@ -225,6 +236,13 @@ namespace BODictionaryTests
 
             Assert.AreEqual(ELEMENTS_TO_INSERT/2,v.Count(),"There should be "+(ELEMENTS_TO_INSERT/2)
                 +" TestPersons with twice as old Spouse");
+
+            int c = 0;
+            foreach(KeyValuePair<int, TestPerson> kvp in v)
+            {
+                Assert.AreEqual(c,kvp.Value.Friends.Count,"Incorrect number of friends");
+                c=c+2;
+            }
         }
     }
 }
