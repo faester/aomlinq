@@ -168,7 +168,7 @@ namespace Tests
                 {
                     ibo.Age = (ibo.Age + 1) * 2;
                 }
-                //ObjectUtilities.PrintOut(res);
+                //ObjectUtilities.PrintOut(clone);
             }
             dataContext.SubmitChanges();
             dur = DateTime.Now - then;

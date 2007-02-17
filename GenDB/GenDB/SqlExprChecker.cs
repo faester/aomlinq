@@ -4,21 +4,67 @@ using System.Text;
 
 namespace GenDB
 {
+    /// <summary>
+    /// This class is used to check if a given abstract expression 
+    /// is translatable to SQL. 
+    /// <para>
+    /// The class modifies the visited clause in a manner that makes
+    /// it possible to translate the resulting clause to SQL. The
+    /// set described by the original clause will always be a subset
+    /// of the result clause.
+    /// </para>
+    /// <para>
+    /// This class is intended to be used to determine and aid distributed
+    /// evaluation of the clause between the SQL-server and in memory query 
+    /// methods, when the clause can not be expressed in SQL alone.
+    /// </para>
+    /// </summary>
     class SqlExprChecker : IAbsSyntaxVisitor
     {        
         class CannotTranslate : Exception {}
 
         bool hasModifiedExpression = false;
 
+        /// <summary>
+        /// Returns true if this visitor has modified the 
+        /// last visited clause.
+        /// </summary>
         public bool HasModifiedExpression
         {
             get { return hasModifiedExpression; }
         }
 
+        /// <summary>
+        /// Delegate used to move subbranches to a higher level 
+        /// in the clause tree when appropriate.
+        /// </summary>
+        /// <param name="expr"></param>
         delegate void SetParentExpression(IExpression expr);
 
         SetParentExpression parentSetter = null;
 
+        /// <summary>
+        /// This class is used to check if a given abstract expression 
+        /// is translatable to SQL. If the clause checked is fully 
+        /// translatable the expression will be left unmodified. 
+        /// If the clause is not completely translatable, the clause
+        /// will be modified, such that every untranslatable element
+        /// is replaced as desdribed below:
+        /// <para>
+        /// Furthermore subbranches of untranslatable subexpressions 
+        /// will be removed and if the untranslatable expression is 
+        /// a branch in an OR-expression, the entire OR-expression is 
+        /// substituted by a CstIsTrue. If clause is a branch in an 
+        /// AND-expression, that branch is replaced by a CstIsTrue 
+        /// instance.
+        /// </para>
+        /// <para>
+        /// The purpose of the said substitutions is to ensure, that 
+        /// the set described by the original clause is a subset of 
+        /// the set described by the result clause.
+        /// </para>
+        /// </summary>
+        /// <param name="clause"></param>
         public void StartVisit(IWhereable clause)
         {
             parentSetter = delegate(IExpression expr) { clause = expr; };
