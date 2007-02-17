@@ -39,13 +39,16 @@
       <HintPath>lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Query, Version=1.0.2319.19041, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BODictionaryTranslationTests.cs" />
     <Compile Include="BOListTranslationTests.cs" />
     <Compile Include="CacheTests.cs" />
     <Compile Include="ContainsAllPrimitiveTypes.cs" />
+    <Compile Include="LogicalExpressionsTests.cs" />
     <Compile Include="TableQueryTests2.cs" />
     <Compile Include="NeverStoreThisClassToDB.cs" />
     <Compile Include="Program.cs" />
@@ -63,6 +66,6 @@
       <Name>GenDB</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" /> 
+  <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
   <!--  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" /> -->
 </Project>
