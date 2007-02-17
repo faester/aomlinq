@@ -224,7 +224,7 @@ namespace GenDB
         /// Adds object to the cache and assigns a DBTag 
         /// at the same time.
         /// </summary>
-        /// <param name="res"></param>
+        /// <param name="clone"></param>
         /// <param name="knudBoergesBalsam"></param>
         internal void Add(IBusinessObject ibo, int entityPOID)
         {

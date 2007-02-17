@@ -10,7 +10,7 @@ namespace GenDB
 {
     // IQueryable<T>,
 
-    public class Table<T> :  ICollection<T>, IEnumerable<T>
+    public class Table<T> :  ICollection<T>, IEnumerable<T>, ICloneable
         where T : IBusinessObject
     {
         IExpression expression = new ExprInstanceOf(typeof(T));
@@ -211,13 +211,8 @@ namespace GenDB
 
         public Table<T> Where(Expression<Func<T, bool>> expr)
         {
-            Table<T> res = new Table<T>();
-            
-            res.translators = this.translators ;
-            res.typeSystem = this.typeSystem ;
-            res.db = this.db;
-            res.iboCache = this.iboCache;
-            
+            Table<T> res = (Table<T>)Clone();
+
             SqlExprTranslator exprTranslator = new SqlExprTranslator(typeSystem);
             SqlExprChecker checker = new SqlExprChecker();
             IExpression sqlExpr = new ExprAnd( exprTranslator.Convert (expr), this.expression);
@@ -251,7 +246,7 @@ namespace GenDB
         //                              Expression<Func<U, K>> innerKeySelector,
         //                              Expression<Func<T, U, V>> resultSelector)
         //{
-        //    Table<T> res = new Table<T>();
+        //    Table<T> clone = new Table<T>();
         //    if (TranslatorChecks.ImplementsIBusinessObject(typeof(U)) && TranslatorChecks.ImplementsIBusinessObject(typeof(T)))
         //    {
         //        SqlJoinTranslator joinTranslator = new SqlJoinTranslator(typeSystem);
@@ -270,7 +265,7 @@ namespace GenDB
         //                                        Expression<Func<U, K>> innerKeySelector,
         //                                        Expression<Func<T, IEnumerable<U>, V>> resultSelector)
         //{
-        //    Table<T> res = new Table<T>();
+        //    Table<T> clone = new Table<T>();
         //    if(TranslatorChecks.ImplementsIBusinessObject(typeof(U)) && TranslatorChecks.ImplementsIBusinessObject(typeof(T)))
         //    {
         //        SqlJoinTranslator joinTranslator = new SqlJoinTranslator(typeSystem);
@@ -289,5 +284,23 @@ namespace GenDB
         {
             return "Table<" + typeof(T).ToString() + "> with condition (" + exprFullySqlTranslatable + ") " + expression;
         }
+
+        #region ICloneable Members
+
+        public object Clone()
+        {
+            Table<T> clone = new Table<T>();
+            
+            clone.translators = this.translators ;
+            clone.typeSystem = this.typeSystem ;
+            clone.db = this.db;
+            clone.iboCache = this.iboCache;
+            clone.expression = this.expression;
+            clone.linqFunc = this.linqFunc;
+
+            return clone;
+        }
+
+        #endregion
     }
 }

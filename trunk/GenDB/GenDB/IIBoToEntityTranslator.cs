@@ -31,7 +31,7 @@ namespace GenDB
         /// actually matches the IBusinessObject given.
         /// </summary>
         /// <param name="db"></param>
-        /// <param name="res"></param>
+        /// <param name="clone"></param>
         void SaveToDB(IBusinessObject ibo);
     }
 }
