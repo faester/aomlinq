@@ -79,7 +79,7 @@ namespace GenDB
                     parArr[i] = VisitMemberExpression(tmp);
                 }
                 else if(roc[i] is MethodCallExpression)
-                {
+                {  
                     if(roc[i].NodeType.ToString()=="MethodCallVirtual")
                         parArr[i] = ValNotTranslatable.Instance;
                     else
@@ -746,6 +746,7 @@ namespace GenDB
 
         #region MakeTreeMethods
 
+        // Sakset fra system.Query.dll -> ExpressionVisitor
         internal static BinaryExpression MakeBinaryExpression(ExpressionType eType, Expression left, Expression right)
         {
             switch (eType)
@@ -766,18 +767,18 @@ namespace GenDB
                     {
                         return Expression.AndAlso(left, right);
                     }
-                //case ExpressionType.BitwiseAnd:
-                //    {
-                //        return Expression.BitAnd(left, right);
-                //    }
-                //case ExpressionType.BitwiseOr:
-                //    {
-                //        return Expression.BitOr(left, right);
-                //    }
-                //case ExpressionType.BitwiseXor:
-                //    {
-                //        return Expression.BitXor(left, right);
-                //    }
+                case ExpressionType.BitwiseAnd:
+                    {
+                        return Expression.BitAnd(left, right);
+                    }
+                case ExpressionType.BitwiseOr:
+                    {
+                        return Expression.BitOr(left, right);
+                    }
+                case ExpressionType.BitwiseXor:
+                    {
+                        return Expression.BitXor(left, right);
+                    }
                 case ExpressionType.Coalesce:
                     {
                         return Expression.Coalesce(left, right);
@@ -854,6 +855,7 @@ namespace GenDB
             throw new ArgumentException("eType: " + eType);
         }
 
+        // Sakset fra system.Query.dll -> ExpressionVisitor
         internal static UnaryExpression MakeUnaryExpression(ExpressionType eType, Expression operand, Type type)
         {
             ExpressionType type1 = eType;

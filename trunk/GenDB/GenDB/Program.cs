@@ -153,11 +153,11 @@ namespace GenDB
         {
             DataContext dcontext = DataContext.Instance;
 
-            //if (!dcontext.IsInitialized)
-            //{
-            //    dcontext.DeleteDatabase();
-            //    dcontext.CreateDatabase();
-            //}
+            if (!dcontext.IsInitialized)
+            {
+                dcontext.DeleteDatabase();
+                dcontext.CreateDatabase();
+            }
 
             //if (!dcontext.DatabaseExists())
             //{
@@ -172,15 +172,27 @@ namespace GenDB
 
             for(int i=0;i<objCount;i++)
             {
-                Person p = new Person{Name = "Name"+1, Age = i};
+                Person p = new Person{Name = "Name"+i, Age = i};
+                Person s = new Person{Name = "Spouse"+i, Age=i};
                 if(i%2==0)
+                {
                     p.Alive=true;
+                    p.Sex = Sex.FEMALE;
+                    p.Letter = 'l';
+
+                    tp.Add(s);
+                    p.Spouse = s;
+                }
                 tp.Add(p);
             }
             dcontext.SubmitChanges();
-            
+            char ch0 = 'l';
             var v = from per in tp
-                    where !per.Alive || per.Alive
+                    //where per.Name.Substring(2) == "ame2"
+                    //where per.Letter  == ch0
+                    //where per.Sex == Sex.NEUTER
+                    where per.Age > 0
+                    //where (!per.Alive)==false
                     select per;
 
             foreach(Person person in v)

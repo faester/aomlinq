@@ -17,7 +17,7 @@ namespace BOListTests
 
         DataContext dataContext = DataContext.Instance;
 
-        [TestFixtureSetUp]
+        [TestFixtureSetUp] 
         public void InitDB()
         {
             if (!dataContext.IsInitialized)
