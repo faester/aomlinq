@@ -42,7 +42,6 @@ namespace GenDB.DB
         const string TB_PROPERTY_NAME = "Property";
         const string TB_PROPERTYVALUE_NAME = "PropertyValue";
         const string TB_COLLECTION_ELEMENT_NAME = "CollectionElement";
-        const string TB_COLLECTION_KEY_NAME = "CollectionKey";
 
         const bool WHERE_USING_JOINS = true;
         #endregion
@@ -938,7 +937,6 @@ namespace GenDB.DB
         public void ClearCollection(int collectionEntityPOID)
         {
             ClearCollectionElements(collectionEntityPOID);
-            ClearCollectionKeys(collectionEntityPOID);
         }
 
         #region Private methods.
@@ -1044,19 +1042,6 @@ namespace GenDB.DB
             sbCollectionElementOperations.Append(TB_COLLECTION_ELEMENT_NAME);
             sbCollectionElementOperations.Append(" WHERE EntityPOID = ");
             sbCollectionElementOperations.Append(collectionEntityPOID);
-        }
-
-        private void ClearCollectionKeys(int collectionEntityPOID)
-        {
-            if (collectionKeyOperationCount > dataContext.DbBatchSize)
-            {
-                CollectionKeyStringBuilderToLL();
-            }
-            collectionKeyOperationCount++;
-            sbSetKeyInserts.Append(" DELETE FROM ");
-            sbSetKeyInserts.Append(TB_COLLECTION_KEY_NAME);
-            sbSetKeyInserts.Append(" WHERE EntityPOID = ");
-            sbSetKeyInserts.Append(collectionEntityPOID);
         }
 
         private void InitNextPOIDs()
@@ -1200,20 +1185,9 @@ namespace GenDB.DB
                 + " DoubleValue FLOAT) "
                 );
 
-            tCC.AddLast("CREATE TABLE "
-                + TB_COLLECTION_KEY_NAME + " ( "
-                + " KeyID int not null, "
-                + " EntityPOID int not null references " + TB_ENTITY_NAME + " (EntityPOID) ON DELETE CASCADE, "
-                + " LongValue BIGINT, " // Also stores referenceids. Null is in this case empty reference. 
-                + " BoolValue BIT, "
-                + " StringValue VARCHAR(MAX), "
-                + " DoubleValue FLOAT) "
-                );
 
             tCC.AddLast("ALTER TABLE " + TB_PROPERTYVALUE_NAME + " ADD PRIMARY KEY (PropertyPOID, EntityPOID)");
             tCC.AddLast("ALTER TABLE " + TB_COLLECTION_ELEMENT_NAME + " ADD PRIMARY KEY ( EntityPOID, ElementID)");
-            tCC.AddLast("ALTER TABLE " + TB_COLLECTION_KEY_NAME + " ADD PRIMARY KEY ( EntityPOID, KeyID)");
-            tCC.AddLast("ALTER TABLE " + TB_COLLECTION_KEY_NAME + " ADD FOREIGN KEY (EntityPOID, KeyID) REFERENCES " + TB_COLLECTION_ELEMENT_NAME + " (EntityPOID, ElementID) ");
 
             tCC.AddLast(
             "CREATE TRIGGER cascade_delete_references ON " + TB_ENTITY_NAME + " AFTER DELETE AS " +
@@ -1293,33 +1267,7 @@ namespace GenDB.DB
                                         "		VALUES (@EntityPOID, @ElementID, @LongValue, @StringValue, @BoolValue, @DoubleValue)" +
                                         "	END";
 
-            string sp_SET_COLLECTION_KEY
-                            = "CREATE PROCEDURE sp_SET_COLLECTION_KEY " +
-                            "	@EntityPOID AS INT, " +
-                            "	@KeyID AS INT," +
-                            "	@LongValue AS BIGINT," +
-                            "	@StringValue AS VARCHAR(max)," +
-                            "	@BoolValue AS BIT, " +
-                            "   @DoubleValue AS FLOAT " +
-                            " AS " +
-                            "	IF EXISTS (SELECT * FROM " + TB_COLLECTION_KEY_NAME + " WHERE EntityPOID = @EntityPOID AND KeyID = @KeyID) " +
-                            "	BEGIN " +
-                            "		UPDATE " + TB_COLLECTION_KEY_NAME + " SET " +
-                            "			LongValue = @LongValue," +
-                            "			StringValue = @StringValue ," +
-                            "			BoolValue = @BoolValue, " +
-                            "			DoubleValue = @DoubleValue " +
-                            "		WHERE " +
-                            "			EntityPOID = @EntityPOID AND KeyID = @KeyID " +
-                            "	END " +
-                            "	ELSE" +
-                            "	BEGIN" +
-                            "		INSERT INTO " + TB_COLLECTION_KEY_NAME +
-                            "		(EntityPOID, KeyID, LongValue, StringValue , BoolValue, DoubleValue)" +
-                            "		VALUES (@EntityPOID, @KeyID, @LongValue, @StringValue, @BoolValue, @DoubleValue)" +
-                            "	END";
-
-            string[] cmds = new string[] { sp_UP_INS_ENTITY, sp_SET_PROPERTYVALUE, sp_SET_COLLECTION_ELEMENT, sp_SET_COLLECTION_KEY };
+            string[] cmds = new string[] { sp_UP_INS_ENTITY, sp_SET_PROPERTYVALUE, sp_SET_COLLECTION_ELEMENT };
             ExecuteNonQueries(cmds, cnn, t);
         }
 
