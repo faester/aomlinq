@@ -166,7 +166,7 @@ namespace GenDB
 
             int objCount = 10;
  
-            Table<Person> tp = dcontext.CreateTable<Person>();
+            Table<Person> tp = dcontext.GetTable<Person>();
             tp.Clear();
             dcontext.SubmitChanges();
 
@@ -213,7 +213,7 @@ namespace GenDB
             //    bolist.Add (p);
             //}
 
-            //Table<BODictionary<int, int>> table = dcontext.CreateTable<BODictionary<int, int>>();
+            //Table<BODictionary<int, int>> table = dcontext.GetTable<BODictionary<int, int>>();
             //table.Clear();
             //dcontext.SubmitChanges();
             

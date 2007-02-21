@@ -148,7 +148,7 @@ namespace GenDB
             return etid2IEt[entityTypePOID].Target;
         }
 
-        public  Type GetClrType(IEntityType et)
+        public Type GetClrType(IEntityType et)
         {
             return etid2IEt[et.EntityTypePOID].ClrType;
         }
@@ -197,7 +197,7 @@ namespace GenDB
         /// </summary>
         /// <param name="entityType"></param>
         /// <returns></returns>
-        public  IEnumerable<IEntityType> GetEntityTypesInstanceOf(IEntityType iet)
+        internal IEnumerable<IEntityType> GetEntityTypesInstanceOf(IEntityType iet)
         {
             // List for storing the result
             LinkedList<IEntityType> result = new LinkedList<IEntityType>();
@@ -225,7 +225,7 @@ namespace GenDB
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public  IEnumerable<IEntityType> GetEntityTypesInstanceOf(Type t)
+        internal IEnumerable<IEntityType> GetEntityTypesInstanceOf(Type t)
         {
             if (!IsTypeKnown(t)) 
             { // Ensure that the type is known. 
@@ -241,7 +241,7 @@ namespace GenDB
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public  IEnumerable<IEntityType> GetEntityTypesInstanceOf(long entityTypePOID)
+        internal IEnumerable<IEntityType> GetEntityTypesInstanceOf(long entityTypePOID)
         {
             return GetEntityTypesInstanceOf(etid2IEt[entityTypePOID].Target);
         }
@@ -301,7 +301,7 @@ namespace GenDB
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        private IEntityType IBOEntityType(Type t)
+        public IEntityType IBOEntityType(Type t)
         {
             IEntityType et = dataContext.GenDB.NewEntityType();
 

@@ -97,7 +97,7 @@
     <Compile Include="SqlJoinTranslator.cs" />
     <Compile Include="Table.cs" />
     <Compile Include="TranslatorChecks.cs" />
-    <Compile Include="Translators.cs" />
+    <Compile Include="TranslatorSet.cs" />
     <Compile Include="TypeSystem.cs" />
     <Compile Include="VolatileAnnotation.cs" />
   </ItemGroup>

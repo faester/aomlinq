@@ -71,9 +71,9 @@ namespace GenDB
     /// <typeparam name="V"></typeparam>
     public sealed class BODictionary<K, V> : IDictionaryStub, IDictionary<K, V>    
     {
-        static Table<DictKeyValueMapping> mappings = DataContext.Instance.CreateTable<DictKeyValueMapping>();
-        static Table<InternalList<K>> keyLists = DataContext.Instance.CreateTable<InternalList<K>>();
-        static Table<InternalList<V>> valueLists = DataContext.Instance.CreateTable<InternalList<V>>();
+        static Table<DictKeyValueMapping> mappings = DataContext.Instance.GetTable<DictKeyValueMapping>();
+        static Table<InternalList<K>> keyLists = DataContext.Instance.GetTable<InternalList<K>>();
+        static Table<InternalList<V>> valueLists = DataContext.Instance.GetTable<InternalList<V>>();
         IIBoToEntityTranslator superTranslator = null;
 
         Dictionary<K, V> dict = new Dictionary<K,V>();
