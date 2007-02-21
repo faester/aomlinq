@@ -116,7 +116,7 @@ namespace QueryToSqlTranslationTests
             }
 
             int objCount = 10;
-            tp = dataContext.CreateTable<Person>();
+            tp = dataContext.GetTable<Person>();
             tp.Clear();
             dataContext.SubmitChanges();
 
@@ -264,7 +264,7 @@ namespace QueryToSqlTranslationTests
         [Test, ExpectedException(typeof(FieldsNotAllowedInConditionsException))]
         public void TestShouldNotAllowFiltersOnPublicProperties()
         {
-            Table<ContainsAllPrimitiveTypes> tcapt = dataContext.CreateTable<ContainsAllPrimitiveTypes>();
+            Table<ContainsAllPrimitiveTypes> tcapt = dataContext.GetTable<ContainsAllPrimitiveTypes>();
 
             var res = from capt in tcapt 
                       where capt.stringNotPersisted == "hvadsomhelst"
@@ -274,7 +274,7 @@ namespace QueryToSqlTranslationTests
         [Test, ExpectedException(typeof(FieldsNotAllowedInConditionsException))]
         public void TestShouldNotAllowFiltersOnPublicProperties_int()
         {
-            Table<ContainsAllPrimitiveTypes> tcapt = dataContext.CreateTable<ContainsAllPrimitiveTypes>();
+            Table<ContainsAllPrimitiveTypes> tcapt = dataContext.GetTable<ContainsAllPrimitiveTypes>();
 
             var res = from capt in tcapt 
                       where capt.intNotPersisted == -1

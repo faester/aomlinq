@@ -25,8 +25,8 @@ namespace ObjectUtilitiesTests
             {
                 dataContext.CreateDatabase();
             }
-            Table<EqualityTest> t_eq = dataContext.CreateTable<EqualityTest>();
-            Table<EqulityTestPrimitives > t_eqp = dataContext.CreateTable<EqulityTestPrimitives>();
+            Table<EqualityTest> t_eq = dataContext.GetTable<EqualityTest>();
+            Table<EqulityTestPrimitives > t_eqp = dataContext.GetTable<EqulityTestPrimitives>();
         }
 
         [TestFixtureTearDown]

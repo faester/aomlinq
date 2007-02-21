@@ -48,7 +48,7 @@ namespace BOListTests
         [Test]
         public void TestBOListOfContainsAllPrimitives()
         {
-            Table<BOList<ContainsAllPrimitiveTypes>> table = dataContext.CreateTable<BOList<ContainsAllPrimitiveTypes>>();
+            Table<BOList<ContainsAllPrimitiveTypes>> table = dataContext.GetTable<BOList<ContainsAllPrimitiveTypes>>();
             table.Clear();
             dataContext.SubmitChanges();
 
@@ -79,7 +79,7 @@ namespace BOListTests
         [Test]
         public void TestBOListOfInt()
         {
-            Table<BOList<int>> table = dataContext.CreateTable<BOList<int>>();
+            Table<BOList<int>> table = dataContext.GetTable<BOList<int>>();
             table.Clear();
             dataContext.SubmitChanges();
 
@@ -110,7 +110,7 @@ namespace BOListTests
         [Test]
         public void TestBOListOfString()
         {
-            Table<BOList<string>> table = dataContext.CreateTable<BOList<string>>();
+            Table<BOList<string>> table = dataContext.GetTable<BOList<string>>();
             table.Clear();
             dataContext.SubmitChanges();
 
@@ -142,7 +142,7 @@ namespace BOListTests
         [Test]
         public void TestBOListOfDateTime()
         {
-            Table<BOList<DateTime>> table = dataContext.CreateTable<BOList<DateTime>>();
+            Table<BOList<DateTime>> table = dataContext.GetTable<BOList<DateTime>>();
             table.Clear();
             dataContext.SubmitChanges();
 
@@ -177,7 +177,7 @@ namespace BOListTests
         public void TestBOListSimpleQuery()
         {
             // ** not used
-            Table<BOList<TestPerson>> table = dataContext.CreateTable<BOList<TestPerson>>();
+            Table<BOList<TestPerson>> table = dataContext.GetTable<BOList<TestPerson>>();
             table.Clear();
             dataContext.SubmitChanges();
             // **

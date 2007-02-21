@@ -107,8 +107,8 @@ namespace TranslationTests
                 dc.Init();
             }
 
-            tableOfHasVolatileProperty = dc.CreateTable<HasVolatileProperty>();
-            tableOfPureIBusinessImpl = dc.CreateTable<PureIBusinessImpl>();
+            tableOfHasVolatileProperty = dc.GetTable<HasVolatileProperty>();
+            tableOfPureIBusinessImpl = dc.GetTable<PureIBusinessImpl>();
         }
         
         [TestFixtureTearDown]
@@ -126,13 +126,13 @@ namespace TranslationTests
         [Test, ExpectedException(typeof(NotTranslatableException))]
         public void TestTranslateNoSetter() 
         { 
-            tableOfShouldFailNoSetter = dc.CreateTable<ShouldFailNoSetter>();
+            tableOfShouldFailNoSetter = dc.GetTable<ShouldFailNoSetter>();
         }
 
         [Test, ExpectedException(typeof(NotTranslatableException))]
         public void TestTranslateNoGetter()
         {
-            tableOfShouldFailNoGetter = dc.CreateTable <ShouldFailNoGetter>();
+            tableOfShouldFailNoGetter = dc.GetTable <ShouldFailNoGetter>();
             tableOfShouldFailNoGetter.Add ( new ShouldFailNoGetter());
         }
 
@@ -163,7 +163,7 @@ namespace TranslationTests
         [Test]
         public void TestFieldsShouldNotBePersisted()
         {
-            Table<ContainsAllPrimitiveTypes> tcapt = dc.CreateTable<ContainsAllPrimitiveTypes>();
+            Table<ContainsAllPrimitiveTypes> tcapt = dc.GetTable<ContainsAllPrimitiveTypes>();
 
             for (int i = 0; i < 100; i++)
             {
