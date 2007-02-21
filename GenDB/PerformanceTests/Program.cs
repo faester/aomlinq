@@ -27,7 +27,7 @@ namespace PerformanceTests
             //}
             //GenDB.DataContext.Instance.Init();
             
-            //GenDB.Table<PerfTestAllPrimitiveTypes > table = GenDB.DataContext.Instance.CreateTable<PerfTestAllPrimitiveTypes>();
+            //GenDB.Table<PerfTestAllPrimitiveTypes > table = GenDB.DataContext.Instance.GetTable<PerfTestAllPrimitiveTypes>();
 
             //var q = from p in table
             //        where p.Dbl * p.Integer == 0.2
