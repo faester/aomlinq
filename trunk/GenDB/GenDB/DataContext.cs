@@ -16,7 +16,7 @@ namespace GenDB
             get { return isInitialized; }
         }
 
-        public Table<T> CreateTable<T> ()
+        public Table<T> GetTable<T> ()
             where T : IBusinessObject
         {
             if (!isInitialized)
