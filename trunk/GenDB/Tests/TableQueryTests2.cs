@@ -42,7 +42,7 @@ namespace QueryToSqlTranslationTests
 
         public void InitTableOfPersons()
         {
-            ttp = dataContext.CreateTable<TestPerson>();
+            ttp = dataContext.GetTable<TestPerson>();
             TestPerson lastPerson = null;
 
             for (int i = 0; i < 10; i++)
@@ -61,7 +61,7 @@ namespace QueryToSqlTranslationTests
         {
             dataContext.SubmitChanges();
             GC.Collect();
-            tableAllPrimitives = dataContext.CreateTable<ContainsAllPrimitiveTypes>();
+            tableAllPrimitives = dataContext.GetTable<ContainsAllPrimitiveTypes>();
             tableAllPrimitives.Clear();
             dataContext.SubmitChanges();
 

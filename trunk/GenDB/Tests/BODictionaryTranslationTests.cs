@@ -38,8 +38,8 @@ namespace BODictionaryTests
                 throw e;
             }
 
-            ti = dataContext.CreateTable<BOList<int>>();
-            ttp = dataContext.CreateTable<BOList<TestPerson>>();
+            ti = dataContext.GetTable<BOList<int>>();
+            ttp = dataContext.GetTable<BOList<TestPerson>>();
 
             ti.Clear();
             ttp.Clear();
@@ -56,7 +56,7 @@ namespace BODictionaryTests
 
         private void InsertTest<K, V>(Func<K, V> mapping, Func<int, K> keyCreator)
         {
-            Table<BODictionary<K, V>> table = dataContext.CreateTable<BODictionary<K, V>>();
+            Table<BODictionary<K, V>> table = dataContext.GetTable<BODictionary<K, V>>();
 
             table.Clear();
             dataContext.SubmitChanges();
@@ -79,7 +79,7 @@ namespace BODictionaryTests
 
         private void RetrieveTest<K, V>(Func<K, V> mapping, Func<K, int> keyToInt)
         {
-            Table<BODictionary<K, V>> table = dataContext.CreateTable<BODictionary<K, V>>();
+            Table<BODictionary<K, V>> table = dataContext.GetTable<BODictionary<K, V>>();
 
             int foundDicts = 0;
 
@@ -130,7 +130,7 @@ namespace BODictionaryTests
         [Test]
         public void TestBODictOfIntTestPerson()
         {
-            Table<BODictionary<int, TestPerson>> table = dataContext.CreateTable<BODictionary<int, TestPerson>>();
+            Table<BODictionary<int, TestPerson>> table = dataContext.GetTable<BODictionary<int, TestPerson>>();
             table.Clear();
             dataContext.SubmitChanges();
 
@@ -150,7 +150,7 @@ namespace BODictionaryTests
         [Test]
         public void TestBODictOfIntTestPersonRetrieve()
         {
-            Table<BODictionary<int, TestPerson>> table = dataContext.CreateTable<BODictionary<int, TestPerson>>();
+            Table<BODictionary<int, TestPerson>> table = dataContext.GetTable<BODictionary<int, TestPerson>>();
 
             int foundDicts = 0;
 

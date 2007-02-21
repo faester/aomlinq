@@ -72,7 +72,7 @@ namespace TableTests
         public void SetUp()
         {
             Console.WriteLine("TABLE TEST SETUP *********************************");
-            tpt = dataContext.CreateTable<TestPerson>();
+            tpt = dataContext.GetTable<TestPerson>();
 
             tpt.Clear();
             dataContext.SubmitChanges();
@@ -93,8 +93,8 @@ namespace TableTests
             caro.Car = c;
             c.Owner = caro;
 
-            t_carOwners = dataContext.CreateTable<CarOwner>();
-            t_cars = dataContext.CreateTable<Car>();
+            t_carOwners = dataContext.GetTable<CarOwner>();
+            t_cars = dataContext.GetTable<Car>();
 
             t_cars.Add(c);
             t_carOwners.Add (caro);
@@ -108,10 +108,10 @@ namespace TableTests
         [Test]
         public void TestCanClearOnUnPersistedType()
         {
-            Table<NeverStoreThisClassToDB> tNeverStore = dataContext.CreateTable<NeverStoreThisClassToDB>();
+            Table<NeverStoreThisClassToDB> tNeverStore = dataContext.GetTable<NeverStoreThisClassToDB>();
             tNeverStore.Clear();
             
-            Table<ContainsAllPrimitiveTypes> tapt = dataContext.CreateTable<ContainsAllPrimitiveTypes>();
+            Table<ContainsAllPrimitiveTypes> tapt = dataContext.GetTable<ContainsAllPrimitiveTypes>();
             tapt.Clear();
 
             dataContext.SubmitChanges();
@@ -132,7 +132,7 @@ namespace TableTests
         [Test]
         public void TestContains()
         {
-            Table<TestPerson> tpt = dataContext.CreateTable<TestPerson>();
+            Table<TestPerson> tpt = dataContext.GetTable<TestPerson>();
             TestPerson p1 = new TestPerson();
             TestPerson p2 = new TestPerson();
             TestPerson p3 = new TestPerson();
@@ -150,7 +150,7 @@ namespace TableTests
         [Test, ExpectedException(typeof(NullReferenceException))]
         public void TestInsertNull()
         {
-            Table<TestPerson> tpt = dataContext.CreateTable<TestPerson>();
+            Table<TestPerson> tpt = dataContext.GetTable<TestPerson>();
             tpt.Add(null);
         }
 

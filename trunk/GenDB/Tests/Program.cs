@@ -82,9 +82,9 @@ namespace Tests
             dataContext.DbBatchSize = 2000;
             long objcount = 1;
 
-            Table<BOList<TestlistElement>> tl = dataContext.CreateTable<BOList<TestlistElement>>();
+            Table<BOList<TestlistElement>> tl = dataContext.GetTable<BOList<TestlistElement>>();
 
-            Table<BOList<int>> tbi = dataContext.CreateTable<BOList<int>>();
+            Table<BOList<int>> tbi = dataContext.GetTable<BOList<int>>();
 
             BOList<int> bi = new BOList<int>();
 
@@ -131,7 +131,7 @@ namespace Tests
                 }
             }
 
-            Table<Person> tp = dataContext.CreateTable<Person>();
+            Table<Person> tp = dataContext.GetTable<Person>();
 
             DateTime then = DateTime.Now;
 

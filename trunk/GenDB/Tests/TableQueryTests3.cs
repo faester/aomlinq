@@ -45,7 +45,7 @@ namespace QueryToSqlTranslationTests
 
         public void InitTableOfPersons()
         {
-            ttp = dataContext.CreateTable<TestPerson>();  
+            ttp = dataContext.GetTable<TestPerson>();  
             ttp.Clear();
 
             dataContext.SubmitChanges();
@@ -70,7 +70,7 @@ namespace QueryToSqlTranslationTests
         {
             dataContext.SubmitChanges();
             GC.Collect();
-            tableAllPrimitives = dataContext.CreateTable<ContainsAllPrimitiveTypes>();
+            tableAllPrimitives = dataContext.GetTable<ContainsAllPrimitiveTypes>();
             tableAllPrimitives.Clear();
             dataContext.SubmitChanges();
 

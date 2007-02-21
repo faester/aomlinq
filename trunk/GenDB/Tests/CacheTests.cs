@@ -59,7 +59,7 @@ namespace IBOCache
                 dc.Init();
             }
 
-            table = dc.CreateTable<CacheTestObject>();
+            table = dc.GetTable<CacheTestObject>();
             table.Clear();
 
             for (int i = 0; i < instancesToCreate; i++)
@@ -69,7 +69,7 @@ namespace IBOCache
                 keepInstances.AddLast(cto);
             }
 
-            var ttp = dc.CreateTable<TestPerson>();
+            var ttp = dc.GetTable<TestPerson>();
             ttp.Clear();
             dc.SubmitChanges();
 
@@ -134,7 +134,7 @@ namespace IBOCache
             }
             lastPerson.Spouse = tp;
 
-            Table<TestPerson> ttp = dc.CreateTable<TestPerson>();
+            Table<TestPerson> ttp = dc.GetTable<TestPerson>();
             ttp.Add (tp);
             dc.SubmitChanges();
         }
@@ -144,7 +144,7 @@ namespace IBOCache
         {
             Check(storeRecursiveDataType1);
             storeRecursiveDataType2 = testsRun;   
-            Table<TestPerson> ttp = dc.CreateTable<TestPerson>();
+            Table<TestPerson> ttp = dc.GetTable<TestPerson>();
 
             var qs = from tps in ttp
                        where tps.Name == "0"
@@ -235,7 +235,7 @@ namespace IBOCache
         public void TestChangesPersisted()
         {
             int obs = 500;
-            Table<ContainsAllPrimitiveTypes> tcapt = dc.CreateTable<ContainsAllPrimitiveTypes>();
+            Table<ContainsAllPrimitiveTypes> tcapt = dc.GetTable<ContainsAllPrimitiveTypes>();
             tcapt.Clear();
             dc.SubmitChanges();
 
