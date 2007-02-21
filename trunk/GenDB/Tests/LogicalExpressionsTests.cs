@@ -19,7 +19,7 @@ namespace Tests
             bool blib;
             bool blob;
 
-            int a, b;
+            int a, b; 
 
             public int A
             {
