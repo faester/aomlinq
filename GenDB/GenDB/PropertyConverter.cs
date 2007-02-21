@@ -8,8 +8,11 @@ namespace GenDB
 {
     /*
      * http://www.codeproject.com/csharp/csharpcasts.asp
-     * TODO: Rename til PropertyConverter
      */
+
+    /// <summary>
+    /// Used to convert between a property of a class and an IPropertyValue 
+    /// </summary>
     class PropertyConverter
     {
         PropertyValueSetter pvs;
