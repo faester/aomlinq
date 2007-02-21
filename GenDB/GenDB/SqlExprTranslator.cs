@@ -166,11 +166,11 @@ namespace GenDB
                     r = VisitUnaryExpressionValue(ue);
                 }
 
+                return new OPPlus(l,r);
+
             }
             else
-                throw new Exception("Unknown return parameter: "+mce.Method.ReturnParameter.Member.Name);
-            
-            return new OPPlus(l,r);
+                return ValNotTranslatable.Instance;
         }
 
         internal IValue DecomposeConstant(ConstantExpression ce)
@@ -336,6 +336,9 @@ namespace GenDB
                 {
                     MemberExpression mem = (MemberExpression) un.Operand;
                     parArr[1] = VisitMemberExpression(mem);
+                }
+                else if(un.Operand is ParameterExpression) {
+                    parArr[1] = ValNotTranslatable.Instance;
                 }
                 else
                     throw new Exception("Unknown exception type: "+un.Operand.NodeType.ToString());
@@ -621,6 +624,14 @@ namespace GenDB
                             return ExprNotTranslatable.Instance;
                     }   
                 }
+                //else if(lambda.Body is MethodCallExpression)
+                //{
+                //    MethodCallExpression mce = (MethodCallExpression) lambda.Body;
+                //    //left = VisitMethodCall((MethodCallExpression)lambda.Body);
+                //    left = VisitUnaryExpressionValue((UnaryExpression)mce.Object);
+ 
+                //    throw new Exception("sd");
+                //}
                 else
                 {
                     return ExprNotTranslatable.Instance;
