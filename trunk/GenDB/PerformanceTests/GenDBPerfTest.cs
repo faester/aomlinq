@@ -10,7 +10,7 @@ namespace PerformanceTests
         where T : GenDB.IBusinessObject, new()
     {
         GenDB.DataContext dataContext = GenDB.DataContext.Instance;
-        GenDB.Table<T> table = GenDB.DataContext.Instance.CreateTable<T>();
+        GenDB.Table<T> table = GenDB.DataContext.Instance.GetTable<T>();
         int lastInsert = 0;
 
         public GenDBPerfTests(GenDB.DataContext dataContext)
@@ -20,7 +20,7 @@ namespace PerformanceTests
 
         public void InitTests(int objectCount)
         {
-            GenDB.Table<T> table = dataContext.CreateTable<T>();
+            GenDB.Table<T> table = dataContext.GetTable<T>();
             int count = table.Count;
             bool needCommit = false;
             Console.WriteLine("Contains {0} objects", count);
