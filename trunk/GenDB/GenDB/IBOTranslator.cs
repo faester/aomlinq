@@ -12,7 +12,21 @@ namespace GenDB
      * http://www.codeproject.com/useritems/Dynamic_Code_Generation.asp
      */
 
+
+    /// <summary>
+    /// Sets a specific IProperty of the given 
+    /// IEntity object to value given.
+    /// </summary>
+    /// <param name="e"></param>
+    /// <param name="value"></param>
     delegate void PropertyValueSetter(IEntity e, object value);
+
+    /// <summary>
+    /// Sets a property value of the given IBusinessObject to
+    /// the value contained in value.
+    /// </summary>
+    /// <param name="ibo"></param>
+    /// <param name="value"></param>
     delegate void PropertySetter(IBusinessObject ibo, object value);
 
 

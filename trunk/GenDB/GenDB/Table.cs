@@ -240,7 +240,8 @@ namespace GenDB
 
             return res;
         }
-        // inner join
+
+        ////inner join
         //public IEnumerable<V> Join<U, K, V>(IEnumerable<U> inner, 
         //                              Expression<Func<T, K>> outerKeySelector,
         //                              Expression<Func<U, K>> innerKeySelector,
@@ -259,7 +260,7 @@ namespace GenDB
         //    }
         //}
 
-        // outer join
+        ////outer join
         //public IEnumerable<V> GroupJoin<U, K, V>(IEnumerable<U> inner, 
         //                                        Expression<Func<T, K>> outerKeySelector,
         //                                        Expression<Func<U, K>> innerKeySelector,
