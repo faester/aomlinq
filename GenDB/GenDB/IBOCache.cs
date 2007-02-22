@@ -46,7 +46,9 @@ namespace GenDB
         /// </summary>
         internal int UnCommittedObjectsSize
         {
-            get { return uncommittedObjects.Count; }
+            get { 
+                throw new Exception("Not implemented"); //TODO
+            }
         }
 
         /// <summary>
@@ -154,6 +156,12 @@ namespace GenDB
             Console.WriteLine("IBOCache removed {0} objects.", removeCount);
             Console.WriteLine("Committed objects now contains {0} elements", committedObjects.Count);
 #endif
+        }
+
+
+        internal void PrepareForType(int entityTypePOID)
+        {
+            //throw new Exception("Not implemented");
         }
 
         /// <summary>
