@@ -211,7 +211,6 @@ namespace GenDB
 
         public Table<T> Where(Expression<Func<T, bool>> expr)
         {
-            Console.WriteLine("Running Table<{0}>.Where({1})", typeof(T), expr);
             Table<T> res = (Table<T>)Clone();
 
             SqlExprTranslator exprTranslator = new SqlExprTranslator(typeSystem);
