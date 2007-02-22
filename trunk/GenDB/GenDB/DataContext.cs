@@ -165,7 +165,8 @@ namespace GenDB
 
         public void RollbackTransaction()
         {
-            throw new Exception("Not implemented");
+            iboCache.RollbackTransaction();
+            genDB.RollbackTransaction();
         }
         /// <summary>
         /// Number of objects watched by the cache.
