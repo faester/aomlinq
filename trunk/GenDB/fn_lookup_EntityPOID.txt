@@ -13,7 +13,7 @@ BEGIN
 
 	SET @idx = CHARINDEX('.', @ls)  
 	SET @propertyPOID = CAST (SUBSTRING(@ls, 1, @idx - 1) AS BIGINT)
-	SELECT @nbep = LongValue FROM PropertyValue WHERE PropertyPOID = @propertyPOID AND EntityPOID = @bep
+	SELECT @nbep = ReferenceValue FROM PropertyValue WHERE PropertyPOID = @propertyPOID AND EntityPOID = @bep
 	IF @nbep IS NULL 
 		SET @res = NULL
 	ELSE

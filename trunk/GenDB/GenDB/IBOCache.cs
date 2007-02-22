@@ -397,7 +397,6 @@ namespace GenDB
                 ibo.DBIdentity = newID;
                 uncommittedObjects.Remove(id);
                 entityToTypeMapping.Remove(id);
-
             }
         }
     }
