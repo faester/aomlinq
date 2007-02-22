@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 using GenDB.DB;
-#if DEBUG
-using System.Diagnostics;
-#endif
+using System.Expressions;
+using System.Query;
 
 namespace GenDB
 {
@@ -16,7 +15,55 @@ namespace GenDB
     /// </summary>
     internal class IBOCache
     {
-        int MAX_OLD_OBJECTS_TO_KEEP = 1000;
+        internal class CommittedObjectsOfType : IEnumerable<IBOCacheElement>, System.Collections.IEnumerable
+        {
+            int entityTypePOID;
+
+            public int EntityTypePOID
+            {
+                get { return entityTypePOID; }
+                private set { entityTypePOID = value; }
+            }
+
+            public CommittedObjectsOfType(int entityTypePOID)
+            {
+                EntityTypePOID = entityTypePOID;
+            }
+
+            Dictionary<int, IBOCacheElement> objs = new Dictionary<int, IBOCacheElement>();
+
+            public IBOCacheElement this[int entityPOID] {
+                get { return objs[entityPOID];}
+                internal set { objs[entityPOID] = value; }
+            }
+
+            public int Count { get { return objs.Count; } }
+
+            public void Remove(int entityPOID)
+            {
+                objs.Remove(entityPOID);
+            }
+
+            public bool TryGetValue(int entityPOID, out IBOCacheElement ce)
+            {
+                return objs.TryGetValue(entityPOID, out ce);
+            }
+
+            #region IEnumerable<IBOCacheElement> Members
+            IEnumerator<IBOCacheElement> IEnumerable<IBOCacheElement>.GetEnumerator()
+            {
+               return objs.Values.GetEnumerator();
+            }
+            #endregion
+
+            #region IEnumerable Members
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                throw new Exception("Not implemented (IEnumerator)");
+                //return this.GetEnumerator<IBOCacheElement>();
+            }
+            #endregion
+        }
 
         /// <summary>
         /// Constructor with a parameter specifying which 
@@ -37,7 +84,12 @@ namespace GenDB
         {
             get
             {
-                return committedObjects.Count;
+                int res = 0;
+                foreach(CommittedObjectsOfType co in committedObjects.Values )
+                {
+                    res += co.Count;
+                }
+                return res;
             }
         }
 
@@ -47,7 +99,7 @@ namespace GenDB
         internal int UnCommittedObjectsSize
         {
             get { 
-                throw new Exception("Not implemented"); //TODO
+                return uncommittedObjects.Count;
             }
         }
 
@@ -55,22 +107,26 @@ namespace GenDB
         /// Stores objects with weak references to allow garbage collection of 
         /// the cached objects.
         /// </summary>
-        Dictionary<long, IBOCacheElement> committedObjects = new Dictionary<long, IBOCacheElement>();
+        //Dictionary<long, IBOCacheElement> committedObjects = new Dictionary<long, IBOCacheElement>();
+
+        Dictionary<int, CommittedObjectsOfType> committedObjects = new Dictionary<int, CommittedObjectsOfType>();
 
         ///// <summary>
         ///// Stores regular object references. The object must not be gc'ed before 
         ///// it has been written to persistent storage.
         ///// </summary>
-        Dictionary<long, IBusinessObject> uncommittedObjects = new Dictionary<long, IBusinessObject>();
+        Dictionary<int, IBusinessObject> uncommittedObjects = new Dictionary<int, IBusinessObject>();
+
+        Dictionary<int, int> entityToTypeMapping = new Dictionary<int, int>();
 
         /// <summary>
         /// Adds an object to the dictionary of uncomitted objects.
         /// </summary>
         /// <param name="obj"></param>
-        private void AddToCommitted(IBusinessObject obj)
+        private void AddToCommitted(int entityTypePOID, IBusinessObject obj)
         {
             IBOCacheElement wr = new IBOCacheElement(obj);
-            committedObjects[obj.DBIdentity] = wr;
+            committedObjects[entityTypePOID][obj.DBIdentity] = wr;
         }
 
         /// <summary>
@@ -88,12 +144,20 @@ namespace GenDB
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool TryGet(long id, out IBusinessObject obj)
+        public bool TryGet(int entityPOID, out IBusinessObject obj)
         {
-            IBOCacheElement wr;
-            if (!committedObjects.TryGetValue(id, out wr))
+            int entityTypePOID;
+
+            if (!entityToTypeMapping.TryGetValue(entityPOID, out entityTypePOID))
             {
-                if (!uncommittedObjects.TryGetValue(id, out obj))
+                obj = null;
+                return false;
+            }
+
+            IBOCacheElement wr;
+            if (!committedObjects[entityTypePOID].TryGetValue(entityPOID, out wr))
+            {
+                if (!uncommittedObjects.TryGetValue(entityPOID, out obj))
                 {
                     return false;
                 }
@@ -102,7 +166,8 @@ namespace GenDB
             {
                 if (!wr.IsAlive)
                 {
-                    committedObjects.Remove(id);
+                    committedObjects[entityTypePOID].Remove(entityPOID);
+                    entityToTypeMapping.Remove(entityPOID);
                     obj = null;
                     return false;
                 }
@@ -123,45 +188,43 @@ namespace GenDB
         /// </summary>
         private void TryGC()
         {
-#if DEBUG
-            Console.WriteLine("Committed objects contains {0} elements", committedObjects.Count);
-            Console.WriteLine("IBOCache contains {0} committed objects.", CommittedObjectsSize);
-            int removeCount = 0;
-#endif
-            IBOCacheElement[] ll = new IBOCacheElement[committedObjects.Count];
-            committedObjects.Values.CopyTo(ll, 0);
-            foreach (IBOCacheElement ce in ll)
+            // Set real references to null for all cached objects.
+            foreach (CommittedObjectsOfType co in committedObjects.Values)
             {
-                ce.Original = null;
-            }
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            foreach (IBOCacheElement ce in ll)
-            {
-                if (ce.IsAlive)
+                IBOCacheElement[] ll = new IBOCacheElement[co.Count];
+                int idx = 0;
+
+                foreach (IBOCacheElement ce in co)
                 {
-                    ce.Original = ce.Target;
+                    ll[idx++] = ce;
+                    ce.Original = null;
                 }
-                else
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+             
+                foreach (IBOCacheElement ce in ll)
                 {
-#if DEBUG
-                    removeCount++;
-#endif
-                    committedObjects.Remove(ce.EntityPOID);
-                    Remove(ce.EntityPOID);
+                    if (ce.IsAlive)
+                    {
+                        ce.Original = ce.Target;
+                    }
+                    else
+                    {
+                        int entityPOID = ce.EntityPOID;
+                        int entityTypePOID = entityToTypeMapping[entityPOID];
+                        committedObjects[entityTypePOID].Remove(entityPOID);
+                        Remove(entityPOID);
+                    }
                 }
+                ll = null;
             }
-            ll = null;
-#if DEBUG
-            Console.WriteLine("IBOCache removed {0} objects.", removeCount);
-            Console.WriteLine("Committed objects now contains {0} elements", committedObjects.Count);
-#endif
         }
 
 
         internal void PrepareForType(int entityTypePOID)
         {
-            //throw new Exception("Not implemented");
+            committedObjects[entityTypePOID] = new CommittedObjectsOfType(entityTypePOID);
         }
 
         /// <summary>
@@ -191,6 +254,10 @@ namespace GenDB
         /// </summary>
         internal void RollbackTransaction()
         {
+            foreach(int i in uncommittedObjects.Keys)
+            {
+                entityToTypeMapping.Remove(i);
+            }
             uncommittedObjects.Clear();
         }
 
@@ -201,16 +268,18 @@ namespace GenDB
         {
             while (uncommittedObjects.Count > 0)
             {
-                Dictionary<long, IBusinessObject> tmpUncomitted = uncommittedObjects;
+                Dictionary<int, IBusinessObject> tmpUncomitted = uncommittedObjects;
 
                 // Make a new uncomitted collection to allow clrtype2translator to add objects to the cache.
-                uncommittedObjects = new Dictionary<long, IBusinessObject>();
+                uncommittedObjects = new Dictionary<int, IBusinessObject>();
 
-                foreach (IBusinessObject ibo in tmpUncomitted.Values)
+                foreach (KeyValuePair<int,  IBusinessObject> kvp in tmpUncomitted)
                 {
-                    IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
+                    int entityTypePOID = entityToTypeMapping[kvp.Key];
+                    IBusinessObject ibo = kvp.Value;
+                    IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(entityTypePOID);
                     trans.SaveToDB(ibo);
-                    AddToCommitted(ibo);
+                    AddToCommitted(entityTypePOID, ibo);
                 }
             }
         }
@@ -222,22 +291,25 @@ namespace GenDB
         /// </summary>
         private void CommitChangedCommitted()
         {
-            foreach (IBOCacheElement ce in committedObjects.Values)
+            foreach (CommittedObjectsOfType co in committedObjects.Values)
             {
-                if (ce.Original.DBIdentity.IsPersistent && ce.IsDirty)
+                foreach (IBOCacheElement ce in co)
                 {
-                    if (ce.IsAlive)
+                    if (ce.Original.DBIdentity.IsPersistent && ce.IsDirty)
                     {
-                        IBusinessObject ibo = ce.Original;
-                        IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
-                        trans.SaveToDB(ibo);
+                        if (ce.IsAlive)
+                        {
+                            IBusinessObject ibo = ce.Original;
+                            IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
+                            trans.SaveToDB(ibo);
 
-                        ce.ClearDirtyBit();
-                    }
-                    else
-                    {
-                        //TODO: Should never happen, but need proper testing....
-                        throw new Exception("Object reclaimed before if was flushed to the DB.");
+                            ce.ClearDirtyBit();
+                        }
+                        else
+                        {
+                            //TODO: Should never happen, but need proper testing....
+                            throw new Exception("Object reclaimed before if was flushed to the DB.");
+                        }
                     }
                 }
             }
@@ -255,6 +327,10 @@ namespace GenDB
             {
                 throw new Exception("Was already set...");
             }
+
+            int entityTypePOID = dataContext.TypeSystem.GetEntityType(ibo.GetType()).EntityTypePOID;
+
+            entityToTypeMapping[entityPOID] = entityTypePOID;
 
             ibo.DBIdentity = new DBIdentifier(entityPOID, true);
 
@@ -278,6 +354,10 @@ namespace GenDB
             {
                 throw new Exception("Something wrong in DBIdentity class.");
             }
+            int entityTypePOID = dataContext.TypeSystem.GetEntityType(ibo.GetType()).EntityTypePOID;
+
+            entityToTypeMapping[ibo.DBIdentity] = entityTypePOID;
+
             uncommittedObjects.Add(ibo.DBIdentity, ibo);
         }
 
@@ -289,15 +369,25 @@ namespace GenDB
         /// the DBTag destructor)
         /// </summary>
         /// <param name="id"></param>
-        internal void Remove(long id)
+        internal void Remove(int id)
         {
             IBOCacheElement obj = null;
             IBusinessObject ibo = null;
-            if (committedObjects.TryGetValue(id, out obj))
+            int entityTypePOID;
+
+            if (!entityToTypeMapping.TryGetValue(id, out entityTypePOID))
+            {
+                return; 
+            }
+            
+            if (committedObjects[entityTypePOID].TryGetValue(id, out obj))
             {
                 ibo = obj.Original;
-                DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
-                obj.Original.DBIdentity = newID;
+                if (ibo != null)
+                {
+                    DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
+                    obj.Original.DBIdentity = newID;
+                }
             }
 
             // Indicate that object is no longer under cache control
@@ -306,6 +396,8 @@ namespace GenDB
                 DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
                 ibo.DBIdentity = newID;
                 uncommittedObjects.Remove(id);
+                entityToTypeMapping.Remove(id);
+
             }
         }
     }

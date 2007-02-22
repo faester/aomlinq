@@ -7,9 +7,9 @@ namespace GenDB
     internal sealed class IBOCacheElement
     {
         WeakReference wr;
-        long entityPOID;
+        int entityPOID;
 
-        public long EntityPOID
+        public int EntityPOID
         {
             get { return entityPOID; }
         }
