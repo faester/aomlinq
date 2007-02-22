@@ -925,7 +925,7 @@ namespace GenDB.DB
 
         public void RollbackTransaction()
         {
-            ClearValueInsertStringBuilders();
+            ClearObjectInsertUpdateCommands();
             ClearCollectionCommands();
         }
 
@@ -980,7 +980,7 @@ namespace GenDB.DB
                 transaction.Commit();
             }
 
-            ClearValueInsertStringBuilders();
+            ClearObjectInsertUpdateCommands();
         }
 
         private void CommitCollections()
@@ -1078,7 +1078,7 @@ namespace GenDB.DB
             sbPropertyInserts = new StringBuilder();
         }
 
-        private void ClearValueInsertStringBuilders()
+        private void ClearObjectInsertUpdateCommands()
         {
             sbEntityInserts = new StringBuilder();
             sbPropertyValueInserts = new StringBuilder();
