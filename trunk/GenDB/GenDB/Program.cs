@@ -169,7 +169,7 @@ namespace GenDB
             Table<Person> tp = dcontext.GetTable<Person>();
             tp.Clear();
             dcontext.SubmitChanges();
-
+            Person myPerson;
             for(int i=0;i<objCount;i++)
             {
                 Person p = new Person{Name = "Name"+i, Age = i};
@@ -183,15 +183,15 @@ namespace GenDB
                     tp.Add(s);
                     p.Spouse = s;
                 }
+                if(i==3) myPerson = s;
                 tp.Add(p);
             }
+            
             dcontext.SubmitChanges();
             char ch0 = 'l';
+            //Person myPerson = new Person{Name = "myPerson", Age = 99};
             var v = from per in tp
-                    //where per.Name.Substring(2) == "ame2"
-                    //where per.Letter  == ch0
-                    //where per.Sex == Sex.NEUTER
-                    where per.Age > 0
+                    where per.Age == per.Age
                     //where (!per.Alive)==false
                     select per;
 

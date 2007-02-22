@@ -342,7 +342,7 @@ namespace QueryToSqlTranslationTests
             var qs = from persons in ttp
                      where persons.Spouse.Spouse.Name != "Name1" && persons.Spouse.Age > 3
                      select persons;
-
+            
             foreach (var person in qs)
             {
                 TestPerson spouse = person.Spouse;
