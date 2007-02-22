@@ -9,30 +9,20 @@ using System.Diagnostics;
 
 namespace GenDB
 {
+
+    /// <summary>
+    /// Keeps track of objects that are both residing in the database and 
+    /// in the application layer.  
+    /// </summary>
     internal class IBOCache
     {
         int MAX_OLD_OBJECTS_TO_KEEP = 1000;
 
-        //private static IBOCache instance = null;
-
-        ///// <summary>
-        ///// Returns the singleton instance of the IBOCache.
-        ///// It is mandatory to run IBOCache.Init(DataContext) before 
-        ///// the first access to the instance, in order to set the 
-        ///// DataContext for the IBOCache.
-        ///// </summary>
-        //public static IBOCache Instance 
-        //{
-        //    get { return instance; }
-        //}
-
-        //public static void Init(DataContext dataContext)
-        //{
-        //    instance = new IBOCache(dataContext);
-        //}
-
-        long retrieved = 0;
-
+        /// <summary>
+        /// Constructor with a parameter specifying which 
+        /// datacontext to use for all other operations.
+        /// </summary>
+        /// <param name="dataContext"></param>
         internal IBOCache(DataContext dataContext)
         {
             this.dataContext = dataContext;
@@ -40,11 +30,9 @@ namespace GenDB
 
         DataContext dataContext;
 
-        public long Retrieved
-        {
-            get { return retrieved; }
-        }
-
+        /// <summary>
+        /// The number of comitted objects stored in the cache.
+        /// </summary>
         internal int CommittedObjectsSize
         {
             get
@@ -53,6 +41,9 @@ namespace GenDB
             }
         }
 
+        /// <summary>
+        /// The number of uncomitted objects stored in the cache.
+        /// </summary>
         internal int UnCommittedObjectsSize
         {
             get { return uncommittedObjects.Count; }
@@ -70,24 +61,22 @@ namespace GenDB
         ///// </summary>
         Dictionary<long, IBusinessObject> uncommittedObjects = new Dictionary<long, IBusinessObject>();
 
-        Dictionary<long, IBusinessObject> oldObjects = new Dictionary<long, IBusinessObject>();
-
-        LinkedList<IBusinessObject> oldObjectsHotlist = new LinkedList<IBusinessObject>();
-
-        private void AddToOldObjects()
-        {
-
-        }
-
+        /// <summary>
+        /// Adds an object to the dictionary of uncomitted objects.
+        /// </summary>
+        /// <param name="obj"></param>
         private void AddToCommitted(IBusinessObject obj)
         {
             IBOCacheElement wr = new IBOCacheElement(obj);
             committedObjects[obj.DBIdentity] = wr;
         }
 
+        /// <summary>
+        /// The total number of objects stored in the cache.
+        /// </summary>
         public int Count
         {
-            get { return committedObjects.Count; }
+            get { return CommittedObjectsSize + UnCommittedObjectsSize; }
         }
 
         /// <summary>
@@ -120,7 +109,6 @@ namespace GenDB
                     obj = wr.Target;
                 }
             }
-            retrieved++;
             return true;
         }
 
@@ -168,7 +156,15 @@ namespace GenDB
 #endif
         }
 
-        public void FlushToDB()
+        /// <summary>
+        /// When a SubmitChanges is called new objects 
+        /// are stored indiscriminately. To ensure database consistency with the 
+        /// application layer a submit will also cause the already stored objects 
+        /// to be compared with their property state when the object was last 
+        /// submitted to the databse. If a state change is found the object is 
+        /// rewritten to the database.
+        /// </summary>
+        public void SubmitChanges()
         {
             CommitUncommitted();
             CommitChangedCommitted();
@@ -179,6 +175,9 @@ namespace GenDB
             dataContext.GenDB.CommitChanges();
         }
 
+        /// <summary>
+        /// Commits all uncomitted objects to the database. 
+        /// </summary>
         private void CommitUncommitted()
         {
             while (uncommittedObjects.Count > 0)
@@ -197,6 +196,11 @@ namespace GenDB
             }
         }
 
+        /// <summary>
+        /// Commits objects that has been comitted once, if at 
+        /// least one of its fields has changed since the last 
+        /// commit.
+        /// </summary>
         private void CommitChangedCommitted()
         {
             foreach (IBOCacheElement ce in committedObjects.Values)
