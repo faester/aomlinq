@@ -4,6 +4,8 @@ using System.Text;
 using GenDB;
 using NUnit.Framework;
 using CommonTestObjects;
+using System.Query;
+using System.Expressions;
 
 namespace QueryToSqlTranslationTests
 {
@@ -13,7 +15,8 @@ namespace QueryToSqlTranslationTests
         private const int ELEMENTS_TO_STORE = 40;
         Table<ContainsAllPrimitiveTypes> tableAllPrimitives = null;
         DataContext dataContext = DataContext.Instance;
-        Table<TestPerson> ttp ;
+        Table<TestPerson> ttp;
+        LinkedList<TestPerson> thePersons;
 
         [TestFixtureTearDown]
         public void FixtureTearDown()
@@ -42,6 +45,7 @@ namespace QueryToSqlTranslationTests
 
         public void InitTableOfPersons()
         {
+            thePersons = new LinkedList<TestPerson>();
             ttp = dataContext.GetTable<TestPerson>();
             TestPerson lastPerson = null;
 
@@ -54,6 +58,7 @@ namespace QueryToSqlTranslationTests
                 tp.Spouse = lastPerson;
                 lastPerson = tp;
                 ttp.Add(tp);
+                thePersons.AddLast(tp);
             }
         }
 
@@ -287,14 +292,38 @@ namespace QueryToSqlTranslationTests
         }
 
         [Test]
+        public void TestDBVsAppTranslation()
+       {
+            foreach(TestPerson p in thePersons)
+            {
+                p.Name = "Knæskade";
+            }
+
+            var ns = from ps in ttp
+                     where ps.Name == "Name1" || ps.Name == "Name2"
+                     select ps;
+
+            foreach(TestPerson p in ns)
+            {
+                Assert.IsTrue(p.Name == "Name1" || p.Name == "Name2", "Error in returned values. Application object has changed state since last commit.");
+            }
+
+       }
+
+        [Test]
         public void TestReferenceFieldPropertyFilter1()
         {
             var qs = from persons in ttp
                      where persons.Spouse.Spouse.Name != "Name1"
                      select persons;
 
+            int realCount = thePersons.Count<TestPerson>(p => p != null && p.Spouse != null && p.Spouse.Spouse != null && p.Spouse.Spouse.Name != "Name1");
+            int count = 0;
+
+
             foreach (var person in qs)
             {
+                count++;
                 TestPerson spouse = person.Spouse;
                 TestPerson spouseSpouse = spouse == null ? null : spouse.Spouse;
 
@@ -304,6 +333,7 @@ namespace QueryToSqlTranslationTests
                 Assert.AreNotEqual("Name1", spouseSpouseName, "Spouse spouse name was ALL WRONG!");
             }
             Assert.IsTrue(qs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
+            Assert.AreEqual(realCount, count, "Wrong number of elements returned.");
         }
  
         [Test]
@@ -353,13 +383,51 @@ namespace QueryToSqlTranslationTests
             Assert.IsTrue(qs.ExprFullySqlTranslatable, "Expression included linq function. This should not be the case.");
         }
 
+        private void PersonRetrieveTest(Func<TestPerson, bool> discriminator)
+        {
+            int trueCount = thePersons.Count<TestPerson>(discriminator);
+            thePersons = null;
+            dataContext.SubmitChanges();
+
+            int count = 0;
+
+            var k = ttp.Where<TestPerson>(discriminator);
+
+            foreach(TestPerson p in k)
+            {
+                Assert.IsTrue(discriminator(p), "Error in returned result");
+                count++;
+            }
+
+            Assert.AreEqual (trueCount, count, "Wrong number of elements returned from table.");
+            Assert.AreNotEqual(0, trueCount, "No tests should have conditions that are not met by any object in the table.");
+        }
+
+        [Test]
+        public void TestReferenceFieldPropertyFilter4()
+        {
+            string testName = "Name3";
+            dataContext.SubmitChanges();
+
+            Func<TestPerson, bool> k = 
+                (TestPerson p) => 
+                    (p.Spouse != null && p.Spouse.Spouse != null && p.Spouse.Spouse.Name == testName) 
+                    || p.Name == testName 
+                    || (p.Spouse != null && p.Spouse.Name == testName);
+
+            PersonRetrieveTest(k);
+        }
+
+
+        
+        
         [Test]
         public void TestReferenceFieldBooleanPropertyFilter()
         {
             var qs_false  = from persons in ttp
                       where persons.Spouse.GoodLooking == false
                       select persons;
-            //Assert.AreEqual(4, qs_false.Count,"there should be 4 ugly bastards out there!!");
+            //Assert.AreEqual(4, qs_false.Count,"there should be 4 ugly bastards out ther!!");
 
             foreach(var person in qs_false)
             {

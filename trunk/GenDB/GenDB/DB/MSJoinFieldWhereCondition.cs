@@ -81,6 +81,7 @@ namespace GenDB.DB
         {
             get {
                 string res = wherePart.ToString();
+                Console.WriteLine(res);
                 return wherePart.ToString();
             }
         }

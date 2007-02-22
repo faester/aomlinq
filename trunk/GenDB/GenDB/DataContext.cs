@@ -72,10 +72,12 @@ namespace GenDB
             {
                 throw new Exception("Database already up running.");
             }
+            iboCache = new IBOCache(this);
+
             typeSystem = new TypeSystem (this);
             typeSystem.Init();
              
-            iboCache = new IBOCache(this);
+            
             isInitialized = true;
         }
 

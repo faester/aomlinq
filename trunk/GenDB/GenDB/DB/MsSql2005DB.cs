@@ -1286,10 +1286,9 @@ namespace GenDB.DB
                 "	DECLARE @idx AS BIGINT" +
                 "	DECLARE @nbep AS BIGINT" +
                 "	DECLARE @propertyPOID AS BIGINT" +
-
                 "	SET @idx = CHARINDEX('.', @ls)  " +
                 "	SET @propertyPOID = CAST (SUBSTRING(@ls, 1, @idx - 1) AS BIGINT)" +
-                "	SELECT @nbep = LongValue FROM PropertyValue WHERE PropertyPOID = @propertyPOID AND EntityPOID = @bep" +
+                "	SELECT @nbep = ReferenceValue FROM PropertyValue WHERE PropertyPOID = @propertyPOID AND EntityPOID = @bep" +
                 "	IF @nbep IS NULL " +
                 "		SET @res = NULL" +
                 "	ELSE" +
@@ -1304,7 +1303,7 @@ namespace GenDB.DB
                 "		BEGIN" +
                 "			SET @res = @nbep" +
                 "		END" +
-                "		RETURN @res" +
+                "		RETURN @res " +
                 " END ";
 
             ExecuteNonQueries(new string[] { cmdStr }, cnn, t);
