@@ -1297,7 +1297,6 @@ namespace GenDB.DB
                 "			DECLARE @nls AS VARCHAR(8000)" +
                 "			SET @nls = SUBSTRING(@ls, @idx + 1, LEN(@ls) - (@idx))" +
                 "			RETURN dbo.fn_lookup_EntityPOID(@nbep, @nls)" +
-                "			SET @res = dbo.fn_lookup_EntityPOID(@nbep, @nls)" +
                 "		END" +
                 "		ELSE" +
                 "		BEGIN" +

@@ -6,28 +6,42 @@ CREATE FUNCTION dbo.fn_lookup_EntityPOID
 RETURNS BIGINT
 AS
 BEGIN
-	DECLARE @res AS BIGINT
-	DECLARE @idx AS BIGINT
-	DECLARE @nbep AS BIGINT
-	DECLARE @propertyPOID AS BIGINT
+	-- This SQL-function takes a dot-separated string (@ls) describing which 
+	-- properties to follow, to obtain a given value. 
+	-- The form is x.y.z.end
+	-- where x, y and z denotes reference type properties.
+	-- The function is evaluated to a base entitypoid @bep, 
+	-- such that it will recursively lookup the ReferenceValue of
+	-- property x for Entity @bep. If this value differs from null
+	-- a new call will be made where x <- @bep and @ls = 'y.z.end'
+	-- When the end of string ('end' here, but could also just be 
+	-- a dot), the found entityPOID (ReferenceValue) will be returned.
+	
+	-- The function is ment to be used in conjunction with an enclosing
+	-- query, that looks up the value of the entitypoid returned from 
+	-- the function.
+
+	DECLARE @res AS BIGINT -- The result
+	DECLARE @idx AS BIGINT  -- String index of first '.' in @ls
+	DECLARE @nbep AS BIGINT -- New Base Entity Poid.
+	DECLARE @propertyPOID AS BIGINT -- ID of property to look up ReferenceValue in
 
 	SET @idx = CHARINDEX('.', @ls)  
 	SET @propertyPOID = CAST (SUBSTRING(@ls, 1, @idx - 1) AS BIGINT)
 	SELECT @nbep = ReferenceValue FROM PropertyValue WHERE PropertyPOID = @propertyPOID AND EntityPOID = @bep
 	IF @nbep IS NULL 
-		SET @res = NULL
+		SET @res = NULL -- Property contained a null value. Set null as return value
 	ELSE
-		IF @ls LIKE '%.%.%' 
+		IF @ls LIKE '%.%.%' -- Test if more properties exists and recursion should continue
 		BEGIN
-			DECLARE @nls AS VARCHAR(8000)
-			SET @nls = SUBSTRING(@ls, @idx + 1, LEN(@ls) - (@idx))
-			RETURN dbo.fn_lookup_EntityPOID(@nbep, @nls)
-			SET @res = dbo.fn_lookup_EntityPOID(@nbep, @nls)
+			DECLARE @nls AS VARCHAR(8000) -- New @ls for next recursive call
+			SET @nls = SUBSTRING(@ls, @idx + 1, LEN(@ls) - (@idx)) -- Strip leading '%.'
+			RETURN dbo.fn_lookup_EntityPOID(@nbep, @nls)  -- Return recursive value
 		END
 		ELSE
 		BEGIN
-			SET @res = @nbep
+			SET @res = @nbep -- We are done parsing the string
 		END
 		
-		RETURN @res
+	RETURN @res
 END
