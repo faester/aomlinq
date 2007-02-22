@@ -160,7 +160,7 @@ namespace GenDB
 
         public void SubmitChanges()
         {
-            iboCache.FlushToDB();
+            iboCache.SubmitChanges();
         }
 
         public void RollbackTransaction()
