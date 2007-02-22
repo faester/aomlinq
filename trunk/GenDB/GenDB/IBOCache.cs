@@ -176,6 +176,17 @@ namespace GenDB
         }
 
         /// <summary>
+        /// Removes objects added to the cache since last commit. 
+        /// When objects are retrieved from the database they are stored
+        /// in the list of committed objects, so state changes in those
+        /// objects will still be tracked, if submit is invoked later on.
+        /// </summary>
+        internal void RollbackTransaction()
+        {
+            uncommittedObjects.Clear();
+        }
+
+        /// <summary>
         /// Commits all uncomitted objects to the database. 
         /// </summary>
         private void CommitUncommitted()
@@ -242,14 +253,15 @@ namespace GenDB
             uncommittedObjects.Add(entityPOID, ibo);
         }
 
+        
 
         /// <summary>
         /// When the db reads in a new object, it should be stored in the
         /// cache, but not be put in the UnCommittedObjects dictionary, since
-        /// all changes are persisted. 
+        /// all objects in this list are persisted. 
         /// 
         /// We also assume that this method is only called from the db, why the 
-        /// id part of the identity should be set correctly.
+        /// id part of the identity should be set before this method is invoked.
         /// </summary>
         /// <param name="ibo"></param>
         internal void AddFromDB(IBusinessObject ibo)
