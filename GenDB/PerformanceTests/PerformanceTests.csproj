@@ -67,6 +67,8 @@
   <ItemGroup>
     <Compile Include="Interface1.cs" />
     <Compile Include="JustRead.cs" />
+    <Compile Include="PerfPerson.cs" />
+    <Compile Include="PerfPersonTest.cs" />
     <Compile Include="PerfTestAllPrimitiveTypes.cs" />
     <Compile Include="DLinqWriteTest.cs" />
     <Compile Include="ExcelWriter.cs" />

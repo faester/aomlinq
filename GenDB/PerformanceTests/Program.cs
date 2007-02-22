@@ -12,6 +12,9 @@ namespace PerformanceTests
     {
         public static void Main(string[] args)
         {
+            args = new String[]{"G","R","20","30","400"};
+            
+
             ITest theTest = null;
             ReadWriteClearTest dbtest = null;
             string dbSystem = "G";
@@ -99,6 +102,7 @@ namespace PerformanceTests
             }
 
             theTest.PerformTest();
+
         }
     }
 }
