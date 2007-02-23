@@ -12,7 +12,12 @@ namespace PerformanceTests
     {
         public static void Main(string[] args)
         {
-            args = new String[]{"G","R","20","30","400"};
+            if (args.Length == 0)
+            {
+                Console.WriteLine("No parameters specified. Using 'G R 20 30 400'");
+                Console.WriteLine("Use /? to get help");
+                args = new String[] { "G", "R", "20", "30", "400" };
+            }
             
 
             ITest theTest = null;
