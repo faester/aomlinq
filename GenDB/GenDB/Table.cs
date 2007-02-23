@@ -8,11 +8,15 @@ using GenDB.DB;
 
 namespace GenDB
 {
-    // IQueryable<T>,
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum TransactionLevel { DBConsistency, CacheChecking };
 
     public class Table<T> :  ICollection<T>, IEnumerable<T>, ICloneable
         where T : IBusinessObject
     {
+        TransactionLevel tLevel = TransactionLevel.DBConsistency;
         IExpression expression = new ExprInstanceOf(typeof(T));
         IGenericDatabase db = null;
         TranslatorSet translators = null;
@@ -46,6 +50,12 @@ namespace GenDB
             {
                 typeSystem.RegisterType(typeof(T));
             }
+        }
+
+        internal Table(IGenericDatabase db, TranslatorSet translators, TypeSystem ts, IBOCache iboCache, TransactionLevel tLevel)
+            : this(db, translators, ts, iboCache)
+        {
+            this.tLevel = tLevel;
         }
         #endregion
 
@@ -184,19 +194,29 @@ namespace GenDB
 
         public System.Collections.Generic.IEnumerator<T> GetEnumerator()
         {
+            if (linqFunc == null)
+            {
+                return UnFilteredEnumerator();
+            }
+            else
+            {
+                return LinqFilteredEnumerator();
+            }
+        }
+
+        private System.Collections.Generic.IEnumerator<T> LinqFilteredEnumerator()
+        {
             foreach (T e in db.Where(expression))
             {
-                if (exprFullySqlTranslatable)
-                {
-                    yield return e;
-                }
-                else
-                {
-                    if (linqFunc(e))
-                    {
-                        yield return e;
-                    }
-                }
+                if (linqFunc(e)) { yield return e; }
+            }
+        }
+
+        private System.Collections.Generic.IEnumerator<T> UnFilteredEnumerator()
+        {
+            foreach (T e in db.Where(expression))
+            {
+                yield return e;
             }
         }
 
@@ -218,25 +238,41 @@ namespace GenDB
             IExpression sqlExpr = new ExprAnd( exprTranslator.Convert (expr), this.expression);
             checker.StartVisit(sqlExpr);
             res.expression = sqlExpr;
-            
-            res.exprFullySqlTranslatable = (!checker.HasModifiedExpression) && this.exprFullySqlTranslatable;
-            if (!res.exprFullySqlTranslatable)
+
+            Func<T, bool> f = expr.Compile();
+            if (linqFunc != null)
             {
-                if (!this.exprFullySqlTranslatable)
-                {
-                    Func<T, bool> f = expr.Compile();
-                    Func<T, bool> andedFunc = delegate(T element) { return linqFunc(element) && f(element); };
-                    res.linqFunc = andedFunc;
-                }
-                else
-                {
-                    res.linqFunc = expr.Compile();
-                }
+                Func<T, bool> andedFunc = delegate(T element) { return linqFunc(element) && f(element); };
+                res.linqFunc = andedFunc;
             }
             else
             {
-                res.linqFunc = null;
+                res.linqFunc = f;
             }
+
+            if (checker.HasModifiedExpression)
+            {
+                res.exprFullySqlTranslatable = false;
+            }
+
+            //res.exprFullySqlTranslatable = (!checker.HasModifiedExpression) && this.exprFullySqlTranslatable;
+            //if (!res.exprFullySqlTranslatable)
+            //{
+            //    if (!this.exprFullySqlTranslatable)
+            //    {
+            //        Func<T, bool> f = expr.Compile();
+            //        Func<T, bool> andedFunc = delegate(T element) { return linqFunc(element) && f(element); };
+            //        res.linqFunc = andedFunc;
+            //    }
+            //    else
+            //    {
+            //        res.linqFunc = expr.Compile();
+            //    }
+            //}
+            //else
+            //{
+            //    res.linqFunc = null;
+            //}
 
             return res;
         }
@@ -298,6 +334,7 @@ namespace GenDB
             clone.iboCache = this.iboCache;
             clone.expression = this.expression;
             clone.linqFunc = this.linqFunc;
+            clone.tLevel = this.tLevel;
 
             return clone;
         }
