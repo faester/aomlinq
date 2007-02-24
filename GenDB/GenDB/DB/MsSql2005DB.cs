@@ -145,7 +145,7 @@ namespace GenDB.DB
         /// </summary>
         public void CreateDatabase()
         {
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
+            using (SqlConnection cnn = dataContext.CreateServerConnection())
             {
                 cnn.Open();
                 try
@@ -162,7 +162,7 @@ namespace GenDB.DB
                 }
             }
 
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
+            using (SqlConnection cnn = dataContext.CreateDBConnection())
             {
                 cnn.Open();
                 SqlTransaction transaction = null;
@@ -198,7 +198,7 @@ namespace GenDB.DB
         /// <returns></returns>
         public bool DatabaseExists()
         {
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
+            using (SqlConnection cnn = dataContext.CreateServerConnection())
             {
                 cnn.Open();
 
@@ -224,7 +224,7 @@ namespace GenDB.DB
         /// </summary>
         public void DeleteDatabase()
         {
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithoutDBName))
+            using (SqlConnection cnn = dataContext.CreateServerConnection())
             {
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand("DROP DATABASE " + dataContext.DatabaseName, cnn);
@@ -267,7 +267,7 @@ namespace GenDB.DB
         {
             LinkedList<IPropertyType> res = new LinkedList<IPropertyType>();
 
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
+            using (SqlConnection cnn = dataContext.CreateDBConnection())
             {
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand("SELECT Name, PropertyTypePOID, MappingType FROM " + TB_PROPERTYTYPE_NAME, cnn);
@@ -302,7 +302,7 @@ namespace GenDB.DB
             )
         {
             Dictionary<int, IProperty> res = new Dictionary<int, IProperty>();
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
+            using (SqlConnection cnn = dataContext.CreateDBConnection())
             {
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand("SELECT PropertyName, PropertyPOID, PropertyTypePOID, EntityTypePOID FROM " + TB_PROPERTY_NAME, cnn);
@@ -332,7 +332,7 @@ namespace GenDB.DB
         private Dictionary<int, IEntityType> RawEntityTypes()
         {
             Dictionary<int, IEntityType> res = new Dictionary<int, IEntityType>();
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
+            using (SqlConnection cnn = dataContext.CreateDBConnection())
             {
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand(
@@ -397,87 +397,15 @@ namespace GenDB.DB
 
         private IBusinessObject Get(int entityPOID)
         {
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
+            IExpression clause = new BoolEquals(new CstLong(entityPOID), CstThis.Instance);
+
+            IEnumerable<IBusinessObject> iter = new FieldsAsTuplesIterator(dataContext, clause);
+
+            foreach(IBusinessObject ibo in iter)
             {
-                cnn.Open();
-
-                SqlCommand cmd = new SqlCommand(
-                    "SELECT " +
-                    "    e.EntityTypePOID, " + // 0
-                    "    PropertyPOID, " + // 1
-                    "    LongValue, " + // 2
-                    "    BoolValue, " + // 3x
-                    "    StringValue, " + // 4
-                    "    DoubleValue, " + // 5
-                    "    e.EntityPOID, " + // 6
-                    "    ReferenceValue " + // 7
-                    " FROM Entity e LEFT JOIN PropertyValue pv ON e.EntityPOID = pv.EntityPOID" +
-                    " WHERE e.EntityPOID = " + entityPOID +
-                    " ORDER BY e.EntityPOID"
-                    );
-
-                cmd.Connection = cnn;
-                cmd.CommandTimeout = dataContext.CommandTimeout;
-                SqlDataReader reader = cmd.ExecuteReader();
-                IEntityType iet = null;
-                IIBoToEntityTranslator translator = null;
-                IBusinessObject result = null;
-                int propertyPOID = 0;
-                int entityTypePOID = 0;
-                bool firstPass = true;
-
-                while (reader.Read())
-                {
-                    if (firstPass)
-                    {
-                        entityPOID = reader.GetInt32(6);
-                        entityTypePOID = reader.GetInt32(0);
-                        if (dataContext.IBOCache.TryGet(entityPOID, out result))
-                        {
-                            return result;
-                        }
-                        else 
-                        {
-                            translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
-                            iet = DataContext.Instance.TypeSystem.GetEntityType(entityTypePOID);
-
-                            result = translator.CreateInstanceOfIBusinessObject();
-                            result.DBIdentity = new DBIdentifier(entityPOID, true);
-                            this.dataContext.IBOCache.AddFromDB(result);
-                        }
-                    }
-
-                    if (reader[1] != DBNull.Value) // Does any properties exist?
-                    {
-                        propertyPOID = reader.GetInt32(1);
-                        object value = null;
-                        switch (iet.GetProperty(propertyPOID).MappingType)
-                        {
-                            case MappingType.BOOL: value = reader.GetBoolean(3); break;
-                            case MappingType.DATETIME: value = new DateTime(reader.GetInt64(2)); break;
-                            case MappingType.DOUBLE: value = reader.GetDouble(5); break;
-                            case MappingType.LONG: value = reader.GetInt64(2); break;
-                            case MappingType.REFERENCE:
-                                if (reader[7] == DBNull.Value)
-                                {
-                                    value = null;
-                                    break;
-                                }
-                                else
-                                {
-                                    value = reader.GetInt32(7);
-                                    break;
-                                }
-                            case MappingType.STRING: value = reader.GetString(4); break;
-                            default: throw new Exception("Could not translate the property value.");
-                        } // switch
-                        translator.SetProperty(propertyPOID, result, value);
-                    } // if
-                    firstPass = false;
-                } // while
-                if (!reader.IsClosed) { reader.Close(); }
-                return result;
+                return ibo;
             }
+            return null;
         }
 
         public int Count(IWhereable expression)
@@ -490,7 +418,7 @@ namespace GenDB.DB
 #endif
             int res = 0;
 
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
+            using (SqlConnection cnn = dataContext.CreateDBConnection())
             {
                 cnn.Open();
 
@@ -526,116 +454,9 @@ namespace GenDB.DB
             }
             else
             {
-                MSEntityPOIDListBuilder mswsb = new MSEntityPOIDListBuilder(dataContext.TypeSystem);
-                mswsb.Reset();
-                mswsb.Visit(expression);
-                string whereStr = mswsb.WhereStr;
-                return Where(whereStr);
+                return new FieldsAsTuplesIterator(dataContext, expression);
             }
         }
-
-        private IEnumerable<IBusinessObject> Where(string entityPoidListQuery)
-        {
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
-            {
-                cnn.Open();
-
-                SqlCommand cmd = new SqlCommand(
-                    "SELECT " +
-                    "    e.EntityTypePOID, " + // 0
-                    "    PropertyPOID, " + // 1
-                    "    LongValue, " + // 2
-                    "    BoolValue, " + // 3x
-                    "    StringValue, " + // 4
-                    "    DoubleValue, " + // 5
-                    "    e.EntityPOID, " + // 6
-                    "    ReferenceValue " + // 7
-                    " FROM Entity e INNER JOIN (" + 
-                    entityPoidListQuery +
-                    ") ew ON ew.EntityPOID = e.EntityPOID " +
-                    " LEFT JOIN PropertyValue pv ON pv.EntityPOID = e.EntityPOID " 
-                    + " ORDER BY e.EntityPOID "
-                    , cnn);
-
-                cmd.Connection = cnn;
-                cmd.CommandTimeout = dataContext.CommandTimeout;
-                SqlDataReader reader = cmd.ExecuteReader();
-                IEntityType iet = null;
-                IIBoToEntityTranslator translator = null;
-                IBusinessObject result = null;
-                int propertyPOID = 0;
-                int entityTypePOID = 0;
-                int oldEntityTypePOID = entityTypePOID + 1; // Must be different
-                int entityPOID = 0;
-                int oldEntityPOID = entityPOID + 1; // Must be different
-                bool firstPass = true;
-                bool returnCachedCopy = false;
-
-                while (reader.Read())
-                {
-                    entityPOID = reader.GetInt32(6);
-                    if (entityPOID != oldEntityPOID || firstPass)
-                    {
-                        entityTypePOID = reader.GetInt32(0);
-                        if (entityTypePOID != oldEntityTypePOID || firstPass)
-                        {
-                            translator = DataContext.Instance.Translators.GetTranslator(entityTypePOID);
-                            iet = DataContext.Instance.TypeSystem.GetEntityType(entityTypePOID);
-                            oldEntityTypePOID = entityTypePOID;
-                        } // if
-                        if (result != null)
-                        {
-                            yield return result;
-                        }
-
-                        returnCachedCopy = dataContext.IBOCache.TryGet(entityPOID, out result);
-                        if (!returnCachedCopy)
-                        {
-                            result = translator.CreateInstanceOfIBusinessObject();
-                            result.DBIdentity = new DBIdentifier(entityPOID, true);
-                            this.dataContext.IBOCache.AddFromDB(result);
-                        }
-
-                        oldEntityPOID = entityPOID;
-                    } // if
-                    if (!returnCachedCopy && reader[1] != DBNull.Value) // Does any properties exist?
-                    {
-                        propertyPOID = (int)reader[1];
-                        object value = null;
-                        switch (iet.GetProperty(propertyPOID).MappingType)
-                        {
-                            case MappingType.BOOL: value = reader.GetBoolean(3); break;
-                            case MappingType.DATETIME: value = new DateTime(reader.GetInt64(2)); break;
-                            case MappingType.DOUBLE: value = reader.GetDouble(5); break;
-                            case MappingType.LONG: value = reader.GetInt64(2); break;
-                            case MappingType.REFERENCE:
-                                if (reader[7] == DBNull.Value)
-                                {
-                                    value = null;
-                                    break;
-                                }
-                                else
-                                {
-                                    value = reader.GetInt32(7);
-                                    break;
-                                }
-                            case MappingType.STRING: value = reader.GetString(4); break;
-                            default: throw new Exception("Could not translate the property value.");
-                        } // switch
-                        translator.SetProperty(propertyPOID, result, value);
-                    } // if
-                    firstPass = false;
-                } // while
-
-                if (!reader.IsClosed) { reader.Close(); }
-
-                if (result != null)
-                {
-                    yield return result;
-                }
-            }
-        }
-
 
         public IEnumerable<IGenCollectionElement> AllElements(int collectionEntityPOID)
         {
@@ -655,7 +476,7 @@ namespace GenDB.DB
 
             LinkedList<IGenCollectionElement> res = new LinkedList<IGenCollectionElement>();
 
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
+            using (SqlConnection cnn = dataContext.CreateDBConnection())
             {
                 cnn.Open();
                 string sqlStr = "SELECT ElementID, LongValue, BoolValue, StringValue, DoubleValue FROM " + TB_COLLECTION_ELEMENT_NAME + " WHERE EntityPOID = " + collectionEntityPOID.ToString();
@@ -889,7 +710,7 @@ namespace GenDB.DB
         public void CommitTypeChanges()
         {
             SqlCommand cmd = new SqlCommand();
-            using (SqlConnection cnn =  new SqlConnection(dataContext.ConnectStringWithDBName))
+            using (SqlConnection cnn =   dataContext.CreateDBConnection())
             {
                 cnn.Open();
                 SqlTransaction transaction = cnn.BeginTransaction();
@@ -947,7 +768,7 @@ namespace GenDB.DB
 
             SqlCommand cmd = new SqlCommand();
 
-            using (SqlConnection cnn =  new SqlConnection(dataContext.ConnectStringWithDBName))
+            using (SqlConnection cnn = dataContext.CreateDBConnection())
             {
                 cnn.Open();
                 cmd.Connection = cnn;
@@ -989,7 +810,7 @@ namespace GenDB.DB
             if (collectionKeyOperationCount > 0) { CollectionKeyStringBuilderToLL(); }
             SqlCommand cmd = new SqlCommand();
 
-            using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
+            using (SqlConnection cnn =  dataContext.CreateDBConnection())
             {
                 cnn.Open();
                 cmd.Connection = cnn;
@@ -1048,7 +869,7 @@ namespace GenDB.DB
         {
             if (DatabaseExists())
             {
-                using (SqlConnection cnn = new SqlConnection(dataContext.ConnectStringWithDBName))
+                using (SqlConnection cnn =  dataContext.CreateDBConnection())
                 {
                     cnn.Open();
                     SqlCommand cmd = new SqlCommand();

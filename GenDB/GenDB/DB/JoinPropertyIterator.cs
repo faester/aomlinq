@@ -182,7 +182,7 @@ namespace GenDB.DB
             this.whereCondition = whereCondition;
             this.dataContext = dataContext;
             //cnn = ConnectionPool.NextConnection();
-            cnn = new SqlConnection(dataContext.ConnectStringWithDBName);
+            cnn = dataContext.CreateDBConnection();
             cnn.Open();
             wsb = new MSJoinFieldWhereCondition(dataContext.TypeSystem);
             wsb.Visit(whereCondition);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using GenDB.DB;
+using System.Data.SqlClient;
 
 namespace GenDB
 {
@@ -144,22 +145,31 @@ namespace GenDB
             set { commandTimeout = value; }
         }
 
-
         string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI;connection timeout=0";
 
-        internal string ConnectStringWithDBName
+        //internal string ConnectStringWithDBName
+        //{
+        //    get { return connectStringWithDBName; }
+        //    set { connectStringWithDBName = value; }
+        //}
+
+        internal SqlConnection CreateDBConnection()
         {
-            get { return connectStringWithDBName; }
-            set { connectStringWithDBName = value; }
+            return new SqlConnection(connectStringWithDBName);
+        }
+
+        internal SqlConnection CreateServerConnection()
+        {
+            return new SqlConnection(connectStringWithoutDBName);
         }
 
         string connectStringWithoutDBName = "server=(local);Integrated Security=SSPI;connection timeout=0";
 
-        internal string ConnectStringWithoutDBName
-        {
-            get { return connectStringWithoutDBName; }
-            set { connectStringWithoutDBName = value; }
-        }
+        //internal string ConnectStringWithoutDBName
+        //{
+        //    get { return connectStringWithoutDBName; }
+        //    set { connectStringWithoutDBName = value; }
+        //}
 
         string dbname = "generic";
 

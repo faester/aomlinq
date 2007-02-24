@@ -120,7 +120,7 @@ namespace GenDB
         /// <returns></returns>
         public bool Contains(T e)
         {
-            if (e == null) { return false;}
+            if (e == null) { return false; }
             if (e.DBIdentity == 0) { return false; }
             IExpression where = new BoolEquals(new VarReference(e), CstThis.Instance);
             foreach (T ibo in db.Where(where))

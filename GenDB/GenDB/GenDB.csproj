@@ -71,6 +71,7 @@
     <Compile Include="DBIdentifier.cs" />
     <Compile Include="DB\Entity.cs" />
     <Compile Include="DB\EntityType.cs" />
+    <Compile Include="DB\FieldsAsTuplesIterator.cs" />
     <Compile Include="DB\GenCollectionElement.cs" />
     <Compile Include="DB\JoinPropertyIterator.cs" />
     <Compile Include="DB\MSJoinFieldWhereCondition.cs" />
