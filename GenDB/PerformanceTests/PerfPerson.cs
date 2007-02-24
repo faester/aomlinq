@@ -12,37 +12,49 @@ namespace PerformanceTests
         static Random rand = new Random(0);
 
         DBIdentifier entityPOID;
-        public DBIdentifier DBIdentity {
+        public DBIdentifier DBIdentity 
+        {
             get{return entityPOID;}
             set{entityPOID = value;}
         }
         
-        int id = rand.Next(10000);
+        long id = rand.Next(10000);
         [Column(Id = true, AutoGen=true), Volatile]
-        public int Id {
+        public long Id 
+        {
             get{return id;}
             set{id = value;}
         }
-        
+
         string name;
         [Column]
-        public string Name {
+        public string Name 
+        {
             get{return name;}
             set{name = value;}
         }
 
-        BOList<string> aliases;
+        PerfPerson spouse;
         [Column]
-        public BOList<string> Aliases {
-            get{return aliases;}
-            set{aliases = value;}
+        public PerfPerson Spouse
+        {
+            get{return spouse;}
+            set{spouse = value;}
         }
+        
+        //public BOList<string> aliases = new BOList<string>();
+        //[Column]
+        //public BOList<string> Aliases {
+        //    get{return aliases;}
+        //    set{aliases = value;}
+        //}
 
-        BODictionary<int, PerfPerson> friends;
-        [Column]
-        public BODictionary<int, PerfPerson> Friends {
-            get{return friends;}
-            set{friends = value;}
-        }
+        //BODictionary<long, PerfPerson> friends = new BODictionary<long,PerfPerson>();
+        //[Column]
+        //public BODictionary<long, PerfPerson> Friends {
+        //    get{return friends;}
+        //    set{friends = value;}
+        //}
+
     }
 }

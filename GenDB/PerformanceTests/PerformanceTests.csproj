@@ -65,10 +65,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DLinqPerfPersonTest.cs" />
+    <Compile Include="GenDBPerfPersonTest.cs" />
     <Compile Include="Interface1.cs" />
     <Compile Include="JustRead.cs" />
     <Compile Include="PerfPerson.cs" />
-    <Compile Include="PerfPersonTest.cs" />
     <Compile Include="PerfTestAllPrimitiveTypes.cs" />
     <Compile Include="DLinqWriteTest.cs" />
     <Compile Include="ExcelWriter.cs" />
@@ -108,8 +109,11 @@
       <Name>GenDB</Name>
     </ProjectReference>
   </ItemGroup>
-  <!--  <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" /> -->
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
+  </ItemGroup>
+  <Import Project="$(ProgramFiles)\LINQ Preview\Misc\Linq.targets" />
+  <!-- <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" /> -->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

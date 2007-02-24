@@ -15,6 +15,10 @@ namespace PerformanceTests
         long PerformAllTests(int objectCount);
         long PerformWriteTest(int objectCount);
         long PerformReadTest(int objectCount);
+        long PerformSimpleSelectTest(int objectCount);
+        long PerformCompositeSelectTest(int objectCount);
+        long PerformJoinedSelectTest(int objectCount);
+        long PerformSubSelectTest(int objectCount);
         long PerformClearTest();
     }
 }

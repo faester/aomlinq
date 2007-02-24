@@ -95,10 +95,11 @@ namespace GenDB
 
         PropertyValueSetter CreateSetter(IProperty p)
         {
-             switch (p.MappingType)
+            switch (p.MappingType)
             {
                 case MappingType.BOOL:
-                    return delegate(IEntity e, object value) {
+                    return delegate(IEntity e, object value)
+                    {
                         e.GetPropertyValue(p).BoolValue = Convert.ToBoolean(value);
                     };
                 case MappingType.DATETIME:
@@ -106,9 +107,9 @@ namespace GenDB
                     {
                         e.GetPropertyValue(p).DateTimeValue = Convert.ToDateTime(value);
                     };
-                case MappingType.DOUBLE: 
+                case MappingType.DOUBLE:
                     return delegate(IEntity e, object value)
-                    { 
+                    {
                         e.GetPropertyValue(p).DoubleValue = Convert.ToDouble(value);
                     };
                 case MappingType.LONG:
@@ -130,7 +131,7 @@ namespace GenDB
                         {
                             IEntity refered = dataContext.GenDB.NewEntity();
                             dataContext.IBOCache.Add(ibo, refered.EntityPOID);
-                            IBOReference reference = new IBOReference (ibo.DBIdentity);
+                            IBOReference reference = new IBOReference(ibo.DBIdentity);
                             e.GetPropertyValue(p).RefValue = reference;
                         }
                         else
@@ -151,22 +152,22 @@ namespace GenDB
 
         private PropertySetter CreatePropertySetter(PropertyInfo propInfo)
         {
-            if ((propInfo.PropertyType.IsByRef || propInfo.PropertyType.IsClass) 
+            if ((propInfo.PropertyType.IsByRef || propInfo.PropertyType.IsClass)
                 && !(propInfo.PropertyType == typeof(string) || propInfo.PropertyType == typeof(DateTime))
                 )
             { // Handles references other than string and DateTime
                 return delegate(IBusinessObject ibo, object value)
                 {
-                    if (value == DBNull.Value || value == null) 
+                    if (value == DBNull.Value || value == null)
                     {
                         propertySetHandler(ibo, null);
                         return;
                     }
 
-                    int refEntityPOID = ((IConvertible) value).ToInt32(null);
+                    int refEntityPOID = ((IConvertible)value).ToInt32(null);
 
                     IBusinessObject iboVal = null;
-                    
+
                     if (this.dataContext.IBOCache.TryGet(refEntityPOID, out iboVal))
                     {
                         propertySetHandler(ibo, iboVal);
@@ -185,14 +186,14 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {
-                    propertySetHandler(ibo, ((IConvertible) value).ToInt64(null));
+                    propertySetHandler(ibo, ((IConvertible)value).ToInt64(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(int))
             {
-                return delegate(IBusinessObject ibo, object value) 
+                return delegate(IBusinessObject ibo, object value)
                 {
-                    propertySetHandler(ibo, ((IConvertible) value).ToInt32(null));
+                    propertySetHandler(ibo, ((IConvertible)value).ToInt32(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(string))
@@ -211,15 +212,16 @@ namespace GenDB
             }
             else if (propInfo.PropertyType == typeof(bool))
             {
-                return delegate(IBusinessObject ibo, object value) 
+                return delegate(IBusinessObject ibo, object value)
                 {
                     propertySetHandler(ibo, Convert.ToBoolean(value));
                 };
             }
             else if (propInfo.PropertyType == typeof(char))
             {
-                return delegate(IBusinessObject ibo, object value) {  //
-                    propertySetHandler(ibo, ((IConvertible) value).ToChar(null));
+                return delegate(IBusinessObject ibo, object value)
+                {  //
+                    propertySetHandler(ibo, ((IConvertible)value).ToChar(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(float))
@@ -233,17 +235,17 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    propertySetHandler(ibo, ((IConvertible) value).ToDouble(null));
+                    propertySetHandler(ibo, ((IConvertible)value).ToDouble(null));
                 };
             }
             else if (propInfo.PropertyType.IsEnum)
             {
-                return delegate (IBusinessObject ibo, object value)
+                return delegate(IBusinessObject ibo, object value)
                 {
                     // Oversætter til array indeholdende alle mulige værdier for den pågældende enum.
                     // Dernæst vælges værdien gemt index Long-feltet index den pågældende PropertyValue record.
-                    System.Collections.IList vals =  (System.Collections.IList) Enum.GetValues(propInfo.PropertyType);
-                    propertySetHandler(ibo,  vals[Convert.ToInt32(value)]);
+                    System.Collections.IList vals = (System.Collections.IList)Enum.GetValues(propInfo.PropertyType);
+                    propertySetHandler(ibo, vals[Convert.ToInt32(value)]);
                     //return Enum.GetValues (propInfo.PropertyType). ((int)ie.GetPropertyValue(prop).LongValue);
                 };
             }
@@ -251,17 +253,17 @@ namespace GenDB
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    propertySetHandler(ibo, ((IConvertible) value).ToInt16(null));
+                    propertySetHandler(ibo, ((IConvertible)value).ToInt16(null));
                 };
             }
             else if (propInfo.PropertyType == typeof(uint))
             {
                 return delegate(IBusinessObject ibo, object value)
                 {  //
-                    propertySetHandler(ibo, ((IConvertible) value).ToUInt32(null));
+                    propertySetHandler(ibo, ((IConvertible)value).ToUInt32(null));
                 };
             }
-            else 
+            else
             {
                 throw new NotTranslatableException("Have not implemented PropertySetter for field type.", propInfo);
             }
