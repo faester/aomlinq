@@ -95,5 +95,25 @@ namespace PerformanceTests
             long ms = sw.ElapsedMilliseconds;
             return ms;
         }
+
+        public long PerformSimpleSelectTest(int objectCount)
+        {
+            return 0;
+        }
+
+        public long PerformCompositeSelectTest(int objectCount)
+        {
+            return 0;
+        }
+
+        public long PerformJoinedSelectTest(int objectCount)
+        {
+            return 0;
+        }
+
+        public long PerformSubSelectTest(int objectCount) 
+        {
+            return 0;
+        }
     }
 }

@@ -27,6 +27,7 @@ namespace GenDB
         {
             //throw new Exception("not implemented");
             Type t = ibo.GetType();
+            
             if (!t.IsGenericType || t.GetGenericTypeDefinition() != TypeOfBODictionary )
             {
                 throw new NotTranslatableException("Internal error: BOListTranslator can not translate Type ", ibo.GetType());

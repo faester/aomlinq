@@ -7,7 +7,7 @@ using GenDB.DB;
 /* Om instantiering af generiske typer via reflection:
  * http://msdn2.microsoft.com/en-us/library/b8ytshk6.aspx
  */
-
+// registrer generiske typeparameter, hvis ikke registreret i forvejen
 namespace GenDB
 {
 

@@ -12,6 +12,8 @@ namespace PerformanceTests
     {
         public static void Main(string[] args)
         {
+
+           
             if (args.Length == 0)
             {
                 Console.WriteLine("No parameters specified. Using 'G R 20 30 400'");
@@ -19,7 +21,6 @@ namespace PerformanceTests
                 args = new String[] { "G", "R", "20", "30", "400" };
             }
             
-
             ITest theTest = null;
             ReadWriteClearTest dbtest = null;
             string dbSystem = "G";
@@ -28,7 +29,7 @@ namespace PerformanceTests
             string fileName = null;
             LinkedList<int> objectCounts = new LinkedList<int>();
 
-            //GenDB.DataContext.Instance.DatabaseName = "knold";
+            //GenDB.DataContext.Instance.DatabaseName = "perftestDA";
             //if (!GenDB.DataContext.Instance.DatabaseExists())
             //{
             //    GenDB.DataContext.Instance.CreateDatabase();
@@ -85,12 +86,14 @@ namespace PerformanceTests
             {
                 GenDB.DataContext dc = GenDB.DataContext.Instance;
                 dc.DatabaseName = dbName;
+                dc.DeleteDatabase();
                 if (!dc.DatabaseExists())
                 {
                     dc.CreateDatabase();
                 }
                 dc.Init();
-                dbtest= new GenDBPerfTests<PerfTestAllPrimitiveTypes>(dc);
+                //dbtest= new GenDBPerfTests<PerfTestAllPrimitiveTypes>(dc);
+                dbtest = new GenDBPerfPersonTest(dc);
             }
             else 
             {
