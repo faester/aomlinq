@@ -293,8 +293,8 @@ namespace QueryToSqlTranslationTests
 
         [Test]
         public void TestDBVsAppTranslation()
-       {
-            foreach(TestPerson p in thePersons)
+        {
+            foreach (TestPerson p in thePersons)
             {
                 p.Name = "Knæskade";
             }
@@ -303,12 +303,12 @@ namespace QueryToSqlTranslationTests
                      where ps.Name == "Name1" || ps.Name == "Name2"
                      select ps;
 
-            foreach(TestPerson p in ns)
+            foreach (TestPerson p in ns)
             {
                 Assert.IsTrue(p.Name == "Name1" || p.Name == "Name2", "Error in returned values. Application object has changed state since last commit.");
             }
 
-       }
+        }
 
         [Test]
         public void TestReferenceFieldPropertyFilter1()
