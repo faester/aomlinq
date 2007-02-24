@@ -32,7 +32,7 @@ namespace GenDB.DB
             {
                 this.entityPoidListQuery = entityPoidListQuery;
                 dataContext = DataContext.Instance;
-                SqlConnection cnn = dataContext.CreateDBConnection();
+                cnn = dataContext.CreateDBConnection();
                 cnn.Open();
                 cmd = new SqlCommand(
                     "SELECT " +
@@ -154,7 +154,7 @@ namespace GenDB.DB
             {
                 cmd.Cancel();
                 if (!reader.IsClosed) { reader.Close(); }
-                if (cnn != null && cnn.State != System.Data.ConnectionState.Closed) { cnn.Close(); }
+                if (cnn.State != System.Data.ConnectionState.Closed) { cnn.Close(); }
             }
 
             #endregion
