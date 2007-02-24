@@ -8,6 +8,7 @@ namespace GenDB
     {
         WeakReference wr;
         int entityPOID;
+        bool isCollection;
 
         public int EntityPOID
         {
@@ -15,12 +16,6 @@ namespace GenDB
         }
 
         IBusinessObject clone;
-
-        public IBusinessObject Clone
-        {
-            get { return clone; }
-            set { clone = value; }
-        }
 
         IBusinessObject original;
 
@@ -34,9 +29,17 @@ namespace GenDB
 
         public IBOCacheElement(IBusinessObject target)
         {
+            if (target.GetType().GetInterface("IDBSaveableCollection") != null) 
+            { 
+                isCollection = true; 
+            }
+            else
+            {
+                clone = (IBusinessObject)ObjectUtilities.MakeClone(target);
+            }
+
             original = target;
             wr = new WeakReference(target);
-            clone = (IBusinessObject)ObjectUtilities.MakeClone(target);
             entityPOID = target.DBIdentity;
         }
 
@@ -47,7 +50,16 @@ namespace GenDB
 
         public bool IsDirty
         {
-            get { return !ObjectUtilities.TestFieldEquality(wr.Target, clone); }
+            get { 
+                if (!isCollection)
+                {
+                    return !ObjectUtilities.TestFieldEquality(wr.Target, clone); 
+                }
+                else
+                {
+                    return (original as IDBSaveableCollection).HasBeenModified;
+                }
+            }
         }
 
         public IBusinessObject Target
@@ -57,7 +69,13 @@ namespace GenDB
 
         public void ClearDirtyBit()
         {
-            clone = (IBusinessObject)ObjectUtilities.MakeClone((IBusinessObject)wr.Target);
+            if (!isCollection) {
+                clone = (IBusinessObject)ObjectUtilities.MakeClone((IBusinessObject)wr.Target);
+            }
+            else
+            {
+                (original as IDBSaveableCollection).HasBeenModified = false;
+            }
         }
     }
 }
