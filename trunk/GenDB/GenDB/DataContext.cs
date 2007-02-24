@@ -94,7 +94,7 @@ namespace GenDB
             isInitialized = true;
         }
 
-        private int dbBatchSize = 1;
+        private int dbBatchSize = 500;
 
         /// <summary>
         /// Attempts to build database. All changes will be lost. 
@@ -147,12 +147,6 @@ namespace GenDB
 
         string connectStringWithDBName = "server=(local);database=generic;Integrated Security=SSPI;connection timeout=0";
 
-        //internal string ConnectStringWithDBName
-        //{
-        //    get { return connectStringWithDBName; }
-        //    set { connectStringWithDBName = value; }
-        //}
-
         internal SqlConnection CreateDBConnection()
         {
             return new SqlConnection(connectStringWithDBName);
@@ -164,12 +158,6 @@ namespace GenDB
         }
 
         string connectStringWithoutDBName = "server=(local);Integrated Security=SSPI;connection timeout=0";
-
-        //internal string ConnectStringWithoutDBName
-        //{
-        //    get { return connectStringWithoutDBName; }
-        //    set { connectStringWithoutDBName = value; }
-        //}
 
         string dbname = "generic";
 
