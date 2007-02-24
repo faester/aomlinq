@@ -107,7 +107,7 @@ namespace GenDB.DB
                                     break;
                                 }
                             case MappingType.STRING:
-                                if (reader[7] == DBNull.Value)
+                                if (reader[4] == DBNull.Value)
                                 {
                                     value = null;
                                     break;
