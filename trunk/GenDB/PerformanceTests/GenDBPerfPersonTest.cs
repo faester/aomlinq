@@ -123,8 +123,8 @@ namespace PerformanceTests
 
         public long PerformSelectFiftySubFiftyPctTest(int objectCount)
         {
-            int amount = objectCount/50;
-            int half = amount/50;
+            int amount = objectCount/2;
+            int half = amount/2;
             int c=0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
