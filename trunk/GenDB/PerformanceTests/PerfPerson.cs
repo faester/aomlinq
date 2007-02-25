@@ -6,10 +6,18 @@ using System.Data.DLinq;
 
 namespace PerformanceTests
 {
-    
+    [Table]
     public class Car : IBusinessObject
     {
         public Car(){/*empty*/}
+
+        int id =0;
+        [Column(Id = true, AutoGen=true), Volatile]
+        public int Id 
+        {
+            get{return id;}
+            set{id = value;}
+        }
 
         DBIdentifier entityPOID;
         public DBIdentifier DBIdentity 
@@ -30,7 +38,9 @@ namespace PerformanceTests
             get{return entityPOID;}
             set{entityPOID = value;}
         }
-        
+ 
+        private Car car;
+
         public long id = rand.Next(10000);
         [Column(Id = true, AutoGen=true), Volatile]
         public long Id 
@@ -70,11 +80,11 @@ namespace PerformanceTests
             set{gList=value;}
         }
 
-        //BODictionary<int, Car> gDict = new BODictionary<int,Car>();
-        //public BODictionary<long, PerfPerson> Friends {
-        //    get{return friends;}
-        //    set{friends = value;}
-        //}
+        BODictionary<int, Car> gDict = new BODictionary<int,Car>();
+        public BODictionary<int, Car> GDict {
+            get{return gDict;}
+            set{gDict = value;}
+        }
 
     }
 }
