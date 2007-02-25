@@ -7,6 +7,18 @@ using System.Data.DLinq;
 namespace PerformanceTests
 {
     
+    public class Car : IBusinessObject
+    {
+        public Car(){/*empty*/}
+
+        DBIdentifier entityPOID;
+        public DBIdentifier DBIdentity 
+        {
+            get{return entityPOID;}
+            set{entityPOID = value;}
+        }
+    }
+
     [Table(Name="t_PerfPerson")]
     public class PerfPerson : IBusinessObject
     {
@@ -43,30 +55,22 @@ namespace PerformanceTests
             set{age=value;}
         }
 
-        //List<string> dAlias;
-        //public List<string> DAlias
-        //{
-        //    get{return dAlias;}
-        //    set{dAlias=value;}
-        //}
+        private EntitySet<Car> _entries = new EntitySet<Car>();
+        [Volatile]
+        public EntitySet<Car> Entries
+        {
+            get{return _entries;}
+            set{_entries.Assign(value);}
+        }
 
-        //private EntitySet<PerfCar> _PerfCars = new EntitySet<PerfCar>();
-        //[Association(Storage="_PerfCars", OtherKey="id")]
-        //public EntitySet<PerfCar> PerfCars
-        //{
-        //    get{return this._PerfCars;}
-        //    set{this._PerfCars.Assign(value);}
-        //}
-        
-        //public BOList<string> aliases = new BOList<string>();
-        //[Column]
-        //public BOList<string> Aliases {
-        //    get{return aliases;}
-        //    set{aliases = value;}
-        //}
+        private BOList<Car> gList = new BOList<Car>();
+        public BOList<Car> GList
+        {
+            get{return gList;}
+            set{gList=value;}
+        }
 
-        //BODictionary<long, PerfPerson> friends = new BODictionary<long,PerfPerson>();
-        //[Column]
+        //BODictionary<int, Car> gDict = new BODictionary<int,Car>();
         //public BODictionary<long, PerfPerson> Friends {
         //    get{return friends;}
         //    set{friends = value;}

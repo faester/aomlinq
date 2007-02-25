@@ -28,6 +28,7 @@ namespace PerformanceTests
         long PerformSelectTenPctTest(int objectCount);
         long PerformSelectHundredPctTest(int objectCount);
         long PerformSelectFiftySubFiftyPctTest(int objectCount);
+        long PerformSelectUnconditionalTest(int objectCount);
 
         //long PerformCompositeSelectTest(int objectCount);
         //long PerformJoinedSelectTest(int objectCount);

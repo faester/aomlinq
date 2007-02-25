@@ -46,7 +46,7 @@ namespace PerformanceTests
             if (needToAdd > 0)
             {
                 Console.WriteLine("Adding {0} objects to table", needToAdd);
-                for (int i = 0; i < needToAdd; i++)
+                for (int i = count; i < objectCount; i++)
                 {
                     table.Add(new PerfPerson{Name="name"+(i+1), Age=(i+1)});
                 }
@@ -139,9 +139,22 @@ namespace PerformanceTests
             sw.Start();
             var v = from t in table
                     where t.Age <= amount
-                    select new PerfPerson{Name = t.Name, Age = t.Age} into x
-                    where x.Age <= half
-                    select x;
+                    select t;                    
+            var subv = from subt in v
+                       where subt.Age <= half
+                       select subt;
+            foreach(PerfPerson pp in subv) {c++;}
+            long ms = sw.ElapsedMilliseconds;
+            return ms;
+        }
+
+        public long PerformSelectUnconditionalTest(int objectCount)
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            int c=0;
+            var v = from t in table
+                    select t;
             foreach(PerfPerson pp in v) {c++;}
             long ms = sw.ElapsedMilliseconds;
             return ms;

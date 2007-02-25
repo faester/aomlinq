@@ -24,13 +24,14 @@ namespace PerformanceTests
             GenDB.Table<PerfPerson> table = dataContext.GetTable<PerfPerson>();
             int count = table.Count;
             bool needCommit = false;
+            
             Console.WriteLine("Contains {0} objects", count);
             while (count < objectCount)
             {
                 needCommit = true;
                 int toWrite = objectCount- count ;
                 Console.WriteLine("Writing {0} objects to table.", toWrite);
-                for (int i = 0; i < toWrite; i++)
+                for (int i = count; i < objectCount; i++)
                 {
                     table.Add(new PerfPerson{Name="name"+(i+1), Age=(i+1)});
                 }
@@ -122,23 +123,32 @@ namespace PerformanceTests
 
         public long PerformSelectFiftySubFiftyPctTest(int objectCount)
         {
-            //int amount = objectCount/50;
-            //int half = amount/50;
-            //int c=0;
-            //Stopwatch sw = new Stopwatch();
-            //sw.Start();
-            //var v = from t in table
-            //        where t.Age <= amount
-                    
-            //        select new PerfPerson{Name = t.Name, Age = t.Age} into x
-            //        where x.Age <= half
-            //        select x;
+            int amount = objectCount/50;
+            int half = amount/50;
+            int c=0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var v = from t in table
+                    where t.Age <= amount
+                    select t;                    
+            var subv = from subt in v
+                       where subt.Age <= half
+                       select subt;
+            foreach(PerfPerson pp in subv) {c++;}
+            long ms = sw.ElapsedMilliseconds;
+            return ms;
+        }
 
-            //foreach(PerfPerson pp in v) {c++;}
-            //long ms = sw.ElapsedMilliseconds;
-            //return ms;
-
-            return 0;
+        public long PerformSelectUnconditionalTest(int objectCount)
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            int c=0;
+            var v = from t in table
+                    select t;
+            foreach(PerfPerson pp in v) {c++;}
+            long ms = sw.ElapsedMilliseconds;
+            return ms;
         }
     }
 }

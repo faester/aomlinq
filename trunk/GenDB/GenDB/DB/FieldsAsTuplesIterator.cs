@@ -63,7 +63,6 @@ namespace GenDB.DB
         {
             IBusinessObject result = null;
 
-
             cmd.Parameters[0].Value = entityPOID;
 
             cnn.Open();
