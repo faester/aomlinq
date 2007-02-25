@@ -1,64 +1,150 @@
 using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Text;
-using GenDB;
+using System.Diagnostics;
+using System.Query;
+using System.Data.DLinq;
+using System.Expressions;
 
 namespace PerformanceTests
 {
-    class DLinqPerfPersonTest : ReadWriteClearTest
+    public class DLinqPersonDB<T> : DataContext 
+        where T : GenDB.IBusinessObject, new()
     {
-        GenDB.DataContext dataContext = GenDB.DataContext.Instance;
-        GenDB.Table<PerfPerson> table = GenDB.DataContext.Instance.GetTable<PerfPerson>();
+        public Table<PerfPerson> Table;
+        public DLinqPersonDB(string cnnstr)
+            : base(cnnstr) { }
+    }
+
+    class DLinqPerfPersonTest<T> : QueryTest
+        where T : GenDB.IBusinessObject, new()
+    {
+        DLinqPersonDB<T> db = null;
+        Table<PerfPerson> table;
+        TestOutput testOutput;
         int lastInsert = 0;
 
-        public DLinqPerfPersonTest(GenDB.DataContext dataContext)
+        public DLinqPerfPersonTest(TestOutput testOutput, string dbName)
         {
-            this.dataContext = dataContext;
+            this.testOutput = testOutput;
+
+            this.db = new DLinqPersonDB<T>("server=.;database=" + dbName + ";Integrated Security=SSPI");
+            //db.DeleteDatabase();
+            if (!db.DatabaseExists())
+            {
+                Console.WriteLine("Creating DLinq db");
+                db.CreateDatabase();
+            }
+            table = db.Table;
         }
 
         public void InitTests(int objectCount)
         {
-            /*empty*/
+            int count = Sequence.Count(table);
+            int needToAdd = objectCount - count;
+            if (needToAdd > 0)
+            {
+                Console.WriteLine("Adding {0} objects to table", needToAdd);
+                for (int i = 0; i < needToAdd; i++)
+                {
+                    table.Add(new PerfPerson{Name="name"+(i+1), Age=(i+1)});
+                }
+                Console.WriteLine("Submitting.");
+                db.SubmitChanges();
+            }
         }
 
-        public long PerformAllTests(int objectCount)
+        public void CleanDB()
         {
-            return 0;
+            db.DeleteDatabase();
+            //table.RemoveAll(table);
+            //db.SubmitChanges();
         }
 
-        public long PerformWriteTest(int objectCount)
+        public long PerformSelectNothingTest(int objectCount)
         {
-            return 0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            int c=0;
+            var v = from t in table
+                    where t.Name == "Albert E"
+                    select t;
+            foreach(PerfPerson pp in v) {c++;}
+            long ms = sw.ElapsedMilliseconds;
+            return ms;
         }
 
-        public long PerformReadTest(int objectCount)
+        public long PerformSelectOneTest(int objectCount)
         {
-            return 0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            int c=0;
+            var v = from t in table
+                    where t.Name == "name9"
+                    select t;
+            foreach(PerfPerson pp in v) {c++;}
+            long ms = sw.ElapsedMilliseconds;
+            return ms;
         }
 
-        public long PerformClearTest()
+        public long PerformSelectOnePctTest(int objectCount)
         {
-            return 0;
+            int amount = objectCount/100;
+            int c=0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var v = from t in table
+                    where t.Age <= amount
+                    select t;
+            foreach(PerfPerson pp in v) {c++;}
+            long ms = sw.ElapsedMilliseconds;
+            return ms;
+        }
+        
+        public long PerformSelectTenPctTest(int objectCount)
+        {
+            int amount = objectCount/10;
+            int c=0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var v = from t in table
+                    where t.Age <= amount
+                    select t;
+            foreach(PerfPerson pp in v) {c++;}
+            long ms = sw.ElapsedMilliseconds;
+            return ms;
         }
 
-        public long PerformSimpleSelectTest(int objectCount)
+        public long PerformSelectHundredPctTest(int objectCount)
         {
-            return 0;
+            int amount = objectCount;
+            int c=0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var v = from t in table
+                    where t.Age <= amount
+                    select t;
+            foreach(PerfPerson pp in v) {c++;}
+            long ms = sw.ElapsedMilliseconds;
+            return ms;
         }
 
-        public long PerformCompositeSelectTest(int objectCount)
+        public long PerformSelectFiftySubFiftyPctTest(int objectCount)
         {
-            return 0;
-        }
-
-        public long PerformJoinedSelectTest(int objectCount)
-        {
-            return 0;
-        }
-
-        public long PerformSubSelectTest(int objectCount) 
-        {
-            return 0;
+            int amount = objectCount/50;
+            int half = amount/50;
+            int c=0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var v = from t in table
+                    where t.Age <= amount
+                    select new PerfPerson{Name = t.Name, Age = t.Age} into x
+                    where x.Age <= half
+                    select x;
+            foreach(PerfPerson pp in v) {c++;}
+            long ms = sw.ElapsedMilliseconds;
+            return ms;
         }
     }
 }

@@ -160,8 +160,7 @@ namespace TranslationTests
             }
         }
 
-        [Test]
-        public void TestFieldsShouldNotBePersisted()
+        private void TestFieldsShouldNotBePersistedInit()
         {
             Table<ContainsAllPrimitiveTypes> tcapt = dc.GetTable<ContainsAllPrimitiveTypes>();
 
@@ -171,6 +170,16 @@ namespace TranslationTests
                 tcapt.Add(toAdd);
             }
             dc.SubmitChanges();
+            GC.Collect();
+        }
+
+        [Test]
+        public void TestFieldsShouldNotBePersisted()
+        {
+            TestFieldsShouldNotBePersistedInit();
+            dc.SubmitChanges();
+            GC.Collect();
+            Table<ContainsAllPrimitiveTypes> tcapt = dc.GetTable<ContainsAllPrimitiveTypes>();
 
             foreach(ContainsAllPrimitiveTypes capt in tcapt)
             {

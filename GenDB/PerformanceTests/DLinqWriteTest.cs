@@ -34,7 +34,6 @@ namespace PerformanceTests
                 db.CreateDatabase();
             }
             table = db.Table;
-            
         }
 
         public void InitTests(int objectCount)
@@ -94,26 +93,6 @@ namespace PerformanceTests
             db.SubmitChanges();
             long ms = sw.ElapsedMilliseconds;
             return ms;
-        }
-
-        public long PerformSimpleSelectTest(int objectCount)
-        {
-            return 0;
-        }
-
-        public long PerformCompositeSelectTest(int objectCount)
-        {
-            return 0;
-        }
-
-        public long PerformJoinedSelectTest(int objectCount)
-        {
-            return 0;
-        }
-
-        public long PerformSubSelectTest(int objectCount) 
-        {
-            return 0;
         }
     }
 }
