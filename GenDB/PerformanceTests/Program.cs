@@ -16,7 +16,7 @@ namespace PerformanceTests
             {
                 Console.WriteLine("No parameters specified. Using 'G R 20 30 400'");
                 Console.WriteLine("Use /? to get help");
-                args = new String[] { "G", "Q", "11", "1000", "10000", "20000","50000","70000","100000"};
+                args = new String[] { "D", "Q", "11", "1000", "10000", "20000","50000","70000","100000"};
             }
             
             ITest theTest = null;
@@ -50,6 +50,18 @@ namespace PerformanceTests
                 TestOutput to = new TestOutput (fileName, dbSystem,"Q");
                 Console.WriteLine("Writing to {0}",fileName);
 
+                //if(dbSystem=="G")
+                //{
+                //    qtest = new GenDBPerfPersonTest<PerfPerson>(GenDB.DataContext.Instance);
+                //    qtest.CleanDB();
+                //} 
+                //else if(dbSystem=="D")
+                //{
+                //    qtest = new DLinqPerfPersonTest<PerfPerson>(to, "perftestDQ");
+                //    qtest.CleanDB();
+                //}
+                
+
                 foreach(int obj in objectCounts)
                 {
                     Console.WriteLine("choosing db...");
@@ -69,6 +81,9 @@ namespace PerformanceTests
                     {
                         qtest = new DLinqPerfPersonTest<PerfPerson>(to, "perftestDQ");
                     }
+                    //Console.WriteLine("cleaning db...");
+                    //qtest.CleanDB();
+
                     Console.WriteLine("initializing data...");
                     qtest.InitTests(obj);
 

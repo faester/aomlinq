@@ -37,6 +37,7 @@ namespace PerformanceTests
                 db.CreateDatabase();
             }
             table = db.Table;
+            //CleanDB();
         }
 
         public void InitTests(int objectCount)
@@ -48,7 +49,9 @@ namespace PerformanceTests
                 Console.WriteLine("Adding {0} objects to table", needToAdd);
                 for (int i = count; i < objectCount; i++)
                 {
-                    table.Add(new PerfPerson{Name="name"+(i+1), Age=(i+1)});
+                    PerfPerson p = new PerfPerson{Name="name"+(i+1), Age=(i+1) };
+                    p.Entries .Add (new Car());
+                    table.Add(p);
                 }
                 Console.WriteLine("Submitting.");
                 db.SubmitChanges();
@@ -57,9 +60,9 @@ namespace PerformanceTests
 
         public void CleanDB()
         {
-            db.DeleteDatabase();
-            //table.RemoveAll(table);
-            //db.SubmitChanges();
+            //db.DeleteDatabase();
+            table.RemoveAll(table);
+            db.SubmitChanges();
         }
 
         public long PerformSelectNothingTest(int objectCount)
@@ -70,7 +73,7 @@ namespace PerformanceTests
             var v = from t in table
                     where t.Name == "Albert E"
                     select t;
-            foreach(PerfPerson pp in v) {c++;}
+            foreach(PerfPerson pp in v) {c=pp.GList.Count;}
             long ms = sw.ElapsedMilliseconds;
             return ms;
         }
@@ -112,6 +115,7 @@ namespace PerformanceTests
                     where t.Age <= amount
                     select t;
             foreach(PerfPerson pp in v) {c++;}
+            if (c < amount) throw new Exception();
             long ms = sw.ElapsedMilliseconds;
             return ms;
         }
@@ -125,7 +129,15 @@ namespace PerformanceTests
             var v = from t in table
                     where t.Age <= amount
                     select t;
-            foreach(PerfPerson pp in v) {c++;}
+            int cc = 0;
+            foreach(PerfPerson pp in v) 
+            {
+                foreach(Car car in pp.Entries)
+                {
+                    cc++;
+                }
+            }
+            Console.WriteLine("Cars  {0}", cc);
             long ms = sw.ElapsedMilliseconds;
             return ms;
         }
