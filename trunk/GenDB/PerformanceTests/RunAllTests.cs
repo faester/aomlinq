@@ -36,13 +36,6 @@ namespace PerformanceTests
                     ms = test.PerformReadTest(objectCount);
                     Console.WriteLine("{0} ms, {1} objs/sec", ms, (1000.0 * objectCount) / ms);
                     to.ReceiveReadTestResult(objectCount, ms);
-
-                    // query start
-                    Console.Write("Performing simple query test with {0} objects", objectCount);
-                    ms = test.PerformSimpleSelectTest(objectCount);
-                    Console.WriteLine("{0} ms, {1} objs/sec", ms, (1000.0 * objectCount) / ms);
-                    to.RecieveSimpleSelectTestResult(objectCount, ms);
-                    // query end
                     
                     Console.Write("Performing clear test with {0} objects ", objectCount);
                     ms = test.PerformClearTest();

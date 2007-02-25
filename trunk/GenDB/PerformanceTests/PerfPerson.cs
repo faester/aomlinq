@@ -6,8 +6,9 @@ using System.Data.DLinq;
 
 namespace PerformanceTests
 {
+    
     [Table(Name="t_PerfPerson")]
-    class PerfPerson : IBusinessObject
+    public class PerfPerson : IBusinessObject
     {
         static Random rand = new Random(0);
 
@@ -18,7 +19,7 @@ namespace PerformanceTests
             set{entityPOID = value;}
         }
         
-        long id = rand.Next(10000);
+        public long id = rand.Next(10000);
         [Column(Id = true, AutoGen=true), Volatile]
         public long Id 
         {
@@ -34,13 +35,28 @@ namespace PerformanceTests
             set{name = value;}
         }
 
-        PerfPerson spouse;
+        int age;
         [Column]
-        public PerfPerson Spouse
+        public int Age
         {
-            get{return spouse;}
-            set{spouse = value;}
+            get{return age;}
+            set{age=value;}
         }
+
+        //List<string> dAlias;
+        //public List<string> DAlias
+        //{
+        //    get{return dAlias;}
+        //    set{dAlias=value;}
+        //}
+
+        //private EntitySet<PerfCar> _PerfCars = new EntitySet<PerfCar>();
+        //[Association(Storage="_PerfCars", OtherKey="id")]
+        //public EntitySet<PerfCar> PerfCars
+        //{
+        //    get{return this._PerfCars;}
+        //    set{this._PerfCars.Assign(value);}
+        //}
         
         public BOList<string> aliases = new BOList<string>();
         [Column]
