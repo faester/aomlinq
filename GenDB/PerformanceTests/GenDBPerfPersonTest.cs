@@ -129,12 +129,15 @@ namespace PerformanceTests
             //sw.Start();
             //var v = from t in table
             //        where t.Age <= amount
+                    
             //        select new PerfPerson{Name = t.Name, Age = t.Age} into x
             //        where x.Age <= half
             //        select x;
+
             //foreach(PerfPerson pp in v) {c++;}
             //long ms = sw.ElapsedMilliseconds;
             //return ms;
+
             return 0;
         }
     }
