@@ -43,7 +43,6 @@ namespace GenDB.DB
         const string TB_PROPERTYVALUE_NAME = "PropertyValue";
         const string TB_COLLECTION_ELEMENT_NAME = "CollectionElement";
 
-        const bool WHERE_USING_JOINS = true;
         #endregion
 
         DataContext dataContext;
@@ -393,19 +392,30 @@ namespace GenDB.DB
 
         public IBusinessObject GetByEntityPOID(int entityPOID)
         {
-            //IBusinessObject result = null;
-            //if (!dataContext.IBOCache.TryGet(entityPOID, out result))
-            //{
-            //    result = oeg.GetByEntityPOID(entityPOID);    
-            //}
-            //return result;
+            IBusinessObject result = null;
 
-            FieldsAsTuplesIterator iter = new FieldsAsTuplesIterator(dataContext, new BoolEquals(new CstLong(entityPOID), CstThis.Instance));
-            foreach(IBusinessObject ibo in iter)
+            if (false)
             {
-                return ibo;
+                if (!dataContext.IBOCache.TryGet(entityPOID, out result))
+                {
+                    result = oeg.GetByEntityPOID(entityPOID);
+                    if (result != null)
+                    {
+                        result.DBIdentity = new DBIdentifier(entityPOID, true);
+                        dataContext.IBOCache.AddFromDB(result);
+                    }
+                }
+                return result;
             }
-            return null;
+            else
+            {
+                FieldsAsTuplesIterator iter = new FieldsAsTuplesIterator(dataContext, new BoolEquals(new CstLong(entityPOID), CstThis.Instance));
+                foreach (IBusinessObject ibo in iter)
+                {
+                    return ibo;
+                }
+                return null;
+            }
         }
 
         public int Count(IWhereable expression)
@@ -448,14 +458,7 @@ namespace GenDB.DB
 
         public IEnumerable<IBusinessObject> Where(IExpression expression)
         {
-            if (WHERE_USING_JOINS)
-            {
-                return new JoinPropertyIterator(dataContext, expression);            
-            }
-            else
-            {
-                return new FieldsAsTuplesIterator(dataContext, expression);
-            }
+            return new JoinPropertyIterator(dataContext, expression);            
         }
 
         public IEnumerable<IGenCollectionElement> AllElements(int collectionEntityPOID)

@@ -77,8 +77,9 @@ namespace GenDB.DB
                 {
                     first = false;
                     entityTypePOID = reader.GetInt32(0);
-                    translator = dataContext.Translators.GetTranslator(entityTypePOID);
+                    Console.WriteLine(entityTypePOID);
                     et = dataContext.TypeSystem.GetEntityType(entityTypePOID);
+                    translator = dataContext.Translators.GetTranslator(entityTypePOID);
                     result = translator.CreateInstanceOfIBusinessObject();
                 }
 
@@ -86,6 +87,7 @@ namespace GenDB.DB
                 {
                     int propertyPOID = reader.GetInt32(1);
                     IProperty p = et.GetProperty(propertyPOID);
+                    if (p == null) { throw new NullReferenceException("Property"); }
 
                     object propertyValue = null;
 
@@ -106,7 +108,8 @@ namespace GenDB.DB
                             propertyValue = reader[4] == DBNull.Value ? null : reader.GetString(4);
                             break;
                     }
-
+                    Console.WriteLine("Setting property {0} to >'{1}'<", p, propertyValue);
+                    Console.WriteLine("Using translator {0}", translator);
                     translator.SetProperty(propertyPOID, result, propertyValue);
                 }
             }

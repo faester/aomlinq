@@ -84,8 +84,8 @@ namespace GenDB
         /// entities of type T or a subclass of this type.)
         /// <br>
         /// Elements are also removed from the cache to ensure that they will not 
-        /// be accidentally added later on. This slows down the operation, since 
-        /// it is neccessary run the where-query twice. 
+        /// be accidentally added to the cache later on. This slows down the operation, 
+        /// since it is neccessary run the where-query twice. 
         /// </br>  
         /// </summary>
         public void Clear()
