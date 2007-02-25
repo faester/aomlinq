@@ -254,26 +254,7 @@ namespace GenDB
             {
                 res.exprFullySqlTranslatable = false;
             }
-
-            //res.exprFullySqlTranslatable = (!checker.HasModifiedExpression) && this.exprFullySqlTranslatable;
-            //if (!res.exprFullySqlTranslatable)
-            //{
-            //    if (!this.exprFullySqlTranslatable)
-            //    {
-            //        Func<T, bool> f = expr.Compile();
-            //        Func<T, bool> andedFunc = delegate(T element) { return linqFunc(element) && f(element); };
-            //        res.linqFunc = andedFunc;
-            //    }
-            //    else
-            //    {
-            //        res.linqFunc = expr.Compile();
-            //    }
-            //}
-            //else
-            //{
-            //    res.linqFunc = null;
-            //}
-
+    
             return res;
         }
 

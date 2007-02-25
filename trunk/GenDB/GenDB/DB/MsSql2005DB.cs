@@ -115,9 +115,12 @@ namespace GenDB.DB
         internal MsSql2005DB(DataContext dataContext)
         {
             this.dataContext = dataContext;
+            oeg = new OneEntityGetter(dataContext);
         }
 
         #region fields
+        OneEntityGetter oeg = null;
+
         StringBuilder sbEntityTypeInserts = new StringBuilder(); // "Batching" queries as appended strings.
         StringBuilder sbPropertyTypeInserts = new StringBuilder(); // Stored in different stringbuilders to 
         StringBuilder sbPropertyInserts = new StringBuilder();  // ensure ordered inserts. (One migth 
@@ -388,19 +391,16 @@ namespace GenDB.DB
             return res;
         }
 
-
         public IBusinessObject GetByEntityPOID(int entityPOID)
         {
-            IBusinessObject res = Get(entityPOID);
-            return res;
-        }
+            //IBusinessObject result = null;
+            //if (!dataContext.IBOCache.TryGet(entityPOID, out result))
+            //{
+            //    result = oeg.GetByEntityPOID(entityPOID);    
+            //}
+            //return result;
 
-        private IBusinessObject Get(int entityPOID)
-        {
-            IExpression clause = new BoolEquals(new CstLong(entityPOID), CstThis.Instance);
-
-            IEnumerable<IBusinessObject> iter = new FieldsAsTuplesIterator(dataContext, clause);
-
+            FieldsAsTuplesIterator iter = new FieldsAsTuplesIterator(dataContext, new BoolEquals(new CstLong(entityPOID), CstThis.Instance));
             foreach(IBusinessObject ibo in iter)
             {
                 return ibo;
@@ -515,7 +515,16 @@ namespace GenDB.DB
                             }
                             break;
                         case MappingType.STRING:
-                            element.StringValue = reader[3].ToString();
+                            {
+                                if (reader[3] == DBNull.Value)
+                                {
+                                    element.StringValue = null;
+                                }
+                                else
+                                {
+                                    element.StringValue = reader[3].ToString();
+                                }
+                            }
                             break;
                         default: throw new Exception("Can not fetch collection elements of type " + mapping.ToString());
                     }

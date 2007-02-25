@@ -2,9 +2,135 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Data.SqlClient;
+using System.Data;
 
 namespace GenDB.DB
 {
+    class OneEntityGetter : IDisposable
+    {
+        SqlCommand cmd = null; // Parametrized command
+        SqlConnection cnn = null; // DB connection. Kept open during objects lifetime
+        DataContext dataContext = null;
+        bool hasBeenDisposed = false;
+
+        public OneEntityGetter(DataContext dataContext)
+        {
+            this.dataContext = dataContext;
+            Init();
+        }
+
+        ~OneEntityGetter()
+        {
+            if (!hasBeenDisposed)
+            {
+                Dispose();
+            }
+        }
+
+        private void Init()
+        {
+            cnn = dataContext.CreateDBConnection();
+
+            cmd = new SqlCommand(
+                "SELECT " +
+                "    e.EntityTypePOID, " + // 0
+                "    PropertyPOID, " + // 1
+                "    LongValue, " + // 2
+                "    BoolValue, " + // 3x
+                "    StringValue, " + // 4
+                "    DoubleValue, " + // 5
+                "    ReferenceValue " + // 6
+                " FROM Entity e LEFT JOIN  " +
+                "      PropertyValue pv ON pv.EntityPOID = e.EntityPOID " +
+                " WHERE e.EntityPOID = @entityPOID"
+                ,
+                cnn);
+            cmd.CommandTimeout = dataContext.CommandTimeout;
+            
+            cmd.Parameters.Add (new SqlParameter("@entityPOID", SqlDbType.Int));
+        }
+
+
+        /// <summary>
+        /// Returns object identified by 'entityPOID'
+        /// from database. Will not check if a cached copy 
+        /// already exists.
+        /// </summary>
+        /// <param name="entityPOID"></param>
+        /// <returns></returns>
+        public IBusinessObject GetByEntityPOID(int entityPOID)
+        {
+            cmd.Parameters[0].Value = entityPOID;
+            cnn.Open();
+
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            bool first = true;
+            int entityTypePOID = 0;
+            IBusinessObject result = null;
+            IIBoToEntityTranslator translator = null;
+            IEntityType et = null;
+
+            while(reader.Read())
+            {
+                if (first)
+                {
+                    first = false;
+                    entityTypePOID = reader.GetInt32(0);
+                    translator = dataContext.Translators.GetTranslator(entityTypePOID);
+                    et = dataContext.TypeSystem.GetEntityType(entityTypePOID);
+                    result = translator.CreateInstanceOfIBusinessObject();
+                }
+
+                if (reader[1] != DBNull.Value) // Set values if they exist. (Otherwise the left join ensures null values in related reader fields)
+                {
+                    int propertyPOID = reader.GetInt32(1);
+                    IProperty p = et.GetProperty(propertyPOID);
+
+                    object propertyValue = null;
+
+                    switch(p.MappingType)
+                    {
+                        case MappingType.BOOL: propertyValue = reader.GetBoolean(3); break;
+                        case MappingType.DATETIME: propertyValue = new DateTime(reader.GetInt64(2)); break;
+                        case MappingType.DOUBLE: propertyValue = reader.GetDouble(5); break;
+                        case MappingType.LONG: reader.GetInt64(2); break;
+                        case MappingType.REFERENCE:
+                            if (reader[6] == DBNull.Value) {
+                                propertyValue = null; 
+                            } else {
+                                reader.GetInt32(6);
+                            }
+                            break;
+                        case MappingType.STRING:
+                            propertyValue = reader[4] == DBNull.Value ? null : reader.GetString(4);
+                            break;
+                    }
+
+                    translator.SetProperty(propertyPOID, result, propertyValue);
+                }
+            }
+
+            reader.Close();
+            cnn.Close();
+            return result;
+        }
+
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            hasBeenDisposed = true;
+            //if (cnn.State == ConnectionState.Open)
+            //{
+            //    cnn.Close();
+            //}
+        }
+
+        #endregion
+    }
+
     class FieldsAsTuplesIterator : IEnumerable<IBusinessObject>
     {
         private class TheEnumerator : IEnumerator<IBusinessObject>, IEnumerable<IBusinessObject>
@@ -126,7 +252,7 @@ namespace GenDB.DB
 
                 if (result != null)
                 {
-                    current =  result;
+                    current = result;
                 }
                 if (hasReturnedLastElement)
                 {
