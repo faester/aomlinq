@@ -13,6 +13,7 @@ namespace PerformanceTests
         where T : GenDB.IBusinessObject, new()
     {
         public Table<PerfPerson> Table;
+        //public Table<Car> TableCar;
         public DLinqPersonDB(string cnnstr)
             : base(cnnstr) { }
     }
@@ -22,6 +23,7 @@ namespace PerformanceTests
     {
         DLinqPersonDB<T> db = null;
         Table<PerfPerson> table;
+        //Table<Car> tableCar;
         TestOutput testOutput;
         int lastInsert = 0;
 
@@ -37,6 +39,7 @@ namespace PerformanceTests
                 db.CreateDatabase();
             }
             table = db.Table;
+            //tableCar = db.TableCar;
             //CleanDB();
         }
 
@@ -50,8 +53,13 @@ namespace PerformanceTests
                 for (int i = count; i < objectCount; i++)
                 {
                     PerfPerson p = new PerfPerson{Name="name"+(i+1), Age=(i+1) };
-                    p.Entries .Add (new Car());
+
+                    Car car = new Car();
+                    //car.Entries = p;
+                    
+                    p.Entries.Add(car);
                     table.Add(p);
+                    
                 }
                 Console.WriteLine("Submitting.");
                 db.SubmitChanges();
@@ -129,15 +137,14 @@ namespace PerformanceTests
             var v = from t in table
                     where t.Age <= amount
                     select t;
-            int cc = 0;
             foreach(PerfPerson pp in v) 
             {
                 foreach(Car car in pp.Entries)
                 {
-                    cc++;
+                    c++;
                 }
             }
-            Console.WriteLine("Cars  {0}", cc);
+            Console.WriteLine("Cars  {0}", c);
             long ms = sw.ElapsedMilliseconds;
             return ms;
         }
@@ -155,7 +162,14 @@ namespace PerformanceTests
             var subv = from subt in v
                        where subt.Age <= half
                        select subt;
-            foreach(PerfPerson pp in subv) {c++;}
+            foreach(PerfPerson pp in subv) 
+            {
+                foreach(Car car in pp.Entries)
+                {
+                    c++;
+                }
+            }
+            Console.WriteLine("Cars  {0}", c);
             long ms = sw.ElapsedMilliseconds;
             return ms;
         }
