@@ -58,19 +58,19 @@ namespace PerformanceTests
         //    set{this._PerfCars.Assign(value);}
         //}
         
-        public BOList<string> aliases = new BOList<string>();
-        [Column]
-        public BOList<string> Aliases {
-            get{return aliases;}
-            set{aliases = value;}
-        }
+        //public BOList<string> aliases = new BOList<string>();
+        //[Column]
+        //public BOList<string> Aliases {
+        //    get{return aliases;}
+        //    set{aliases = value;}
+        //}
 
-        BODictionary<long, PerfPerson> friends = new BODictionary<long,PerfPerson>();
-        [Column]
-        public BODictionary<long, PerfPerson> Friends {
-            get{return friends;}
-            set{friends = value;}
-        }
+        //BODictionary<long, PerfPerson> friends = new BODictionary<long,PerfPerson>();
+        //[Column]
+        //public BODictionary<long, PerfPerson> Friends {
+        //    get{return friends;}
+        //    set{friends = value;}
+        //}
 
     }
 }
