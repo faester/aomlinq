@@ -15,6 +15,19 @@ namespace PerformanceTests
     {
         static Random rnd = new Random(0);
         DBIdentifier entityPOID;
+        Car car;
+
+        public Car Car
+        {
+            get { return car; }
+            set { car = value; }
+        }
+
+        public PerfTestAllPrimitiveTypes()
+        {
+            car = new Car();
+        }
+        
 
         public DBIdentifier DBIdentity
         {

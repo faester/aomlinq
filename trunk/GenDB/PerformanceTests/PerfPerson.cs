@@ -6,41 +6,46 @@ using System.Data.DLinq;
 
 namespace PerformanceTests
 {
-    [Table]
+    [Table(Name="Cars")]
     public class Car : IBusinessObject
     {
-        public Car(){/*empty*/}
-
-        int id =0;
-        [Column(Id = true, AutoGen=true), Volatile]
+        int id = 0;
+        [Column(Id = true), Volatile]
         public int Id 
         {
             get{return id;}
             set{id = value;}
         }
 
+        [Column]
+        private long PersonID;
+        //[Volatile, Column]
+        //public long PersonID
+        //{
+        //    get { return personID; }
+        //    set { personID = value; }
+        //}
+        
+        EntityRef<PerfPerson> _owner;
+
+        [Volatile, Association(ThisKey = "PersonID")]
+        public PerfPerson Owner
+        {
+            get { return this._owner.Entity; }
+            set { this._owner.Entity = value; }
+        }
+        
         DBIdentifier entityPOID;
         public DBIdentifier DBIdentity 
         {
             get{return entityPOID;}
             set{entityPOID = value;}
         }
-
-        private EntityRef<PerfPerson> _entries = new EntityRef<PerfPerson>();
-        [Volatile]
-        public PerfPerson Entries
-        {
-            get{return this._entries.Entity;}
-            set{this._entries.Entity=value;}
-        }
-
     }
 
-    [Table(Name="t_PerfPerson")]
+    [Table(Name="Persons")]
     public class PerfPerson : IBusinessObject
     {
-        static Random rand = new Random(0);
-
         DBIdentifier entityPOID;
         public DBIdentifier DBIdentity 
         {
@@ -48,14 +53,16 @@ namespace PerformanceTests
             set{entityPOID = value;}
         }
  
-        private Car car;
+        [Column(Id = true), Volatile]
+        public long PersonID = 0;
 
-        public long id = rand.Next(10000);
-        [Column(Id = true, AutoGen=true), Volatile]
-        public long Id 
+        private EntitySet<Car> _Cars = new EntitySet<Car>();
+
+        [Volatile, Association(OtherKey = "PersonID")]
+        public EntitySet<Car> Cars 
         {
-            get{return id;}
-            set{id = value;}
+            get { return _Cars; }
+            set { _Cars.Assign(value); }
         }
 
         string name;
@@ -67,19 +74,12 @@ namespace PerformanceTests
         }
 
         int age;
+
         [Column]
         public int Age
         {
             get{return age;}
             set{age=value;}
-        }
-
-        private EntitySet<Car> _entries = new EntitySet<Car>();
-        [Volatile]
-        public EntitySet<Car> Entries
-        {
-            get{return _entries;}
-            set{_entries.Assign(value);}
         }
 
         private BOList<Car> gList = new BOList<Car>();
@@ -91,8 +91,8 @@ namespace PerformanceTests
 
         BODictionary<int, Car> gDict = new BODictionary<int,Car>();
         public BODictionary<int, Car> GDict {
-            get{return gDict;}
-            set{gDict = value;}
+            get { return gDict; }
+            set { gDict = value; }
         }
 
     }

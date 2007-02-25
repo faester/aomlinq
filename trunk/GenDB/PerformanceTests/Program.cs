@@ -16,7 +16,7 @@ namespace PerformanceTests
             {
                 Console.WriteLine("No parameters specified. Using 'G R 20 30 400'");
                 Console.WriteLine("Use /? to get help");
-                args = new String[] { "D", "Q", "11", "1000", "10000", "20000","50000","70000","100000"};
+                args = new String[] { "D", "Q", "1", "1000", "10000"};
             }
             
             ITest theTest = null;
