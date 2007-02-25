@@ -11,10 +11,10 @@ namespace GenDB
         IEntityType entityType;
 
         protected InstantiateObjectHandler instantiator;
-        protected LinkedList<PropertyConverter> fieldConverters = new LinkedList<PropertyConverter>();
-        protected LinkedList<PropertyConverter> allFieldConverters = new LinkedList<PropertyConverter>();
+        protected LinkedList<IPropertyConverter> fieldConverters = new LinkedList<IPropertyConverter>();
+        protected LinkedList<IPropertyConverter> allFieldConverters = new LinkedList<IPropertyConverter>();
 
-        protected Dictionary<long, PropertyConverter> fieldConverterDict = new Dictionary<long, PropertyConverter>();
+        protected Dictionary<long, IPropertyConverter> fieldConverterDict = new Dictionary<long, IPropertyConverter>();
 
         protected IIBoToEntityTranslator superTranslator = null;
         protected DataContext dataContext = null;
@@ -43,7 +43,7 @@ namespace GenDB
         }
 
 
-        public IEnumerable<PropertyConverter> FieldConverters
+        public IEnumerable<IPropertyConverter> FieldConverters
         {
             get
             {
@@ -82,7 +82,7 @@ namespace GenDB
         public abstract void SaveToDB(IBusinessObject ibo);
 
 
-        public PropertyConverter GetPropertyConverter(int propertyPOID)
+        public IPropertyConverter GetPropertyConverter(int propertyPOID)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace GenDB
             }
         }
 
-        public PropertyConverter GetPropertyConverter(IProperty property)
+        public IPropertyConverter GetPropertyConverter(IProperty property)
         {
             try {
             return GetPropertyConverter(property.PropertyPOID);
@@ -108,16 +108,30 @@ namespace GenDB
         protected abstract PropertyInfo[] GetPropertiesToTranslate();
 
 
-        
-    private void InitPropertyTranslators()
+
+        private void InitPropertyTranslators()
         {
             foreach (PropertyInfo clrProperty in fields)
             {
-                Attribute a = Volatile.GetCustomAttribute(clrProperty, typeof(Volatile));
-                if (clrProperty.PropertyType != typeof(DBIdentifier) && a == null)
+                Attribute volatileAttribute = Volatile.GetCustomAttribute(clrProperty, typeof(Volatile));
+                Attribute lazyLoadAttribute = Attribute.GetCustomAttribute(clrProperty, typeof(LazyLoad));
+
+                if (clrProperty.PropertyType != typeof(DBIdentifier) && volatileAttribute == null)
                 {
                     IProperty prop = this.entityType.GetProperty(clrProperty.Name);
-                    fieldConverters.AddLast(new PropertyConverter(t, clrProperty, prop, dataContext));
+                    if (lazyLoadAttribute != null)
+                    {
+                        LazyLoad laz = (LazyLoad)lazyLoadAttribute;
+                        string fieldName = laz.Storage;
+                        if (fieldName == null) { throw new NullReferenceException("When Properties are decorated with LazyLoad attribute, the storage field must be specified using 'Storage'-parameter"); }
+
+
+                        fieldConverters.AddLast(new PropertyConverter(t, clrProperty, prop, dataContext));
+                    }
+                    else
+                    {
+                        fieldConverters.AddLast(new PropertyConverter(t, clrProperty, prop, dataContext));
+                    }
                     fieldConverterDict[prop.PropertyPOID] = fieldConverters.Last.Value;
                     if (
                         TranslatorChecks.ImplementsIBusinessObject(clrProperty.PropertyType)

@@ -78,6 +78,7 @@
     <Compile Include="DB\Property.cs" />
     <Compile Include="DB\PropertyType.cs" />
     <Compile Include="DB\PropertyValue.cs" />
+    <Compile Include="IPropertyConverter.cs" />
     <Compile Include="PropertyConverter.cs" />
     <Compile Include="IBOCacheElement.cs" />
     <Compile Include="IBOTranslator.cs" />

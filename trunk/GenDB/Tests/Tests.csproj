@@ -49,6 +49,7 @@
     <Compile Include="CacheSubstitutionTests.cs" />
     <Compile Include="CacheTests.cs" />
     <Compile Include="ContainsAllPrimitiveTypes.cs" />
+    <Compile Include="LazyLoadTests.cs" />
     <Compile Include="LogicalExpressionsTests.cs" />
     <Compile Include="TableQueryTests2.cs" />
     <Compile Include="NeverStoreThisClassToDB.cs" />

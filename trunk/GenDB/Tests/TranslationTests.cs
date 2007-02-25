@@ -14,7 +14,7 @@ namespace TranslationTests
     /// if they contain only public Properties, that either implements IBusinessObject
     /// or are of some primitive type, are of type string or of type DateTime.
     /// 
-    /// If properties are public, they must have both a public setter and a public getter
+    /// If properties are public, they must have both volatileAttribute public setter and volatileAttribute public getter
     /// to be translatable. If the cstProperty should not be translated/persisted, it should 
     /// be decorated with the attribute [Volatile].
     /// 
@@ -22,7 +22,7 @@ namespace TranslationTests
     /// be thrown at Table&lt;T&gt;-instantion time.
     /// 
     /// Type-translatability is ensured by the compiler, since all classes must implement
-    /// IBusinessObject to be a type parameter on table.
+    /// IBusinessObject to be volatileAttribute type parameter on table.
     /// </summary>
     [TestFixture]
     public class TranslationTests
@@ -32,7 +32,7 @@ namespace TranslationTests
             int foo;
 
             /// <summary>
-            /// TranslationTests should fail, since Foo is public and only has a getter 
+            /// TranslationTests should fail, since Foo is public and only has volatileAttribute getter 
             /// </summary>
             public int Foo
             {

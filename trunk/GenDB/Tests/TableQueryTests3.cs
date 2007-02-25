@@ -183,6 +183,7 @@ namespace QueryToSqlTranslationTests
         [Test]
         public void TestContains()
         {
+            dataContext.SubmitChanges();
             var ps = from persons in ttp
                     where persons.Name.Contains("ame")
                     select persons;

@@ -194,7 +194,7 @@ namespace GenDB
 
         public System.Collections.Generic.IEnumerator<T> GetEnumerator()
         {
-            if (linqFunc == null || true)
+            if (linqFunc == null)
             {
                 return UnFilteredEnumerator();
             }
