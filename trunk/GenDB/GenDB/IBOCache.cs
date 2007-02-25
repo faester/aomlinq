@@ -386,6 +386,7 @@ namespace GenDB
                 ibo = obj.Original;
                 if (ibo != null)
                 {
+                    // Ensure that object is treated as non-persistent in later translations
                     DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
                     obj.Original.DBIdentity = newID;
                 }
@@ -394,6 +395,7 @@ namespace GenDB
             // Indicate that object is no longer under cache control
             if (uncommittedObjects.TryGetValue(id, out ibo))
             {
+                // Ensure that object is treated as non-persistent in later translations
                 DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
                 ibo.DBIdentity = newID;
                 uncommittedObjects.Remove(id);
