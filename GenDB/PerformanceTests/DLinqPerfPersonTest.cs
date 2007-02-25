@@ -12,8 +12,9 @@ namespace PerformanceTests
     public class DLinqPersonDB<T> : DataContext 
         where T : GenDB.IBusinessObject, new()
     {
-        public Table<PerfPerson> Table;
-        //public Table<Car> TableCar;
+        public Table<PerfPerson> Persons;
+        public Table<Car> Cars;
+        //public Persons<Car> TableCar;
         public DLinqPersonDB(string cnnstr)
             : base(cnnstr) { }
     }
@@ -23,7 +24,7 @@ namespace PerformanceTests
     {
         DLinqPersonDB<T> db = null;
         Table<PerfPerson> table;
-        //Table<Car> tableCar;
+        //Persons<Car> tableCar;
         TestOutput testOutput;
         int lastInsert = 0;
 
@@ -32,32 +33,33 @@ namespace PerformanceTests
             this.testOutput = testOutput;
 
             this.db = new DLinqPersonDB<T>("server=.;database=" + dbName + ";Integrated Security=SSPI");
-            //db.DeleteDatabase();
+
             if (!db.DatabaseExists())
             {
                 Console.WriteLine("Creating DLinq db");
                 db.CreateDatabase();
             }
-            table = db.Table;
+            table = db.Persons;
             //tableCar = db.TableCar;
             //CleanDB();
         }
 
         public void InitTests(int objectCount)
         {
-            int count = Sequence.Count(table);
+            int count = table.Count<PerfPerson>(p => true);
             int needToAdd = objectCount - count;
             if (needToAdd > 0)
             {
                 Console.WriteLine("Adding {0} objects to table", needToAdd);
                 for (int i = count; i < objectCount; i++)
                 {
-                    PerfPerson p = new PerfPerson{Name="name"+(i+1), Age=(i+1) };
-
+                    PerfPerson p = new PerfPerson { Name = "name" + (i + 1), Age = (i + 1) };
+                    p.PersonID = i;
                     Car car = new Car();
-                    //car.Entries = p;
-                    
-                    p.Entries.Add(car);
+                    car.Id = i;
+
+                    p.Cars.Add(car);
+                    car.Owner = p;
                     table.Add(p);
                     
                 }
@@ -69,8 +71,8 @@ namespace PerformanceTests
         public void CleanDB()
         {
             //db.DeleteDatabase();
-            table.RemoveAll(table);
-            db.SubmitChanges();
+            //table.RemoveAll(table);
+            //db.SubmitChanges();
         }
 
         public long PerformSelectNothingTest(int objectCount)
@@ -81,7 +83,7 @@ namespace PerformanceTests
             var v = from t in table
                     where t.Name == "Albert E"
                     select t;
-            foreach(PerfPerson pp in v) {c=pp.GList.Count;}
+            foreach(PerfPerson pp in v) {c=pp.Cars.Count;}
             long ms = sw.ElapsedMilliseconds;
             return ms;
         }
@@ -139,7 +141,7 @@ namespace PerformanceTests
                     select t;
             foreach(PerfPerson pp in v) 
             {
-                foreach(Car car in pp.Entries)
+                foreach(Car car in pp.Cars)
                 {
                     c++;
                 }
@@ -164,7 +166,7 @@ namespace PerformanceTests
                        select subt;
             foreach(PerfPerson pp in subv) 
             {
-                foreach(Car car in pp.Entries)
+                foreach(Car car in pp.Cars)
                 {
                     c++;
                 }
