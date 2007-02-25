@@ -11,7 +11,7 @@ namespace GenDB
 
         IBusinessObject CreateInstanceOfIBusinessObject();
 
-        IEnumerable<PropertyConverter> FieldConverters { get; }
+        IEnumerable<IPropertyConverter> FieldConverters { get; }
 
         void SetProperty(long propertyPOID, IBusinessObject obj, object propertyValue);
 
@@ -19,9 +19,9 @@ namespace GenDB
 
         void SetValues(IBusinessObject ibo, IEntity ie);    
 
-        PropertyConverter GetPropertyConverter(int propertyPOID);
+        IPropertyConverter GetPropertyConverter(int propertyPOID);
 
-        PropertyConverter GetPropertyConverter(IProperty property);
+        IPropertyConverter GetPropertyConverter(IProperty property);
 
         /// <summary>
         /// This method is introduced to allow different save 
