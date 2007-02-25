@@ -194,6 +194,7 @@ namespace QueryToSqlTranslationTests
                 count++;
                 Console.WriteLine(p.Name);
             }
+
             Assert.AreEqual(count, ps.Count, "Count method of tables returned erroneous result.");
             Assert.AreEqual(10, ps.Count, "not enough persons returned");
         }

@@ -9,9 +9,10 @@ namespace PerformanceTests
     [Table(Name="Cars")]
     public class Car : IBusinessObject
     {
-        int id = 0;
+
+        long id = 0;
         [Column(Id = true), Volatile]
-        public int Id 
+        public long Id 
         {
             get{return id;}
             set{id = value;}
@@ -46,6 +47,15 @@ namespace PerformanceTests
     [Table(Name="Persons")]
     public class PerfPerson : IBusinessObject
     {
+
+
+        public static long pid=1;
+        public long Pid
+        {
+            get{return pid;}
+            set{pid++;}
+        }
+
         DBIdentifier entityPOID;
         public DBIdentifier DBIdentity 
         {

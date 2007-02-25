@@ -16,7 +16,7 @@ namespace PerformanceTests
             {
                 Console.WriteLine("No parameters specified. Using 'G R 20 30 400'");
                 Console.WriteLine("Use /? to get help");
-                args = new String[] { "D", "Q", "1", "1000", "10000"};
+                args = new String[] { "G", "Q", "1", "1000", "10000", "200000"};
             }
             
             ITest theTest = null;
@@ -70,6 +70,10 @@ namespace PerformanceTests
                         GenDB.DataContext dc = GenDB.DataContext.Instance;
                         dc.DatabaseName = "perftestGQ";
                         //dc.DeleteDatabase();
+                        if (dc.DatabaseExists())
+                        {
+                            dc.DeleteDatabase();
+                        }
                         if (!dc.DatabaseExists())
                         {
                             dc.CreateDatabase();

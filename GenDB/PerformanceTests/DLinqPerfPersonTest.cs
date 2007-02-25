@@ -15,6 +15,7 @@ namespace PerformanceTests
         public Table<PerfPerson> Persons;
         public Table<Car> Cars;
         //public Persons<Car> TableCar;
+
         public DLinqPersonDB(string cnnstr)
             : base(cnnstr) { }
     }
@@ -24,15 +25,17 @@ namespace PerformanceTests
     {
         DLinqPersonDB<T> db = null;
         Table<PerfPerson> table;
+
         //Persons<Car> tableCar;
+
         TestOutput testOutput;
         int lastInsert = 0;
 
         public DLinqPerfPersonTest(TestOutput testOutput, string dbName)
         {
             this.testOutput = testOutput;
-
             this.db = new DLinqPersonDB<T>("server=.;database=" + dbName + ";Integrated Security=SSPI");
+
 
             if (!db.DatabaseExists())
             {
@@ -41,12 +44,12 @@ namespace PerformanceTests
             }
             table = db.Persons;
             //tableCar = db.TableCar;
-            //CleanDB();
         }
 
         public void InitTests(int objectCount)
         {
             int count = table.Count<PerfPerson>(p => true);
+
             int needToAdd = objectCount - count;
             if (needToAdd > 0)
             {
@@ -57,11 +60,11 @@ namespace PerformanceTests
                     p.PersonID = i;
                     Car car = new Car();
                     car.Id = i;
-
+                    
                     p.Cars.Add(car);
                     car.Owner = p;
+
                     table.Add(p);
-                    
                 }
                 Console.WriteLine("Submitting.");
                 db.SubmitChanges();
@@ -125,8 +128,14 @@ namespace PerformanceTests
             var v = from t in table
                     where t.Age <= amount
                     select t;
-            foreach(PerfPerson pp in v) {c++;}
-            if (c < amount) throw new Exception();
+            foreach(PerfPerson pp in v) 
+            {
+                foreach(Car car in pp.Cars)
+                {
+                    c++;
+                }
+            }
+            Console.WriteLine("Cars  {0}", c);
             long ms = sw.ElapsedMilliseconds;
             return ms;
         }
@@ -154,8 +163,8 @@ namespace PerformanceTests
 
         public long PerformSelectFiftySubFiftyPctTest(int objectCount)
         {
-            int amount = objectCount/50;
-            int half = amount/50;
+            int amount = objectCount/2;
+            int half = amount/2;
             int c=0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -165,6 +174,7 @@ namespace PerformanceTests
             var subv = from subt in v
                        where subt.Age <= half
                        select subt;
+            Console.WriteLine(subv.Count());
             foreach(PerfPerson pp in subv) 
             {
                 foreach(Car car in pp.Cars)
