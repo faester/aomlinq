@@ -107,7 +107,35 @@ namespace GenDB
 
         protected abstract PropertyInfo[] GetPropertiesToTranslate();
 
+        private IPropertyConverter ConstructLazyPropertyConverter(
+            Type t, 
+            PropertyInfo clrProperty, 
+            IProperty prop, 
+            DataContext dataContext,
+            LazyLoad laz
+            )
+        {
+            string fieldName = laz.Storage;
+            if (fieldName == null) { throw new NullReferenceException("When Properties are decorated with LazyLoad attribute, the storage field must be specified using 'Storage'-parameter"); }
+            FieldInfo field = t.GetField(fieldName, BindingFlags.Public | BindingFlags.Public);
+            if (field == null) { throw new Exception("Could not find specified storage field '" + fieldName + "'"); }
 
+            Type fieldsType = field.FieldType;
+            if (!fieldsType.IsGenericType) { throw new Exception("Storage field is not generic"); }
+            Type genericTypeParam = fieldsType.GetGenericArguments()[0];
+
+            if (fieldsType.GetGenericTypeDefinition () != typeof(LazyLoader<>))
+            {
+                throw new Exception("Storage field must be of type " + typeof(LazyLoader).ToString());
+            }
+
+            if (genericTypeParam.GetInterface(typeof(IBusinessObject).ToString()) == null)
+            {
+                throw new Exception("Storage fields generic type parameter does not implement IBusinessObject.");
+            }
+
+            throw new Exception("Not implemented");
+        }
 
         private void InitPropertyTranslators()
         {
@@ -122,11 +150,7 @@ namespace GenDB
                     if (lazyLoadAttribute != null)
                     {
                         LazyLoad laz = (LazyLoad)lazyLoadAttribute;
-                        string fieldName = laz.Storage;
-                        if (fieldName == null) { throw new NullReferenceException("When Properties are decorated with LazyLoad attribute, the storage field must be specified using 'Storage'-parameter"); }
-
-
-                        fieldConverters.AddLast(new PropertyConverter(t, clrProperty, prop, dataContext));
+                        fieldConverters.AddLast(ConstructLazyPropertyConverter(t, clrProperty, prop, dataContext, laz));
                     }
                     else
                     {

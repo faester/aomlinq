@@ -16,7 +16,13 @@ namespace GenDB
 
     public class LazyLoader
     {
-        protected bool isLoaded = false;
+        private bool isLoaded = false;
+
+        internal bool IsLoaded
+        {
+            get { return isLoaded; }
+            set { isLoaded = value; }
+        }
 
         internal int entityPOID = 0;
 
@@ -53,27 +59,27 @@ namespace GenDB
     public sealed class LazyLoader<T> : LazyLoader
         where T : IBusinessObject
     {
-        public LazyLoader() { isLoaded = true; }
+        public LazyLoader() { IsLoaded = true; }
         private T element;
 
         public LazyLoader(T element)
         {
             this.element = element;
-            isLoaded = true;
+            IsLoaded = true;
         }
 
         public T Element
         {
             get {
-                if (!isLoaded)
+                if (!IsLoaded)
                 {
-                    isLoaded = true;
+                    IsLoaded = true;
                     Load();
                 }
                 return element;
             }
             set {
-                isLoaded = true;
+                IsLoaded = true;
                 element = value;
             }
         }
@@ -83,4 +89,5 @@ namespace GenDB
             element = (T)LoadObject();
         }
     }
+
 }

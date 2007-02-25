@@ -11,7 +11,7 @@ namespace GenDB
      */
 
     /// <summary>
-    /// Used to convert between a property of volatileAttribute class and an IPropertyValue 
+    /// Used to convert between a property of a class and an IPropertyValue 
     /// </summary>
     class PropertyConverter : GenDB.IPropertyConverter
     {
