@@ -15,6 +15,7 @@ namespace PerformanceTests
         ExcelWriter selectHundredPctOut;
         ExcelWriter selectFiftySubFiftyPctOut;
         ExcelWriter selectNothingOut;
+        ExcelWriter selectUnconditionalOut;
 
         public TestOutput(string filename, string prefix, string type)
         {
@@ -26,6 +27,7 @@ namespace PerformanceTests
                 selectHundredPctOut = new ExcelWriter(filename, prefix + "_selecthundredprocent");
                 selectFiftySubFiftyPctOut = new ExcelWriter(filename, prefix + "_selectfiftysubfifty");
                 selectNothingOut = new ExcelWriter(filename, prefix + "_selectnothing");
+                selectUnconditionalOut = new ExcelWriter(filename, prefix + "_selectunconditional");
             }
             else
             {
@@ -78,6 +80,11 @@ namespace PerformanceTests
         public void RecieveSelectNothingTestResult(int objCount, double time)
         {
             selectNothingOut.WriteInformation(objCount, time);
+        }
+        
+        public void RecieveSelectUnconditionalTestResult(int objCount, double time)
+        {
+            selectUnconditionalOut.WriteInformation(objCount, time);
         }
     }
 }

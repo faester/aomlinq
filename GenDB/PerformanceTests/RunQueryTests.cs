@@ -47,6 +47,10 @@ namespace PerformanceTests
                 Console.WriteLine("Performing select 0 of {0} objects", objectCount);
                 ms = test.PerformSelectNothingTest(objectCount);
                 to.RecieveSelectNothingTestResult(objectCount,ms);
+
+                Console.WriteLine("Performing select unconditional of {0} objects", objectCount);
+                ms = test.PerformSelectUnconditionalTest(objectCount);
+                to.RecieveSelectUnconditionalTestResult(objectCount,ms);
             }
         }
     }

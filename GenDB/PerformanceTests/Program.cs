@@ -16,7 +16,7 @@ namespace PerformanceTests
             {
                 Console.WriteLine("No parameters specified. Using 'G R 20 30 400'");
                 Console.WriteLine("Use /? to get help");
-                args = new String[] { "G", "Q", "10", "1000", "2000","4000","7000","10000","15000","20000"};
+                args = new String[] { "G", "Q", "11", "1000", "10000", "20000","50000","70000","100000"};
             }
             
             ITest theTest = null;
@@ -46,7 +46,7 @@ namespace PerformanceTests
 
             if(testType == "Q") 
             {
-                fileName = "querytest.xls";
+                fileName = "querytest2.xls";
                 TestOutput to = new TestOutput (fileName, dbSystem,"Q");
                 Console.WriteLine("Writing to {0}",fileName);
 
