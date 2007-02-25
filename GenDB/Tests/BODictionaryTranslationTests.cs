@@ -74,7 +74,8 @@ namespace BODictionaryTests
 
             dataContext.SubmitChanges();
             GC.Collect();
-            dataContext.SubmitChanges();
+
+            Console.WriteLine("Size of cache: {0}, {1}", dataContext.UnCommittedObjectsSize, dataContext.CommittedObjectsSize);
         }
 
         private void RetrieveTest<K, V>(Func<K, V> mapping, Func<K, int> keyToInt)
