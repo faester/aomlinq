@@ -18,6 +18,11 @@ namespace GenDB
         GetHandler gh;
         DataContext dataContext;
 
+        SetHandler fieldSetter;
+        GetHandler fieldGetter;
+
+
+
         public PropertyConverterLazy (Type t, FieldInfo llField, IProperty prop, DataContext dc, PropertyInfo propInfo)
         {
             lazyLoaderField = llField;
@@ -30,14 +35,20 @@ namespace GenDB
 
             propertyPOID = prop.PropertyPOID;
 
+            fieldSetter = DynamicMethodCompiler.CreateSetHandler(t, llField);
+            fieldGetter = DynamicMethodCompiler.CreateGetHandler(t, llField);
+
             instantiator = DynamicMethodCompiler.CreateInstantiateObjectHandler(llField.FieldType);
 
             gh = DynamicMethodCompiler.CreateGetHandler(t, propInfo);
 
             ps = delegate(IBusinessObject ibo, object value)
             {
+                Console.WriteLine(value);
+                Console.WriteLine(value.GetType());
                 // We can cast to LazyLoader, since this is a subtype of LazyLoader<T>
                 LazyLoader fieldValue = (instantiator() as LazyLoader);
+                Console.WriteLine(fieldValue.GetType());
                 if (value == null)
                 {
                     fieldValue.entityPOID = 0;
@@ -48,6 +59,7 @@ namespace GenDB
                     fieldValue.entityPOID = Convert.ToInt32(value);
                     fieldValue.IsLoaded = false;
                 }
+                fieldSetter(ibo, fieldValue);
             };
         }
 
@@ -104,15 +116,34 @@ namespace GenDB
                 }
                 else
                 {
-                    IBOReference iboreference = new IBOReference(ibo.DBIdentity);
+                    IBOReference iboreference = new IBOReference(propibo.DBIdentity);
                     e.GetPropertyValue(iproperty).RefValue = iboreference;
                 }
             }
         }
 
+        internal SetHandler PropertySetHandler
+        {
+            get { return this.setHandler; }
+        }
+
         public PropertySetter PropertySetter
         {
             get { return ps; }
+        }
+
+        internal GetHandler PropertyGetHandler
+        {
+            get { return gh; }
+        }
+
+        #endregion
+
+        #region IPropertyConverter Members
+
+        public void CloneProperty(object source, object target)
+        {
+            fieldSetter(target, fieldGetter(source));
         }
 
         #endregion

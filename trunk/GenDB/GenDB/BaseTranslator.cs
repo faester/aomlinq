@@ -59,7 +59,7 @@ namespace GenDB
             InitPropertyTranslators();
             InitInstantiator();
             InitSuperTranslator();
-            foreach (PropertyConverter fc in fieldConverterDict.Values)
+            foreach (IPropertyConverter fc in fieldConverterDict.Values)
             {
                 allFieldConverters.AddLast(fc);
             }
@@ -117,7 +117,7 @@ namespace GenDB
         {
             string fieldName = laz.Storage;
             if (fieldName == null) { throw new NullReferenceException("When Properties are decorated with LazyLoad attribute, the storage field must be specified using 'Storage'-parameter"); }
-            FieldInfo field = t.GetField(fieldName, BindingFlags.Public | BindingFlags.Public);
+            FieldInfo field = t.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance );
             if (field == null) { throw new Exception("Could not find specified storage field '" + fieldName + "'"); }
 
             Type fieldsType = field.FieldType;
@@ -134,7 +134,8 @@ namespace GenDB
                 throw new Exception("Storage fields generic type parameter does not implement IBusinessObject.");
             }
 
-            throw new Exception("Not implemented");
+            
+            return new PropertyConverterLazy(t, field, prop, dataContext, clrProperty);
         }
 
         private void InitPropertyTranslators()
@@ -201,7 +202,7 @@ namespace GenDB
                     IPropertyValue propertyValue = property.CreateNewPropertyValue(e);
                 }
 
-                foreach (PropertyConverter fcv in fieldConverters)
+                foreach (IPropertyConverter fcv in fieldConverters)
                 {
                     fcv.SetEntityPropertyValue(ibo, e);
                 }

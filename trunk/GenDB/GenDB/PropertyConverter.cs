@@ -268,5 +268,14 @@ namespace GenDB
                 throw new NotTranslatableException("Have not implemented PropertySetter for field type.", propInfo);
             }
         }
+
+        #region IPropertyConverter Members
+
+        public void CloneProperty(object source, object target)
+        {
+            PropertySetHandler(target, PropertyGetHandler(source));
+        }
+
+        #endregion
     }
 }
