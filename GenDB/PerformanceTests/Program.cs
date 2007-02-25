@@ -28,25 +28,6 @@ namespace PerformanceTests
             string fileName = null;
             LinkedList<int> objectCounts = new LinkedList<int>();
 
-            //GenDB.DataContext.Instance.DatabaseName = "perftestDA";
-            //if (!GenDB.DataContext.Instance.DatabaseExists())
-            //{
-            //    GenDB.DataContext.Instance.CreateDatabase();
-            //}
-            //GenDB.DataContext.Instance.Init();
-            
-            //GenDB.Table<PerfTestAllPrimitiveTypes > table = GenDB.DataContext.Instance.GetTable<PerfTestAllPrimitiveTypes>();
-
-            //var q = from p in table
-            //        where p.Dbl * p.Integer == 0.2
-            //        select p;
-
-            //foreach(PerfTestAllPrimitiveTypes pt in q)
-            //{
-            //    Console.WriteLine (pt);
-            //}
-            //return;
-
             if (args.Length < 4)
             {
                 Console.WriteLine("Usage: PerformanceTests {D | G} {R | A | Q} repetitions objectCount1, ..., objectCountN");
@@ -123,7 +104,10 @@ namespace PerformanceTests
                 {
                     GenDB.DataContext dc = GenDB.DataContext.Instance;
                     dc.DatabaseName = dbName;
-                    dc.DeleteDatabase();
+                    if (testType != "R" && dc.DatabaseExists())
+                    {
+                        dc.DeleteDatabase();
+                    }
                     if (!dc.DatabaseExists())
                     {
                         dc.CreateDatabase();
