@@ -25,6 +25,15 @@ namespace PerformanceTests
             get{return entityPOID;}
             set{entityPOID = value;}
         }
+
+        private EntityRef<PerfPerson> _entries = new EntityRef<PerfPerson>();
+        [Volatile]
+        public PerfPerson Entries
+        {
+            get{return this._entries.Entity;}
+            set{this._entries.Entity=value;}
+        }
+
     }
 
     [Table(Name="t_PerfPerson")]
