@@ -65,6 +65,10 @@ namespace GenDB.DB
 
             cmd.Parameters[0].Value = entityPOID;
 
+            cnn = dataContext.CreateDBConnection();
+
+            cmd.Connection = cnn;
+
             cnn.Open();
 
             SqlDataReader reader = cmd.ExecuteReader();
