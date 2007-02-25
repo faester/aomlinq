@@ -394,16 +394,11 @@ namespace GenDB.DB
         {
             IBusinessObject result = null;
 
-            if (false)
+            if (true)
             {
                 if (!dataContext.IBOCache.TryGet(entityPOID, out result))
                 {
                     result = oeg.GetByEntityPOID(entityPOID);
-                    if (result != null)
-                    {
-                        result.DBIdentity = new DBIdentifier(entityPOID, true);
-                        dataContext.IBOCache.AddFromDB(result);
-                    }
                 }
                 return result;
             }

@@ -237,13 +237,12 @@ namespace GenDB
         /// </summary>
         public void SubmitChanges()
         {
-            
             CommitChangedCommitted();
             // Der kan være objekter i committed, der henviser til andre objekter i committed.
             CommitUncommitted();
 
             TryGC();
-
+            
             dataContext.GenDB.CommitChanges();
         }
 

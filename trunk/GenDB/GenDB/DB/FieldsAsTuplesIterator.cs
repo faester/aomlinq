@@ -39,7 +39,8 @@ namespace GenDB.DB
                 "    BoolValue, " + // 3x
                 "    StringValue, " + // 4
                 "    DoubleValue, " + // 5
-                "    ReferenceValue " + // 6
+                "    ReferenceValue, " + // 6
+                "    e.EntityPOID " +
                 " FROM Entity e LEFT JOIN  " +
                 "      PropertyValue pv ON pv.EntityPOID = e.EntityPOID " +
                 " WHERE e.EntityPOID = @entityPOID"
@@ -60,14 +61,17 @@ namespace GenDB.DB
         /// <returns></returns>
         public IBusinessObject GetByEntityPOID(int entityPOID)
         {
+            IBusinessObject result = null;
+
+
             cmd.Parameters[0].Value = entityPOID;
+
             cnn.Open();
 
             SqlDataReader reader = cmd.ExecuteReader();
 
-            bool first = true;
+                bool first = true;
             int entityTypePOID = 0;
-            IBusinessObject result = null;
             IIBoToEntityTranslator translator = null;
             IEntityType et = null;
 
@@ -77,10 +81,11 @@ namespace GenDB.DB
                 {
                     first = false;
                     entityTypePOID = reader.GetInt32(0);
-                    Console.WriteLine(entityTypePOID);
                     et = dataContext.TypeSystem.GetEntityType(entityTypePOID);
                     translator = dataContext.Translators.GetTranslator(entityTypePOID);
                     result = translator.CreateInstanceOfIBusinessObject();
+                    result.DBIdentity = new DBIdentifier(entityPOID, true);
+                     dataContext.IBOCache.AddFromDB(result);
                 }
 
                 if (reader[1] != DBNull.Value) // Set values if they exist. (Otherwise the left join ensures null values in related reader fields)
@@ -96,7 +101,7 @@ namespace GenDB.DB
                         case MappingType.BOOL: propertyValue = reader.GetBoolean(3); break;
                         case MappingType.DATETIME: propertyValue = new DateTime(reader.GetInt64(2)); break;
                         case MappingType.DOUBLE: propertyValue = reader.GetDouble(5); break;
-                        case MappingType.LONG: reader.GetInt64(2); break;
+                        case MappingType.LONG: propertyValue = reader.GetInt64(2); break;
                         case MappingType.REFERENCE:
                             if (reader[6] == DBNull.Value) {
                                 propertyValue = null; 
@@ -108,14 +113,16 @@ namespace GenDB.DB
                             propertyValue = reader[4] == DBNull.Value ? null : reader.GetString(4);
                             break;
                     }
-                    Console.WriteLine("Setting property {0} to >'{1}'<", p, propertyValue);
-                    Console.WriteLine("Using translator {0}", translator);
+
+                    //PropertyConverter pc = translator.GetPropertyConverter(propertyPOID);
+                    //pc.PropertySetter(result, propertyValue);
                     translator.SetProperty(propertyPOID, result, propertyValue);
                 }
             }
 
             reader.Close();
             cnn.Close();
+
             return result;
         }
 
@@ -125,10 +132,6 @@ namespace GenDB.DB
         public void Dispose()
         {
             hasBeenDisposed = true;
-            //if (cnn.State == ConnectionState.Open)
-            //{
-            //    cnn.Close();
-            //}
         }
 
         #endregion
