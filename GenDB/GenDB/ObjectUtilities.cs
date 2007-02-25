@@ -165,9 +165,10 @@ namespace GenDB
 
             IBusinessObject clone = trans.CreateInstanceOfIBusinessObject();
 
-            foreach (PropertyConverter fc in trans.FieldConverters)
+            foreach (IPropertyConverter fc in trans.FieldConverters)
             {
-                fc.PropertySetHandler(clone, fc.PropertyGetHandler(o));
+                fc.CloneProperty(o, clone);
+                //fc.PropertySetHandler(clone, fc.PropertyGetHandler(o));
             }
 
             return clone;
