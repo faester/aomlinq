@@ -86,14 +86,14 @@ namespace PerformanceTests
             {
                 GenDB.DataContext dc = GenDB.DataContext.Instance;
                 dc.DatabaseName = dbName;
-                dc.DeleteDatabase();
+                
                 if (!dc.DatabaseExists())
                 {
                     dc.CreateDatabase();
                 }
                 dc.Init();
-                //dbtest= new GenDBPerfTests<PerfTestAllPrimitiveTypes>(dc);
-                dbtest = new GenDBPerfPersonTest(dc);
+                dbtest= new GenDBPerfTests<PerfTestAllPrimitiveTypes>(dc);
+                //dbtest = new GenDBPerfPersonTest(dc);
             }
             else 
             {
