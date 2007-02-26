@@ -63,7 +63,7 @@ namespace PerformanceTests
             set{entityPOID = value;}
         }
  
-        [Column(Id = true), Volatile]
+        [Column(Id = true)]
         public long PersonID = 0;
 
         private EntitySet<Car> _Cars = new EntitySet<Car>();
@@ -94,7 +94,7 @@ namespace PerformanceTests
 
         LazyLoader<BOList<Car>> carListHolder = new LazyLoader<BOList<Car>>(new BOList<Car>());
 
-        [LazyLoad(Storage = "carListHolder")]
+        [LazyLoad("carListHolder")]
         public BOList<Car> GList
         {
             get { return carListHolder.Element; }
@@ -103,7 +103,7 @@ namespace PerformanceTests
 
         LazyLoader<BODictionary<int, Car>> carDictHolder = new LazyLoader<BODictionary<int, Car>>(new BODictionary<int,Car>());
 
-        [LazyLoad(Storage = "carDictHolder")]
+        [LazyLoad("carDictHolder")]
         public BODictionary<int, Car> GDict {
             get { return carDictHolder.Element; }
             set { carDictHolder.Element = value; }

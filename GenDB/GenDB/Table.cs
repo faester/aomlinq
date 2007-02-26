@@ -14,7 +14,7 @@ namespace GenDB
     public enum TransactionLevel { DBConsistency, CacheChecking };
 
     public class Table<T> :  ICollection<T>, IEnumerable<T>, ICloneable
-        where T : IBusinessObject
+        where T : IBusinessObject, new()
     {
         TransactionLevel tLevel = TransactionLevel.DBConsistency;
         IExpression expression = new ExprInstanceOf(typeof(T));

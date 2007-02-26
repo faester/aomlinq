@@ -18,7 +18,7 @@ namespace GenDB
         }
 
         public Table<T> GetTable<T> (TransactionLevel transactionLevel)
-            where T : IBusinessObject
+            where T : IBusinessObject, new()
         {
             if (!isInitialized)
             {
@@ -34,7 +34,7 @@ namespace GenDB
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public Table<T> GetTable<T> ()
-            where T : IBusinessObject
+            where T : IBusinessObject, new()
         {
             return GetTable<T>(TransactionLevel.DBConsistency);
         }

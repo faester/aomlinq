@@ -36,7 +36,6 @@ namespace GenDB
     {
         DBIdentifier dbid;
 
-        [Volatile]
         InternalList<T> theList = new InternalList<T>();
 
         #region IList<T> Members
