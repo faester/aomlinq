@@ -189,6 +189,17 @@ namespace GenDB
         }
 
         /// <summary>
+        /// Updates the statistics of the
+        /// generic database. DataContext
+        /// must be initialized, and database 
+        /// must have been created.
+        /// </summary>
+        public void UpdateDBStatistics()
+        {
+            genDB.UpdateStaticstics();
+        }
+
+        /// <summary>
         /// Number of uncomitted objects in cache.
         /// </summary>
         public long UnCommittedObjectsSize

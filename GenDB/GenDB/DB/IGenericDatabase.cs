@@ -306,6 +306,12 @@ namespace GenDB.DB
         void RollbackTypeTransaction();
         void RollbackTransaction();
 
+
+        /// <summary>
+        /// Updates statistics on all tables in database.
+        /// </summary>
+        void UpdateStaticstics();
+
         /// <summary>
         /// Deletes all matching entities from database. 
         /// </summary>
