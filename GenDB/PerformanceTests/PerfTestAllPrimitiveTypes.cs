@@ -15,19 +15,9 @@ namespace PerformanceTests
     {
         static Random rnd = new Random(0);
         DBIdentifier entityPOID;
-        Car car;
 
-        public Car Car
-        {
-            get { return car; }
-            set { car = value; }
-        }
+        public PerfTestAllPrimitiveTypes() { }        
 
-        public PerfTestAllPrimitiveTypes()
-        {
-            car = new Car();
-        }
-        
 
         public DBIdentifier DBIdentity
         {
@@ -35,10 +25,9 @@ namespace PerformanceTests
             set { entityPOID = value; }
         }
 
-        long id = rnd.Next(1000);
-
+        int id = 0;
         [Column (Id = true, AutoGen = true), Volatile]
-        public long Id
+        public int Id
         {
             get { return id; }
             set { id = value; }
