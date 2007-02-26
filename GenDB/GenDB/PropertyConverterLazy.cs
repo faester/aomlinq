@@ -93,9 +93,26 @@ namespace GenDB
 
         public void SetEntityPropertyValue(IBusinessObject ibo, GenDB.DB.IEntity e)
         {
+            // Check if we can do with the LazyLoader object to avoid retrieving 
+            // the element from db. (Might speed up saving the object holding the reference.)
+            IPropertyValue pv = iproperty.CreateNewPropertyValue(e);
+
+            LazyLoader ll = (fieldGetter(ibo) as LazyLoader);
+            //if ( ll == null || (ll.IsLoaded && ll.IsNullReference))
+            //{
+            //    pv.RefValue = new IBOReference(true);
+            //    return;
+            //}
+
+            if (ll.IsLoaded && ll.entityPOID != 0)
+            {
+                pv.RefValue = new IBOReference(ll.entityPOID);
+                e.StorePropertyValue(pv);
+                return;
+            }
+
             // This class is only used with IBOReference properties...
             object reference = gh(ibo);
-            IPropertyValue pv = iproperty.CreateNewPropertyValue(e);
             if (reference == null)
             {
                 pv.RefValue = new IBOReference(true);

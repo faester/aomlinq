@@ -14,7 +14,7 @@ namespace PerformanceTests
         {
             if (args.Length == 0)
             {
-                args = new String[] { "G", "Q", "1", "1000", "10000", "200000"};
+                args = new String[] { "G", "Q", "1", "1000", "10000", "20000"};
                 Console.Write("No parameters specified. Using '");
                 bool first = true;
                 foreach (string s in args)
