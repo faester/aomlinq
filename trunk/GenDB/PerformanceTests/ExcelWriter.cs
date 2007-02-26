@@ -24,14 +24,6 @@ namespace PerformanceTests
 
         private ExcelWriter() { /* empty */ }
 
-        ~ExcelWriter()
-        {
-            if (!hasBeenDisposed)
-            {
-                Dispose();
-            }
-        }
-
         public ExcelWriter(string filename, string sheetname)
         {
             this.sheetname = sheetname;
