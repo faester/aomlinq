@@ -1157,5 +1157,31 @@ namespace GenDB.DB
             }
         }
         #endregion
+
+        #region IGenericDatabase Members
+
+
+        public void UpdateStaticstics()
+        {
+            SqlConnection cnn0 = dataContext.CreateDBConnection();
+            cnn0.Open();
+            SqlCommand cmd = new SqlCommand ("SELECT 'UPDATE STATISTICS ' + name FROM sysobjects WHERE type = 'u'", cnn0);
+
+            SqlDataReader statCommands = cmd.ExecuteReader();
+
+            while (statCommands.Read())
+            {
+                SqlConnection cnn1 = dataContext.CreateDBConnection();
+                cnn1.Open();
+                SqlCommand updateStatistics = new SqlCommand(statCommands.GetString(0), cnn1);
+                updateStatistics.ExecuteNonQuery();
+                cnn1.Close();
+            }
+
+            statCommands.Close();
+            cnn0.Close();
+        }
+
+        #endregion
     }
 }
