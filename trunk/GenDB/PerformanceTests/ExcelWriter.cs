@@ -6,10 +6,12 @@ using System.Data;
 
 namespace PerformanceTests
 {
-    public class ExcelWriter
+    public class ExcelWriter : IDisposable
     {
         string filename = null;
         string sheetname = null;
+        bool hasBeenDisposed = false;
+
         OleDbConnection cnn;
         OleDbCommand cmd;
         private static string ConnectionString(string outputfile)
@@ -21,6 +23,14 @@ namespace PerformanceTests
         }
 
         private ExcelWriter() { /* empty */ }
+
+        ~ExcelWriter()
+        {
+            if (!hasBeenDisposed)
+            {
+                Dispose();
+            }
+        }
 
         public ExcelWriter(string filename, string sheetname)
         {
@@ -64,6 +74,7 @@ namespace PerformanceTests
 
         public void Dispose()
         {
+            hasBeenDisposed = true;
             cnn.Close();
         }
     }
