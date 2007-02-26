@@ -328,7 +328,16 @@ namespace GenDB
                 throw new Exception("Was already set...");
             }
 
-            int entityTypePOID = dataContext.TypeSystem.GetEntityType(ibo.GetType()).EntityTypePOID;
+            Type t = ibo.GetType();
+
+            TypeSystem typSys = dataContext.TypeSystem;
+
+            if (!typSys.IsTypeKnown(t))
+            {
+                typSys.RegisterType(t);
+            }
+
+            int entityTypePOID = typSys.GetEntityType(t).EntityTypePOID;
 
             entityToTypeMapping[entityPOID] = entityTypePOID;
 
