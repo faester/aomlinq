@@ -42,6 +42,7 @@ namespace PerformanceTests
                 Console.WriteLine("Committing changes.");
                 dataContext.SubmitChanges();
             }
+            dataContext.UpdateDBStatistics();
         }
 
         public long PerformAllTests(int objectCount)
