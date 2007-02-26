@@ -120,7 +120,7 @@ namespace LastingPersistanceTests
                 p.Name = i.ToString();
                 p.Age = i;
                 p.CarsBrand = null;
-                
+
                 if (i % 2 == 0)
                 {
                     Car c = new Car();
@@ -132,7 +132,7 @@ namespace LastingPersistanceTests
             dc.SubmitChanges();
 
             //Make changes after first commit.
-            foreach(Person p in Persons)
+            foreach (Person p in Persons)
             {
                 if (p.Car != null)
                 {
@@ -144,12 +144,12 @@ namespace LastingPersistanceTests
 
             int idx = 0;
 
-            foreach(Person p in Persons)
+            foreach (Person p in Persons)
             {
                 idx++;
                 if (idx % 5 == 0)
                 {
-                    p.Car = new Car{Brand = "Five!"};
+                    p.Car = new Car { Brand = "Five!" };
                     p.CarsBrand = p.Car.Brand;
                 }
             }
@@ -165,8 +165,16 @@ namespace LastingPersistanceTests
 
         public void RetrieveData()
         {
-            bool foundBrandFive = false;
-            foreach(Person p in Persons)
+            LinkedList<Person> ps = new LinkedList<Person>();
+
+            foreach (Person p in Persons)
+            {
+                ps.AddLast(p);
+            }
+
+            Console.WriteLine("Done reading in objects");
+
+            foreach (Person p in ps)
             {
                 if (p.Age.ToString() != p.Name)
                 {
@@ -174,7 +182,7 @@ namespace LastingPersistanceTests
                     Console.WriteLine("Person {0} had errors in Name/Age", p);
                 }
 
-                if (p.CarsBrand != null )
+                if (p.CarsBrand != null)
                 {
                     if (p.CarsBrand == "")
                     {

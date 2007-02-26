@@ -90,7 +90,6 @@ namespace GenDB
     ///    }
     /// }
     /// </code>
-    /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
 
