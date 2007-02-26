@@ -5,6 +5,7 @@ using GenDB;
 using NUnit.Framework;
 using System.Query;
 using CommonTestObjects;
+using System.Expressions;
 
 namespace TranslationTests
 {
@@ -27,6 +28,11 @@ namespace TranslationTests
     [TestFixture]
     public class TranslationTests
     {
+        private class TestPersonsSecretSubclass : TestPerson
+        {
+
+        }
+
         private class ShouldFailNoSetter : AbstractBusinessObject
         {
             int foo;
@@ -246,6 +252,46 @@ namespace TranslationTests
                 Assert.IsNull(p.Name, "Found person with name >" + p.Name + "<");
             }
 
+        }
+
+        private void PopulateWithPersonSubclass()
+        {
+            Table<TestPerson> ttp = dc.GetTable<TestPerson>();
+            ttp.Clear();
+            dc.SubmitChanges();
+
+            for (int i = 0; i < 10; i ++)
+            {
+                TestPerson p = new TestPerson();
+                p.Spouse = new TestPersonsSecretSubclass();
+                p.Name = "HasSecretSpouse";
+                ttp.Add(p);
+            }
+
+            dc.SubmitChanges();
+        }
+
+        [Test]
+        public void FieldIsUnknownSubType()
+        {
+            PopulateWithPersonSubclass();
+            Table<TestPerson> ttp = dc.GetTable<TestPerson>();
+
+            var k = from ps in ttp
+                    where ps.Name == "HasSecretSpouse"
+                    select ps;
+
+            Type typeSP = typeof(TestPersonsSecretSubclass);
+            bool foundSome = false;
+
+            foreach(TestPerson p in k)
+            {
+                foundSome = true;
+                Assert.IsNotNull(p.Spouse, "Spouse was empty.");
+                Assert.IsTrue(typeSP.Equals(p.Spouse.GetType()), "Spouse should be of private subtype " + typeSP);
+            }
+
+            Assert.IsTrue(foundSome, "Did not find any persons.");
         }
 
     }
