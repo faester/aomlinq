@@ -14,7 +14,7 @@ namespace PerformanceTests
         {
             if (args.Length == 0)
             {
-                args = new String[] { "G", "Q", "1", "1000", "10000", "20000"};
+                args = new String[] { "D", "Q", "5", "1000", "10000", "20000"};
                 Console.Write("No parameters specified. Using '");
                 bool first = true;
                 foreach (string s in args)
@@ -38,7 +38,7 @@ namespace PerformanceTests
 
             if (args.Length < 4)
             {
-                Console.WriteLine("Usage: PerformanceTests {D | G} {R | A | Q} repetitions objectCount1, ..., objectCountN");
+                Console.WriteLine("Usage: PerformanceTests {Q | G} {R | A | Q} repetitions objectCount1, ..., objectCountN");
                 return;
             }
             

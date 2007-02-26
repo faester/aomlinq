@@ -101,13 +101,13 @@ namespace PerformanceTests
             set { carListHolder.Element = value; }
         }
 
-        LazyLoader<BODictionary<int, Car>> carDictHolder = new LazyLoader<BODictionary<int, Car>>(new BODictionary<int,Car>());
+        //LazyLoader<BODictionary<int, Car>> carDictHolder = new LazyLoader<BODictionary<int, Car>>(new BODictionary<int,Car>());
 
-        [LazyLoad("carDictHolder")]
-        public BODictionary<int, Car> GDict {
-            get { return carDictHolder.Element; }
-            set { carDictHolder.Element = value; }
-        }
+        //[LazyLoad("carDictHolder")]
+        //public BODictionary<int, Car> GDict {
+        //    get { return carDictHolder.Element; }
+        //    set { carDictHolder.Element = value; }
+        //}
 
     }
 }
