@@ -92,17 +92,21 @@ namespace PerformanceTests
             set{age=value;}
         }
 
-        private BOList<Car> gList = new BOList<Car>();
+        LazyLoader<BOList<Car>> carListHolder = new LazyLoader<BOList<Car>>(new BOList<Car>());
+
+        [LazyLoad(Storage = "carListHolder")]
         public BOList<Car> GList
         {
-            get{return gList;}
-            set{gList=value;}
+            get { return carListHolder.Element; }
+            set { carListHolder.Element = value; }
         }
 
-        BODictionary<int, Car> gDict = new BODictionary<int,Car>();
+        LazyLoader<BODictionary<int, Car>> carDictHolder = new LazyLoader<BODictionary<int, Car>>(new BODictionary<int,Car>());
+
+        [LazyLoad(Storage = "carDictHolder")]
         public BODictionary<int, Car> GDict {
-            get { return gDict; }
-            set { gDict = value; }
+            get { return carDictHolder.Element; }
+            set { carDictHolder.Element = value; }
         }
 
     }

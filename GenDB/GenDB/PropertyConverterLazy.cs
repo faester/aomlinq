@@ -44,11 +44,8 @@ namespace GenDB
 
             ps = delegate(IBusinessObject ibo, object value)
             {
-                Console.WriteLine(value);
-                Console.WriteLine(value.GetType());
                 // We can cast to LazyLoader, since this is a subtype of LazyLoader<T>
                 LazyLoader fieldValue = (instantiator() as LazyLoader);
-                Console.WriteLine(fieldValue.GetType());
                 if (value == null)
                 {
                     fieldValue.entityPOID = 0;
