@@ -7,7 +7,7 @@ using CommonTestObjects;
 
 namespace Tests
 {
-    [TestFixture]
+    //[TestFixture]
     public class CacheSubstitutionTests
     {
         const int NUM_ELEMENTS = 10;
