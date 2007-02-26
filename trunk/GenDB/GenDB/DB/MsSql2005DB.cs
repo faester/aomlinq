@@ -982,6 +982,9 @@ namespace GenDB.DB
         private void CreateIndexes(SqlConnection cnn, SqlTransaction t)
         {
             LinkedList<string> iCC = new LinkedList<string>(); //Table create commands
+
+            iCC.AddLast ("CREATE INDEX IDX_EntityPOID  ON PropertyValue (EntityPOID)");
+
             ExecuteNonQueries(iCC, cnn, t);
         }
 

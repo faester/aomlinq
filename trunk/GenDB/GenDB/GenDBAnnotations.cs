@@ -23,6 +23,13 @@ namespace GenDB
     public class LazyLoader
     {
         private bool isLoaded = false;
+        private bool isNullReference = false;
+
+        internal bool IsNullReference
+        {
+            get { return isNullReference; }
+            set { isNullReference = value; }
+        }
 
         internal bool IsLoaded
         {
@@ -32,7 +39,11 @@ namespace GenDB
 
         internal int entityPOID = 0;
 
-        protected internal LazyLoader() {}
+        protected internal LazyLoader() 
+        {
+            isNullReference = true;
+            isLoaded = true;
+        }
 
         /// <summary>
         /// For non-null references, use this
@@ -43,6 +54,7 @@ namespace GenDB
         {
             this.entityPOID = entityPOID;
             isLoaded = false;
+            isNullReference = false;
         }
 
         /// <summary>
@@ -54,11 +66,14 @@ namespace GenDB
         internal LazyLoader(bool isNullReference)
         {
             isLoaded = isNullReference;
+            this.isNullReference = isNullReference;
         }
 
         internal IBusinessObject LoadObject()
         {
-            return DataContext.Instance.GenDB.GetByEntityPOID(entityPOID);
+            IBusinessObject ibo = DataContext.Instance.GenDB.GetByEntityPOID(entityPOID);
+            isNullReference = (ibo == null);
+            return ibo;
         }
     }
 
@@ -71,6 +86,7 @@ namespace GenDB
         /// </summary>
         public LazyLoader() { 
             IsLoaded = true; 
+            IsNullReference = true;
             element = default(T);
         }
         private T element;
@@ -93,6 +109,7 @@ namespace GenDB
             }
             set {
                 IsLoaded = true;
+                IsNullReference = (value == null);
                 element = value;
             }
         }
