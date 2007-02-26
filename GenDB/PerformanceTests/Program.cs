@@ -25,7 +25,6 @@ namespace PerformanceTests
                 }
                 Console.WriteLine();
                 Console.WriteLine("Use /? to get help");
-                
             }
             
             ITest theTest = null;
