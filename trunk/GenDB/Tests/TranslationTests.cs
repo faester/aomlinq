@@ -272,7 +272,7 @@ namespace TranslationTests
         }
 
         [Test]
-        public void FieldIsUnknownSubType()
+        public void PropertyIsUnknownSubType()
         {
             PopulateWithPersonSubclass();
             Table<TestPerson> ttp = dc.GetTable<TestPerson>();
