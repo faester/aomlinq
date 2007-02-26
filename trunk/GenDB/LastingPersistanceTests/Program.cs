@@ -119,20 +119,41 @@ namespace LastingPersistanceTests
                 Person p = new Person();
                 p.Name = i.ToString();
                 p.Age = i;
-
+                p.CarsBrand = null;
+                
                 if (i % 2 == 0)
                 {
                     Car c = new Car();
                     c.Brand = "Brand" + i.ToString();
                     p.Car = c;
-                    p.CarsBrand = c.Brand;
-                }
-                else
-                {
-                    p.CarsBrand = null;
                 }
                 Persons.Add(p);
             }
+            dc.SubmitChanges();
+
+            //Make changes after first commit.
+            foreach(Person p in Persons)
+            {
+                if (p.Car != null)
+                {
+                    p.CarsBrand = p.Car.Brand;
+                }
+            }
+
+            dc.SubmitChanges();
+
+            int idx = 0;
+
+            foreach(Person p in Persons)
+            {
+                idx++;
+                if (idx % 5 == 0)
+                {
+                    p.Car = new Car{Brand = "Five!"};
+                    p.CarsBrand = p.Car.Brand;
+                }
+            }
+
             dc.SubmitChanges();
         }
     }
@@ -144,6 +165,7 @@ namespace LastingPersistanceTests
 
         public void RetrieveData()
         {
+            bool foundBrandFive = false;
             foreach(Person p in Persons)
             {
                 if (p.Age.ToString() != p.Name)
@@ -154,7 +176,12 @@ namespace LastingPersistanceTests
 
                 if (p.CarsBrand != null )
                 {
-                    if (p.Car == null || p.Car.Brand != p.CarsBrand)
+                    if (p.CarsBrand == "")
+                    {
+                        Console.WriteLine("Emptystring in CarsBrand for {0}", p);
+                        errorsFound++;
+                    }
+                    else if (p.Car.Brand != p.CarsBrand)
                     {
                         errorsFound++;
                         Console.WriteLine("Person {0} had errors in car information", p);
