@@ -74,9 +74,9 @@ namespace PerformanceTests
         public void CleanDB()
         {
             //db.DeleteDatabase();
-            //db.Cars.RemoveAll(db.Cars);
-            //table.RemoveAll(table);
-            //db.SubmitChanges();
+            db.Cars.RemoveAll(db.Cars);
+            table.RemoveAll(table);
+            db.SubmitChanges();
         }
 
         public long PerformSelectNothingTest(int objectCount)
