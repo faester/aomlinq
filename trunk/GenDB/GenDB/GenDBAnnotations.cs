@@ -4,14 +4,20 @@ using System.Text;
 
 namespace GenDB
 {
+    [AttributeUsage(AttributeTargets.Property)]
     public class Volatile : Attribute { }
 
     /// <summary>
     /// Indicates that the user
     /// </summary>
+    [AttributeUsage(AttributeTargets.Property)]
     public class LazyLoad : Attribute
     {
         public string Storage;
+        private LazyLoad() {}
+        public LazyLoad(string storage) { 
+            Storage = storage;
+        }
     }
 
     public class LazyLoader
@@ -59,7 +65,14 @@ namespace GenDB
     public sealed class LazyLoader<T> : LazyLoader
         where T : IBusinessObject
     {
-        public LazyLoader() { IsLoaded = true; }
+        /// <summary>
+        /// When using this constructor the element 
+        /// will be set to default(t);
+        /// </summary>
+        public LazyLoader() { 
+            IsLoaded = true; 
+            element = default(T);
+        }
         private T element;
 
         public LazyLoader(T element)

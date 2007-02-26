@@ -87,7 +87,6 @@ namespace QueryToSqlTranslationTests
         }
 
         public class Student : Person { 
-            [Volatile]
             public long id = nextID++; // Should not be persisted due to attribute.
             private DateTime enlisted;
 

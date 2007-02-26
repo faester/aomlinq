@@ -138,7 +138,6 @@ namespace GenDB
 
         public class Student : Person { 
             public static long test = 100; //This should not be persisted since it is static
-            [Volatile]
             public long id = nextID++; // Should not be persisted due to attribute.
             private DateTime enlisted;
 
