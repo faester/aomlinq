@@ -144,5 +144,17 @@ namespace GenDB
         }
 
         #endregion
+
+        #region IPropertyConverter Members
+
+
+        public bool CompareProperties(object a, object b)
+        {
+            LazyLoader la = (fieldGetter(a) as LazyLoader);
+            LazyLoader lb = (fieldGetter(a) as LazyLoader);
+            return ((la == null && lb == null) || (la.IsLoaded == lb.IsLoaded && la.entityPOID == lb.entityPOID));
+        }
+
+        #endregion
     }
 }

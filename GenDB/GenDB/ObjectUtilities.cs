@@ -214,36 +214,9 @@ namespace GenDB
 
             IIBoToEntityTranslator trans = DataContext.Instance.Translators.GetTranslator(t);
 
-            foreach (PropertyConverter fc in trans.FieldConverters)
+            foreach (IPropertyConverter fc in trans.FieldConverters)
             {
-                object vala = fc.PropertyGetHandler(a);
-                object valb = fc.PropertyGetHandler(b);
-
-                if (fc.ReferenceCompare)
-                {
-                    if (!Object.ReferenceEquals(vala, valb))
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    if (vala == null && valb == null)
-                    {
-                        /* ignore */
-                    }
-                    else
-                    {
-                        if (vala == null ^ valb == null)
-                        {
-                            return false;
-                        }
-                        else if (!vala.Equals(valb))
-                        {
-                            return false;
-                        }
-                    }
-                }
+                if (!fc.CompareProperties(a, b)) { return false; }
             }
 
             return true;

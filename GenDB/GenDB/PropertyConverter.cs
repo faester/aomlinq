@@ -277,5 +277,41 @@ namespace GenDB
         }
 
         #endregion
+
+        #region IPropertyConverter Members
+
+
+        public bool CompareProperties(object a, object b)
+        {
+            if (ReferenceCompare)
+            {
+                return Object.ReferenceEquals(PropertyGetHandler(a), PropertyGetHandler(b));
+            }
+            else 
+            {
+                try{
+                    object vala = PropertyGetHandler(a);
+                    object valb = PropertyGetHandler(b);
+                    // String are compared using equals, so test if both are null.
+                    if (vala == null && valb == null)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return vala.Equals(valb);
+                    }
+                }
+                catch(NullReferenceException nr)
+                {
+                    Console.WriteLine(this.propertyInfo);
+                    Console.WriteLine(a.GetType());
+                    Console.WriteLine(b.GetType());
+                    throw nr;
+                }
+            }
+        }
+
+        #endregion
     }
 }
