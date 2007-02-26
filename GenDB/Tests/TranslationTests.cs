@@ -213,5 +213,40 @@ namespace TranslationTests
                 Assert.AreEqual(persistedSetvalue, hvpr.Persisted, "Persisted property was not persisted.");
             }
         }
+
+        private void Populate()
+        {
+            Table<TestPerson> ttp = dc.GetTable<TestPerson>();
+            ttp.Clear();
+            dc.SubmitChanges();
+
+            for (int i = 0; i < 100; i++)
+            {
+                TestPerson tp = new TestPerson();
+                tp.Name = null;
+                ttp.Add(tp);
+            }
+
+            dc.SubmitChanges();
+            GC.Collect();
+
+            dc.SubmitChanges();
+            GC.Collect();
+
+        }
+
+        [Test]
+        public void StringRemainsNull()
+        {
+            Populate();
+            Table<TestPerson> ttp = dc.GetTable<TestPerson>();
+
+            foreach(TestPerson p in ttp)
+            {
+                Assert.IsNull(p.Name, "Found person with name >" + p.Name + "<");
+            }
+
+        }
+
     }
 }
