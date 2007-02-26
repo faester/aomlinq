@@ -143,7 +143,7 @@ namespace GenDB
                 case MappingType.STRING:
                     return delegate(IEntity e, object value)
                     {
-                        e.GetPropertyValue(p).StringValue = Convert.ToString(value);
+                        e.GetPropertyValue(p).StringValue = value == null ? null : Convert.ToString(value);
                     };
                 default:
                     throw new Exception("Unknown MappingType in DelegateTranslator, CreateSetter: " + p.MappingType);
