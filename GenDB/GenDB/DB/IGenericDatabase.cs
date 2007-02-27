@@ -242,7 +242,8 @@ namespace GenDB.DB
         IEntityType NewEntityType();
 
         /// <summary>
-        /// Returns a unique id. 
+        /// Returns a unique id. The property must never return the value 0, since this is 
+        /// given special treatment inside the translation system.
         /// </summary>
         int NextEntityPOID { get; }
 
