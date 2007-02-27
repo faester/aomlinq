@@ -126,7 +126,7 @@ namespace GenDB
         /// in the table to the array given starting 
         /// from at position index in the array.
         /// </summary>
-        /// <param name="arr">Target array for elements</param>
+        /// <param name="arr">WeakTarget array for elements</param>
         /// <param name="index">Starting position in array</param>
         public void CopyTo(T[] arr, int index)
         {
