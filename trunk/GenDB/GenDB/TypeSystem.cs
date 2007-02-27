@@ -31,7 +31,21 @@ namespace GenDB
 
         private DataContext dataContext;
 
-        internal TypeSystem(DataContext dataContext)
+        private static TypeSystem instance = null;
+
+        internal static TypeSystem Instance
+        {
+            get { return TypeSystem.instance; }
+            set { TypeSystem.instance = value; }
+        }
+
+        internal static void Init(DataContext dataContext)
+        {
+            if (instance != null) { throw new Exception("Internal error: More than one TypeSystem init attempt was made."); }
+            TypeSystem.instance = new TypeSystem(dataContext);
+        }
+
+        private TypeSystem(DataContext dataContext)
         {
             this.dataContext = dataContext;
         }
