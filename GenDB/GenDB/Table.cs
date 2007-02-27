@@ -8,15 +8,9 @@ using GenDB.DB;
 
 namespace GenDB
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public enum TransactionLevel { DBConsistency, CacheChecking };
-
     public class Table<T> :  ICollection<T>, IEnumerable<T>, ICloneable
         where T : IBusinessObject, new()
     {
-        TransactionLevel tLevel = TransactionLevel.DBConsistency;
         IExpression expression = new ExprInstanceOf(typeof(T));
         IGenericDatabase db = null;
         TranslatorSet translators = null;
@@ -52,11 +46,6 @@ namespace GenDB
             }
         }
 
-        internal Table(IGenericDatabase db, TranslatorSet translators, TypeSystem ts, IBOCache iboCache, TransactionLevel tLevel)
-            : this(db, translators, ts, iboCache)
-        {
-            this.tLevel = tLevel;
-        }
         #endregion
 
         internal IWhereable Expression
@@ -66,16 +55,21 @@ namespace GenDB
 
         #region ICollection members
 
-        public void Add(T ibo)
+
+        /// <summary>
+        /// Adds element to Table. element can not be null.
+        /// </summary>
+        /// <param name="element">Element to add</param>
+        public void Add(T element)
         {
-            if (ibo == null) { throw new NullReferenceException("Value can not be null."); }
-            Type t = ibo.GetType();
+            if (element == null) { throw new NullReferenceException("Value can not be null."); }
+            Type t = element.GetType();
             if (!typeSystem.IsTypeKnown(t))
             {
                typeSystem.RegisterType(t);
             }
             IIBoToEntityTranslator trans = translators.GetTranslator(t);
-            trans.SaveToDB(ibo);
+            trans.SaveToDB(element);
         }
 
         /// <summary>
@@ -315,7 +309,6 @@ namespace GenDB
             clone.iboCache = this.iboCache;
             clone.expression = this.expression;
             clone.linqFunc = this.linqFunc;
-            clone.tLevel = this.tLevel;
 
             return clone;
         }
