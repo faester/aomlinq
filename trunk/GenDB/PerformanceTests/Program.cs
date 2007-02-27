@@ -14,8 +14,8 @@ namespace PerformanceTests
         {
             if (args.Length == 0)
             {
-                args = new String[] { "D", "Q", "5", "1000", "10000", "20000"};
-                Console.Write("No parameters specified. Using '");
+                args = new String[] { "G", "R", "10", "100000" };
+                Console.Write("No parameters specified. Using \"");
                 bool first = true;
                 foreach (string s in args)
                 {
@@ -23,7 +23,7 @@ namespace PerformanceTests
                     else { first = false; }
                     Console.Write(s);
                 }
-                Console.WriteLine();
+                Console.WriteLine("\"");
                 Console.WriteLine("Use /? to get help");
             }
             

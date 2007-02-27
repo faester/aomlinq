@@ -123,7 +123,7 @@ namespace GenDB
                 IBOCache cache = DataContext.Instance.IBOCache;
                 if (!propibo.DBIdentity.IsPersistent)
                 {
-                    cache.Add(propibo, dataContext.GenDB.NextEntityPOID);
+                    cache.Add(propibo);
                     IBOReference iboreference = new IBOReference(propibo.DBIdentity);
                     e.GetPropertyValue(iproperty).RefValue = iboreference;
                 }

@@ -62,7 +62,7 @@ namespace GenDB
 
             if (!ibo.DBIdentity.IsPersistent) 
             {
-                dataContext.IBOCache.Add(ibo, this.dataContext.GenDB.NextEntityPOID);
+                dataContext.IBOCache.Add(ibo);
             }
             e.EntityPOID = ibo.DBIdentity; 
             return e;

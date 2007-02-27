@@ -63,23 +63,9 @@ namespace GenDB
         public void Add(T element)
         {
             if (element == null) { throw new NullReferenceException("Value can not be null."); }
-            //Type t = element.GetType();
-            //if (!typeSystem.IsTypeKnown(t))
-            //{
-            //   typeSystem.RegisterType(t);
-            //}
-            //IIBoToEntityTranslator trans = translators.GetTranslator(t);
-            //trans.SaveToDB(element);
-            
-            
-
-            if (element.DBIdentity.IsPersistent)
+            if (!element.DBIdentity.IsPersistent)
             {
-                iboCache.Add (element, element.DBIdentity);
-            }
-            else
-            {
-                iboCache.Add (element, this.db.NextEntityPOID);
+                iboCache.Add (element);
             }
         }
 
