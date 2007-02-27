@@ -129,8 +129,7 @@ namespace GenDB
                         IBusinessObject ibo = (IBusinessObject)value;
                         if (!ibo.DBIdentity.IsPersistent)
                         {
-                            IEntity refered = dataContext.GenDB.NewEntity();
-                            dataContext.IBOCache.Add(ibo, refered.EntityPOID);
+                            dataContext.IBOCache.Add(ibo, dataContext.GenDB.NextEntityPOID);
                             IBOReference reference = new IBOReference(ibo.DBIdentity);
                             e.GetPropertyValue(p).RefValue = reference;
                         }

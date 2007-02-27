@@ -50,9 +50,7 @@ namespace GenDB
 
         public new IEntity Translate(IBusinessObject ibo)
         {
-            //IEntityType elementEntityType = TypeSystem.GetEntityType(elementType);
-            IEntity e = null;
-            e = dataContext.GenDB.NewEntity();
+            IEntity e = new GenDB.DB.Entity();
 
             // The mapping type for the elements are stored in this cstProperty. No other values are relevant.
             IProperty elementTypeProperty = EntityType.GetProperty(TypeSystem.COLLECTION_ELEMENT_TYPE_PROPERTY_NAME);
@@ -62,15 +60,11 @@ namespace GenDB
             e.EntityType = EntityType;
             pv.StringValue = elementType.FullName;
 
-            if (ibo.DBIdentity.IsPersistent) 
-            { 
-                e.EntityPOID = ibo.DBIdentity; 
+            if (!ibo.DBIdentity.IsPersistent) 
+            {
+                dataContext.IBOCache.Add(ibo, this.dataContext.GenDB.NextEntityPOID);
             }
-            else
-            { 
-                dataContext.IBOCache.Add(ibo, e.EntityPOID);
-            }
-
+            e.EntityPOID = ibo.DBIdentity; 
             return e;
         }
 
