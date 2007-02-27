@@ -12,6 +12,7 @@ namespace GenDB
     {
         DictKeyValueMapping mapping = null;
         
+        [Volatile]
         public DictKeyValueMapping Mapping
         {
             get { return mapping; }
@@ -99,9 +100,19 @@ namespace GenDB
 
             DictKeyValueMapping k = Mapping;
 
-                k = (from m in dkv_mappings
+            var q = from m in dkv_mappings
                     where m.DictionaryId == DBIdentity.Value
-                    select m).First();
+                    select m;
+
+            foreach(DictKeyValueMapping map in q)
+            {
+                k = map;
+            }
+
+            if (k == null)
+            {
+                return;
+            }
 
             InternalList<V> values = (InternalList<V>)DataContext.Instance.GenDB.GetByEntityPOID (k.ValueListId);
             InternalList<K> keys = (InternalList<K>)DataContext.Instance.GenDB.GetByEntityPOID (k.KeyListId);
@@ -182,6 +193,9 @@ namespace GenDB
             Mapping.KeyListId = keys.DBIdentity;
             Mapping.ValueListId = values.DBIdentity;
             Mapping.DictionaryId = DBIdentity;
+            
+            IEntity ie = DataContext.Instance.GenDB.NewEntity();
+            DataContext.Instance.IBOCache.Add(Mapping, ie.EntityPOID);
         }
 
         public bool ContainsKey(K key)
