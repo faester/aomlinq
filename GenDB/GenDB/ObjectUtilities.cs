@@ -165,7 +165,7 @@ namespace GenDB
 
             IBusinessObject clone = trans.CreateInstanceOfIBusinessObject();
 
-            foreach (IPropertyConverter fc in trans.FieldConverters)
+            foreach (IPropertyConverter fc in trans.PropertyConverters)
             {
                 fc.CloneProperty(o, clone);
                 //fc.PropertySetHandler(clone, fc.PropertyGetHandler(o));
@@ -214,7 +214,7 @@ namespace GenDB
 
             IIBoToEntityTranslator trans = DataContext.Instance.Translators.GetTranslator(t);
 
-            foreach (IPropertyConverter fc in trans.FieldConverters)
+            foreach (IPropertyConverter fc in trans.PropertyConverters)
             {
                 if (!fc.CompareProperties(a, b)) { return false; }
             }

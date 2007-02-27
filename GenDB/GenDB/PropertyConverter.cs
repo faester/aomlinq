@@ -88,9 +88,9 @@ namespace GenDB
             referenceCompare = !propertyType.IsPrimitive && propertyType != typeof(string) && propertyType != typeof(DateTime);
         }
 
-        public void SetEntityPropertyValue(IBusinessObject ibo, IEntity e)
+        public void SetEntityPropertyValue(IBusinessObject source, IEntity target)
         {
-            pvs(e, propertyGetHandler(ibo));
+            pvs(target, propertyGetHandler(source));
         }
 
         PropertyValueSetter CreateSetter(IProperty p)

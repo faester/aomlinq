@@ -43,7 +43,7 @@ namespace GenDB
         }
 
 
-        public IEnumerable<IPropertyConverter> FieldConverters
+        public IEnumerable<IPropertyConverter> PropertyConverters
         {
             get
             {
@@ -70,7 +70,7 @@ namespace GenDB
             if (entityType.SuperEntityType != null)
             {
                 superTranslator = dataContext.Translators.GetTranslator(entityType.SuperEntityType.EntityTypePOID);
-                foreach (PropertyConverter fc in superTranslator.FieldConverters)
+                foreach (PropertyConverter fc in superTranslator.PropertyConverters)
                 {
                     fieldConverterDict[fc.PropertyPOID] = fc;
                 }

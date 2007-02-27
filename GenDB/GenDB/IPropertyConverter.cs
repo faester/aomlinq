@@ -3,10 +3,36 @@ namespace GenDB
 {
     interface IPropertyConverter
     {
+
+        /// <summary>
+        /// The id of the property this IPropertyConverter can convert
+        /// </summary>
         long PropertyPOID { get; set; }
+
+        /// <summary>
+        /// The Type object describing the type of the Property 
+        /// translatable by this IPropertyConverter
+        /// </summary>
         Type PropertyType { get; }
+
+        /// <summary>
+        /// Indicates if the associated property should be
+        /// compared using reference comparison.
+        /// </summary>
         bool ReferenceCompare { get; set; }
-        void SetEntityPropertyValue(IBusinessObject ibo, GenDB.DB.IEntity e);
+
+        /// <summary>
+        /// Will set the property associated with this IPropertyConverter
+        /// of the given IEntity to the value held by the property in source.
+        /// </summary>
+        /// <param name="source">Where to get property</param>
+        /// <param name="taret">Will set IPropertyValue in this IEntity</param>
+        void SetEntityPropertyValue(IBusinessObject source, GenDB.DB.IEntity target);
+
+
+        /// <summary>
+        /// The propertysetter associated with this object
+        /// </summary>
         PropertySetter PropertySetter { get; }
 
         /// <summary>
