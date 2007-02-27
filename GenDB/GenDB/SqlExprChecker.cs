@@ -10,7 +10,7 @@ namespace GenDB
     /// <para>
     /// The class modifies the visited clause in a manner that makes
     /// it possible to translate the resulting clause to SQL. The
-    /// set described by the original clause will always be a subset
+    /// set described by the element clause will always be a subset
     /// of the result clause.
     /// </para>
     /// <para>
@@ -60,7 +60,7 @@ namespace GenDB
         /// </para>
         /// <para>
         /// The purpose of the said substitutions is to ensure, that 
-        /// the set described by the original clause is a subset of 
+        /// the set described by the element clause is a subset of 
         /// the set described by the result clause.
         /// </para>
         /// </summary>
