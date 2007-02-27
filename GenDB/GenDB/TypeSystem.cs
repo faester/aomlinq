@@ -109,7 +109,7 @@ namespace GenDB
             }
             dataContext.GenDB.Save(et);
             dataContext.GenDB.CommitTypeChanges();
-            //dataContext.Translators.RegisterTranslator(ce.ClrType, ce.Target);
+            //dataContext.Translators.RegisterTranslator(ce.ClrType, ce.WeakTarget);
         }
 
         /// <summary>

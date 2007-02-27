@@ -98,17 +98,13 @@ namespace GenDB
         /// </summary>
         internal int UnCommittedObjectsSize
         {
-            get { 
-                return uncommittedObjects.Count;
-            }
+            get { return uncommittedObjects.Count; }
         }
 
         /// <summary>
         /// Stores objects with weak references to allow garbage collection of 
         /// the cached objects.
         /// </summary>
-        //Dictionary<long, IBOCacheElement> committedObjects = new Dictionary<long, IBOCacheElement>();
-
         Dictionary<int, CommittedObjectsOfType> committedObjects = new Dictionary<int, CommittedObjectsOfType>();
 
         ///// <summary>
@@ -164,17 +160,7 @@ namespace GenDB
             }
             else
             {
-                if (!wr.IsAlive)
-                {
-                    committedObjects[entityTypePOID].Remove(entityPOID);
-                    entityToTypeMapping.Remove(entityPOID);
-                    obj = null;
-                    return false;
-                }
-                else
-                {
-                    obj = wr.Target;
-                }
+                obj = wr.Element;
             }
             return true;
         }
@@ -197,7 +183,7 @@ namespace GenDB
                 foreach (IBOCacheElement ce in co)
                 {
                     ll[idx++] = ce;
-                    ce.Original = null;
+                    ce.ReleaseStrongReference();
                 }
 
                 GC.Collect();
@@ -207,7 +193,7 @@ namespace GenDB
                 {
                     if (ce.IsAlive)
                     {
-                        ce.Original = ce.Target;
+                        ce.ReEstablishStrongReference();
                     }
                     else
                     {
@@ -295,15 +281,15 @@ namespace GenDB
             {
                 foreach (IBOCacheElement ce in co)
                 {
-                    if (ce.Original.DBIdentity.IsPersistent && ce.IsDirty)
+                    if (ce.Element.DBIdentity.IsPersistent && ce.IsDirty)
                     {
                         if (ce.IsAlive)
                         {
-                            IBusinessObject ibo = ce.Original;
+                            IBusinessObject ibo = ce.Element;
                             IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
                             trans.SaveToDB(ibo);
 
-                            ce.ClearDirtyBit();
+                            ce.SetNotDirty();
                         }
                         else
                         {
@@ -352,6 +338,11 @@ namespace GenDB
             uncommittedObjects.Add(entityPOID, ibo);
         }
 
+
+        private void CheckRegisterType(Type t)
+        {
+            
+        }
         
 
         /// <summary>
@@ -397,13 +388,13 @@ namespace GenDB
             
             if (committedObjects[entityTypePOID].TryGetValue(id, out obj))
             {
-                ibo = obj.Original;
+                ibo = obj.Element;
                 if (ibo != null)
                 {
                     // Ensure that object is treated as non-persistent in later translations
                     // Since DBIdentity.Value is non-null, 
                     DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
-                    obj.Original.DBIdentity = newID;
+                    obj.Element.DBIdentity = newID;
                 }
             }
 

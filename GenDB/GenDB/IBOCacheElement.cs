@@ -4,6 +4,11 @@ using System.Text;
 
 namespace GenDB
 {
+    /// <summary>
+    /// Use to store committed objects in the cache.
+    /// Will store a clone of the object given at instantiation
+    /// time to enable change tracking. 
+    /// </summary>
     internal sealed class IBOCacheElement
     {
         WeakReference wr;
@@ -19,10 +24,23 @@ namespace GenDB
 
         IBusinessObject original;
 
-        public IBusinessObject Original
+        /// <summary>
+        /// Contains the element given at instantiation time.
+        /// </summary>
+        public IBusinessObject Element
         {
             get { return original; }
-            set { original = value; }
+            //set { original = value; }
+        }
+
+        public void ReleaseStrongReference()
+        {
+            original = null;
+        }
+
+        public void ReEstablishStrongReference()
+        {
+            original = (wr.Target as IBusinessObject);
         }
 
         private IBOCacheElement() { /* empty */ }
@@ -62,12 +80,7 @@ namespace GenDB
             }
         }
 
-        public IBusinessObject Target
-        {
-            get { return (IBusinessObject)wr.Target; }
-        }
-
-        public void ClearDirtyBit()
+        public void SetNotDirty()
         {
             if (!isCollection) {
                 clone = (IBusinessObject)ObjectUtilities.MakeClone((IBusinessObject)wr.Target);
