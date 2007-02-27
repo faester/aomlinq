@@ -100,8 +100,6 @@ namespace GenDB
             name2IEt.Add(et.Name, ce);
             type2IEt.Add(ce.ClrType, ce);
             
-            dataContext.IBOCache.PrepareForType(et.EntityTypePOID);
-
             // Register et at its supertype, if one is present
             if (et.SuperEntityType != null)
             {
@@ -109,7 +107,6 @@ namespace GenDB
             }
             dataContext.GenDB.Save(et);
             dataContext.GenDB.CommitTypeChanges();
-            //dataContext.Translators.RegisterTranslator(ce.ClrType, ce.WeakTarget);
         }
 
         /// <summary>
