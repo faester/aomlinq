@@ -71,14 +71,15 @@ namespace GenDB
             //IIBoToEntityTranslator trans = translators.GetTranslator(t);
             //trans.SaveToDB(element);
             
+            
+
             if (element.DBIdentity.IsPersistent)
             {
                 iboCache.Add (element, element.DBIdentity);
             }
             else
             {
-                IEntity ie = db.NewEntity();
-                iboCache.Add (element, ie.EntityPOID);
+                iboCache.Add (element, this.db.NextEntityPOID);
             }
         }
 

@@ -241,13 +241,14 @@ namespace GenDB.DB
         /// <returns></returns>
         IEntityType NewEntityType();
 
-        IEntity NewEntity();
+        /// <summary>
+        /// Returns a unique id. 
+        /// </summary>
+        int NextEntityPOID { get; }
 
         IProperty NewProperty();
 
         IPropertyType NewPropertyType();
-
-        //IPropertyValue NewPropertyValue();
 
         /// <summary>
         /// Returns all IEntityTypes stored in the database.
@@ -256,8 +257,6 @@ namespace GenDB.DB
         /// </summary>
         /// <returns></returns>
         IEnumerable<IEntityType> GetAllEntityTypes();
-
-        //IBusinessObject GetEntity(int entityPOID);
 
         /// <summary>
         /// Clears all elements stored for the 

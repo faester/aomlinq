@@ -176,17 +176,14 @@ namespace GenDB
 
         public IEntity Translate(IBusinessObject ibo)
         {
-            IEntity res = dataContext.GenDB.NewEntity();
-
             // Drop the db-created DBIdentity if DBTag is set.
-            if (ibo.DBIdentity.IsPersistent)
-            {
-                res.EntityPOID = ibo.DBIdentity;
-            }
-            else
+            if (!ibo.DBIdentity.IsPersistent)
             { // No DBTag. Add it to cache/db, and assign tag
-                dataContext.IBOCache.Add(ibo, res.EntityPOID);
+
+                dataContext.IBOCache.Add(ibo, this.dataContext.GenDB.NextEntityPOID);
             }
+            IEntity res = new Entity();
+            res.EntityPOID = ibo.DBIdentity;
             res.EntityType = entityType;
             SetValues(ibo, res);
             return res;
