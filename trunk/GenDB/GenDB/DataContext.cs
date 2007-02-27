@@ -17,27 +17,16 @@ namespace GenDB
             get { return isInitialized; }
         }
 
-        public Table<T> GetTable<T> (TransactionLevel transactionLevel)
+        public Table<T> GetTable<T> ()
             where T : IBusinessObject, new()
         {
             if (!isInitialized)
             {
                 Init();
             }
-            return new Table<T>(GenDB, Translators, TypeSystem, IBOCache, transactionLevel);
+            return new Table<T>(GenDB, Translators, TypeSystem, IBOCache);
         }
 
-
-        /// <summary>
-        /// Returns a table with 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public Table<T> GetTable<T> ()
-            where T : IBusinessObject, new()
-        {
-            return GetTable<T>(TransactionLevel.DBConsistency);
-        }
 
         public static DataContext Instance
         {

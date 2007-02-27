@@ -17,7 +17,7 @@ namespace Tests
         [SetUp]
         public void Setup()
         {
-            personsTable = DataContext.Instance.GetTable<TestPerson>(TransactionLevel.CacheChecking);
+            personsTable = DataContext.Instance.GetTable<TestPerson>();
             personsTable.Clear();
             AddPersons();
         }

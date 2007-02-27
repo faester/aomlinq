@@ -356,7 +356,7 @@ namespace GenDB
         /// We also assume that this method is only called from the db, why the 
         /// id part of the identity should be set before this method is invoked.
         /// </summary>
-        /// <param name="ibo"></param>
+        /// <param name="element"></param>
         internal void AddFromDB(IBusinessObject ibo)
         {
             if (!ibo.DBIdentity.IsPersistent)

@@ -25,7 +25,7 @@ namespace GenDB
     /// Sets a property value of the given IBusinessObject to
     /// the value contained in value.
     /// </summary>
-    /// <param name="ibo"></param>
+    /// <param name="element"></param>
     /// <param name="value"></param>
     delegate void PropertySetter(IBusinessObject ibo, object value);
 
