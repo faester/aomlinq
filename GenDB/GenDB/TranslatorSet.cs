@@ -94,7 +94,8 @@ namespace GenDB
                 }
                 else
                 {
-                    throw new NotTranslatableException("Can not translate generic types", t.GetGenericTypeDefinition());
+                    return new IBOTranslator(t, iet, dataContext);
+                    //throw new NotTranslatableException("Can not translate generic types", t.GetGenericTypeDefinition());
                 }
             }
             else

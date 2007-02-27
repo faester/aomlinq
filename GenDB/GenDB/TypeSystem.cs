@@ -370,7 +370,8 @@ namespace GenDB
                 }
                 else 
                 {
-                    throw new NotTranslatableException ("Don't know how to construct IEntityType for type", t.GetGenericTypeDefinition());
+                    return IBOEntityType(t);
+                    //throw new NotTranslatableException ("Don't know how to construct IEntityType for type", t.GetGenericTypeDefinition());
                 }
             }
             else
