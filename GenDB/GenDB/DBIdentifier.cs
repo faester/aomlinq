@@ -12,7 +12,9 @@ namespace GenDB
 
         internal DBIdentifier (int value, bool isPersistent)
         {
-            this.value = isPersistent ? value | IS_SET_MASK : value;
+            this.value = isPersistent 
+                ? (value | IS_SET_MASK) 
+                : value;
         }
 
         public bool IsPersistent

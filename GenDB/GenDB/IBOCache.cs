@@ -321,7 +321,7 @@ namespace GenDB
         /// </summary>
         /// <param name="clone"></param>
         /// <param name="knudBoergesBalsam"></param>
-        internal void Add(IBusinessObject ibo, int entityPOID)
+        internal void Add(IBusinessObject ibo)
         {
             if (ibo.DBIdentity.IsPersistent)
             {
@@ -338,6 +338,12 @@ namespace GenDB
             }
 
             int entityTypePOID = typSys.GetEntityType(t).EntityTypePOID;
+
+            int entityPOID = ibo.DBIdentity.Value;
+            
+            if (entityPOID == 0) {
+                entityPOID = dataContext.GenDB.NextEntityPOID;
+            }
 
             entityToTypeMapping[entityPOID] = entityTypePOID;
 
@@ -395,6 +401,7 @@ namespace GenDB
                 if (ibo != null)
                 {
                     // Ensure that object is treated as non-persistent in later translations
+                    // Since DBIdentity.Value is non-null, 
                     DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
                     obj.Original.DBIdentity = newID;
                 }

@@ -180,7 +180,7 @@ namespace GenDB
             if (!ibo.DBIdentity.IsPersistent)
             { // No DBTag. Add it to cache/db, and assign tag
 
-                dataContext.IBOCache.Add(ibo, this.dataContext.GenDB.NextEntityPOID);
+                dataContext.IBOCache.Add(ibo);
             }
             IEntity res = new Entity();
             res.EntityPOID = ibo.DBIdentity;

@@ -194,7 +194,7 @@ namespace GenDB
             Mapping.ValueListId = values.DBIdentity;
             Mapping.DictionaryId = DBIdentity;
             
-            DataContext.Instance.IBOCache.Add(Mapping, DataContext.Instance.GenDB.NextEntityPOID );
+            DataContext.Instance.IBOCache.Add(Mapping);
         }
 
         public bool ContainsKey(K key)

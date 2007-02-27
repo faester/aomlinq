@@ -71,7 +71,6 @@ namespace TableTests
         [SetUp]
         public void SetUp()
         {
-            Console.WriteLine("TABLE TEST SETUP *********************************");
             tpt = dataContext.GetTable<TestPerson>();
 
             tpt.Clear();
@@ -100,9 +99,6 @@ namespace TableTests
             t_carOwners.Add (caro);
 
             dataContext.SubmitChanges();
-
-            Console.WriteLine("Car has " + c.DBIdentity);
-            Console.WriteLine("CarOwner " + caro.DBIdentity);
         }
 
         [Test]
