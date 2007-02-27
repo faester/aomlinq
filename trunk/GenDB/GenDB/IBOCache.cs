@@ -200,6 +200,7 @@ namespace GenDB
                         int entityPOID = ce.EntityPOID;
                         int entityTypePOID = entityToTypeMapping[entityPOID];
                         committedObjects[entityTypePOID].Remove(entityPOID);
+                        ce.Dispose();
                         Remove(entityPOID);
                     }
                 }
@@ -245,6 +246,7 @@ namespace GenDB
                 entityToTypeMapping.Remove(i);
             }
             uncommittedObjects.Clear();
+            TryGC();
         }
 
         /// <summary>
