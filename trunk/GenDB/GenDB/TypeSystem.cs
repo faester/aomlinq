@@ -36,7 +36,6 @@ namespace GenDB
         internal static TypeSystem Instance
         {
             get { return TypeSystem.instance; }
-            set { TypeSystem.instance = value; }
         }
 
         internal static void Init(DataContext dataContext)

@@ -63,8 +63,8 @@ namespace GenDB
 
         internal DataContext()
         {
-            // Instantiation order is vital!
-            translators = new TranslatorSet(this);
+            TranslatorSet.Init(this);
+            translators = TranslatorSet.Instance;
             genDB = new MsSql2005DB (this);
         }
 
@@ -76,7 +76,8 @@ namespace GenDB
             }
             iboCache = new IBOCache(this);
 
-            typeSystem = new TypeSystem (this);
+            TypeSystem.Init(this);
+            typeSystem = TypeSystem.Instance;
             typeSystem.Init();
              
             
