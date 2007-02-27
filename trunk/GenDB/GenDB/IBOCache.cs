@@ -216,7 +216,7 @@ namespace GenDB
         /// Adds object to the cache and assigns a DBTag 
         /// at the same time.
         /// </summary>
-        /// <param name="ibo">IBusinessObject to add</param>
+        /// <param name="source">IBusinessObject to add</param>
         internal void Add(IBusinessObject ibo)
         {
             if (ibo.DBIdentity.IsPersistent)
