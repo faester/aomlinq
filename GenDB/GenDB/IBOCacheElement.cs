@@ -9,7 +9,7 @@ namespace GenDB
     /// Will store a clone of the object given at instantiation
     /// time to enable change tracking. 
     /// </summary>
-    internal sealed class IBOCacheElement
+    internal sealed class IBOCacheElement : IDisposable
     {
         WeakReference wr; // Used temporarely when cache element is trying to allow garbage collection of its object
         IBusinessObject clone; // The object in its state when cache element was instantiated
@@ -31,14 +31,12 @@ namespace GenDB
             { 
                 isCollection = true; 
             }
-            //else
-            //{
-            //    clone = (IBusinessObject)ObjectUtilities.MakeClone(target);
-            //}
-
             element = target;
+
+            wr = new WeakReference(element);
             
             entityPOID = target.DBIdentity;
+            
             SetNotDirty();
         }
 
@@ -48,7 +46,6 @@ namespace GenDB
         public IBusinessObject Element
         {
             get { return element; }
-            //set { element = value; }
         }
 
 
@@ -61,7 +58,6 @@ namespace GenDB
         /// </summary>
         public void ReleaseStrongReference()
         {
-            wr = new WeakReference(element);
             element = null;
         }
 
@@ -73,7 +69,6 @@ namespace GenDB
         public void ReEstablishStrongReference()
         {
             element = (wr.Target as IBusinessObject);
-            wr = null;
         }
 
         /// <summary>
@@ -115,5 +110,16 @@ namespace GenDB
                 (element as IDBSaveableCollection).HasBeenModified = false;
             }
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            wr = null;
+            element = null;
+            clone = null;
+        }
+
+        #endregion
     }
 }
