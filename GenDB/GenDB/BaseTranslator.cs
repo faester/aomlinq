@@ -6,6 +6,11 @@ using System.Reflection;
 
 namespace GenDB
 {
+
+    /// <summary>
+    /// This abstract class describes basic behaviour of the different  
+    /// IIBoTranslators. 
+    /// </summary>
     abstract class BaseTranslator :  IIBoToEntityTranslator
     {
         IEntityType entityType;
@@ -50,7 +55,6 @@ namespace GenDB
                 return allFieldConverters;
             }
         }
-
 
         protected void Init()
         {
