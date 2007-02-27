@@ -596,7 +596,7 @@ namespace GenDB.DB
         /// IExpression is parsed. (The SqlExprChecker can 
         /// perform the operation of removing untranslatable 
         /// expression while ensuring, that the result set of 
-        /// the original Linq expression will always be a subset
+        /// the element Linq expression will always be a subset
         /// of the result set returned by the database constrained
         /// by the IExpression the SqlExprChecked produces.)
         /// </summary>

@@ -283,19 +283,11 @@ namespace GenDB
                 {
                     if (ce.Element.DBIdentity.IsPersistent && ce.IsDirty)
                     {
-                        if (ce.IsAlive)
-                        {
-                            IBusinessObject ibo = ce.Element;
-                            IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
-                            trans.SaveToDB(ibo);
+                        IBusinessObject ibo = ce.Element;
+                        IIBoToEntityTranslator trans = dataContext.Translators.GetTranslator(ibo.GetType());
+                        trans.SaveToDB(ibo);
 
-                            ce.SetNotDirty();
-                        }
-                        else
-                        {
-                            //TODO: Should never happen, but need proper testing....
-                            throw new Exception("Object reclaimed before if was flushed to the DB.");
-                        }
+                        ce.SetNotDirty();
                     }
                 }
             }
