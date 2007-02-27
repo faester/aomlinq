@@ -8,7 +8,7 @@ using GenDB.DB;
 
 namespace GenDB
 {
-    public class Table<T> :  ICollection<T>, IEnumerable<T>, ICloneable
+    public class Table<T> :  ICollection<T>, ICloneable
         where T : IBusinessObject, new()
     {
         IExpression expression = new ExprInstanceOf(typeof(T));
