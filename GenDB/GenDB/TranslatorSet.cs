@@ -11,7 +11,22 @@ namespace GenDB
         Dictionary<int, IIBoToEntityTranslator> etPOID2translator = new Dictionary<int, IIBoToEntityTranslator>();
         DataContext dataContext = null;
 
-        internal TranslatorSet(DataContext dataContext)
+        private static TranslatorSet instance;
+
+        /// <summary>
+        /// Init must be invoked before first access to the instance.
+        /// </summary>
+        internal static TranslatorSet Instance
+        {
+            get { return TranslatorSet.instance; }
+        }
+
+        internal static void Init(DataContext dataContext)
+        {
+            TranslatorSet.instance = new TranslatorSet(dataContext);
+        }
+
+        private TranslatorSet(DataContext dataContext)
         {
             if (dataContext == null) { throw new NullReferenceException("typeSystem"); }
             this.dataContext = dataContext;
