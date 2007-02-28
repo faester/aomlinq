@@ -22,7 +22,7 @@ namespace LazyLoadTests
                 set { personName = value; }
             }
 
-            [LazyLoad("personLoader")]
+            [LazyLoad(Storage = "personLoader")]
             public TestPerson Person
             {
                 get { return personLoader.Element;}

@@ -22,10 +22,10 @@ namespace GenDB
     public class LazyLoad : Attribute
     {
         public string Storage;
-        private LazyLoad() {}
-        public LazyLoad(string storage) { 
-            Storage = storage;
-        }
+        public LazyLoad() {}
+        //public LazyLoad(string storage) { 
+        //    Storage = storage;
+        //}
     }
 
 }

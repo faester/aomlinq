@@ -94,7 +94,7 @@ namespace PerformanceTests
 
         LazyLoader<BOList<Car>> carListHolder = new LazyLoader<BOList<Car>>(new BOList<Car>());
 
-        [LazyLoad("carListHolder")]
+        [LazyLoad(Storage = "carListHolder")]
         public BOList<Car> GList
         {
             get { return carListHolder.Element; }
