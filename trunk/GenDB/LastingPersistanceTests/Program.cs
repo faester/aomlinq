@@ -44,7 +44,7 @@ namespace LastingPersistanceTests
 
         LazyLoader<Car> carHolder = new LazyLoader<Car>();
 
-        [LazyLoad("carHolder")]
+        [LazyLoad(Storage = "carHolder")]
         public Car Car
         {
             get { return carHolder.Element; }

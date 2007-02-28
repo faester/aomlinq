@@ -101,7 +101,7 @@
     <Compile Include="TranslatorChecks.cs" />
     <Compile Include="TranslatorSet.cs" />
     <Compile Include="TypeSystem.cs" />
-    <Compile Include="GenDBAnnotations.cs" />
+    <Compile Include="GenDBAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="GenDB_TemporaryKey.pfx" />
