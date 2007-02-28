@@ -15,8 +15,7 @@ namespace GenDB
         IBusinessObject clone; // The object in its state when cache element was instantiated
         IBusinessObject element; // The element with ordinary reference. Reflects the application state of the object.
 
-        int entityPOID;
-        bool isCollection;
+        int entityPOID; // The entityPOID is stored seperately, since the property might be accessed, when the element has been set to null to allow garbage collection.
 
         public int EntityPOID
         {
@@ -25,12 +24,14 @@ namespace GenDB
 
         private IBOCacheElement() { /* empty */ }
 
+        /// <summary>
+        /// Target must not be null. (This is ensured both in the Table 
+        /// and IBOCache, so no check is done, but heaven breaks loose
+        /// if this precondition is violated.)
+        /// </summary>
+        /// <param name="target"></param>
         public IBOCacheElement(IBusinessObject target)
         {
-            if (target.GetType().GetInterface("IDBSaveableCollection") != null) 
-            { 
-                isCollection = true; 
-            }
             element = target;
 
             wr = new WeakReference(element);
@@ -48,7 +49,6 @@ namespace GenDB
             get { return element; }
         }
 
-
         /// <summary>
         /// Will temporarely store the element in a WeakReference 
         /// to allow the element to be garbage collected. 
@@ -60,7 +60,6 @@ namespace GenDB
         {
             element = null;
         }
-
 
         /// <summary>
         /// Will swap the internal storage of the element 
@@ -81,7 +80,6 @@ namespace GenDB
             get { return wr.IsAlive; }
         }
 
-
         /// <summary>
         /// Returns true if the element has changes state since this 
         /// cache element was instantiated or since last call to SetNotDirty
@@ -89,39 +87,36 @@ namespace GenDB
         public bool IsDirty
         {
             get { 
-                IIBoToEntityTranslator translator = DataContext.Instance.Translators.GetTranslator(element.GetType());
-                return !translator.CompareProperties(element, clone);
+                return !GetElementsTranslator().CompareProperties(element, clone);
             }
         }
 
+        /// <summary>
+        /// Returns the IIBoToEntityTranslator associated with 
+        /// the stored element. 
+        /// </summary>
+        /// <returns></returns>
         private IIBoToEntityTranslator GetElementsTranslator()
         {
             return DataContext.Instance.Translators.GetTranslator(element.GetType());
         }
 
+        /// <summary>
+        /// Registers that the stored element is no longer dirty. 
+        /// (Creates a new clone)
+        /// </summary>
         public void SetNotDirty()
         {
-            //IIBoToEntityTranslator translator = DataContext.Instance.Translators.GetTranslator(element.GetType());
             clone = GetElementsTranslator().CloneObject(element);
-            //if (!isCollection)
-            //{
-            //    clone = (IBusinessObject)ObjectUtilities.MakeClone((element as IBusinessObject));
-            //}
-            //else
-            //{
-            //    (element as IDBSaveableCollection).HasBeenModified = false;
-            //}
         }
 
         #region IDisposable Members
-
         public void Dispose()
         {
             wr = null;
             element = null;
             clone = null;
         }
-
         #endregion
     }
 }
