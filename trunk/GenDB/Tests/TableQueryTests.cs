@@ -104,11 +104,6 @@ namespace QueryToSqlTranslationTests
         [TestFixtureSetUp]
         public void Initialize()
         {
-            if (!dataContext.IsInitialized)
-            {
-                dataContext.Init();
-            }
-
             if (!dataContext.DatabaseExists())
             {
                 dataContext.CreateDatabase();
