@@ -53,9 +53,7 @@
     <Compile Include="LogicalExpressionsTests.cs" />
     <Compile Include="TableQueryTests2.cs" />
     <Compile Include="NeverStoreThisClassToDB.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ObjectUtilitiesTests.cs" />
     <Compile Include="TableQueryTests.cs" />
     <Compile Include="TableQueryTests3.cs" />
     <Compile Include="TableTests.cs" />
