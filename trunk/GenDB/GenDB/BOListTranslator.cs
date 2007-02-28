@@ -90,5 +90,14 @@ namespace GenDB
         public override void SetProperty(long propertyPOID, IBusinessObject obj, object propertyValue)
         {
         }
+
+        public new bool CompareProperties(IBusinessObject a, IBusinessObject b)
+        {
+            if (a == null && b == null) { return true; }
+
+            if (a == null ^ b == null) { return false; }
+
+            return !((a as IDBSaveableCollection).HasBeenModified || (b as IDBSaveableCollection).HasBeenModified);
+        }
     }
 }

@@ -1,190 +1,190 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Query;
-using GenDB;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Text;
+//using System.Query;
+//using GenDB;
 
-namespace Tests
-{
-    class Program
-    {
-        class Person : AbstractBusinessObject
-        {
-            string name = null;
-            int age;
-            string cpr = "051032-3232";
-            Person spouse;
+//namespace Tests
+//{
+//    class Program
+//    {
+//        class Person : AbstractBusinessObject
+//        {
+//            string name = null;
+//            int age;
+//            string cpr = "051032-3232";
+//            Person spouse;
 
-            public Person Spouse
-            {
-                get { return spouse; } 
-                set { spouse = value; }
-            }
+//            public Person Spouse
+//            {
+//                get { return spouse; } 
+//                set { spouse = value; }
+//            }
 
-            public string Cpr
-            {
-                get { return cpr; }
-                set { cpr = value; }
-            }
+//            public string Cpr
+//            {
+//                get { return cpr; }
+//                set { cpr = value; }
+//            }
 
-            public int Age
-            {
-                get { return age; }
-                set { age = value; }
-            }
+//            public int Age
+//            {
+//                get { return age; }
+//                set { age = value; }
+//            }
 
-            public string Name
-            {
-                get { return name; }
-                set { name = value; }
-            }
+//            public string Name
+//            {
+//                get { return name; }
+//                set { name = value; }
+//            }
 
-        }
+//        }
 
-        class Student : Person
-        {
-            double avg = 8.0;
+//        class Student : Person
+//        {
+//            double avg = 8.0;
 
-            public double Avg
-            {
-                get { return avg; }
-                set { avg = value; }
-            }
+//            public double Avg
+//            {
+//                get { return avg; }
+//                set { avg = value; }
+//            }
 
-        }
+//        }
 
-        class TestlistElement : AbstractBusinessObject
-        {
-            int i;
+//        class TestlistElement : AbstractBusinessObject
+//        {
+//            int i;
 
-            public int I
-            {
-                get { return i; }
-                set { i = value; }
-            }
-        }
+//            public int I
+//            {
+//                get { return i; }
+//                set { i = value; }
+//            }
+//        }
 
-        static void Main(string[] args)
-        {
-#if DEBUG
-            try
-            {
-#endif
-            DataContext dataContext = DataContext.Instance;
+//        static void Main(string[] args)
+//        {
+//#if DEBUG
+//            try
+//            {
+//#endif
+//            DataContext dataContext = DataContext.Instance;
 
-            if (dataContext.DatabaseExists())
-            {
-                dataContext.DeleteDatabase();
-            }
-            dataContext.CreateDatabase();
-
-
-            dataContext.DbBatchSize = 2000;
-            long objcount = 1;
-
-            Table<BOList<TestlistElement>> tl = dataContext.GetTable<BOList<TestlistElement>>();
-
-            Table<BOList<int>> tbi = dataContext.GetTable<BOList<int>>();
-
-            BOList<int> bi = new BOList<int>();
-
-            for (int i = 10; i > 0; i--)
-            {
-                bi.Add(i);
-            }
-
-            tbi.Add(bi);
+//            if (dataContext.DatabaseExists())
+//            {
+//                dataContext.DeleteDatabase();
+//            }
+//            dataContext.CreateDatabase();
 
 
-            foreach(BOList<int> bli in tbi)
-            {
-                bool first = true;
-                foreach(int i in bli)
-                {
-                    if (first) { 
-                        Console.Write(", ");
-                        first = false;
-                    }
-                    Console.Write(i);
-                }
-                Console.WriteLine();
-            }
+//            dataContext.DbBatchSize = 2000;
+//            long objcount = 1;
 
-            BOList<TestlistElement> lp = new BOList<TestlistElement>();
+//            Table<BOList<TestlistElement>> tl = dataContext.GetTable<BOList<TestlistElement>>();
 
-            for (int i = 0; i < 5; i++)
-            {
-                TestlistElement tle = new TestlistElement();
-                tle.I = i;
-                lp.Add(tle);
-            }
+//            Table<BOList<int>> tbi = dataContext.GetTable<BOList<int>>();
 
-            tl.Add(lp);
+//            BOList<int> bi = new BOList<int>();
 
-            dataContext.SubmitChanges();
+//            for (int i = 10; i > 0; i--)
+//            {
+//                bi.Add(i);
+//            }
 
-            foreach (BOList<TestlistElement> list in tl)
-            {
-                foreach (TestlistElement le in list)
-                {
-                    ObjectUtilities.PrintOut(le);
-                }
-            }
+//            tbi.Add(bi);
 
-            Table<Person> tp = dataContext.GetTable<Person>();
 
-            DateTime then = DateTime.Now;
+//            foreach(BOList<int> bli in tbi)
+//            {
+//                bool first = true;
+//                foreach(int i in bli)
+//                {
+//                    if (first) { 
+//                        Console.Write(", ");
+//                        first = false;
+//                    }
+//                    Console.Write(i);
+//                }
+//                Console.WriteLine();
+//            }
 
-            Person lastPerson = null;
+//            BOList<TestlistElement> lp = new BOList<TestlistElement>();
 
-            for (int i = 0; i < objcount; i++)
-            {
-                Person p = new Person();
-                Student s = new Student();
+//            for (int i = 0; i < 5; i++)
+//            {
+//                TestlistElement tle = new TestlistElement();
+//                tle.I = i;
+//                lp.Add(tle);
+//            }
 
-                s.Name = "Student '" + i.ToString();
-                s.Avg = (double)i / objcount;
-                s.Spouse = p;
+//            tl.Add(lp);
 
-                p.Name = "Navn " + i;
-                p.Age = i;
+//            dataContext.SubmitChanges();
 
-                tp.Add(p);
-                tp.Add(s);
-                lastPerson = p;
-            }
+//            foreach (BOList<TestlistElement> list in tl)
+//            {
+//                foreach (TestlistElement le in list)
+//                {
+//                    ObjectUtilities.PrintOut(le);
+//                }
+//            }
 
-            dataContext.SubmitChanges();
+//            Table<Person> tp = dataContext.GetTable<Person>();
 
-            TimeSpan dur = DateTime.Now - then;
-            objcount *= 2;
-            Console.WriteLine("Insertion of {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
-            then = DateTime.Now;
-            objcount = 0;
-            foreach (Person ibo in tp)
-            {
-                objcount++;
-                if (objcount % 500 == 0)
-                {
-                    ibo.Age = (ibo.Age + 1) * 2;
-                }
-                //ObjectUtilities.PrintOut(clone);
-            }
-            dataContext.SubmitChanges();
-            dur = DateTime.Now - then;
-            Console.WriteLine("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
-            Console.WriteLine("Indeholder nu {0} objekter", tp.Count);
+//            DateTime then = DateTime.Now;
 
-            Person[] ps = new Person[tp.Count];
-            tp.CopyTo(ps, 0);
-#if DEBUG
-            }
-            catch (NotTranslatableException ex)
-            {
-                Console.WriteLine(ex);
-            }
-#endif
-            Console.ReadLine();
-        }
-    }
-}
+//            Person lastPerson = null;
+
+//            for (int i = 0; i < objcount; i++)
+//            {
+//                Person p = new Person();
+//                Student s = new Student();
+
+//                s.Name = "Student '" + i.ToString();
+//                s.Avg = (double)i / objcount;
+//                s.Spouse = p;
+
+//                p.Name = "Navn " + i;
+//                p.Age = i;
+
+//                tp.Add(p);
+//                tp.Add(s);
+//                lastPerson = p;
+//            }
+
+//            dataContext.SubmitChanges();
+
+//            TimeSpan dur = DateTime.Now - then;
+//            objcount *= 2;
+//            Console.WriteLine("Insertion of {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
+//            then = DateTime.Now;
+//            objcount = 0;
+//            foreach (Person ibo in tp)
+//            {
+//                objcount++;
+//                if (objcount % 500 == 0)
+//                {
+//                    ibo.Age = (ibo.Age + 1) * 2;
+//                }
+//                //ObjectUtilities.PrintOut(clone);
+//            }
+//            dataContext.SubmitChanges();
+//            dur = DateTime.Now - then;
+//            Console.WriteLine("Read {0} objects in {1}. {2} obj/sec", objcount, dur, objcount / dur.TotalSeconds);
+//            Console.WriteLine("Indeholder nu {0} objekter", tp.Count);
+
+//            Person[] ps = new Person[tp.Count];
+//            tp.CopyTo(ps, 0);
+//#if DEBUG
+//            }
+//            catch (NotTranslatableException ex)
+//            {
+//                Console.WriteLine(ex);
+//            }
+//#endif
+//            Console.ReadLine();
+//        }
+//    }
+//}

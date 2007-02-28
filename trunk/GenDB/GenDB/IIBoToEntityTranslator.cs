@@ -70,5 +70,31 @@ namespace GenDB
         /// <param name="db"></param>
         /// <param name="clone"></param>
         void SaveToDB(IBusinessObject ibo);
+
+        /// <summary>
+        /// Compares every persisted property of a and b and returns true
+        /// if all fields are identical. 
+        /// 
+        /// The method is used in the IBOCacheElement class
+        /// to check if there has been a state change in an
+        /// object.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        bool CompareProperties(IBusinessObject a, IBusinessObject b);
+
+
+        /// <summary>
+        /// Will make a clone of object a where all persisted properties 
+        /// are copied to the clone. 
+        ///
+        /// The method is used in the IBOCacheElement class
+        /// to create copies of the stored objects for later state
+        /// change checks.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        IBusinessObject CloneObject(IBusinessObject a);
     }
 }

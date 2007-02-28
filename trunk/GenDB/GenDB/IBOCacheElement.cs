@@ -89,26 +89,28 @@ namespace GenDB
         public bool IsDirty
         {
             get { 
-                if (!isCollection)
-                {
-                    return !ObjectUtilities.TestFieldEquality(element, clone); 
-                }
-                else
-                {
-                    return (element as IDBSaveableCollection).HasBeenModified;
-                }
+                IIBoToEntityTranslator translator = DataContext.Instance.Translators.GetTranslator(element.GetType());
+                return !translator.CompareProperties(element, clone);
             }
+        }
+
+        private IIBoToEntityTranslator GetElementsTranslator()
+        {
+            return DataContext.Instance.Translators.GetTranslator(element.GetType());
         }
 
         public void SetNotDirty()
         {
-            if (!isCollection) {
-                clone = (IBusinessObject)ObjectUtilities.MakeClone((element as IBusinessObject));
-            }
-            else
-            {
-                (element as IDBSaveableCollection).HasBeenModified = false;
-            }
+            //IIBoToEntityTranslator translator = DataContext.Instance.Translators.GetTranslator(element.GetType());
+            clone = GetElementsTranslator().CloneObject(element);
+            //if (!isCollection)
+            //{
+            //    clone = (IBusinessObject)ObjectUtilities.MakeClone((element as IBusinessObject));
+            //}
+            //else
+            //{
+            //    (element as IDBSaveableCollection).HasBeenModified = false;
+            //}
         }
 
         #region IDisposable Members
