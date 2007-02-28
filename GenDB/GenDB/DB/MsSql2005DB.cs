@@ -1020,10 +1020,10 @@ namespace GenDB.DB
             tCC.AddLast("ALTER TABLE " + TB_PROPERTYVALUE_NAME + " ADD PRIMARY KEY (PropertyPOID, EntityPOID)");
             tCC.AddLast("ALTER TABLE " + TB_COLLECTION_ELEMENT_NAME + " ADD PRIMARY KEY ( EntityPOID, ElementID)");
 
-            tCC.AddLast(
-            "CREATE TRIGGER cascade_delete_references ON " + TB_ENTITY_NAME + " AFTER DELETE AS " +
-            "UPDATE PropertyValue SET ReferenceValue = NULL WHERE ReferenceValue IN (SELECT EntityPOID FROM deleted) "
-            );
+            //tCC.AddLast(
+            //"CREATE TRIGGER cascade_delete_references ON " + TB_ENTITY_NAME + " AFTER DELETE AS " +
+            //"UPDATE PropertyValue SET ReferenceValue = NULL WHERE ReferenceValue IN (SELECT EntityPOID FROM deleted) "
+            //);
 
             ExecuteNonQueries(tCC, cnn, t);
         }
