@@ -240,7 +240,11 @@ namespace GenDB
             uncommittedObjects.Add(entityPOID, ibo);
         }
 
-
+        /// <summary>
+        /// Checks if type t is known by the typesystem, and
+        /// registers the type if it is not the case.
+        /// </summary>
+        /// <param name="t"></param>
         private void CheckRegisterType(Type t)
         {
             if (!dataContext.TypeSystem.IsTypeKnown(t))
@@ -248,7 +252,6 @@ namespace GenDB
                 dataContext.TypeSystem.RegisterType(t);
             }
         }
-        
 
         /// <summary>
         /// When the db reads in a new object, it should be stored in the
