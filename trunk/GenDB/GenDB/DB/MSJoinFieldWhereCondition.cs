@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using GenDB.DB;
+using GenDB.AbstractSyntax;
 
 namespace GenDB.DB
 {

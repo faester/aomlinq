@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 using GenDB.DB;
+using GenDB.AbstractSyntax;
 
 namespace GenDB
 {

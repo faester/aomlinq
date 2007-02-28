@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Query;
 using System.Expressions;
 using GenDB.DB;
+using GenDB.AbstractSyntax;
 
 namespace GenDB
 {
@@ -116,14 +117,14 @@ namespace GenDB
                 }
                 else
                 {
-                    return GenDB.ExprNotTranslatable.Instance;
+                    return GenDB.AbstractSyntax.ExprNotTranslatable.Instance;
                 }
             }
 
             if(mce.Method.Name=="op_Equality")
-                return new GenDB.BoolEquals (parArr[0], parArr[1]);
+                return new GenDB.AbstractSyntax.BoolEquals(parArr[0], parArr[1]);
             else if(mce.Method.Name=="op_Inequality")
-                return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
+                return new GenDB.AbstractSyntax.OP_NotEquals(parArr[0], parArr[1]);
             else 
                 return ExprNotTranslatable.Instance;
         }
@@ -141,7 +142,7 @@ namespace GenDB
                 {
                     ConstantExpression ce = (ConstantExpression) mce.Parameters[0];
                     if(ce.Type.Name=="String")
-                        l = new GenDB.CstString(ce.Value.ToString());
+                        l = new CstString(ce.Value.ToString());
                 }
                 else if(mce.Parameters[0] is UnaryExpression)
                 {
@@ -158,7 +159,7 @@ namespace GenDB
                 {
                     ConstantExpression ce = (ConstantExpression) mce.Parameters[1];
                     if(ce.Type.Name=="String")
-                        r = new GenDB.CstString(ce.Value.ToString());
+                        r = new CstString(ce.Value.ToString());
                 }
                 else if(mce.Parameters[1] is UnaryExpression)
                 {
@@ -178,7 +179,7 @@ namespace GenDB
             switch(TypeSystem.FindMappingType(ce.Type))
                 {
                     case MappingType.BOOL:
-                        return new GenDB.CstBool((bool)ce.Value);
+                        return new CstBool((bool)ce.Value);
                     
                     case MappingType.LONG:
                         return new CstLong(System.Convert.ToInt64(ce.Value.ToString()));
@@ -227,19 +228,19 @@ namespace GenDB
             string opStr = be.NodeType.ToString();
             if(opStr=="Add")
             {
-                return new GenDB.OPPlus(l, r);
+                return new OPPlus(l, r);
             }
             else if(opStr=="Subtract")
             {
-                return new GenDB.OPMinus(l,r);
+                return new OPMinus(l,r);
             }
             else if(opStr=="Multiply")
             {
-                return new GenDB.OPMult(l,r);
+                return new OPMult(l,r);
             }
             else if(opStr=="Divide")
             {
-                return new GenDB.OPDiv(l,r);
+                return new OPDiv(l,r);
             }
             else
                 throw new Exception("what operator?");
@@ -298,7 +299,7 @@ namespace GenDB
                     {
                         case MappingType.BOOL:
                             ConstantExpression ce = (ConstantExpression)be.Right;
-                            parArr[1] = new GenDB.CstBool((bool)ce.Value);
+                            parArr[1] = new CstBool((bool)ce.Value);
                             break;
 
                         case MappingType.LONG:
@@ -355,31 +356,31 @@ namespace GenDB
             string nodeType = expr.NodeType.ToString();
             if(nodeType=="GT")
             {
-                return new GenDB.BoolGreaterThan(parArr[0], parArr[1]);
+                return new BoolGreaterThan(parArr[0], parArr[1]);
             }
             else if(nodeType=="LT")
             {
-                return new GenDB.BoolLessThan(parArr[0], parArr[1]);
+                return new BoolLessThan(parArr[0], parArr[1]);
             }
             else if(nodeType=="EQ")
             {
-                return new GenDB.BoolEquals (parArr[0], parArr[1]);
+                return new BoolEquals (parArr[0], parArr[1]);
             }
             else if(nodeType=="NE")
             {
-                return new GenDB.OP_NotEquals(parArr[0], parArr[1]);
+                return new OP_NotEquals(parArr[0], parArr[1]);
             }
             else if(nodeType=="GE")
             {
-                return new GenDB.BoolGreaterThan(parArr[0], parArr[1]);
+                return new BoolGreaterThan(parArr[0], parArr[1]);
             }
             else if(nodeType=="OrElse")
             {
-                return new GenDB.ExprOr(left, right);
+                return new ExprOr(left, right);
             }
             else if(nodeType=="AndAlso")
             {
-                return new GenDB.ExprAnd(left, right);
+                return new ExprAnd(left, right);
             }
             else
                 return ExprNotTranslatable.Instance;
@@ -510,7 +511,7 @@ namespace GenDB
                     else 
                         right = ExprNotTranslatable.Instance; 
                     
-                    return new GenDB.ExprAnd(left, right);
+                    return new ExprAnd(left, right);
                 }
                 else if(mecstr.StartsWith("OrElse("))
                 {
@@ -570,7 +571,7 @@ namespace GenDB
                     else
                         right = ExprNotTranslatable.Instance;
  
-                    return new GenDB.ExprOr(left, right);
+                    return new ExprOr(left, right);
                 }
                 else if(mecstr.StartsWith("GE("))
                 { // = !(x < y)
@@ -602,7 +603,7 @@ namespace GenDB
                     }
                     else if(ue.Operand.NodeType.ToString() == "MethodCall")
                     {
-                        return new GenDB.ExprNot(VisitMethodCall((MethodCallExpression)ue.Operand));
+                        return new ExprNot(VisitMethodCall((MethodCallExpression)ue.Operand));
                     }
                     else if(ue.Operand.NodeType.ToString() == "MemberAccess")
                     {
@@ -640,14 +641,14 @@ namespace GenDB
             else if(expr.NodeType.ToString()=="Not")
             {
                 UnaryExpression ue = (UnaryExpression) expr;
-                return new GenDB.ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
+                return new ExprNot(VisitBinaryExpression((BinaryExpression)ue.Operand));
             }
             else if(expr.NodeType.ToString()=="OrElse")
             {   
                 BinaryExpression be = (BinaryExpression) expr;
                 left = VisitExpr(be.Left);
                 right = VisitExpr(be.Right);
-                return new GenDB.ExprOr(left,right);
+                return new ExprOr(left,right);
             }
             else if(expr.NodeType.ToString()=="MethodCall")
             {
@@ -747,12 +748,12 @@ namespace GenDB
             }
                 
             if(equality)
-                    parArr[1] = new GenDB.CstBool(true);
+                    parArr[1] = new CstBool(true);
                 else
-                    parArr[1] = new GenDB.CstBool(false);
+                    parArr[1] = new CstBool(false);
 
-                IExpression ie = new GenDB.OP_NotEquals(parArr[0],parArr[1]);            
-                return new GenDB.ExprNot(ie);
+                IExpression ie = new OP_NotEquals(parArr[0],parArr[1]);            
+                return new ExprNot(ie);
         }
 
         #region MakeTreeMethods

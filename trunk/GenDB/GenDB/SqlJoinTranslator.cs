@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Query;
 using GenDB.DB;
 using System.Expressions;
+using GenDB.AbstractSyntax;
 
 namespace GenDB
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using GenDB.DB;
 
-namespace GenDB
+namespace GenDB.AbstractSyntax
 {
     /// <summary>
     /// Interface for en visitor, der kan behandle et
@@ -177,7 +177,7 @@ namespace GenDB
     }
     #endregion
 
-    class CstThis : IValue
+    class CstThis : IConstant
     {
         private CstThis() { }
         private static CstThis instance = new CstThis();
@@ -512,7 +512,7 @@ namespace GenDB
         }
     }
 
-    class CstDateTime : INumerical
+    class CstDateTime : IConstant
     {
         DateTime value;
 
@@ -615,7 +615,7 @@ namespace GenDB
     }
 
 
-    class CstLong : INumerical
+    class CstLong : IConstant
     {
         long value;
 
