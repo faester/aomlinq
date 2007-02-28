@@ -58,7 +58,7 @@ namespace TranslationTests
 
         private class HasVolatileProperty : AbstractBusinessObject
         {
-            int vol = 0; 
+            int vol = 0;
 
             [Volatile]
             public int Vol
@@ -67,7 +67,7 @@ namespace TranslationTests
                 set { vol = value; }
             }
 
-            int persisted = 0; 
+            int persisted = 0;
 
             public int Persisted
             {
@@ -105,7 +105,7 @@ namespace TranslationTests
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
-            dc = DataContext.Instance;  
+            dc = DataContext.Instance;
             if (!dc.IsInitialized)
             {
                 dc.DeleteDatabase();
@@ -116,7 +116,7 @@ namespace TranslationTests
             tableOfHasVolatileProperty = dc.GetTable<HasVolatileProperty>();
             tableOfPureIBusinessImpl = dc.GetTable<PureIBusinessImpl>();
         }
-        
+
         [TestFixtureTearDown]
         public void TestFixtureTearDown()
         {
@@ -125,21 +125,21 @@ namespace TranslationTests
             tableOfShouldFailNoSetter = null;
             tableOfHasVolatileProperty = null;
             tableOfPureIBusinessImpl = null;
-            
+
             Console.Error.WriteLine("IBOCache size is now: " + DataContext.Instance.CommittedObjectsSize);
         }
 
         [Test, ExpectedException(typeof(NotTranslatableException))]
-        public void TestTranslateNoSetter() 
-        { 
+        public void TestTranslateNoSetter()
+        {
             tableOfShouldFailNoSetter = dc.GetTable<ShouldFailNoSetter>();
         }
 
         [Test, ExpectedException(typeof(NotTranslatableException))]
         public void TestTranslateNoGetter()
         {
-            tableOfShouldFailNoGetter = dc.GetTable <ShouldFailNoGetter>();
-            tableOfShouldFailNoGetter.Add ( new ShouldFailNoGetter());
+            tableOfShouldFailNoGetter = dc.GetTable<ShouldFailNoGetter>();
+            tableOfShouldFailNoGetter.Add(new ShouldFailNoGetter());
         }
 
         [Test]
@@ -149,14 +149,14 @@ namespace TranslationTests
 
             for (int i = 0; i < 10; i++)
             {
-                tableOfPureIBusinessImpl.Add(new PureIBusinessImpl{Value = i.ToString()});
+                tableOfPureIBusinessImpl.Add(new PureIBusinessImpl { Value = i.ToString() });
             }
             dc.SubmitChanges();
 
             var pis = from ps in tableOfPureIBusinessImpl
                       orderby ps.Value
                       select ps;
-                      
+
 
             int idx = 0;
             foreach (var q in pis)
@@ -172,7 +172,7 @@ namespace TranslationTests
 
             for (int i = 0; i < 100; i++)
             {
-                ContainsAllPrimitiveTypes toAdd = new ContainsAllPrimitiveTypes{stringNotPersisted = "Væk!", intNotPersisted = 989};
+                ContainsAllPrimitiveTypes toAdd = new ContainsAllPrimitiveTypes { stringNotPersisted = "Væk!", intNotPersisted = 989 };
                 tcapt.Add(toAdd);
             }
             dc.SubmitChanges();
@@ -187,7 +187,7 @@ namespace TranslationTests
             GC.Collect();
             Table<ContainsAllPrimitiveTypes> tcapt = dc.GetTable<ContainsAllPrimitiveTypes>();
 
-            foreach(ContainsAllPrimitiveTypes capt in tcapt)
+            foreach (ContainsAllPrimitiveTypes capt in tcapt)
             {
                 Assert.IsFalse(capt.stringNotPersisted == "Væk!", "Value of public string field was persisted.");
                 Assert.IsFalse(capt.intNotPersisted == 989, "Value of public int field was persisted.");
@@ -205,7 +205,7 @@ namespace TranslationTests
                 hvp = new HasVolatileProperty();
                 hvp.Vol = volSetValue;
                 hvp.Persisted = persistedSetvalue;
-                tableOfHasVolatileProperty.Add (hvp);
+                tableOfHasVolatileProperty.Add(hvp);
             }
             hvp = null;
             GC.Collect();
@@ -213,9 +213,9 @@ namespace TranslationTests
 
             Console.WriteLine("Cache size (Uncommitted = {0}, Comitted = {1})", dc.UnCommittedObjectsSize, dc.CommittedObjectsSize);
 
-            foreach(HasVolatileProperty hvpr in tableOfHasVolatileProperty)
+            foreach (HasVolatileProperty hvpr in tableOfHasVolatileProperty)
             {
-                Assert.AreNotEqual( volSetValue, hvpr.Vol, "Vol property was persisted.");
+                Assert.AreNotEqual(volSetValue, hvpr.Vol, "Vol property was persisted.");
                 Assert.AreEqual(persistedSetvalue, hvpr.Persisted, "Persisted property was not persisted.");
             }
         }
@@ -247,7 +247,7 @@ namespace TranslationTests
             Populate();
             Table<TestPerson> ttp = dc.GetTable<TestPerson>();
 
-            foreach(TestPerson p in ttp)
+            foreach (TestPerson p in ttp)
             {
                 Assert.IsNull(p.Name, "Found person with name >" + p.Name + "<");
             }
@@ -260,7 +260,7 @@ namespace TranslationTests
             ttp.Clear();
             dc.SubmitChanges();
 
-            for (int i = 0; i < 10; i ++)
+            for (int i = 0; i < 10; i++)
             {
                 TestPerson p = new TestPerson();
                 p.Spouse = new TestPersonsSecretSubclass();
@@ -284,7 +284,7 @@ namespace TranslationTests
             Type typeSP = typeof(TestPersonsSecretSubclass);
             bool foundSome = false;
 
-            foreach(TestPerson p in k)
+            foreach (TestPerson p in k)
             {
                 foundSome = true;
                 Assert.IsNotNull(p.Spouse, "Spouse was empty.");
@@ -294,5 +294,53 @@ namespace TranslationTests
             Assert.IsTrue(foundSome, "Did not find any persons.");
         }
 
+        class Holder<T> : AbstractBusinessObject
+        {
+            T element;
+
+            public T Element
+            {
+                get { return element; }
+                set { element = value; }
+            }
+        }
+
+        [Test]
+        public void Generics1()
+        {
+            Table<Holder<TestPerson>> t = dc.GetTable<Holder<TestPerson>>();
+        }
+
+        [Test]
+        public void Generics2()
+        {
+            Table<Holder<TestPerson>> t = dc.GetTable<Holder<TestPerson>>();
+            t.Clear();
+
+            TestPerson p = new TestPerson { Name = "I am held" };
+            Holder<TestPerson> h = new Holder<TestPerson>();
+            h.Element = p;
+
+            t.Add(h);
+
+            dc.SubmitChanges();
+        }
+
+        [Test]
+        public void Generics3()
+        {
+            Table<Holder<TestPerson>> t = dc.GetTable<Holder<TestPerson>>();
+
+            bool foundSome = false;
+
+            foreach(Holder<TestPerson> h in t)
+            {
+                foundSome = true;
+                Assert.IsTrue (h.Element != null, "Element was null");
+                Assert.AreEqual("I am held", h.Element.Name, "Wrong name in TestPerson element");
+            }
+
+            Assert.IsTrue(foundSome, "No objects in table.");
+        }
     }
 }

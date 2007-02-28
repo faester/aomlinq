@@ -216,5 +216,62 @@ namespace GenDB
             }
         }
 
+
+        #region IIBoToEntityTranslator Members
+
+
+        public bool CompareProperties(IBusinessObject a, IBusinessObject b)
+        {
+            if (a == null && b == null)
+            {
+                return true;
+            }
+            
+            if (a == null || b == null)
+            {
+                return false;
+            }
+
+            Type t = a.GetType();
+            if (b.GetType() != t)
+            {
+                return false;
+            }
+
+            if (t != this.t)
+            {
+                return false;
+            }
+
+            IIBoToEntityTranslator trans = DataContext.Instance.Translators.GetTranslator(t);
+
+            foreach (IPropertyConverter fc in PropertyConverters)
+            {
+                if (!fc.CompareProperties(a, b)) { return false; }
+            }
+
+            return true;
+        }
+
+
+        public IBusinessObject CloneObject(IBusinessObject o)
+        {
+            if (o == null)
+            {
+                return null;
+            }
+            Type t = o.GetType();
+
+            IBusinessObject clone = CreateInstanceOfIBusinessObject();
+
+            foreach (IPropertyConverter fc in PropertyConverters)
+            {
+                fc.CloneProperty(o, clone);
+            }
+
+            return clone;
+        }
+
+        #endregion
     }
 }
