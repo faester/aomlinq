@@ -8,10 +8,8 @@ using System.Query;
 
 namespace GenDB
 {
-
     /// <summary>
-    /// Keeps track of objects that are both residing in the database and 
-    /// in the application layer.  
+    /// Keeps track of persisted objects present in the application layer.  
     /// </summary>
     internal class IBOCache
     {
@@ -296,13 +294,13 @@ namespace GenDB
                 if (ibo != null)
                 {
                     // Ensure that object is treated as non-persistent in later translations
-                    // Since DBIdentity.Value is non-null, 
+                    // Since DBIdentity.Value is non-null, it will not have its value reset, 
+                    // so the object id is retained, if the element is readded to the cache.
                     DBIdentifier newID = new DBIdentifier(ibo.DBIdentity.Value, false);
                     obj.Element.DBIdentity = newID;
                 }
             }
 
-            // Indicate that object is no longer under cache control
             if (uncommittedObjects.TryGetValue(id, out ibo))
             {
                 // Ensure that object is treated as non-persistent in later translations
